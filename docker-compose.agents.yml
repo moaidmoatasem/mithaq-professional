@@ -1,0 +1,102 @@
+version: '3.8'
+
+services:
+  # Ollama server (shared by all agents)
+  ollama:
+    image: ollama/ollama:latest
+    container_name: daqiq-ollama
+    ports:
+      - "11434:11434"
+    volumes:
+      - ollama_data:/root/.ollama
+    restart: unless-stopped
+
+  # Agent 1: Orchestrator Refactorer
+  agent_orchestrator:
+    build:
+      context: .
+      dockerfile: Dockerfile.agent
+    container_name: daqiq-agent-orchestrator
+    environment:
+      - AGENT_ROLE=orchestrator_refactor
+      - OLLAMA_HOST=http://ollama:11434
+      - PYTHONPATH=/workspace
+    volumes:
+      - .:/workspace
+      - ./swarm_outputs:/workspace/swarm_outputs
+    depends_on:
+      - ollama
+    command: python daqiq-professional/scripts/agent_worker.py orchestrator_refactor
+
+  # Agent 2: Test Enhancer
+  agent_tests:
+    build:
+      context: .
+      dockerfile: Dockerfile.agent
+    container_name: daqiq-agent-tests
+    environment:
+      - AGENT_ROLE=test_enhancer
+      - OLLAMA_HOST=http://ollama:11434
+      - PYTHONPATH=/workspace
+    volumes:
+      - .:/workspace
+      - ./swarm_outputs:/workspace/swarm_outputs
+    depends_on:
+      - ollama
+    command: python daqiq-professional/scripts/agent_worker.py test_enhancer
+
+  # Agent 3: API Designer
+  agent_api:
+    build:
+      context: .
+      dockerfile: Dockerfile.agent
+    container_name: daqiq-agent-api
+    environment:
+      - AGENT_ROLE=api_designer
+      - OLLAMA_HOST=http://ollama:11434
+      - PYTHONPATH=/workspace
+    volumes:
+      - .:/workspace
+      - ./swarm_outputs:/workspace/swarm_outputs
+    depends_on:
+      - ollama
+    command: python daqiq-professional/scripts/agent_worker.py api_designer
+
+  # Agent 4: Documentation Writer
+  agent_docs:
+    build:
+      context: .
+      dockerfile: Dockerfile.agent
+    container_name: daqiq-agent-docs
+    environment:
+      - AGENT_ROLE=doc_writer
+      - OLLAMA_HOST=http://ollama:11434
+      - PYTHONPATH=/workspace
+    volumes:
+      - .:/workspace
+      - ./swarm_outputs:/workspace/swarm_outputs
+    depends_on:
+      - ollama
+    command: python daqiq-professional/scripts/agent_worker.py doc_writer
+
+  # Coordinator: Collects results and commits
+  coordinator:
+    build:
+      context: .
+      dockerfile: Dockerfile.agent
+    container_name: daqiq-coordinator
+    environment:
+      - PYTHONPATH=/workspace
+    volumes:
+      - .:/workspace
+      - ./swarm_outputs:/workspace/swarm_outputs
+      - ~/.ssh:/root/.ssh:ro  # For git push
+    depends_on:
+      - agent_orchestrator
+      - agent_tests
+      - agent_api
+      - agent_docs
+    command: python daqiq-professional/scripts/coordinator.py
+
+volumes:
+  ollama_data:

@@ -1,0 +1,22 @@
+# Parallel Testing Workflow
+name: "Parallel Exploit Testing"
+description: "Test multiple endpoints in parallel for SQL injection"
+
+agents:
+  - role: "payload_tester_1"
+    endpoint: "/api/users"
+  
+  - role: "payload_tester_2"
+    endpoint: "/api/products"
+  
+  - role: "payload_tester_3"
+    endpoint: "/api/search"
+
+execution:
+  mode: "parallel"
+  max_concurrent: 3
+  timeout: 30
+
+burhan_standard:
+  require_proof: true
+  min_confidence: 0.95

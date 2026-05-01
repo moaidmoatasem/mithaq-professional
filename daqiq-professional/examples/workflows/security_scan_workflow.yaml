@@ -1,0 +1,30 @@
+# Security Scan Workflow
+name: "Basic Security Scan"
+description: "Run a comprehensive security scan using DAQIQ agents"
+
+agents:
+  - role: "vulnerability_scanner"
+    tools:
+      - sql_injection_scanner
+      - xss_scanner
+      - header_scanner
+    
+  - role: "sanitization_gatekeeper"
+    tools:
+      - pii_scrubber
+      - secret_detector
+
+tasks:
+  - name: "scan_target"
+    agent: "vulnerability_scanner"
+    description: "Scan the target application for vulnerabilities"
+    expected_output: "List of vulnerabilities with severity ratings"
+  
+  - name: "sanitize_results"
+    agent: "sanitization_gatekeeper"
+    description: "Remove sensitive data from scan results"
+    expected_output: "Clean, shareable vulnerability report"
+
+output:
+  format: "json"
+  file: "scan_results.json"

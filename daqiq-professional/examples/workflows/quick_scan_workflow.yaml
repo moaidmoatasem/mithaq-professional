@@ -1,0 +1,24 @@
+# Quick Security Scan
+name: "Quick Vulnerability Scan"
+description: "Fast security scan for rapid feedback"
+
+agents:
+  - role: "vulnerability_scanner"
+    tools:
+      - sql_injection_scanner
+      - header_scanner
+
+tasks:
+  - name: "quick_scan"
+    agent: "vulnerability_scanner"
+    description: "Run quick vulnerability checks"
+    expected_output: "Basic vulnerability report"
+
+execution:
+  mode: "sequential"
+  timeout: 60
+
+output:
+  format: "json"
+  file: "quick_scan_results.json"
+  save_to_store: true

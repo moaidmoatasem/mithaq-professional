@@ -1,0 +1,89 @@
+Batch: 1
+Duration: 48.1s
+======================================================================
+```python
+import os
+
+class FileUploadScanner:
+    def __init__(self):
+        # Initialize scanner with user provided sensitive file types for checking e.g. "config", "backup"
+        self.sensitive_file_extensions = set()
+    
+    def add_sensitive_type(self, file_extension):
+        """Adds a specific file extension to the list of sensitive files."""
+        if file_extension.lower() not in ["ini", "yaml", "sql", "json", "yml"]:
+            raise ValueError(f"Sensitive type {file_extension} is invalid.")
+        self.sensitive_file_extensions.add(file_extension.lower())
+    
+    def scan_directory(self, upload_dir):
+        """Scans a directory for files and checks if they were uploaded through an allowed file extensions."""
+        vulnerabilities = []
+        if not os.path.isdir(upload_dir):
+            raise FileNotFoundError(f"The provided path: {upload_dir} is invalid or does not exist")
+        
+        for root, _, files in os.walk(upload_dir):
+            for file_name in files:
+                # Split the full filename from path
+                upload_file_path = os.path.join(root, file_name)
+                
+                if any(file_name.lower().endswith(ext) and ext != "*" for ext in self.sensitive_file_extensions):
+                    try:
+                        with open(upload_file_path, 'r') as f:
+                            content = f.read()
+                        
+                        # Placeholder vulnerability logic
+                        vulnerabilities.append({
+                            "filename": upload_file_path,
+                            "content_length": len(content),
+                            "suspicious_line": None  # Custom implementation goes here for your specific threat model
+                        })
+                    except Exception as e:
+                        vulnerabilities.append({
+                            "filename": upload_file_path, 
+                            "error_message": str(e)
+                        })
+
+        return vulnerabilities
+
+# Example usage of the FileUploadScanner class
+def main():
+    scanner = FileUploadScanner()
+    sensitive_types_to_check = ["json", "ini"]
+    
+    for type in sensitive_types_to_check:
+        try:        
+            if type == "*":
+                # For testing all file types, can be omitted or just add to initial set later.
+                continue
+            scanner.add_sensitive_type(type)
+            print(f"Successfully added sensitivity type - {type}")
+        except ValueError as ve:
+            print(ve)
+    
+    upload_directory = 'path/to/upload'
+    vulnerabilities = scanner.scan_directory(upload_directory)
+    if vulnerabilities:
+        print("\nFound potential File Upload Vulnerabilities:")
+        for vuln in vulnerabilities:
+            print(vuln)
+    else: 
+        print("No vulnerabilities found.")
+    
+
+if __name__ == "__main__":
+    main()
+```
+
+**Test Scenarios:**
+
+1. **Positive Test Case:** The user attempts to add valid extensions `"json"`, `"ini"` and scans a directory with files having these extensions, verify the output is as expected.
+   
+2. **Negative Test Case:** Attempt to add invalid extension like "docx". Expect ValueError exception and correct error message handled.
+
+3. **Positive Test Case Testing Multiple Extensions:** Scan a directory containing multiple file types (`.json`, `.ini`, all available). Examine scan logs for each type's specific vulnerabilities.
+   
+4. **Negative File Handling Test Case**: Upload invalid files, simulate exceptions in reading those files (like permission issues or non-text files), and verify proper error handling in `scan_directory` method.
+
+**Please replace `'path/to/upload'` with the actual path to a directory that contains the data for testing the scanner class functionality.**
+
+Feel free to test more scenarios as you like, these are intended to validate the core functionalities of this tool in specific edge cases common to security audits.

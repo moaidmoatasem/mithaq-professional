@@ -1,17 +1,25 @@
 version: 2
 updates:
+  # Enable security updates for pip dependencies
   - package-ecosystem: "pip"
     directory: "/"
     schedule:
       interval: "weekly"
-      day: "monday"
-      time: "09:00"
-      timezone: "Africa/Cairo"
-    open-pull-requests-limit: 5
+    open-pull-requests-limit: 10
     labels:
       - "dependencies"
-    groups:
-      python-dependencies:
-        update-types:
-          - "minor"
-          - "patch"
+      - "security"
+    # Auto-merge security patches
+    reviewers:
+      - "moaidmoatasem"
+    assignees:
+      - "moaidmoatasem"
+
+  # Also check GitHub Actions
+  - package-ecosystem: "github-actions"
+    directory: "/"
+    schedule:
+      interval: "weekly"
+    labels:
+      - "dependencies"
+      - "github-actions"

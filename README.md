@@ -312,3 +312,83 @@ See [AUTONOMOUS_SYSTEM_README.md](daqiq-professional/AUTONOMOUS_SYSTEM_README.md
 - ⏱️ 7 autonomous iterations
 
 Built entirely by MicroGPT swarm 🚀
+
+---
+
+## 📚 Documentation & Roadmap
+
+- **[Complete Project Documentation](./daqiq-professional/MASTER_DOCUMENTATION.md)** - Technical details, status, metrics
+- **[DAQIQ NEXUS v4 Roadmap](./docs/roadmap/DAQIQ_NEXUS_v4.md)** - Strategic plan, Phases 0-6, MiniGPT & RAG architecture
+- **[Architecture Overview](./docs/architecture/overview.md)** - Dual-brain system design
+
+---
+
+## 📋 Open Source Roadmap
+
+DAQIQ is evolving through 6 phases:
+
+| Phase | Focus | Status | Timeline |
+|-------|-------|--------|----------|
+| **0-1** | Foundation + Zero-Trust Core | 🔄 In Progress | Now (0-3 mo) |
+| **2-3** | RAG + Burhan + Dynamic Analysis | 📅 Planned | Q3 2026 (3-9 mo) |
+| **4-5** | Defense + Forensic UI | 📅 Planned | Q4 2026 (9-18 mo) |
+| **6** | Cairo Pilot + Open-Core | 📅 Planned | 2027 (19-24 mo) |
+
+**Current Status**:
+- ✅ 132 autonomous scanners (Layer 1 - Execution)
+- 🔄 Sanitization Bridge (91.78% coverage)
+- 🔄 Hardware-agnostic design (x86_64, ARM64, Cloud)
+- 📅 Daqiq Trace + Burhan validation (Layer 2 - Intelligence)
+
+See **[Full Roadmap](./docs/roadmap/DAQIQ_NEXUS_v4.md)** for details.
+
+---
+
+## 📜 License
+
+**MIT License** - see [LICENSE](./LICENSE) for details.
+
+Copyright (c) 2026 Moaid EL-Moatasem Bellah
+
+---
+
+## 🤝 Contributing
+
+DAQIQ is open source! Contributions welcome:
+
+1. Fork the repository
+2. Create a feature branch (`git checkout -b feature/amazing-feature`)
+3. Commit your changes (`git commit -m 'feat: Add amazing feature'`)
+4. Push to the branch (`git push origin feature/amazing-feature`)
+5. Open a Pull Request
+
+**Guidelines**:
+- Maintain ≥80% test coverage for new code
+- Follow existing code style (Ruff + Bandit)
+- Update documentation for new features
+- Security-sensitive changes require manual review
+
+---
+
+## 🔒 Security
+
+For security vulnerabilities, see [SECURITY.md](./SECURITY.md).
+
+**Security Principles**:
+- Zero-trust sanitization (all inputs sanitized)
+- Stateless MiniGPTs (no session memory)
+- Fail-closed architecture (reject unsafe operations)
+- Hardware-agnostic deployment (no vendor lock-in)
+
+---
+
+## 📞 Contact
+
+- **Project Lead**: Moaid EL-Moatasem Bellah
+- **Repository**: [github.com/moaidmoatasem/daqiq-professional](https://github.com/moaidmoatasem/daqiq-professional)
+- **Issues**: [GitHub Issues](https://github.com/moaidmoatasem/daqiq-professional/issues)
+
+---
+
+**Built with ❤️ for secure AI-powered security testing**  
+*Hardware-Agnostic | Open Source | Zero-Trust by Design*

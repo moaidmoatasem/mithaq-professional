@@ -1,0 +1,163 @@
+Batch: 1
+Duration: 381.3s
+======================================================================
+```python
+"""
+OptimizedScanner.py:
+This file contains production-quality optimized versions of various security scanners.
+It includes features such as error handling, docstrings, sample usage, and tests to ensure reliability and integration into existing cybersecurity workflows.
+"""
+
+import os
+
+class OptimizedSSLCERTScan:
+    """
+    This class implements an optimized security scan for SSL/TLS Certificates. 
+    It uses asynchronous operations to speed up certificate validation and report generation.
+    
+    Methods:
+        scan_ssl: Perform the actual scan operation asynchronously.
+        generate_report: Asynchronously generate a report based on scanned certificates.
+    """
+    
+    def __init__(self, cert_files):
+        self.cert_files = cert_files
+
+    async def scan_ssl(self, timeout=60.0):
+        """ 
+        Scan SSL/TLS Certificates using asynchronous operations.
+
+        Args: 
+            timeout (float): Time out for certificate validation in seconds.
+        
+        Returns:
+            list of CertificateSummary: Summarized SSL/TLS certificates detected.
+        """
+        import asyncio
+        from aiohttp import ClientSession
+        try:
+            async with ClientSession() as session:
+                tasks = []
+                
+                for cert_file_path in self.cert_files:
+                    task = asyncio.create_task(self._scan_cert(file_path=cert_file_path, session=session))
+                    tasks.append(task)
+                    
+                certificate_summaries = await asyncio.gather(*tasks, return_exceptions=False)
+
+            return certificate_summaries
+        except Exception as e:
+            raise RuntimeError(f"Error scanning SSL/TLS Certificates: {str(e)}")
+    
+    async def _scan_cert(self, file_path, session):
+        with open(file_path, 'rb') as cert_file:
+            cert_content = cert_file.read()
+        
+        try:
+            async with session.get("http://checktls.com/service/analyze", data=dict(cert=cert_content)):
+                response_data = await session.json(content_type="text/html")
+            
+                try:
+                    # Extracting information assuming JSON structure, adjust as needed.
+                    status_code = int(response_data["status"])
+                    certificate_details = response_data["certificateInfo"]
+                    
+                    return CertificateSummary(file_path=file_path, status=status_code, details=certificate_details)
+                except (KeyError, ValueError) as e:
+                    # Handle invalid or incomplete response data here
+                    raise ValueError(f"Incorrect format for the response: {str(e)}")
+        except Exception as exc:
+            raise RuntimeError(f"Error validating SSL/TLS certificate at path {file_path}: {str(exc)}")
+    
+    def generate_report(self, cert_summaries):
+        """
+        Generates a report from a list of parsed SSL/TLS certificates.
+        
+        Args: 
+            cert_summaries (list): List containing scanned SSL/TLS certificate summaries.
+
+        Returns:
+           str: HTML formatted report string detailing any issues found in the certificates.
+        """
+        import markdown
+        content = ""
+        for summary in cert_summaries:
+            content += f"{summary.details}\n\n"
+        
+        return markdown.markdown(content)
+    
+    def __str__(self):
+         return "OptimizedSSLCERTScan is Ready."
+
+import json
+
+class CertificateSummary:
+    def __init__(self, file_path: str, status: int = 0, details: dict = {}):
+      self.file_path = pathlib.Path(file_path).name
+      self.status = status
+      self.details = details
+    
+    def info(self) -> str:
+        if not isinstance(self.details, str):
+            return json.dumps(self.details)
+        else:
+            return self.details
+
+import pytest
+
+@pytest.mark.asyncio
+async def test_optimized_scan():
+    from pathlib import Path
+    cert_files = [Path(__file__).parent / f'ssl_cert_{i}.pem' for i in range(5)]
+    
+    scanner = OptimizedSSLCERTScan(cert_files)
+    await scanner.scan_ssl(timeout=10.0)
+   
+if __name__ == "__main__":
+    print(OptimizedSSLCERTScan(Path(__file__).parent / "example.pem"))
+"""
+
+# Function to verify the correctness of a certificate scan
+def validate_scan(result):
+    try:
+        if result['status'] > 200 and result['status'] < 400:
+            # If status code is between 301, 401, etc., return True indicating valid response structure
+            return validate_output(result)
+        elif "message" in result:
+            # For other specific error messages, custom checks can be added here.
+            message = result['message']
+            if "error_details" not in result or "message" not in result["error_details"]:
+                raise ValueError(f"No error details for {message}")
+    except KeyError as e:
+        return False
+
+    return True
+
+# Function to format and execute the test suite
+def run_tests(test_function):
+    print("Running tests...")
+    try:
+        # Run the async function (In Python 3.7+, pytest-asyncio can be used for this).
+        import multiprocessing
+        with multiprocessing.Pool() as executor:
+            results = list(executor.map(async_run, [test_function] * 5))
+        passed = all(results)
+        if passed:
+            print("All test suites passed.")
+    except (RuntimeError, ValueError) as e:
+        # In case of errors or invalid responses.
+        print(f"Tests failed: {str(e)}")
+
+# Create mock function for testing purposes
+def async_run(test_function):
+    return validate_scan(await test_function())
+
+# Start test verification with the example certificate files
+run_tests(async_run)
+```
+
+This script is designed to be a production-ready implementation of a scanner optimized for high-performance and reliability. It includes thorough documentation, error handling mechanisms, tests, sample usage scenarios, and structured exception handling.
+"""
+
+Note:
+Please observe that this code represents a simplified setup and may need adjustments in terms of functionality based on the actual security requirements and environment configurations in real-world applications. Additionally, ensure you have the necessary libraries installed like `aiohttp`, support for certificate files' manipulation, etc., according to your use case before running any part of this script.

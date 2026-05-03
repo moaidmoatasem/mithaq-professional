@@ -1,0 +1,108 @@
+Batch: 1
+Duration: 200.8s
+======================================================================
+```python
+import os
+
+class PathTraversalScanner:
+    """
+    A class to perform path traversal scans on specified paths using the `os` module.
+    
+    Attributes:
+        base_path (str): The root directory from which to traverse subdirectories and files.
+    """
+    
+    def __init__(self, base_path: str):
+        """
+        Initialize the scanner with a base path for traversal.
+        
+        Args:
+            base_path (str): The starting directory path
+        """
+        self.base_path = os.path.abspath(base_path)  # Ensure it's absolute for compatibility
+        
+    def scan(self, sub_paths: list) -> list:
+        """
+        Execute scans for the provided sub paths to check for path traversal vulnerabilities.
+        
+        Args:
+            sub_paths (list): A list of potential sub-path strings from which to traverse down the base directory.
+            
+        Returns:
+            list: All possible absolute paths found within the scanned directories, including relative and potentially harmful ones if found. 
+                  In case an error occurs during scanning or the `os` module isn't available, this function will return a message indicating that.
+
+        Raises:
+            FileNotFoundError: If the base directory is not accessible.
+        """
+        results = []
+        for path in sub_paths:
+            try:
+                traverse_result = list(self._traverse(path))
+                if traverse_result:
+                    results.extend(traverse_result)
+            except (PermissionError, FileNotFoundError) as e:
+                return [f"An error occurred during the scan: {e}"]
+        
+        # Normalize paths to absolute ones
+        results = [os.path.abspath(os.path.join(self.base_path, result)) for result in results]
+        
+        return results
+    
+    def _traverse(self, path: str):
+        """
+        Internal traverse function.
+        
+        Args:
+            path (str): A potential sub-path from which to start the traversal
+        
+        Yields:
+            str: The next level path discovered during the traversal.
+        """
+        for root, dirs, files in os.walk(os.path.abspath(path)):
+            # Yield all directories as they represent new levels of traversal
+            yield from [os.path.join(root, d) for d in dirs]
+            
+            # Check sub-path components individually to catch any relative paths used properly (e.g., "images")
+            if not root.endswith("/"):
+                base_path = os.path.dirname(os.path.abspath(self.base_path))
+                potential_component = os.path.basename(os.path.normpath(root))
+                yield os.path.join(base_path, *str(potential_component).split('/'))
+
+
+def example_usage():
+    scanner = PathTraversalScanner("/")
+    # Example usage: Scanning two sub-path lists for their respective validity and the existence of possible traversal vulnerabilities
+    paths_to_scan_1 = ["./images", "docs", "./user/data"]
+    paths_to_scan_2 = [os.path.join("/", "_private_files"), ".config"]
+    
+    scan_results = scanner.scan(paths_to_scan_1)
+    print("Scan Results for 'paths_to_scan_1':\n", "\n".join(scan_results))
+    
+    # Note: The second list should contain valid paths, it was intentionally constructed to be ambiguous
+    scan_results = scanner.scan(paths_to_scan_2)
+    print("Scan Results for 'paths_to_scan_2':\n", "\n".join(scan_results))
+
+def run_tests():
+    try:
+        # Test case 1: Valid directory path
+        scanner = PathTraversalScanner("/home/user")
+        results = scanner.scan(["/home/user/images"])
+        assert all(os.path.exists(result) for result in results)
+        print("Test Case 1 passed.")
+        
+        # Test case 2: Invalid base path (nonexistent file)
+        try:
+            PathTraversalScanner("~/temp/nofile") 
+        except FileNotFoundError as e:
+            print(f"Test Case 2 passed. Caught the exception '{e}'")
+    except AssertionError:
+        print("An assertion failed in test cases.")
+        
+if __name__ == "__main__":
+    example_usage()
+    run_tests()
+
+```
+
+This code provides a `PathTraversalScanner` class that encapsulates all necessary operations for scanning potential path traversal vulnerabilities from specified sub-paths under a given base directory. The class includes proper documentation, robust error handling, and method implementations. Please note this script is intended for educational and testing purposes only and may not be fully hardened or ready for production use across various environments.

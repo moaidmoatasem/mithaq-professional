@@ -1,0 +1,149 @@
+Batch: 1
+Duration: 468.0s
+======================================================================
+```python
+import pandas as pd
+
+class VulnerabilityPredictor:
+    """
+    A class that provides functionalities to predict vulnerabilities based on machine learning models.
+    This class utilizes ML for pattern recognition and prediction of potential security issues in software code repositories like GitHub, GitLab etc.
+
+    :example:
+
+    # Load the CSV file into a DataFrame
+    data = pd.read_csv('path_to_file.csv')
+
+    # Create an instance of VulnerabilityPredictor
+    predictor = VulnerabilityPredictor()
+
+    # Predict vulnerabilities using the trained model
+    predictions = predictor.predict(data)
+    
+    ...
+    """
+
+    def __init__(self, model_path='model.pkl', vectorizer_path='vectorizer.pkl'):
+        """
+        Initialize the vulnerability predictor with a path to ML models (trained machine learning and feature extractor).
+        
+        :param str model_path: Path to the trained ML model file. Default is 'model.pkl'.
+        :param str vectorizer_path: Path to the saved feature extractor for tokenization, etc. Default is 'vectorizer.pkl'.
+        """
+        self._load_model(model_path)
+        self._load_vectorizer(vectorizer_path)
+
+    def _load_model(self, path):
+        """
+        Load a trained machine learning model from a specified file.
+        
+        Parameters:
+            path (str): The path of the saved ML model file.
+            
+        Example Usage:
+            predictor = VulnerabilityPredictor()
+            trainer = VulnerabilityTrainer()
+            trainer.train(data)  # Assume this function saves the model to 'model.pkl'
+            predictor._load_model('path_to_file/model.pkl')
+        """
+        from sklearn.externals import joblib
+        self.model = joblib.load(path)
+
+    def _load_vectorizer(self, path):
+        """
+        Load a feature extractor (vectorizer) from a specified file.
+        
+        Parameters:
+            path (str): The path of the saved vectorizer file.
+
+        Example Usage:
+            predictor = VulnerabilityPredictor()
+            trainer = FeatureExtractorTrainer(data)
+            trainer.train()  # Assume this function saves the model to 'vectorizer.pkl'
+            predictor._load_vectorizer('path_to_file/vectorizer.pkl')
+        """
+        from sklearn.externals import joblib
+        self.vectorizer = joblib.load(path)
+
+    def predict(self, data):
+        """
+        Predict vulnerabilities in provided software code repository entries.
+
+        :param pd.DataFrame data: A pandas DataFrame with at least a column for the 'code' containing the source code snippets.
+        :return: prediction dictionary mapping each entry to its predicted vulnerability status (e.g., potential security issue, not).
+        
+        Example Usage:
+            # Assuming we have loaded our trained model and vectorizer
+            predictor = VulnerabilityPredictor()
+            
+            # Create a sample DataFrame with some sample code
+            df_samples = pd.DataFrame({
+                'code': ['import os; print(os);', 'for i in range(10): if i % 2 == 0: pass']
+            })
+            
+            # Predict vulnerabilities
+            predictions = predictor.predict(df_samples)
+        """
+        from sklearn.pipeline import make_pipeline
+        from joblib import Parallel, delayed
+
+        def predict_entry(code):
+            features = self.vectorizer.transform([code])
+            prediction = self.model.predict_proba(features)[0][1]
+            return {'code': code, 'vulnerability_score': prediction}
+
+        predictions = Parallel(n_jobs=-1)(delayed(predict_entry)(entry) for entry in data['code'])
+        
+        # Transform the list to a DataFrame
+        import numpy as np
+        predictions_df = pd.DataFrame(predictions)
+        
+
+        return predictions_df
+
+# Example of how this class is used
+if __name__ == "__main__":
+    from sklearn.externals import joblib
+    from sklearn.pipeline import make_pipeline
+    
+    def mock_load_vectorizer(vectorizers_path):
+        vectorizer = make_pipeline(make_pipeline())
+        with open(vectorizers_path, 'rb') as f:
+            vectorizer.load(f)
+        return vectorizer
+
+    def mock_make_prediction(prediction_dict, model_path='model.pkl'):
+        from joblib import load
+        model = load(model_path)
+        predictions_df['vulnerability_score'] = model.predict_proba(predictions_df[['code']])[0].tolist()
+        return predictions_df
+    
+    # Load an example vectorizer and prediction pipeline for demonstration (real-life would involve training these first)
+    predictor_mock = VulnerabilityPredictor(vectorizer='vectorizers.pkl', model_path='models/model.pkl')
+    
+    import os
+    import pandas as pd
+
+    def test_data(data_directory="test_data"):
+        if not os.path.exists(data_directory):
+            raise ValueError("Data directory does not exist.")
+            
+        files_list = [f for f in os.listdir(data_directory) if f.endswith(".csv")]
+        
+        all_input_data = []
+        for file in files_list:
+            df_input = pd.read_csv(os.path.join(data_directory, file))
+            all_input_data.append(df_input)
+        
+        return pd.concat(all_input_data)
+
+    def run_tests():
+        test_data_dir = "test_data/"
+        complete_pred_df = predictor_mock.predict(test_data(test_data_dir))
+        
+    # Add your tests here
+
+if __name__ == "__main__":
+    run_tests()
+    
+```

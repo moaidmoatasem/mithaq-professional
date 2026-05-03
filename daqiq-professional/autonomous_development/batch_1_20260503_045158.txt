@@ -1,0 +1,132 @@
+Batch: 1
+Duration: 426.3s
+======================================================================
+```python
+import os
+from slack_sdk import WebClient
+from discord_webhook import DiscordWebhook
+from slack.errors import SlackApiError
+
+class SlackDiscordIntegration:
+    """
+    This class provides a service for integrating with both Slack and Discord.
+    
+    Methods:
+        send_slack_message(self, message): Sends the provided message to a Slack channel.
+        send_discord_message(self, message): Sends the provided message to a Discord webhook URL.
+        test_integration(self, slack_channel_id=None, discord_webhook_url=None):
+            Tests sending messages to both Slack and Discord with appropriate error handling.
+
+    Attributes:
+        slack_client: WebClient object for interacting with Slack API.
+        discord_client: DiscordWebhook object for interacting with Discord webhooks.
+        slack_bot_token (str): Token for accessing the authenticated Slack client.
+        slack_channel_id (str): ID of the Slack channel to post messages to.
+        webhook_url (str): URL of the Discord webhook to send requests to.
+    """
+    
+    def __init__(self, slack_bot_token: str, slack_channel_id: str=None, webhook_url: str=None):
+        self.slack_client = WebClient(token=slack_bot_token)
+        if not slack_client:
+            raise ValueError("Slack bot token is required.")
+        
+        self.slack_channel_id = slack_channel_id
+        self.webhook_url = webhook_url
+        
+    @staticmethod
+    def send_slack_message(message: str):
+        """
+        Sends the given message to a specified Slack channel.
+        
+        Parameters:
+            message (str): The message content to be sent in the Slack API.
+            
+        Returns (None)
+            None
+        """
+        try:
+            response = self.slack_client.chat_postMessage(
+                channel=self.slack_channel_id,
+                text=message
+            )
+        except SlackApiError as e:
+            print(f"Slack Error: {e}")
+    
+    @staticmethod
+    def send_discord_message(message: str):
+        """
+        Sends the given message to a Discord webhook URL.
+        
+        Parameters:
+            message (str): The message content to be sent in the Discord API.
+            
+        Returns (None)
+            None
+        """
+        try:
+            response = self.discord_client.send(
+                url=self.webhook_url,
+                content=message
+            )
+            print("Message sent successfully.")
+        except Exception as e:
+            print(f"Discord Error: {e}")
+    
+    def test_integration(self, slack_channel_id=None, discord_webhook_url=None):
+        """
+        Tests sending messages to both Slack and Discord channels/webservices.
+        
+        Parameters:
+            slack_channel_id (str): ID of the Slack channel in which to post a message.
+            discord_webhook_url: URL of the Discord webhook to send requests through.
+            
+        Returns (None)
+            None
+        """
+        if not self.slack_client or not self.webhook_url:
+            print("Slack bot token and/or Discord webhook are missing.")
+            return
+        
+        if slack_channel_id:
+            message = "Test Message from Slack: {}".format(slack_channel_id)
+            try:
+                self.send_slack_message(message)
+            except Exception as e:
+                print(f"Error sending to Slack: {e}")
+        
+        if discord_webhook_url:
+            message = "Test Message via Discord"
+            try:
+                self.send_discord_message(message)
+            except Exception as e:
+                print(f"Error sending to Discord: {e}")
+
+if __name__ == "__main__":
+    slack_token = os.getenv("SLACK_BOT_TOKEN")
+    if not slack_token:
+        raise ValueError("Missing Slack bot token.")
+    
+    webhook_url = "https://hooks.slack.com/services/your-discord-webhook-url"
+    test_slack_channel_id = "C012A3B4E5"
+
+    integrator = SlackDiscordIntegration(slack_bot_token=slack_token, slack_channel_id=test_slack_channel_id, webhook_url=webhook_url)
+    
+    print(integrator.test_integration(test_slack_channel_id))
+    
+    # Example Usage:
+    # integrator.send_slack_message(message="Hello, World!")
+    # integrator.send_discord_message(message="Hello, Discord!")
+
+# Example Test Integration
+if __name__ == "__main__":
+    slack_testing_token = os.getenv("SLACK_BOT_TOKEN_FOR_TESTING")
+    if not slack_testing_token:
+        raise ValueError("Missing Slack bot token for testing.")
+    
+    discord_webhook_for_test = "https://examplediscordhook.com/test"
+    test_message = "This should be sent via Slack and Discord."
+    
+    integrator_with_token = SlackDiscordIntegration(slack_bot_token=slack_testing_token, slack_channel_id="C012A3B4E5", webhook_url=discord_webhook_for_test)
+    integrator_with_token.test_integration(discord_webhook_url=discord_webhook_for_test)
+
+```

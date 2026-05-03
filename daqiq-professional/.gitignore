@@ -7,3 +7,7 @@ logs/
 output/
 .coverage
 .pytest_cache/
+
+# Autonomous agent logs
+src/daqiq/batch_*.txt
+src/daqiq/roadmap_execution_*.log

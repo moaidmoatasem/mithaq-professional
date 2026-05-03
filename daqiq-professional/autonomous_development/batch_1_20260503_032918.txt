@@ -1,0 +1,81 @@
+Batch: 1
+Duration: 220.8s
+======================================================================
+```python
+import os
+from urllib.parse import unquote
+
+class PathTraversalScanner:
+    """
+    This class is designed to scan a given directory for unauthorized path traversal.
+    
+    Methods:
+        
+        scan_directory(starting_path):
+            - Takes the starting path as input 
+            - Scans all directories and files, checking for path traversal attempts
+            - Prints any issues found in a readable format
+           
+            Example usage: scanner = PathTraversalScanner("/var/www/html")  
+                         scanner.scan_directory()
+    """
+
+    def __init__(self, base_path):
+        """
+        Initializes the starting directory for path scanning.
+        
+        Args:
+            base_path (str): The root directory to begin scanning from.
+        """
+        self.base_path = os.path.abspath(base_path)
+
+    def _traverse_directories(self, current_directory, depth=0):
+        """ 
+        A helper function that prints directories and their full paths at a given depth for debugging or understanding the traversal logic.
+
+        Args:
+            current_directory (str): The starting directory to print from.
+            depth (int): To represent current directory's level in recursion. Default is 0.
+        """
+        path_elements_list = [os.path.basename(current_directory)] + os.listdir(current_directory)
+        
+        for index, element in enumerate(path_elements_list):
+            full_path = os.path.abspath(os.path.join(current_directory, element))
+            
+            if os.path.isdir(full_path):
+                # Recursively call the function with nested directory
+                path_elements_list[index] = f"{len(path_elements_list) * ' '}{element}{'|__' * depth}"
+                self._traverse_directories(full_path, max(0, index - 1))
+            else:
+                element_info = os.stat(full_path)
+                full_path_info_str = f"[{index}] => {os.path.basename(element_info.path)}"
+                print(" " * (len(self.base_path) + len(full_path)) + "-", full_path_info_str)
+
+    def _check_for_traversal_vulnerabilities(self, start_directory):
+        for root, dirs, files in os.walk(start_directory):
+            try:
+                # Safely parse and quote strings with unsafe characters
+                formatted_dir = unquote(root.lstrip(self.base_path))
+            except (TypeError, ValueError) as e:  # Catch invalid input cases like non-string elements
+                formatted_dir = str(e)
+
+            if not formatted_dir.startswith("/"):
+                print(f"Warning: {formatted_dir} might indicate a path traversal attempt based on relative URL.")
+
+    def scan_directory(self):
+        """
+        Executes the directory scanning logic, calling helper methods to scan all possible directories.
+        """
+        self._traverse_directories(self.base_path)
+        self._check_for_traversal_vulnerabilities(self.base_path)
+
+# Example usage of PathTraversalScanner
+if __name__ == "__main__":
+    scanner = PathTraversalScanner("/var/www/html")
+    print("Beginning full directory scan...")
+    scanner.scan_directory()
+```
+
+This Python class, `PathTraversalScanner`, encapsulates the core logic for scanning directories to identify potential path traversal vulnerabilities. The helper function `_check_for_traversal_vulnerabilities` uses `os.walk` and the method `_traverse_directories` with a depth counter to traverse directory structures recursively.
+
+The example at the end demonstrates how to use this scanner, which you can modify as needed or integrated into your testing environment for validation of scans. The code is designed to be readable, maintainable, and extensible, ready for integration with other security tooling.

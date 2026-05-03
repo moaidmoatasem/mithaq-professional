@@ -1,0 +1,131 @@
+Batch: 1
+Duration: 357.8s
+======================================================================
+```python
+import os
+import subprocess
+
+class FileUploadVulnerabilityScanner:
+    """
+    A class to scan for potential file upload vulnerabilities.
+    
+    Attributes:
+        allowed_extensions (list): List of allowed MIME types and extensions.
+        exclusion_patterns (dict): Dictionary containing file patterns that should be excluded from scanning based on name or directory level.
+    """
+
+    def __init__(self, allowed_extensions=None, exclusion_patterns=None):
+        """Initialize the FileUploadVulnerabilityScanner.
+
+        Args:
+            allowed_extensions (list | None): A list of MIME types and their extensions. Defaults to common file types if not provided.
+            exclusion_patterns (dict | None): A dictionary with patterns that can be key: "filename" or key: "directory_level". Defaults to exclude '.log' files starting from root directory as common logs are excluded.
+        """
+        self.allowed_extensions = allowed_extensions if allowed_extensions else ['.jpg', '.jpeg', '.png']
+        self.exclusion_patterns = exclusion_patterns if exclusion_patterns else {
+            'root': r'^\.+'  # Root level excludes
+        }
+
+    def scan_file_paths(self, file_paths):
+        """Scan the provided list of file paths for potential file upload vulnerabilities.
+
+        Args:
+            file_paths (list): A list of full or relative file system paths. Expected to be a directory listing initially.
+        
+        Yields:
+            dict: A dictionary containing details about each potential security issue found.
+                - 'issue_type': The type of the encountered vulnerability.
+                - 'file_path': Absolute path from current context to identified vulnerable file.
+                - 'details': Optional additional information, depending on the specific scan result.
+        """
+        for directory_path in set(file_paths):  # Avoid redundant checks
+            if not os.path.isdir(directory_path):
+                continue
+
+            for root, _, files in os.walk(directory_path):
+                relative_root = root.replace(os.getcwd(), '')  # Relative path to current directory
+                for file_name in files:
+                    full_file_path = os.path.join(root, file_name)
+                    issue_detected = False
+
+                    if self.exclusion_patterns.get(relative_root):
+                        if any(pattern.match(full_file_path) and pattern.pattern.startswith('.') for pattern in self.exclusion_patterns[relative_root].split(';')):
+                            continue
+                            
+                    file_extension_mimetype_map = {
+                        '.jpg': 'image/jpeg',
+                        '.jpeg': 'image/jpeg',
+                        '.png': 'image/png'
+                    }
+                    
+                    if not issue_detected:
+                        issue_type = None
+
+                        for ext in self.allowed_extensions:
+                            if full_file_path.endswith(ext):
+                                try_mimetype = file_extension_mimetype_map.get(ext)
+                                if try_mimetype is None or try_mimetype == self._check_for_exposed_mimetype(full_file_path, relative_root):
+                                    issue_type = 'File upload vulnerability detected!'
+                                    break
+
+                    yield {'issue_type': issue_type, 'file_path': full_file_path} if issue_type else None
+
+    def _check_for_exposed_mimetype(self, file_path: str, directory_level: str) -> str:
+        """Check for file mime type exposing to the web. Subprocess is used here as a simple example."""
+        try:
+            result = subprocess.run(['file', '-i', '--mime-type', file_path], capture_output=True, text=True)
+            if 'type' not in result.stdout or 'charset' not in result.stdout or 'text/html' in result.stderr.lower():
+                return 'application/octet-stream'
+            else:
+                return result.stdout.split('=')[0].strip(' ')  # Only retrieve the mime type
+        except Exception as e: 
+            print(f"An error occurred while checking for exposure of file types: {e}")
+            return 'application/octet-stream'
+
+def scan_file_vulnerabilities(file_paths):
+    """Function to use FileUploadVulnerabilityScanner class and output a list of issues found.
+
+    Args:
+        file_paths (list): List containing paths in the target directory, that we want our test for vulnerabilities.
+    
+    Returns:
+        List: List of dictionaries containing files with vulnerability issues detected along its path information. None if no issues are detected.
+    """
+    scanner = FileUploadVulnerabilityScanner()
+    results = [issue for issue in scanner.scan_file_paths(file_paths) if issue]
+    return results
+
+if __name__ == "__main__":
+    example_path = os.getcwd()  # Directory you want to scan
+    files_to_scan = [os.path.join(example_path, file_name) for file_name in next(os.walk(example_path))[2]]
+    
+    issues_found_in_files = scan_file_vulnerabilities(files_to_scan)
+    print(issues_found_in_files)
+
+# Example usage docstring with a mock-up of scanning:
+"""
+Usage example:
+
+>>> issue1_data = {'issue_type': 'File Upload Vulnerability detected', 'file_path': os.path.join(os.getcwd(), 'image.jpg')}
+>>> issue2_data = {'issue_type': None, 'file_path': os.path.join(os.getcwd(), 'file.php')}
+>>> issues_list = [issue1_data, issue2_data]
+>>> scan_file_vulnerabilities(['path/to/example'])
+>>> # [{'issue_type': 'File Upload Vulnerability detected', 'file_path': '/tmp/image.jpg'}, {'issue_type': None}]
+
+Example Output:
+[
+    {
+        "issue_type": "File upload vulnerability detected!",
+        "file_path": "/full/absolute/path/to/vulnerable-file.php"
+    }
+]
+"""
+
+# Note: This is a simplified implementation for example purposes. In production, consider adding more sophisticated error handling and details to issue dictionaries.
+```
+
+This code demonstrates the creation of a `FileUploadVulnerabilityScanner` class that can be used to identify file upload vulnerabilities based on MIME type and extension in a directory. It includes basic error handling using Python's standard library and subprocess for an easy-to-implement check of known issues, which could be replaced with more advanced scanning techniques in actual usage.
+
+The `scan_file_vulnerabilities` function serves as a user-facing entry point that utilizes the scanner to search through directories and returns any identified vulnerabilities as dictionaries. A main block is included in the script to demonstrate how it can be used for testing.
+
+Remember that this example should be adapted based on your specific needs, such as more thorough error handling, deeper detail within security issue reports, integration with databases/metadata collections, etc., for more comprehensive and production-ready tools.

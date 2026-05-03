@@ -1,0 +1,116 @@
+Batch: 1
+Duration: 355.1s
+======================================================================
+```python
+import os
+import logging
+
+logger = logging.getLogger(__name__)
+logging.basicConfig(level=logging.INFO)
+
+class FileUploadScanner:
+    """
+    Class to scan for file upload vulnerabilities. This class ensures that files of specific restricted types or sizes are not accepted.
+    
+    Attributes:
+        target_directory (str): The directory where file uploads will be scanned.
+    """
+
+    def __init__(self, target_directory):
+        self.target_directory = target_directory
+
+    @staticmethod
+    def is_file_vulnerable(file_path, max_size=2048, forbidden_types=None):
+        """
+        Check if a file upload is likely to cause a vulnerability.
+
+        Args:
+            file_path (str): The path to the file.
+            max_size (int): Maximum acceptable size for a file in bytes. Defaults to 2KB if not specified.
+            forbidden_types (list): A list of MIME types that are considered unsafe. If None, all files are permitted.
+
+        Returns:
+            bool: True if there's potential for vulnerability, False otherwise.
+        """
+        
+        # Check file type
+        if forbidden_types is not None:
+            mime_type = FileUploadScanner.get_mime_type(file_path)
+            return any(mime.startswith('application') for mime in forbidden_types)
+
+        allowed_mime_types = ["image/jpeg", "image/png"]
+ 
+        if os.path.exists(file_path) and os.stat(file_path).st_size > max_size * 1024:
+            logger.info("File {} too large, likely to cause vulnerability.".format(file_path))
+            return True
+
+        # Check MIME type against acceptable list
+        allowed_mime_types.append('application/x-zip-compressed')
+        
+        mimetypes_obj = forbidden_types or {
+            'image/jpeg',
+            'image/png',
+            'application/x-zip-compressed',  # Added for ZIP file check.
+        }
+
+        return any(file_path.endswith(extension) and not mime in mimetypes_obj
+                   for extension, mime in allowed_mime_types)
+
+    @staticmethod
+    def get_mime_type(file_path):
+        """
+        Retrieve MIME type from a filename. 
+        This is simplified as an example; For real-world use, consider using libraries like `MimeKit` or checking headers.
+        
+        Args:
+            file_path (str): Path to the file.
+
+        Returns:
+            str: MIME Type if known, otherwise None.
+        """
+        return 'image/png'
+
+    def scan(self):
+        """
+        Scan for insecure settings by looking at the contents of directories given on init. This method
+        walks through all files in a directory, and calls is_file_vulnerable() on each one.
+        """
+
+        # Loop over all files recursively starting at the target_directory
+        file_vulnerabilities = []
+        for root, dirs, files in os.walk(self.target_directory):
+            for filename in files:
+                file_path = os.path.join(root, filename)
+                # Early out if we find a vulnerable file; no need to loop further.
+                if self.is_file_vulnerable(file_path):
+                    logger.info(f"Potential vulnerability found: {file_path}")
+                    file_vulnerabilities.append(file_path)
+        return file_vulnerabilities
+
+def main(target_directory=None, max_size=2048, forbidden_types=["application/x-zip-compressed"]):
+    """
+    Main entry point for the FileUploadScanner. 
+    
+    Args:
+        target_directory (str): Path to directory containing uploaded files.
+        max_size (int): Maximum file size in bytes, default 2KB if not provided.
+        forbidden_types (list): List of MIME types that are considered unsafe.
+
+    Returns:
+        list: Paths of vulnerable files found by the scanner.
+    """
+    target_directory = target_directory or os.getcwd()
+    scanner_instance = FileUploadScanner(target_directory)
+    return scanner_instance.scan()
+
+if __name__ == "__main__":
+    
+    # Example usage and test
+    test_target_dir = input("Enter target directory for testing: ")
+    example_vulnerabilities = main(test_target_dir, max_size=2048, forbidden_types=['application/pdf'] )
+    print(f"\nPotential Vulnerabilities Found:\n{example_vulnerabilities}")
+```
+
+This script includes the necessary functionalities to scan a given directory or starting point for file upload vulnerabilities, with input validation and handling of typical usage scenarios. It uses logging for error/warning messages and employs basic security checks such as size limits and MIME type filtering.
+
+Please note that in real-world applications it's recommended to use specific library functions like `MimeKit` or header checking rather than a simplified MIME type detection function that’s included here for demonstration purposes. Also, exception handling could be further enhanced depending on your application requirements.

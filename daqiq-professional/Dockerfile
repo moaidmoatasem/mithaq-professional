@@ -17,10 +17,9 @@ COPY requirements.txt .
 # Install Python dependencies
 RUN pip install --no-cache-dir -r requirements.txt
 
-# Copy application code
-COPY daqiq/ ./daqiq/
+# Copy application code (fix: remove non-existent daqiq/ directory)
 COPY src/ ./src/
-COPY scripts/ ./scripts/
+COPY scripts/ ./scripts/ 
 COPY examples/ ./examples/
 
 # Set PYTHONPATH
@@ -29,5 +28,5 @@ ENV PYTHONPATH=/app/src:/app
 # Create workflow results directory
 RUN mkdir -p /app/workflow_results
 
-# Default command - run demo
-CMD ["python", "scripts/demo_workflow_execution.py"]
+# Default command
+CMD ["python", "-m", "daqiq.cli"]

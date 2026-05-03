@@ -1,0 +1,149 @@
+Batch: 1
+Duration: 99.3s
+======================================================================
+```python
+import os
+from urllib.parse import unquote
+
+class PathTraversalScanner:
+    """
+    Path Traversal Scanner class to identify potential path traversal vulnerabilities.
+    
+    Usage:
+    >>> scanner = PathTraversalScanner('/path/to/verify')
+    >>> scanner.scan_directory()
+    """
+
+    def __init__(self, base_dir: str):
+        """
+        Initialize the PathTraversalScanner with a base directory for scanning
+        
+        :param base_dir: The root directory to scan starting from.
+        """
+        self.base_dir = os.path.abspath(base_dir)
+        self.results = {}
+
+    def check_path(self, full_path):
+        """
+        Checks if a given path is traversable beyond the root or specified boundary.
+
+        :param full_path: Path that might be exposed by user input or other insecure sources.
+        :return: A dict containing details of the vulnerability if detected, else None
+        """
+        safe_path = os.path.join(self.base_dir, full_path.lstrip(os.sep))
+        
+        # Prevent directory traversal attacks
+        if not safe_path.startswith(f"{self.base_dir}{os.sep}"):
+            return {'Vulnerability': f"Potential path traversal at {safe_path}"}
+            
+        dir_path, file_name = os.path.split(safe_path)
+        if not dir_path or dir_path.isspace() or full_path.startswith("../") or (full_path.endswith("/") and len(full_path) > 1):
+            return {'Vulnerability': f"Dangerous path traversal detected at {safe_path}"}
+        
+        return None
+
+    def scan_directory(self, directory: str) -> dict:
+        """
+        Scans a given directory from the initialized base_dir for path traversal vulnerabilities.
+        
+        :param directory: The directory to be scanned within. Use 'current', 'parent', or 'relative' paths.
+        :return: A dictionary containing any vulnerabilities found and their details.
+        """
+        self.current_directory = directory
+        if directory == 'current':
+            current_dir = os.path.abspath(os.getcwd())
+            if not os.path.isabs(current_dir):
+                return {'Error': "No valid absolute path provided for current directory scan"}
+            
+            full_path = current_dir[len(self.base_dir):].lstrip(os.sep)
+            result = self.check_path(full_path)
+            if result is None:
+                return {}
+            else:
+                return result
+        elif directory == 'parent':
+            # Assuming the input to this function is a relative path, parent would represent a full directory.
+            parent_dir = os.path.abspath(os.path.join(self.base_dir, os.pardir))
+            
+            for root, dirs, files in os.walk(parent_dir):
+                if not self.base_dir in root:
+                    continue
+                for file_name in files + dirs:
+                    full_path = os.path.join(root, file_name)
+                    result = self.check_path(full_path)
+                    if result is None:
+                        continue
+                    else:
+                        return {**self.results, **result}
+        elif directory == 'relative':
+            # Scanning a given relative path can be complex due to potential symlink issues. This example simplifies.
+            
+            for root, dirs, files in os.walk(self.base_dir):
+                full_path = os.path.join(root, self.current_directory)
+                
+                if not self.base_dir in root:
+                    continue
+                for file_name in files + dirs:
+                    safe_path = os.path.join(full_path, file_name)
+                    result = self.check_path(safe_path)
+                    
+                    if result is None and not self.results:
+                        return {}
+                    
+                    self.results = {**self.results, **result}
+        else:
+            current_dir = os.path.abspath(os.path.join(self.base_dir, directory, *os.listdir(os.path.join(self.base_dir, directory))))
+            
+            for root, dirs, files in os.walk(current_dir):
+                safe_path = os.path.join(root, self.current_directory)
+                    
+                if full_path.startswith("."):
+                    continue
+                result = self.check_path(safe_path) 
+                
+                if result is None and not self.results:
+                    continue
+                
+                return {**self.results, **result}
+        
+        return self.results
+
+class PathTraversalExample:
+    def __init__(self):
+        self.scan_dir = PathTraversalScanner('/var/www/html')
+
+    def scan(self):
+        """Example usage to demonstrate the PathTraversalScanner."""
+        print("Current Directory Scan Example: ")
+        start_scan_result = self.scan_dir.scan_directory('current')
+        if start_scan_result:
+            print(f"{start_scan_result}\n")
+        
+        print("\nParent Directory Scan Example:")
+        parent_scan_result = self.scan_dir.scan_directory('parent')
+        if parent_scan_result:
+            print(parent_scan_result)
+            
+        # Relative path usage scan (simplified, assumes no complex relative paths like ../../etc/passwd)
+        print("\nRelative Path Scan Example")
+        rel_path_scan_results = {}
+        
+        for file_name in os.listdir(self.scan_dir.base_dir):
+            full_rel_path = os.path.join(self.scan_dir.base_dir, file_name)
+            
+            if file_name.startswith("."):
+                continue
+            
+            result = self.scan_dir.check_path(full_rel_path) 
+            if result is not None:
+                rel_path_scan_results = {**rel_path_scan_results, **result}
+                
+        if rel_path_scan_results:
+            print(rel_path_scan_results)
+        
+if __name__ == "__main__":
+    example_usage = PathTraversalExample()
+    example_usage.scan()
+
+# Example of running tests would go here
+```

@@ -1,0 +1,110 @@
+Batch: 1
+Duration: 423.6s
+======================================================================
+```python
+# Import necessary libraries
+import os
+from collections import OrderedDict
+import unittest
+
+class FeatureScanner:
+    """
+    A class for scanning features in the codebase.
+    
+    Methods:
+    - scan(codebase_path: str) -> dict: scans and returns feature status information
+    
+    Example Usage:
+    >>> scanner = FeatureScanner()
+    >>> result = scanner.scan('/path/to/codebase')
+    """
+
+    def __init__(self):
+        self.log = []
+
+    @staticmethod
+    def _execute_command(command_line, codebase_path):
+        """
+        Executes a given command (as a list) in the specified directory and returns the output.
+        
+        Args:
+            command_line: List[str] - The command's arguments to be passed through. 
+            Example: ['git', 'status']
+            codebase_path: str - The path where we want to perform command execution
+            
+        Returns:
+            str - Output of the terminal (command output)
+            
+        Usage in Methods:
+            In _execute_command method
+        """
+        import subprocess
+        result = subprocess.getoutput(f'cd {codebase_path}; {command_line[0]} {" ".join(command_line[1:])}')
+        FeatureScanner._log_result(result)
+    
+    @staticmethod
+    def _log_result(output):
+        # Placeholder for logging module usage or error handling.
+        pass
+
+    def scan(self, codebase_path: str) -> dict:
+        """
+        Scans the given codebase and returns a dictionary with feature information.
+
+        Args:
+            codebase_path (str): The path to the directory containing application code. Example "/path/to/codebase".
+
+        Returns:
+            dict: A dictionary containing feature status in the codebase.
+        
+        Raises:
+            RuntimeError: If there is an issue executing commands or parsing results which should be handled by error checking before returning.
+
+        """
+        # Initialize scan log
+        self.log = []
+    
+        try:
+            file_changes_info, issues, unused = FeatureScanner._collect_data(self)
+            
+            if isinstance(file_changes_info, str):
+                return {'file_changes': file_changes_info}
+            
+            features_report = OrderedDict()
+            for feature in sorted(file_changes_info, key=lambda x: x[0]):
+                features_report[str(feature)] = {'changes': len(file_changes_info[feature]['new']),
+                                        'issues_found': issues,
+                                        'unused_features': unused
+                                  }
+                
+            self.log.append(('scan', f"features found : {json.dumps(features_report, indent=2)}"))
+            
+            return {'features_report' : json.dumps(features_report)}
+        
+        except Exception as e:
+            raise RuntimeError(f'Scanning failed with error: {e}')
+    
+    @staticmethod
+    def _collect_data(scanner):
+        file_changes_info = {}
+        issues = 0
+        unused_features = set()
+        # Placeholder usage of commands to collect data about features in the codebase (git status, etc.)
+        FeatureScanner._execute_command(['git', 'status'], codebase_path)
+        
+        return file_changes_info, issues, unused_features
+
+
+if __name__ == "__main__":
+    scanner = FeatureScanner()
+
+# Below, you would include unittests here if this class were implemented as part of a larger project
+
+def main():
+    """
+    Main function to run example scanning
+    """
+    # This is an example of codebase_path and result format after running .scan for a directory
+    result = scanner.scan("/path/to/codebase")
+    print(result)
+```

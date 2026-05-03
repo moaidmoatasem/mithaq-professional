@@ -1,0 +1,71 @@
+Batch: 1
+Duration: 437.2s
+======================================================================
+```python
+from flask import Flask, request, jsonify
+import os
+
+app = Flask(__name__)
+
+@app.route('/scanners', methods=['POST'])
+def submit_scan():
+    """
+    API endpoint for submitting scans. Handles HTTP POST requests.
+    
+    Returns:
+        A JSON with scan results if successful, or an error message otherwise.
+
+    Raises:
+        ValueError: If the request payload is invalid.
+        KeyError: If any required fields are missing in the payload.
+        
+    Usage Example:
+    >>> import requests
+    >>> response = requests.post('http://localhost:5000/scanners', json={'scanner_type': 'snyk'})
+    """
+    try:
+        data = request.json
+    except Exception as e:
+        raise ValueError("Invalid JSON provided in the POST body") from e
+
+    required_fields = ['scanner_type']
+    for field in required_fields:
+        if field not in data:
+            raise KeyError(f"Required field {field} is missing")
+
+    # Simulated scan results. In a real scenario, this would call an actual scanning function.
+    response_results = {
+        "status": "success",
+        "message": "Scan submitted successfully for type: {}".format(data['scanner_type']),
+    }
+
+    return jsonify(response_results), 201
+
+@app.route('/healthcheck', methods=['GET'])
+def health():
+    """
+    API endpoint to check the health of the application. 
+
+    Returns:
+        A JSON message indicating that the service is healthy or not.
+        
+    Usage Example:
+    >>> response = requests.get('http://localhost:5000/healthcheck')
+    """    
+    return jsonify({"status": "OK", "message": "Service is healthy."})
+
+if __name__ == "__main__":
+    app.run(debug=True, port=5000)
+```
+
+This complete code includes:
+- A Flask based API handling POST requests to the /scanners endpoint for submit_scan functionality. The response provides a JSON with scan results or an error message.
+- An additional healthcheck route at the /healthcheck URL which always responds that the service is healthy, simulating any application validation.
+- Proper use of comments within functions and routes providing detailed documentation.
+- Error handling defined using `try...except` blocks to inform on what kinds of exceptions may occur such as bad JSON formats and missing required fields in request data.
+- A placeholder for simulated return scan results.
+
+In a real-world scenario, this code would be part of an integrated system where the POST request includes more complex payload information like start/stop command parameters. The `submit_scan` function could connect to multiple scanning services or APIs depending on requirements.
+
+Furthermore, integration testing should include scenarios such as sending both valid and invalid JSON payloads, making sure the API responds appropriately in these cases. For the healthcheck endpoint, actual health checks can be performed for any upstream components used within the scan.
+```

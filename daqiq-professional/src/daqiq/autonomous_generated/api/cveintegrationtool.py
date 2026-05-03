@@ -9,11 +9,12 @@ Category: api
 
 import requests
 
+
 class CVEIntegrationTool:
     def __init__(self, api_key):
         """
         Initialize a new instance of CVE Integration Tool with an API key to access the CVE database.
-        
+
         :param api_key: A valid API key to authenticate against the CVE Database
         """
         self.api_key = api_key
@@ -22,13 +23,13 @@ class CVEIntegrationTool:
     def get_vulnerabilities(self, cve_id):
         """
         Retrieve information for a specific vulnerability ID in the CVE database.
-        
+
         :param cve_id: A CPE (Common Platform Enumeration) compliant ID for the CVE
         :return: The API response as JSON format if successful, None otherwise.
         """
         url = f"{self.base_url}/vulnerabilities/{cve_id}"
         headers = {"Authorization": self.api_key}
-        
+
         try:
             resp = requests.get(url, headers=headers)
             resp.raise_for_status()
@@ -40,12 +41,12 @@ class CVEIntegrationTool:
     def list_all_vulnerabilities(self):
         """
         Retrieve information for all vulnerabilities in the CVE database.
-        
+
         :return: The API response as JSON if successful, None otherwise.
         """
         url = f"{self.base_url}/vulnerabilities"
         headers = {"Authorization": self.api_key}
-        
+
         try:
             resp = requests.get(url, headers=headers)
             resp.raise_for_status()
@@ -57,12 +58,12 @@ class CVEIntegrationTool:
     def list_vulnerable_systems(self):
         """
         Retrieve information about systems that are vulnerable to CVEs.
-        
+
         :return: The API response as JSON format if successful, None otherwise.
         """
         url = f"{self.base_url}/vulnerable-system"
         headers = {"Authorization": self.api_key}
-        
+
         try:
             resp = requests.get(url, headers=headers)
             resp.raise_for_status()
@@ -70,6 +71,7 @@ class CVEIntegrationTool:
             raise Exception(f"An error occurred while fetching vulnerable systems: {e}")
         else:
             return resp.json()
+
 
 # Example Usage
 if __name__ == "__main__":
@@ -81,29 +83,25 @@ if __name__ == "__main__":
     all_vulnerabilities_response = cve_integration_tool.list_all_vulnerabilities()
     vulnerable_systems_response = cve_integration_tool.list_vulnerable_systems()
 
-# Testing Code    
+# Testing Code
 if __name__ == "__main__":
     # Mock API responses for testing
-    mock_api_responses = [
-        {"status": 200, "response": ...},
-        None,
-        ...
-    ]
-      
+    mock_api_responses = [{"status": 200, "response": ...}, None, ...]
+
     def test_get_vulnerability(api_method):
         api_method("CVE-123")
-    
+
     def test_list_all_vulnerabilities(api_method):
         all_response = api_method()
         assert isinstance(all_response, dict)
-        
+
     for response in mock_api_responses:
-        try:  
-            test_get_vulnerability(cve_integration_tool.get_vulnerabilities)   
+        try:
+            test_get_vulnerability(cve_integration_tool.get_vulnerabilities)
             print("get_vulnerability test passed.")
         except Exception as e:
-            print(f"Test failed: {e}")      
-         
-        if response is not None:          
+            print(f"Test failed: {e}")
+
+        if response is not None:
             test_list_all_vulnerabilities(cve_integration_tool.list_all_vulnerabilities)
-            print("list_all_vulnerabilities test passed.")   
+            print("list_all_vulnerabilities test passed.")

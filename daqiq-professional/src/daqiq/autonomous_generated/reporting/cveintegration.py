@@ -4,12 +4,14 @@ Source: batch_1_20260503_042559.txt
 Category: reporting
 """
 
-import requests
-from typing import List
 from datetime import date
+from typing import List
+
+import requests
 
 # Constants
 CVE_API_URL = "https://services.nvd.nasa.gov/fetchResults"
+
 
 class CVEIntegration:
     def __init__(self):
@@ -18,7 +20,7 @@ class CVEIntegration:
     def fetch_vulnerability_reports(self, startDate: str, endDate: str) -> List[str]:
         """
         Fetches vulnerability reports from the CVE database based on specified date range.
-        
+
         :param startDate: The start date (inclusive).
         :param endDate: The end date (exclusive).
         :return: A list of CVE IDs as strings.
@@ -28,7 +30,7 @@ class CVEIntegration:
             "action": "getResults",
             "resultsType": "CANVAS",
             "startDate": startDate,
-            "endDate": endDate
+            "endDate": endDate,
         }
 
         response = requests.get(CVE_API_URL, params=params)
@@ -39,7 +41,7 @@ class CVEIntegration:
     def check_cve_id(self, cve_ids: List[str]) -> None:
         """
         Validates that given CVE IDs are meaningful and do not result in errors.
-        
+
         :param cve_ids: A list of CVE IDs to be validated.
         """
 
@@ -48,18 +50,20 @@ class CVEIntegration:
             # to retrieve more information about each ID, which is beyond the scope of a simple example.
             pass
 
+
 def integrate_cvedb():
     vint = CVEIntegration()
     cves = vint.fetch_vulnerability_reports(str(date.today().year - 1), str(date.today().year))
-    
+
     for cve_id in cves:
         if cve_id:
-            try: 
+            try:
                 vint.check_cve_id([cve_id])
             except Exception as e:
                 print(f"An error occurred with CVE ID {cve_id}: {e}")
             else:
                 print(f"CVE {cve_id} is valid and has passed validation.")
+
 
 if __name__ == "__main__":
     integrate_cvedb()

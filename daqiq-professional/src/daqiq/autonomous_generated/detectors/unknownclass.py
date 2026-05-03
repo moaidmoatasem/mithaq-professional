@@ -26,44 +26,48 @@ def find_build_attack_chains(binary_path):
     Find suspicious patterns resembling malware build attack chains in a binary file.
 
     :param str binary_path: Path to the binary file containing code or application logic.
-    
+
     :return: A list of potential malicious patterns found within the binary.
     :rtype: list[str]
     """
     results = []
-    with open(binary_path, 'rb') as binary_file:
+    with open(binary_path, "rb") as binary_file:
         binary_content = binary_file.read()
-        
+
         # Example regex pattern for detection
-        attack_chain_regex_pattern = b'PUSHX\s*(addr|addr2)\s*\%\sinj\('
+        attack_chain_regex_pattern = rb"PUSHX\s*(addr|addr2)\s*\%\sinj\("
 
         # Perform a search and raise an informative warning if a regex match is found
         matches_found = re.finditer(attack_chain_regex_pattern, binary_content)
-        
+
         for _ in matches_found:
             results.append(f"{binary_path}: Sighting potential attack chain pattern.")
             break  # This is just for demonstration; real implementation would have more logic
-            
+
     return results
 
 
 def detect_build_attack_chains_in_dir(directory_to_search):
     """
-    Perform a depth-first search within the given directory and all its subdirectories, 
+    Perform a depth-first search within the given directory and all its subdirectories,
     to find any binary files that may contain attack chain patterns.
 
     :param str directory_to_search: Path to the directory to be searched.
-    
+
     :return: A list of files found in the directory tree which are potentially attack signature carriers.
     :rtype: list[str]
     """
     result_files = []
     for root, dirs, files in os.walk(directory_to_search):
-        target_paths = [os.path.join(root, file) for file in files if file.lower().endswith(('.exe', '.bin'))]
-        
+        target_paths = [
+            os.path.join(root, file) for file in files if file.lower().endswith((".exe", ".bin"))
+        ]
+
         # Filter out any non-binary or non-executable files
-        executable_binary_files = [file_path for file_path in target_paths if os.access(file_path, os.X_OK)]
-        
+        executable_binary_files = [
+            file_path for file_path in target_paths if os.access(file_path, os.X_OK)
+        ]
+
         result_files.extend(executable_binary_files)
     return result_files
 
@@ -72,20 +76,20 @@ def main():
     """
     Main function that scans the current working directory and its subdirectories
     for any binary files that might contain attack chain patterns.
-    
+
     Example of use:
     >>> from build_attack_chain_detector import find_build_attack_chains, detect_build_attack_chains_in_dir
     >>> binary_files = detect_build_attack_chains_in_dir(os.getcwd())
     >>> find_build_attack_chains(binary_files[0])  # This path would need to be actual file or directory in the path you gave above.
     """
-    
-    if not os.path.isabs(os.getenv('SRC_PATH')):
+
+    if not os.path.isabs(os.getenv("SRC_PATH")):
         raise ValueError("SRC_PATH must be an absolute path.")
-    
-    results = detect_build_attack_chains_in_dir(os.environ['SRC_PATH'])
+
+    results = detect_build_attack_chains_in_dir(os.environ["SRC_PATH"])
     for result_file_path in results:
         find_build_attack_chains(result_file_path)
-        
+
 
 if __name__ == "__main__":
     main()

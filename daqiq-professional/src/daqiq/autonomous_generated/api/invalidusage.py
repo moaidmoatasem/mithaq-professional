@@ -4,8 +4,9 @@ Source: batch_1_20260503_045104.txt
 Category: api
 """
 
-from flask import Flask, jsonify, request, abort
 import logging
+
+from flask import Flask, abort, jsonify, request
 
 app = Flask(__name__)
 logging.basicConfig(level=logging.INFO)
@@ -14,8 +15,9 @@ logger = logging.getLogger(__name__)
 # Dummy data for example purposes (in production you would use actual API responses or database)
 scan_results = [
     {"asset": "webserver-1", "status": "vulnerable"},
-    {"asset": "database-2", "status": "not_vulnerable"}
+    {"asset": "database-2", "status": "not_vulnerable"},
 ]
+
 
 class InvalidUsage(Exception):
     status_code = 400
@@ -30,7 +32,7 @@ def handle_invalid_usage(error):
     return jsonify(error.to_dict()), error.status_code
 
 
-@app.route('/api/scans', methods=['POST'])
+@app.route("/api/scans", methods=["POST"])
 @handle_invalid_usage
 def scan():
     """
@@ -43,25 +45,30 @@ def scan():
     """
     try:
         # Validate input data here (e.g., required fields, format)
-        device_id = request.json.get('device_id', None)
-        service_type = request.json.get('service_type', None)
+        device_id = request.json.get("device_id", None)
+        service_type = request.json.get("service_type", None)
 
         if not device_id or not service_type:
-            raise InvalidUsage("Device ID and Service Type are required", response="invalid_request")
+            raise InvalidUsage(
+                "Device ID and Service Type are required", response="invalid_request"
+            )
 
         # Example of validating data
         allowed_services = ["webserver", "database"]
         if service_type not in allowed_services:
             raise InvalidUsage(f"Unknown service type: {service_type}")
 
-        scan_result = {"asset": f"{device_id}_{service_type}", "status": "vulnerable"}  # Dummy result
+        scan_result = {
+            "asset": f"{device_id}_{service_type}",
+            "status": "vulnerable",
+        }  # Dummy result
         return jsonify(scan_result), 201
     except Exception as e:
         logger.exception(e)
-        abort(500, 'Internal Server Error')
+        abort(500, "Internal Server Error")
 
 
-@app.route('/api/scans', methods=['GET'])
+@app.route("/api/scans", methods=["GET"])
 def scan_list():
     """
     List all scans
@@ -76,7 +83,7 @@ def scan_list():
     return jsonify(scan_results)
 
 
-@app.route('/api/scans/<scan_id>', methods=['GET'])
+@app.route("/api/scans/<scan_id>", methods=["GET"])
 def get_scan_details(scan_id):
     """
     Get details of a specific scan.
@@ -90,13 +97,20 @@ def get_scan_details(scan_id):
     logger.info(f"Fetching details for scan ID: {scan_id}")
 
     # Example of filtering and returning data based on input parameters (in production use a database)
-    found = next((item for item in scan_results if item['asset'] == f'{scan_id}_{request.args.get("service_type", "")}'), None)
+    found = next(
+        (
+            item
+            for item in scan_results
+            if item["asset"] == f'{scan_id}_{request.args.get("service_type", "")}'
+        ),
+        None,
+    )
 
     if not found:
-        return jsonify({'error': 'Scan not found'}), 404
+        return jsonify({"error": "Scan not found"}), 404
 
     return jsonify(found)
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     app.run(debug=True)

@@ -7,6 +7,7 @@ Category: ml
 import os
 from datetime import datetime
 
+
 class DashboardService:
     def __init__(self):
         self.current_date = None
@@ -14,15 +15,17 @@ class DashboardService:
     def generate_report(self, scanned_entity):
         """
         Generate an HTML report for the provided scanned entity.
-        
+
         :param scanned_entity: A string representing some business object (e.g., 'network-traffic-2023-11-15')
         :return: None
         """
-        self.current_date = datetime.now().strftime('%Y-%m-%d')
+        self.current_date = datetime.now().strftime("%Y-%m-%d")
 
-        report_path = os.path.join('/var/www/html/dashboard', f'{scanned_entity}-{self.current_date}.html')
-        
-        with open(report_path, 'w') as report_file:
+        report_path = os.path.join(
+            "/var/www/html/dashboard", f"{scanned_entity}-{self.current_date}.html"
+        )
+
+        with open(report_path, "w") as report_file:
             # Basic HTML structure
             report_text = f"""
 <!DOCTYPE html>
@@ -39,20 +42,21 @@ class DashboardService:
 </html>
             """
             report_file.write(report_text)
-        
-        return f'Report saved at {report_path}'
+
+        return f"Report saved at {report_path}"
+
 
 # Example usage
 if __name__ == "__main__":
     dashboard_service = DashboardService()
-    
+
     # Generate a test report for 'network-traffic'
-    report1 = dashboard_service.generate_report('network-traffic')
+    report1 = dashboard_service.generate_report("network-traffic")
     print(f"Report Generated 1: {report1}")
-    
+
     # Attempt to generate a report with an invalid scanned entity
     try:
-        report2 = dashboard_service.generate_report('invalid-entity')
+        report2 = dashboard_service.generate_report("invalid-entity")
         print(report2)
     except ValueError as e:
         print(f"Error during report generation: {e}")
@@ -60,35 +64,39 @@ if __name__ == "__main__":
 # Test Function for generating valid and invalid reports
 import unittest
 
+
 class DashboardServiceTests(unittest.TestCase):
     def test_generate_valid_report(self):
         """Test case to ensure the service can generate a valid HTML file."""
         dashboard_service = DashboardService()
-        
-        scanned_entity = 'valid-entity-2023-11-16'
-        report_path = os.path.join('/var/www/html/dashboard', f'{scanned_entity}-{dashboard_service.current_date}.html')
-        
+
+        scanned_entity = "valid-entity-2023-11-16"
+        report_path = os.path.join(
+            "/var/www/html/dashboard", f"{scanned_entity}-{dashboard_service.current_date}.html"
+        )
+
         # Create an empty text file to simulate the existing directory structure
-        open(report_path, 'w').close()
-        
+        open(report_path, "w").close()
+
         try:
             report_content = dashboard_service.generate_report(scanned_entity)
-            self.assertIn(f'Report saved at {report_path}', report_content)
-            self.assertIn('valid-entity-2023-11-16', report_content)
+            self.assertIn(f"Report saved at {report_path}", report_content)
+            self.assertIn("valid-entity-2023-11-16", report_content)
         except Exception as e:
-            self.fail(f'An exception was raised: {e}')
-        
+            self.fail(f"An exception was raised: {e}")
+
     def test_generate_invalid_report(self):
         """Test case to ensure error handling and appropriate exception propagation."""
         dashboard_service = DashboardService()
-        scanned_entity = 'non-existent-entity'
+        scanned_entity = "non-existent-entity"
 
         with self.assertRaises(ValueError) as context:
             report_content = dashboard_service.generate_report(scanned_entity)
-        
+
         # Check the value error message from the generate function
         expected_exception_message = f"Invalid scanned entity '{scanned_entity}'."
         self.assertIn(expected_exception_message, str(context.exception))
+
 
 if __name__ == "__main__":
     unittest.main()

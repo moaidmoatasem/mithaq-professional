@@ -6,11 +6,12 @@ Category: ml
 
 from dataclasses import dataclass
 
+
 @dataclass
 class DataFetcher:
     """
     This class is responsible for fetching and validating data for the HTML report.
-    
+
     It ensures that all required fields are present before returning the data.
     """
 
@@ -19,25 +20,34 @@ class DataFetcher:
         # In practice, this would be replaced with actual logic to fetch data
         if source not in ["local_db", "remote_api"]:
             raise ValueError("Unsupported source")
-        
-        fetched_data = {"report_type": "example_report",
-                         "data_values": 123.45, 
-                         "datetime": None} # Placeholder for datetime
+
+        fetched_data = {
+            "report_type": "example_report",
+            "data_values": 123.45,
+            "datetime": None,
+        }  # Placeholder for datetime
         return fetched_data
+
 
 @dataclass
 class DashboardGenerator:
     """
     This class is responsible for generating an HTML dashboard report based on provided data.
-    
+
     It accepts a dictionary of data and validates it before rendering the final report.
     """
 
     def __init__(self, data: dict):
         self.data = data
-        if not all(self.data.keys() & {'report_type', 'data_values'} | {k for k in DashboardGenerator.default_data}.keys()):
-            raise ValueError("Data is missing required fields. Expected: %s" % list(set(DashboardGenerator.default_data.keys()).intersection(data.keys())))
-        
+        if not all(
+            self.data.keys() & {"report_type", "data_values"}
+            | {k for k in DashboardGenerator.default_data}.keys()
+        ):
+            raise ValueError(
+                "Data is missing required fields. Expected: %s"
+                % list(set(DashboardGenerator.default_data.keys()).intersection(data.keys()))
+            )
+
     def render_report(self) -> str:
         """Generates the HTML report"""
         html_template = """
@@ -53,16 +63,16 @@ class DashboardGenerator:
         </body>
         </html>
         """
-        
+
         rendered_html = html_template
         for field, value in self.data.items():
             rendered_html = rendered_html.replace("{{" + field + "}}", str(value))
-            
+
         return rendered_html
 
-    default_data = {"report_type": "", 
-                    "data_values": ""}
-    
+    default_data = {"report_type": "", "data_values": ""}
+
+
 class DashboardManager:
     def generate_dashboard(self):
         """
@@ -70,34 +80,37 @@ class DashboardManager:
         It handles the creation of an instance of DataFetcher, generating a report using DashboardGenerator,
         and storing it in a file for later usage.
         """
-        
+
         try:
             fetcher = DataFetcher()
             fetched_data = fetcher.fetch_data("local_db")
-            
+
             generator = DashboardGenerator(fetched_data)
             rendered_html = generator.render_report()
 
             # In production, this line would save the generated HTML to disk
             with open("dashboard_report.html", "w") as report_file:
                 report_file.write(rendered_html)
-                
+
             return rendered_html
-                
-        except ValueError as ve: 
-            import sys  
+
+        except ValueError as ve:
+            import sys
+
             print(f"An error occurred: {ve}", file=sys.stderr)
             return None
+
 
 def main():
     """
     Entry point for the application. This function showcases how to use all above classes.
-    
+
     Mainly used for testing example usage, but in production scenarios this will be invoked by a more complex architecture or service.
     """
 
     manager = DashboardManager()
     report = manager.generate_dashboard()
+
 
 if __name__ == "__main__":
     main()

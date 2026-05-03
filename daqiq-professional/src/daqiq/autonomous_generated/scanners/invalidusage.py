@@ -5,7 +5,6 @@ Category: scanners
 """
 
 from flask import Flask, jsonify, request
-from werkzeug.exceptions import BadRequestKeyError
 
 app = Flask(__name__)
 
@@ -13,17 +12,20 @@ app = Flask(__name__)
 scanner_data = {
     "id": 1,
     "name": "Network Scanner",
-    "description": "Scans networks and systems for security vulnerabilities"
+    "description": "Scans networks and systems for security vulnerabilities",
 }
+
 
 class InvalidUsage(Exception):
     status_code = 400
+
 
 @app.errorhandler(InvalidUsage)
 def invalid_usage(error):
     return jsonify(error.to_dict()), error.status_code
 
-@app.route('/scan', methods=['POST'])
+
+@app.route("/scan", methods=["POST"])
 @docstring
 def perform_scan():
     """
@@ -33,31 +35,38 @@ def perform_scan():
         The current state of the scan and any errors that may have occurred.
     """
 
-    if 'path' not in request.json:
-        raise InvalidUsage("Path parameter is missing", payload={"message": "The path parameter is required"}, status_code=400)
+    if "path" not in request.json:
+        raise InvalidUsage(
+            "Path parameter is missing",
+            payload={"message": "The path parameter is required"},
+            status_code=400,
+        )
 
     try:
-        metadata = {'result': scanner_data, 'status': 'Active'}
+        metadata = {"result": scanner_data, "status": "Active"}
         return jsonify(metadata)
     except Exception as e:
         return jsonify(error=f"An error occurred: {str(e)}"), 500
 
-@app.route('/health', methods=['GET'])
+
+@app.route("/health", methods=["GET"])
 def health_check():
     """
     Perform a health check of the API.
 
     Returns a simple success response if the call is successful.
-    
+
     Response:
         A JSON object containing a 'status' and a 'message'.
     """
 
-    return jsonify({'status': 'OK', 'message': 'API is healthy'}), 200
+    return jsonify({"status": "OK", "message": "API is healthy"}), 200
+
 
 # Example usage
 if __name__ == "__main__":
     app.run()
+
 
 def docstring():
     """
@@ -67,7 +76,4 @@ def docstring():
         strings: A list of documentation strings.
     """
 
-    return [
-        perform_scan.__doc__,
-        health_check.__doc__
-    ]
+    return [perform_scan.__doc__, health_check.__doc__]

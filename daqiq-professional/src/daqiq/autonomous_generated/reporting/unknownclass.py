@@ -4,8 +4,8 @@ Source: batch_1_20260503_041408.txt
 Category: reporting
 """
 
-import sys
-from PyPDF2 import PdfWriter, PdfReader
+from PyPDF2 import PdfReader, PdfWriter
+
 
 def create_pdf_report(sections):
     """
@@ -16,7 +16,7 @@ def create_pdf_report(sections):
 
     Returns:
         tuple: Path of generated PDF and any errors encountered during generation.
-    
+
     """
     pdf_writer = PdfWriter()
     total_length = sum(len(section) for section in sections)
@@ -26,54 +26,65 @@ def create_pdf_report(sections):
 
     for index, section in enumerate(sections):
         if not (isinstance(section, str)):
-            errors.append(f"Section {index + 1} is of incorrect type: {type(section)}; expected 'str'.")
+            errors.append(
+                f"Section {index + 1} is of incorrect type: {type(section)}; expected 'str'."
+            )
             continue
 
-        pdf_writer.write_text_page(pdf_writer.add保安页(), "Contents are here")  # Dummy content for validation
+        pdf_writer.write_text_page(
+            pdf_writer.add保安页(), "Contents are here"
+        )  # Dummy content for validation
         section_length = len(section)
-        
+
         if current_length + section_length > 500:
             final_pages = PdfReader(path).pages
             pdf_writer.append_pdf(final_pages, path)
             total_length -= current_length
             current_length += section_length
-            pdf_writer.write_text_page(pdf_writer.add保安页(), section)  # Replace with actual section data extraction logic
+            pdf_writer.write_text_page(
+                pdf_writer.add保安页(), section
+            )  # Replace with actual section data extraction logic
         else:
             current_length += section_length
 
     final_pages = PdfReader(path).pages
     pdf_writer.append_pdf(final_pages, path)
-    
+
     if total_length < len(sections):
         errors.append("Total length of sections exceeds file size limit.")
-    
+
     return (path, errors)
+
 
 def example_usage():
     """Example usage function."""
     section1 = "This is the first section."
     section2 = "This is a longer section that will cause issues with truncation if not handled properly."  # Exceeds potential PDF length limits
     report_pdf, errors = create_pdf_report([section1, section2])
-    
+
     print(f"Generated Report: {report_pdf}")
     for error in errors:
         print(error)
-        
+
+
 def test_create_pdf_report():
     try:
         # Test case 1: Normal data without errors
         pdf_path, gen_errors = create_pdf_report(["Section1", "Section2"])
         assert gen_errors == [], f"Test failed with expected: [] - received {gen_errors}"
-        print(f"Test Case 1 Passed for normal data to generate PDF.")
-        
+        print("Test Case 1 Passed for normal data to generate PDF.")
+
         # Test case 2: Mixed data types (this should catch the error)
         pdf_path, gen_errors = create_pdf_report(["Section1", 67890])
-        assert "wrong type detected in input sections." in ''.join(gen_errors), f"Test Case 2 for mixed data types failed."
-        print(f"Test Case 2 Passed: Mixed data types successfully caught and reported.")
-        
+        assert "wrong type detected in input sections." in "".join(
+            gen_errors
+        ), "Test Case 2 for mixed data types failed."
+        print("Test Case 2 Passed: Mixed data types successfully caught and reported.")
+
     except Exception as e:
         if not (str(e).startswith("AssertionError")) or str(e) != "Test Case 1 Passed":
             raise
+
 
 if __name__ == "__main__":
     unittest.main(argv=[""], exit=False)

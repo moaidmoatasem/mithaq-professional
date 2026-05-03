@@ -21,60 +21,61 @@ Usage example (runnable via 'from create_html_dashboard_reports import *'):
 import json
 import os
 
+
 def read_config(config_file):
     """Simulates reading configuration settings."""
     with open(config_file) as file:
         config_data = json.load(file)
     return config_data
 
+
 class HTMLDashboardReportGenerator:
-    
-    def __init__(self, config_file='config.json'):
+    def __init__(self, config_file="config.json"):
         self.config_data = read_config(config_file)
-        self.dashboard_title = self.config_data.get('dashboard_title', '')
+        self.dashboard_title = self.config_data.get("dashboard_title", "")
         self.errors = []
 
     def generate_report(self):
         """
-        Generates the HTML dashboard report. 
+        Generates the HTML dashboard report.
         This function is designed to be called in the main logic of an application.
-        
+
         :return: str - The rendered HTML content for the dashboard.
         :raises ValueError: If required data sources are not accessible or errors occur during operations.
 
         """
         try:
             env_errors = []
-            
+
             # Simulate calling the feature/scanner
             result = self._call_feature_scanner()
-            if not result['success']:
+            if not result["success"]:
                 env_errors.append(f'Scanner failed on {self.config_data["feature"]}')
-                
+
             # Simulatenous errors handling
-            error_msg1 = f'Error 1: The Feature "{result["name"]}" is currently down.' 
+            error_msg1 = f'Error 1: The Feature "{result["name"]}" is currently down.'
             self.errors.append(error_msg1)
-            
+
             # Example of adding more checks
-            if self.config_data['another_check']:
+            if self.config_data["another_check"]:
                 result, another_errs = self._perform_another_process()
                 env_errors.extend(another_errs)
-                
+
         except Exception as e:
-            error_msg = f'An unexpected Error Occurred: {str(e)}'
+            error_msg = f"An unexpected Error Occurred: {str(e)}"
             self.errors.append(error_msg)
             self.handle_unexpected_error()
 
         # Collect and document any errors
-        log = f"Environment Errors - List of issues to be addressed in the next check-in.\n"
-        log += "\n".join(env_errors)  
-            
+        log = "Environment Errors - List of issues to be addressed in the next check-in.\n"
+        log += "\n".join(env_errors)
+
         return self._create_html_dashboard(self.dashboard_title, result)
 
     def handle_unexpected_error(self):
         # Handle unanticipated issues here. May also extend environmental checks.
         raise ValueError("An unexpected error happened during processing.")
-        
+
     def _call_feature_scanner(self):
         """
         Placeholder method to call the feature/scanner logic with error handling.
@@ -86,23 +87,26 @@ class HTMLDashboardReportGenerator:
         raise NotImplementedError("Subclasses should implement this!")
 
     def _create_html_dashboard(self, title, data):
-        """ Generates HTML content for reporting purposes."""
-        template_path = os.path.join(os.getcwd(), "themes", f'{self.config_data["dashboard_template"]}')
-        
-        with open(template_path, 'r') as file:
+        """Generates HTML content for reporting purposes."""
+        template_path = os.path.join(
+            os.getcwd(), "themes", f'{self.config_data["dashboard_template"]}'
+        )
+
+        with open(template_path, "r") as file:
             template_content = file.read()
-            
+
         html_content = template_content.format(title=title, scan_result=data)
-        
+
         return html_content
-        
+
     def _perform_another_process(self):
         # Simulate a more data-intensive scanner logic
         pass  # Placeholder implementation. Replace with actual logic.
-        
+
+
 if __name__ == "__main__":
-    config_file='./config.json'
+    config_file = "./config.json"
     generator = HTMLDashboardReportGenerator(config_file)
     report = generator.generate_report()
-    
-    print(report)  
+
+    print(report)

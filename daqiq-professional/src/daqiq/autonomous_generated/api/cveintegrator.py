@@ -28,24 +28,25 @@ if __name__ == "__main__":
 
 import requests
 
+
 class CVEIntegrator:
     def __init__(self):
         self.api_url = "https://api.cvedb.com/v1"
-    
+
     def fetch_cves(self, api_key):
         """
         Fetches a list of valid and/or important CVEs.
 
         Args:
             api_key (str): The API key for the CVE database service.
-        
+
         Returns:
             dict: Dictionary containing information about the fetched CVEs.
         """
         headers = {"Authorization": f"Bearer {api_key}"}
         response = requests.get(f"{self.api_url}/vulnerabilities", headers=headers)
         return response.json()
-    
+
     def check_product_vulnerability(self, product_id, api_key):
         """
         Checks if a specific product is vulnerable by querying the CVE database.
@@ -62,11 +63,12 @@ class CVEIntegrator:
         return response.json()
 
     def main(self, api_key):
-        """ Wrapper function to fetch and use the fetched CVE data. Example of API usage."""
+        """Wrapper function to fetch and use the fetched CVE data. Example of API usage."""
         cve_list = self.fetch_cves(api_key)
         print("List of all Valid/Important CVEs:")
         for cve in cve_list["vulnerabilities"]:
             print(cve)
+
 
 def _main():
     # Replace with valid test or real API key.
@@ -75,13 +77,16 @@ def _main():
     # Call the integration
     integrator = CVEIntegrator()
     vulnerability_data = integrator.main(api_key)
-    
+
     # Here, you would add your logic to use 'vulnerability_data' for further processing
-    print(f"Checking Product Vulnerabilities: /your/vulnerable_service/")
+    print("Checking Product Vulnerabilities: /your/vulnerable_service/")
     product_integrater = CVEIntegrator()
-    vulnerabilities_for_product = product_integrater.check_product_vulnerability("/your/vulnerable_service/", api_key)
-    
+    vulnerabilities_for_product = product_integrater.check_product_vulnerability(
+        "/your/vulnerable_service/", api_key
+    )
+
     return vulnerabilities_for_product
+
 
 if __name__ == "__main__":
     _main()

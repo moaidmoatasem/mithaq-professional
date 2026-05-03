@@ -6,19 +6,20 @@ Category: ml
 
 import os
 
+
 class HTMLDashboard:
     """
     This class generates an HTML dashboard with critical security metrics and alerts.
     It includes error handling to ensure robustness in production environments.
-    
+
     Methods:
         - generate_report: Generates the HTML report based on provided data.
         - create_css_style: Provides CSS style definitions for the dashboard.
-        
+
     Attributes:
         - data: A dictionary containing key performance indicators (KPIs).
     """
-    
+
     def __init__(self, data):
         """
         Initializes the class with security data and sets up HTML template.
@@ -27,12 +28,12 @@ class HTMLDashboard:
             data (dict): A dictionary containing security KPI information.
         """
         self.data = data
-    
+
     @staticmethod
     def create_css_style():
-        """ 
+        """
         Creates CSS style definitions for dashboard elements.
-        
+
         Returns:
             str: CSS string defining the styles.
         """
@@ -41,16 +42,16 @@ class HTMLDashboard:
             #dashboard-header {background-color: #f2f2f2; padding: 10px}
             .security-indicator {border: 1px solid #096a8c; padding: 15px; margin: 5px}
         """
-    
+
     def generate_report(self):
-        """ 
+        """
         Generates the HTML report with security insights.
 
         Returns:
             str: The generated HTML content.
         """
         css_style = self.create_css_style()
-        
+
         html_content = f"""
             <html>
                 <head>
@@ -72,26 +73,29 @@ class HTMLDashboard:
                 </body>
             </html>
         """
-        
+
         return html_content
+
 
 def generate_table(data):
     """
     Generates an HTML table based on the provided security data.
-    
+
     Args:
         data (dict): A dictionary containing security KPIs.
 
     Returns:
         str: The generated table content.
     """
-    
+
     rows = []
     for index, kpi in enumerate(data.items(), start=1):
-        row = f'<tr><th>Indicator {index}</th><td>{kpi[0]}, Value: {kpi[1]}</td></tr>'
+        row = f"<tr><th>Indicator {index}</th><td>{kpi[0]}, Value: {kpi[1]}</td></tr>"
         rows.append(row)
-        
-    table_html = '<table border="1" cellpadding="2" cellspacing="0">\n' + ''.join(rows) + '</table>\n'
+
+    table_html = (
+        '<table border="1" cellpadding="2" cellspacing="0">\n' + "".join(rows) + "</table>\n"
+    )
     return table_html
 
 
@@ -100,24 +104,27 @@ def example_usage():
     Example usage of the HTMLDashboard class, providing data and ensuring
     proper error handling in a production environment.
     """
-    
+
     try:
         # Validate input data
         validate_data = lambda x: isinstance(x, dict)
-        if not validate_data(os.getenv('SECURITY_DATA')):
-            raise ValueError("Security Data must be provided as an environment variable or dictionary.")
-        
-        env_security_data = os.getenv('SECURITY_DATA')
+        if not validate_data(os.getenv("SECURITY_DATA")):
+            raise ValueError(
+                "Security Data must be provided as an environment variable or dictionary."
+            )
+
+        env_security_data = os.getenv("SECURITY_DATA")
         if not env_security_data:
             # Fallback to example data in case of error
-            env_security_data = {'version': '1.0', 'generation_date': '2023-04-05'}
-        
+            env_security_data = {"version": "1.0", "generation_date": "2023-04-05"}
+
         dashboard = HTMLDashboard(json.loads(env_security_data))
-    
+
         print(dashboard.generate_report())
     except Exception as e:
         # Handle possible errors like missing data or invalid input
         print(f"Error: {str(e)}")
 
-if __name__ == '__main__':
+
+if __name__ == "__main__":
     example_usage()

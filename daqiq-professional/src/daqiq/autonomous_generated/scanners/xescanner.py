@@ -27,16 +27,17 @@ python xxe_scanner.py --file 'path_to_single_xml_file.xml'
 import os
 import xml.etree.ElementTree as ET
 
+
 class XeScanner:
     def __init__(self, directory=None, xml_file=None):
         self._xml_files = []
-        
+
         if directory and os.path.exists(directory) and os.path.isdir(directory):
             for root, _, files in os.walk(directory):
                 for file_name in files:
                     abs_path = os.path.join(root, file_name)
                     self._xml_files.append(abs_path)
-        else: 
+        else:
             if xml_file is not None:
                 self._xml_files.append(xml_file)
 
@@ -48,37 +49,39 @@ class XeScanner:
         except Exception as e:
             # Handle different types of exceptions gracefully.
             print(f"An error occurred during XML parsing for {xml_path}: {e}")
-    
+
     def scan(self):
         results = {}
-        
+
         for file in self._xml_files:
             found_xxe = self._scan_xml(file)
             if found_xe:
                 results[file] = "XXE detected"
-                
+
         return results
+
 
 def main():
     import argparse
-    parser = argparse.ArgumentParser(
-        description='XSS Scanner: Check XML External Entities'
-    )
+
+    parser = argparse.ArgumentParser(description="XSS Scanner: Check XML External Entities")
     group = parser.add_mutually_exclusive_group(required=True)
-    group.add_argument('--file', help="Path to a single xml file")
-    group.add_argument('--directory', type=str, help="Directory with multiple xml files")
+    group.add_argument("--file", help="Path to a single xml file")
+    group.add_argument("--directory", type=str, help="Directory with multiple xml files")
 
     args = parser.parse_args()
 
     scanner = XeScanner(args.file, args.directory)
-    
+
     if not isinstance(scanner._xml_files, list):
         results = scanner.scan()
         for path in results:
             print(f"{path}: XXE detected")
     else:
-        print("List of XML files provided as directory input. Review the scan results by running with file option.")
+        print(
+            "List of XML files provided as directory input. Review the scan results by running with file option."
+        )
+
 
 if __name__ == "__main__":
     main()
-

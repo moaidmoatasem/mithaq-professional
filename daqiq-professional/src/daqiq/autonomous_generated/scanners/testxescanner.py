@@ -7,15 +7,22 @@ Category: scanners
 # Run basic tests to ensure code works correctly
 import unittest
 
+
 class TestXeScanner(unittest.TestCase):
     def setUp(self):
-        self.scanner = XeScanner(directory="tests/data") # Assume you have XML files locally available in a test folder.
-        
+        self.scanner = XeScanner(
+            directory="tests/data"
+        )  # Assume you have XML files locally available in a test folder.
+
     def test_scan_results(self):
-        expected_paths = ['file1.xml', 'file2.xml']  # Paths of XML that should raise potential threat based on known XXE patterns
+        expected_paths = [
+            "file1.xml",
+            "file2.xml",
+        ]  # Paths of XML that should raise potential threat based on known XXE patterns
         found_xxe_scans = self.scanner.scan()
         for file, result in found_xxe_scans.items():
             self.assertIn(file, expected_paths)
 
-if __name__ == '__main__':
+
+if __name__ == "__main__":
     unittest.main(exit=False)

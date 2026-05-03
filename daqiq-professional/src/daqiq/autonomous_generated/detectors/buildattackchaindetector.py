@@ -12,71 +12,72 @@ It primarily aims to identify malicious behavior that might be inserted into a s
 such as adding unauthorized backdoors or trojans.
 """
 
-import os
 import logging
+import os
 from datetime import datetime
 
-logging.basicConfig(level=logging.INFO, format='%(asctime)s %(levelname)s: %(message)s')
+logging.basicConfig(level=logging.INFO, format="%(asctime)s %(levelname)s: %(message)s")
+
 
 class BuildAttackChainDetector:
     def __init__(self):
         self.detected_build_issues = []
-    
+
     def _log(self, message):
         logging.info(message)
-    
+
     def detect_malware_included_files(self, build_directory: str) -> None:
         """
         Checks for the inclusion of binary files in the build directory.
-        
+
         :param build_directory: The path to the build directory containing artifacts such as executables
         :return: None
         """
         if not os.path.isdir(build_directory):
             self._log(f"Build directory {build_directory} does not exist, skipping malware checks.")
             return
-        
+
         for root, _, files in os.walk(build_directory):
             for file in files:
                 file_path = os.path.join(root, file)
                 abs_file_path = os.path.abspath(file_path)
-                
+
                 # This can be further customized based on the types of artifacts that are considered "normal".
-                if any(ext in file or ext in abs_file_path for ext in ('.exe', '.dll')):
+                if any(ext in file or ext in abs_file_path for ext in (".exe", ".dll")):
                     self.detected_build_issues.append(abs_file_path)
                     self._log(f"Detected binary artifact: {abs_file_path}")
-    
+
     def analyze_malicious_files(self, build_directory: str) -> None:
         """
         Analyzes files in the build directory for suspicious or malicious file attributes.
-        
+
         :param build_directory: The path to the build directory containing artifacts
         :return: None
         """
         if not self.detected_build_issues:
             return
-        
+
         self._log("Analyzing known problematic binary files.")
-        
+
         issues = []
         now = datetime.now()
         for issue in self.detected_build_issues:
             check_result = {
-                'timestamp': now.isoformat(),
-                'path': issue,
+                "timestamp": now.isoformat(),
+                "path": issue,
                 # Assuming file size and creation date are indicators of malicious activity, this could be customized.
-                'size_kb': os.path.getsize(issue) / 1024,
-                'created': datetime.fromtimestamp(os.path.getctime(issue)),
+                "size_kb": os.path.getsize(issue) / 1024,
+                "created": datetime.fromtimestamp(os.path.getctime(issue)),
             }
             issues.append(check_result)
-        
+
         if not issues:
             self._log("No suspicious or unknown binary files found.")
-    
+
     def report_issues(self, build_directory: str) -> None:
         """
         Report the findings to an external security tool for further inspection.
-        
+
         :param build_directory: The path to the build directory we examined
         :return: This function will return if there are any "detected_build_issues"
         """
@@ -84,26 +85,27 @@ class BuildAttackChainDetector:
         if self.detected_build_issues:
             for issue in self.detected_build_issues:
                 result_entry = {
-                    'file_path': issue,
-                    'timestamp': datetime.now().isoformat(),
+                    "file_path": issue,
+                    "timestamp": datetime.now().isoformat(),
                 }
                 results.append(result_entry)
-        
+
         return results
 
-if __name__ == '__main__':
-    build_directory = '/path/to/build'  # Path to the actual build directory
+
+if __name__ == "__main__":
+    build_directory = "/path/to/build"  # Path to the actual build directory
     detector = BuildAttackChainDetector()
-    
+
     if os.path.exists(build_directory):
         try:
             detector.detect_malware_included_files(build_directory)
             detector.analyze_malicious_files(build_directory)
             results = detector.report_issues(build_directory)
-            
+
             for issue in results:
                 print(issue)
-                
+
         except Exception as e:
             print(f"An unexpected error occurred: {e}")
     else:

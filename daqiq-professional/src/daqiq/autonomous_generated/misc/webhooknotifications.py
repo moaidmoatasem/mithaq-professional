@@ -6,11 +6,12 @@ Category: misc
 
 import requests
 
+
 class WebhookNotifications:
     """
-    A class to send webhooks to notify about events using webhook mechanism. 
+    A class to send webhooks to notify about events using webhook mechanism.
     Raises an exception if the request fails.
-    
+
     Attributes:
         url (str): The URL of the target endpoint for the webhook notifications.
             It should be a valid URL which accepts POST or JSON requests.
@@ -22,7 +23,7 @@ class WebhookNotifications:
 
         Args:
             url (str): The target webhook endpoint URL.
-        
+
         Raises:
             ValueError: If the provided URL is not in the correct format.
         """
@@ -50,7 +51,7 @@ class WebhookNotifications:
 
         Args:
             event_data (dict): The data to be sent in the body of the POST request.
-        
+
         Returns:
             bool: True if the send operation is successful, False otherwise and raises an exception on failure.
         """
@@ -58,19 +59,22 @@ class WebhookNotifications:
             result = requests.post(self.url, json=event_data)
             return 200 <= result.status_code < 300
         except Exception as e:
-            print(f"Warning: There was a problem with the HTTP request to {self.url}. Error details: {str(e)}")
+            print(
+                f"Warning: There was a problem with the HTTP request to {self.url}. Error details: {str(e)}"
+            )
             raise
+
 
 def example_usage():
     """
     Example usage of WebhookNotifications.
-    
+
     Returns:
         None
     """
     url = "https://example.com/webhooks"
     wn = WebhookNotifications(url)
-    
+
     # Correct usage with valid event data dictionary
     try:
         if wn.send_notification({"key": "value"}):
@@ -80,16 +84,18 @@ def example_usage():
     except Exception as e:
         print(f"Unexpected error: {str(e)}")
 
+
 def check_tests():
     """
     Placeholder for unit tests. Production-ready code does not usually include such tests,
     but for the sake of this task, it will be included in a simplistic form.
-    
+
     Returns:
         None
     """
     # Simple test setup and verification (mock function usage if needed with assertions)
     assert "200" in example_usage()
-    
+
+
 if __name__ == "__main__":
     example_usage()

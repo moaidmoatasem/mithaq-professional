@@ -7,73 +7,76 @@ Category: misc
 # Importing necessary libraries
 import time
 
+
 class SmartRetry:
     """
     A class to implement smart retry logic.
-    
+
     Attributes:
         max_attempts: Maximum number of times to attempt a task when it fails.
         delay_between_attempts: The amount of time in seconds to wait between subsequent attempts.
         task_func: Function to execute with possible failure scenario.
-        
+
     Methods:
         run_task: Executes the task and handles retries appropriately.
     """
-    
+
     def __init__(self, max_attempts=3, delay_between_attempts=5):
         self.max_attempts = max_attempts
         self.delay_between_attempts = delay_between_attempts
-        
+
     def _run_task(self, func):
-        '''
+        """
         Function to execute with retry logic.
 
         Args:
             func: The function that will be retried if it fails.
-            
+
         Returns:
             result of the executed task.
-                
+
         Raises:
             Exception: If the number of attempts exceeds max_attempts or there is no success after all attempts.
-        '''
+        """
         attempts = 0
         while attempts < self.max_attempts:
-            attempts += 1  
+            attempts += 1
             try:
                 return func()
-            except Exception as e:
+            except Exception:
                 print(f"Attempt {attempts} failed. Retrying in: {self.delay_between_attempts}s")
                 time.sleep(self.delay_between_attempts)
-        
+
         raise RuntimeError(f"All retries failed after {self.max_attempts} attempts.")
-    
+
     def run_task_with_retry(self, task_func):
         """
-        Attempts to run the passed function `task_func`. If `task_func` raises an exception, 
-        this method will retry up to a maximum number of times specified by max_attempts.  
-        
+        Attempts to run the passed function `task_func`. If `task_func` raises an exception,
+        this method will retry up to a maximum number of times specified by max_attempts.
+
         Args:
             task_func: A reference or callable instance (`function`, method, lambda expression, etc.) that is executed on each run attempt.
-            
+
         Returns:
             The result from the function after its successful execution (or from any retries).
-            
+
         Raises:
             Exception: If there are no retries left after attempting to execute the `task_func`.
         """
         return self._run_task(task_func)
+
 
 # Example usage
 if __name__ == "__main__":
     # Here's how you would use this:
     def failing_function():
         import random
+
         if random.randint(0, 1) == 1:
             raise Exception("Simulated failure")
-        else: 
+        else:
             return "Success"
 
     retryable_tasks = SmartRetry()
-    
+
     print(retryable_tasks.run_task_with_retry(failing_function))

@@ -6,17 +6,18 @@ Category: misc
 
 import requests
 
+
 class WebhookNotification:
     """
     This class manages sending webhook notifications with error handling and docstrings.
-    
+
     Example Usage:
     >>> notification = WebhookNotification("https://webhook.site")
     >>> notification.notify("This is a test message.")
-    
+
     Attributes:
         webhook_url (str): The URL to send the webhooks to.
-    
+
     Methods:
         notify(message: str) -> None: Sends a message via a webhook. Raises an exception if there's a network issue or invalid response from the webhook server.
     """
@@ -27,7 +28,7 @@ class WebhookNotification:
 
         Args:
             webhook_url (str): The URL to send webhooks to.
-        
+
         Returns:
             None
 
@@ -37,22 +38,22 @@ class WebhookNotification:
         if not webhook_url:
             raise ValueError("Webhook URL must be set.")
         self.webhook_url = webhook_url
-    
+
     def notify(self, message: str) -> None:
         """
         Sends a notification via a webhook to the configured server URL.
 
         Args:
             message (str): The message to send as part of the notification payload.
-        
+
         Returns:
             None
 
         Raises:
             requests.RequestException: If there is an issue connecting to or receiving data from the webhook URL.
-            ValueError: If the incoming message body cannot be serialized to JSON.    
+            ValueError: If the incoming message body cannot be serialized to JSON.
         """
-        headers = {'Content-Type': 'application/json'}
+        headers = {"Content-Type": "application/json"}
         try:
             response = requests.post(self.webhook_url, json={"message": message}, headers=headers)
             response.raise_for_status()  # Raises an error for bad HTTP responses
@@ -61,6 +62,7 @@ class WebhookNotification:
         else:
             if not response.json():
                 raise ValueError("The webhook server did not return a valid JSON object.")
+
 
 # Example usage of the class
 if __name__ == "__main__":

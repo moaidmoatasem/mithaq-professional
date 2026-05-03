@@ -7,9 +7,10 @@ Category: misc
 #!/usr/bin/env python3
 
 import logging
+from abc import ABC, abstractmethod
 from enum import Enum
 from uuid import uuid4
-from abc import ABC, abstractmethod
+
 
 class SeverityLevel(Enum):
     LOW = "LOW"
@@ -17,24 +18,31 @@ class SeverityLevel(Enum):
     HIGH = "HIGH"
     CRITICAL = "CRITICAL"
 
+
 class Vulnerability:
     def __init__(self, name: str, severity: SeverityLevel):
         self.name = name
         self.severity = severity
+
 
 class ExploitGenerator(ABC):
     @abstractmethod
     def generate_exploit(self, vulnerability: Vulnerability) -> str:
         pass
 
+
 class CustomExploitGenerator(ExploitGenerator):
     def __init__(self, vulnerabilities_directory):
         self._vulnerabilities_directory = vulnerabilities_directory
-    
+
     def validate_vulnerabilities_directory(self):
         if not (os.path.exists(self.vulnerabilities_directory)):
-            logging.error(f"Vulnerabilities directory {self.vulnerabilities_directory} does not exist.")
-            raise FileNotFoundError(f"The specified directory {self.vulnerabilities_directory} does not contain a valid directory for vulnerabilities.")
+            logging.error(
+                f"Vulnerabilities directory {self.vulnerabilities_directory} does not exist."
+            )
+            raise FileNotFoundError(
+                f"The specified directory {self.vulnerabilities_directory} does not contain a valid directory for vulnerabilities."
+            )
 
     def _generate_exploit_file_name(self, vulnerability: Vulnerability) -> str:
         return f"{vulnerability.name.lower()}-{uuid4().hex}.py"
@@ -45,32 +53,45 @@ class CustomExploitGenerator(ExploitGenerator):
             self.validate_vulnerabilities_directory()
         except FileNotFoundError as e:
             logging.error(e)
-        
+
         return self._vulnerabilities_directory
 
     def generate_exploit(self, vulnerability: Vulnerability) -> str:
-        exploit_file_path = os.path.join(self.vulnerabilities_directory, self._generate_exploit_file_name(vulnerability))
-        with open(exploit_file_path, 'w') as f:
-            f.write(f"# This is a custom generated exploit for {vulnerability.name}. Do not ship this code externally.\n")
-        
-        logging.info(f"Exploit for vulnerability '{vulnerability.name}' saved to: {exploit_file_path}")
+        exploit_file_path = os.path.join(
+            self.vulnerabilities_directory, self._generate_exploit_file_name(vulnerability)
+        )
+        with open(exploit_file_path, "w") as f:
+            f.write(
+                f"# This is a custom generated exploit for {vulnerability.name}. Do not ship this code externally.\n"
+            )
+
+        logging.info(
+            f"Exploit for vulnerability '{vulnerability.name}' saved to: {exploit_file_path}"
+        )
+
 
 class ExploitUsageSample:
     def use_exploit_generator(self, generator_instance):
         while True:
             print("Enter 'q' or 'quit' to exit.")
-            name = input(f"\nEnter the name of the vulnerability (e.g., SQL Injection): ").strip()
-            severity_input = input("\n\nWhat is the severity level? (LOW/MEDIUM/CRITICAL) ").strip().upper()
+            name = input("\nEnter the name of the vulnerability (e.g., SQL Injection): ").strip()
+            severity_input = (
+                input("\n\nWhat is the severity level? (LOW/MEDIUM/CRITICAL) ").strip().upper()
+            )
 
             try:
                 if severity_input not in [member.value for member in SeverityLevel]:
-                    logging.error("Invalid severity level provided. Please select one of: LOW, MEDIUM, HIGH, CRITICAL.")
+                    logging.error(
+                        "Invalid severity level provided. Please select one of: LOW, MEDIUM, HIGH, CRITICAL."
+                    )
                     continue
 
                 severity = SeverityLevel[severity_input]
                 vulnerability = Vulnerability(name=name, severity=severity)
             except LookupError:
-                logging.warning(f"Unknown severity '{severity_input}' given. Assigning DEFAULT_SEVERITY instead.")
+                logging.warning(
+                    f"Unknown severity '{severity_input}' given. Assigning DEFAULT_SEVERITY instead."
+                )
 
             exploit_generator_instance = CustomExploitGenerator("/path/to/vulnerabilities")
             try:
@@ -82,14 +103,16 @@ class ExploitUsageSample:
     def _should_generate_exploit(self):
         return True  # Placeholder for actual condition
 
+
 def main() -> None:
     custom_exploit_gen = CustomExploitGenerator("/path/to/vulnerabilities_directory")
     usage_example = ExploitUsageSample()
-    
+
     try:
         usage_example.use_exploit_generator(custom_exploit_gen)
-    except FileNotFoundError as e: 
+    except FileNotFoundError as e:
         logging.error(e)
+
 
 if __name__ == "__main__":
     main()

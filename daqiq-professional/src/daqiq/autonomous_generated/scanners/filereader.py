@@ -5,13 +5,13 @@ Category: scanners
 """
 
 import os
-import tempfile
 from urllib.parse import unquote
+
 
 class FileReader:
     """
     A class to handle file reading operations.
-    
+
     Attributes:
         _file_path (str): The path of the uploaded file on disk.
     """
@@ -21,16 +21,18 @@ class FileReader:
 
     @property
     def content(self):
-        with open(self._file_path, 'r') as f:
+        with open(self._file_path, "r") as f:
             return f.read()
+
 
 class FileReaderError(Exception):
     """
     Custom exception to be raised when there is a problem reading the file.
-    
+
     Attributes:
          message (str): Description of error.
-     """
+    """
+
     pass
 
 
@@ -56,16 +58,16 @@ class FileUploadVulnerabilityScanner:
 
         allowed = set([".js", ".jsp", ".php", ".asp"])
         file_extensions = os.path.splitext(self.uploaded_file_path)[-1].lower()
-        
+
         if any(ext in allowed for ext in file_extensions):
-            vuln_detected = contents.find("eval(") >=0 or "system" in contents
+            vuln_detected = contents.find("eval(") >= 0 or "system" in contents
             return vuln_detected
 
     @staticmethod
     def error_handler(e):
         """
         A method to handle errors.
-        
+
         Args:
             e (Exception): The exception object.
 
@@ -77,22 +79,23 @@ class FileUploadVulnerabilityScanner:
     def scan_for_vulnerability(self, uploaded_file_path=None):
         """
         Invokes the vulnerability-checking functionality.
-        
+
         Args:
             uploaded_file_path (str): The path of the file to be checked on disk.
-            
-        Returns: bool - whether there is a vulnerability present 
+
+        Returns: bool - whether there is a vulnerability present
         """
 
         self.uploaded_file_path = unquote(uploaded_file_path or self.uploaded_file_path)
         self.file_reader = FileReader(self.uploaded_file_path)
-        
+
         return self.has_vulnerability
+
 
 def example_usage():
     """
     Example usage of the FileUploadVulnerabilityScanner.
-    
+
     Returns: None
     """
 
@@ -103,9 +106,10 @@ def example_usage():
     result = scanner.scan_for_vulnerability()
 
     if result:
-        print(f"A potential vulnerability was detected. Further investigation is recommended.")
+        print("A potential vulnerability was detected. Further investigation is recommended.")
     else:
         print("No vulnerabilities found in the uploaded file.")
+
 
 # Uncomment below to run examples
 if __name__ == "__main__":

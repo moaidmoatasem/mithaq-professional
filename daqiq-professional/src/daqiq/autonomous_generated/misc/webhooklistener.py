@@ -21,13 +21,14 @@ Error Handling:
 """
 
 import argparse
-from aiohttp import web
 import asyncio
+
+from aiohttp import web
 
 
 def parse_setup_arg():
     parser = argparse.ArgumentParser(description="Set up webhook")
-    parser.add_argument('--setup', action='store_true', help='Setup a webhook')
+    parser.add_argument("--setup", action="store_true", help="Setup a webhook")
     parsed = parser.parse_args()
     return parsed.setup
 
@@ -39,13 +40,13 @@ class WebhookListener:
     async def setup_webhook(self, app, url):
         # This function would be used when setting up the listener with an existing URL
         print(f"Setting up webhook to {url}")
-        
+
     async def listen_for_webhook(self, app, url):
         async with app:
-            route = web.get('/webhook', self.receive_webhook)
+            route = web.get("/webhook", self.receive_webhook)
             await asyncio.start_server(route.handler, "0.0.0.0", 8080)
             print(f"Listening for webhooks on {url}")
-            
+
     def receive_webhook(self, request):
         # Process webhook data
         pass
@@ -53,16 +54,17 @@ class WebhookListener:
     def setup(self, url):
         if self.setup_webhook:
             asyncio.ensure_future(self.setup_webhook(self.app, url))
-            
+
     def run(self):
         loop = asyncio.get_event_loop()
         if parse_setup_arg():
             return loop.run_until_complete(self.setup(None))
         else:
-            return loop.run_until_complete(self.listen_for_webhook(self.app, "http://example.com/webhook"))
+            return loop.run_until_complete(
+                self.listen_for_webhook(self.app, "http://example.com/webhook")
+            )
 
 
 if __name__ == "__main__":
     listener = WebhookListener()
     listener.run()
-

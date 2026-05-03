@@ -4,45 +4,46 @@ Source: batch_1_20260503_040256.txt
 Category: ml
 """
 
-import pdfkit  # or your preferred PDF library
 from datetime import datetime
+
+import pdfkit  # or your preferred PDF library
 
 
 class PDFGenerator:
-    DEFAULT_PAGE_FORMAT = 'A4'
-    DEFAULT_STYLESHEET_PATH = 'css/global.css'
+    DEFAULT_PAGE_FORMAT = "A4"
+    DEFAULT_STYLESHEET_PATH = "css/global.css"
 
     def __init__(self, page_format=DEFAULT_PAGE_FORMAT, stylesheet_path=DEFAULT_STYLESHEET_PATH):
         self.page_format = page_format
         self.stylesheet_path = stylesheet_path
 
-    def generate_pdf(self, content, filename='report.pdf'):
+    def generate_pdf(self, content, filename="report.pdf"):
         """Generate a PDF report with the provided content in HTML format.
-        
+
         :param content: str or Iterable of data. If an iterable, it will be rendered as list.
         :param filename: String, name for generated file (default 'report.pdf').
         :return: Path to generated PDF file, None on failure.
         """
         if not isinstance(content, (str, bytes)):
             try:
-                content = '\n'.join(map(str, content))  # Render iterable as string
+                content = "\n".join(map(str, content))  # Render iterable as string
             except Exception as e:
                 raise ValueError(f"Invalid content type supplied: {e}")
 
         pdfkit_config = {
-            'page-size': self.page_format,
-            'margin-top': "0in",
-            'margin-right': "0.69in",
-            'margin-bottom': "0.69in",
-            'margin-left': "0in",
-            'encoding': "UTF-8",
+            "page-size": self.page_format,
+            "margin-top": "0in",
+            "margin-right": "0.69in",
+            "margin-bottom": "0.69in",
+            "margin-left": "0in",
+            "encoding": "UTF-8",
         }
 
         try:
             if isinstance(content, (str, bytes)):
                 pdfkit.from_string(content, filename=filename, options=pdfkit_config)
             else:
-                content = ''.join(str(i) for i in content)
+                content = "".join(str(i) for i in content)
                 css_url = f"file://{self.stylesheet_path}"
                 print(f"Rendering HTML with CSS URL: {css_url}")
                 pdfkit.from_string(content, filename, css=[css_url], options=pdfkit_config)
@@ -63,14 +64,17 @@ class PDFGenerator:
   <p>This is a test. Page rendered on {current_date}.</p>
 </body>
 </html>
-        """.format(global_stylesheet_path=self.stylesheet_path,
-                   current_date=datetime.now().strftime("%B %d, %Y"))
-        
+        """.format(
+            global_stylesheet_path=self.stylesheet_path,
+            current_date=datetime.now().strftime("%B %d, %Y"),
+        )
+
         self.generate_pdf(content)
 
 
 if __name__ == "__main__":
     import unittest
+
     from mock_data import VALID_CONTENT
 
     class TestPDFGenerator(unittest.TestCase):
@@ -79,7 +83,7 @@ if __name__ == "__main__":
             try:
                 result_file = pdf_gen.usage_example()  # Generates report.pdf in current directory
                 self.assertIsNotNone(result_file)
-                pdf_gen_usage = open(result_file, 'rb')
+                pdf_gen_usage = open(result_file, "rb")
                 contents = pdf_gen_usage.read()
                 self.assertIn(b"This is a test. Page rendered on", contents)
             finally:
@@ -87,10 +91,9 @@ if __name__ == "__main__":
                     pdf_gen_usage.close()
 
     # Run tests to verify functionality
-    unittest.main(argv=['first-arg-is-ignored'], exit=False)
+    unittest.main(argv=["first-arg-is-ignored"], exit=False)
 
 
 # Example usage with real content (assuming we have it as valid_content below):
 pdf_gen = PDFGenerator()
 pdf_gen.generate_pdf(VALID_CONTENT)
-

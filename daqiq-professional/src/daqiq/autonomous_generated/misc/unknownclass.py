@@ -32,6 +32,7 @@ SOFTWARE.
 
 import os
 
+
 def calculate_vulnerability_severity(cve_details):
     """
     Function to calculate the severity score of a given CVE details.
@@ -48,18 +49,15 @@ def calculate_vulnerability_severity(cve_details):
         ValueError: If the provided dictionary does not contain at least the required 'cvss_score' field.
     """
 
-    if not all(field in cve_details for field in ('cvss_score')):
+    if not all(field in cve_details for field in ("cvss_score")):
         raise ValueError('CVE details must include a "cvss_score" field.')
 
-    score = int(cve_details['cvss_score'])
+    score = int(cve_details["cvss_score"])
 
-    severity_level = {
-        '0-4': 0,
-        '5-7': 1,
-        '8+': 2
-    }
+    severity_level = {"0-4": 0, "5-7": 1, "8+": 2}
 
     return severity_level.get(score, None)
+
 
 def main():
     """
@@ -68,17 +66,24 @@ def main():
     """
 
     # Check if the required file exists and is readable
-    filename = os.path.join(os.path.dirname(__file__), 'cves.txt')
+    filename = os.path.join(os.path.dirname(__file__), "cves.txt")
     if not os.access(filename, os.R_OK):
-        print(f"File {filename} is not accessible for reading. Please ensure it exists and has read permissions.")
+        print(
+            f"File {filename} is not accessible for reading. Please ensure it exists and has read permissions."
+        )
         return
 
     with open(filename) as f:
-        cve_list = [dict(cve.strip().strip('"'), **{'cvss_score': '5-7'}) for cve in f.readlines()]
+        cve_list = [dict(cve.strip().strip('"'), **{"cvss_score": "5-7"}) for cve in f.readlines()]
 
-    severity_scores = {cve['ID']: calculate_vulnerability_severity(data=cve) for cve in cve_list if 'ID' in cve and isinstance(cve.get('ID'), str)}
+    severity_scores = {
+        cve["ID"]: calculate_vulnerability_severity(data=cve)
+        for cve in cve_list
+        if "ID" in cve and isinstance(cve.get("ID"), str)
+    }
 
     print("Vulnerabilities Severity Scores:", severity_scores)
+
 
 if __name__ == "__main__":
     main()

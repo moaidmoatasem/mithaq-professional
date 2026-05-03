@@ -35,6 +35,7 @@ Usage Examples:
 import logging
 import time
 
+
 class Detector(object):
     def __init__(self, log_file_path: str, max_chain_depth=10):
         """
@@ -63,10 +64,10 @@ class Detector(object):
 
         :param attacker_id: The attacker ID representing the sequence of logs indicating coordinated attacks.
         :param log_entry: The current log entry to be incorporated into the chain if valid.
-        Returns None on failure, or an int representing the number of logs in the completed chain otherwise.  
+        Returns None on failure, or an int representing the number of logs in the completed chain otherwise.
         """
         assert isinstance(attacker_id, int), "Attacker ID must be an integer"
-        
+
         # Basic validation to ensure the attacker is a known entity
         if attacker_id not in self.attack_pattern_counter:
             self.logger.warning("Detected unknown attacker: %s", attacker_id)
@@ -75,15 +76,17 @@ class Detector(object):
         log_entry = self.validate_log(log_entry)
 
         if len(self.active_chain_stack) == 0 or (
-                (len(self.active_chain_stack) > 1 and attacker_id != self.active_chain_stack[-1]) 
-             and attacker_id != self.attack_pattern_counter.get(attacker_id - 1)
+            (len(self.active_chain_stack) > 1 and attacker_id != self.active_chain_stack[-1])
+            and attacker_id != self.attack_pattern_counter.get(attacker_id - 1)
         ):
-            self.active_chain_stack = [attacker_id, ]
+            self.active_chain_stack = [
+                attacker_id,
+            ]
         else:
             if len(self.active_chain_stack) < self.max_chain_depth:
-                self.logger.info('Building chain with existing log entry')
+                self.logger.info("Building chain with existing log entry")
                 self.active_chain_stack.append(attacker_id)
-                
+
         # Placeholder for the actual logic to determine if a chain is complete
         self.__is_chain_complete(attacker_id)
 
@@ -99,35 +102,36 @@ class Detector(object):
     def scan(self) -> bool:
         """
         Scan attack activity patterns within the specified depth level of provided network logs file.
- 
+
         :return Boolean indicating if any active threats are detected based on pattern matching results.
         """
 
-        self.logger.info('Starting log file scanning with %s as reference.', self.log_file_path)
-        
+        self.logger.info("Starting log file scanning with %s as reference.", self.log_file_path)
+
         # Dummy data to simulate reading from a log file
         self.active_chain_stack.clear()
         temp_logs = [
-            ('log entry 1', ),
-            ('log entry 2, attacker_id: 3', ),
-            ('log entry 3 with another attack pattern: attacker_id: 4', ),
-            ('log entry 4', )
+            ("log entry 1",),
+            ("log entry 2, attacker_id: 3",),
+            ("log entry 3 with another attack pattern: attacker_id: 4",),
+            ("log entry 4",),
         ]
 
         for log_entry in temp_logs:
             if self.__is_chain_complete(log_entry[1]):
                 return True
-            attacked = any(self._is_attack(entry) for entry in str(log_entry).split(', '))
-            
+            attacked = any(self._is_attack(entry) for entry in str(log_entry).split(", "))
+
             # Introduce a delay to simulate real file processing time
             time.sleep(0.7)
-        self.logger.info('Finished scanning')
-        
+        self.logger.info("Finished scanning")
+
         # Placeholder to add more complex logic if this module is intended to integrate with an active detection system.
         return False
 
+
 if __name__ == "__main__":
-    detector = Detector(log_file_path='/var/log/secure', max_chain_depth=15)
+    detector = Detector(log_file_path="/var/log/secure", max_chain_depth=15)
     attacker_found = detector.scan()
     if attacker_found:
         print("An active threat was detected. Proceed with mitigation.")

@@ -18,7 +18,9 @@ Features:
 """
 
 import logging
+
 import requests
+
 
 def send_webhook(notify_url: str, notify_data: dict) -> None:
     """
@@ -44,46 +46,52 @@ def send_webhook(notify_url: str, notify_data: dict) -> None:
     try:
         response = requests.post(notify_url, json=notify_data)
         response.raise_for_status()  # Raises an HTTPError for bad status codes.
-    except (requests.RequestException, requests.HTTPError) as e: 
+    except (requests.RequestException, requests.HTTPError) as e:
         logger.error(f"Failed to send webhook data due to error - {str(e)}")
-        raise ValueError("A server error occurred. Please check the notify_url and try again.") from e
+        raise ValueError(
+            "A server error occurred. Please check the notify_url and try again."
+        ) from e
+
 
 # Example usage
 if __name__ == "__main__":
     # This is a placeholder for example data that would come from a form, API call, etc.
-    example_data = {'project': 'example_project', 'status': 'Failed'}
-    
+    example_data = {"project": "example_project", "status": "Failed"}
+
     # Ensure this URL points to the notification endpoint you wish to receive your webhook payload at
     notify_url = "https://your-notification-endpoint.com/webhook"
-    
+
     try:
         logger = logging.getLogger(__name__)
         send_webhook(notify_url, example_data)
         logger.info("Webhook sent successfully.")
     except Exception as e:
         logger.error(f"Failed to initiate webhook: {str(e)}")
-    
+
 
 # Testing
 import unittest
 
+
 class TestSendWebhook(unittest.TestCase):
     def test_send_webhook(self):
-        with patch('requests.post') as mock_post:
+        with patch("requests.post") as mock_post:
             # Simulate a successful response
             mock_post.return_value.status_code = 201
-            mock_post.return_value.json.return_value = {'message': 'Notification success'}
-            
-            result = send_webhook('https://test.notify-endpoint.com', {"test": "data"})
+            mock_post.return_value.json.return_value = {"message": "Notification success"}
+
+            result = send_webhook("https://test.notify-endpoint.com", {"test": "data"})
             self.assertEqual(mock_post.call_args, mock_post.return_value)
             self.assertEqual(result, None)
 
-        with patch.object(logging.getLogger(__name__), 'error', wraps=logging.error) as mock_log:
+        with patch.object(logging.getLogger(__name__), "error", wraps=logging.error) as mock_log:
             # Simulate a server error response
-            mock_post.side_effect = requests.HTTPError('An HTTP error occurred.', request=Mock())
-            
-            result = send_webhook('https://test.notify-endpoint.com', {"test": "data"})
-            
-            called_with_url = mock_post.call_args[1]['url']
-            self.assertEqual(called_with_url, 'https://test.notify-endpoint.com')
-            self.assertIn(result['message'], ["A server error occurred.", "An HTTP error occurred."])
+            mock_post.side_effect = requests.HTTPError("An HTTP error occurred.", request=Mock())
+
+            result = send_webhook("https://test.notify-endpoint.com", {"test": "data"})
+
+            called_with_url = mock_post.call_args[1]["url"]
+            self.assertEqual(called_with_url, "https://test.notify-endpoint.com")
+            self.assertIn(
+                result["message"], ["A server error occurred.", "An HTTP error occurred."]
+            )

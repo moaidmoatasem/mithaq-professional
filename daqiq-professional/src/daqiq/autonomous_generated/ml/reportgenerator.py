@@ -4,12 +4,11 @@ Source: batch_1_20260501_054834.txt
 Category: ml
 """
 
-import datetime
 
 class ReportGenerator:
     """
     Class to generate HTML and PDF reports. Provides methods for generating documents with error handling.
-    
+
     Attributes:
         title (str): The title of the report.
         body (list): A list of strings representing paragraphs in the report body.
@@ -23,7 +22,7 @@ class ReportGenerator:
     def validate_input(value):
         """
         Validate input value ensuring it's safe for use in a PDF document.
-        
+
         Args:
             value (str): The string to validate.
 
@@ -35,7 +34,7 @@ class ReportGenerator:
     def add_paragraph(self, paragraph):
         """
         Adds a paragraph to the body of the report. Ensures input is safe for PDF generation.
-        
+
         Args:
             paragraph (str): The text of the paragraph.
 
@@ -49,7 +48,7 @@ class ReportGenerator:
     def generate_pdf(self, filename="report.pdf"):
         """
         Generates a PDF file with the HTML content and saves it to disk. Contains error handling for common issues.
-        
+
         Args:
             filename (str): The name of the output PDF file.
 
@@ -66,13 +65,15 @@ class ReportGenerator:
                 pdf_writer.addBlankPage()
                 current_pdf_page = pdf_writer.pages[index - 1]
                 width, height = current_pdf_page.width / 72, current_pdf_page.height / 72
-                context = Image.new('RGB', (width * 5, height))
+                context = Image.new("RGB", (width * 5, height))
                 font_path = "arial.ttf"  # Dummy font path for demonstration
 
                 styles = getSampleStyleSheet().copy()
-                h1_style = ParagraphStyle(name='Heading', parent=styles['Normal'])
+                h1_style = ParagraphStyle(name="Heading", parent=styles["Normal"])
 
-                content_box = TextFlow.wrap(paragraph.rjust(width), current_pdf_page.text_matrix, (0, height - 15))
+                content_box = TextFlow.wrap(
+                    paragraph.rjust(width), current_pdf_page.text_matrix, (0, height - 15)
+                )
 
                 container = Container(size=(width * 3, height))
                 image_container = ImageContainer(image=context)
@@ -86,8 +87,9 @@ class ReportGenerator:
             print(f"An error occurred while generating the PDF: {e}")
             return False
         else:
-            pdf_writer.write(open(filename, 'wb'))
+            pdf_writer.write(open(filename, "wb"))
             return True
+
 
 # Example Usage
 def generate_example_report():
@@ -95,11 +97,14 @@ def generate_example_report():
     Create a simple ReportGenerator instance and populate it with a sample body.
     """
 
-    report = ReportGenerator('Monthly Security Audit')
+    report = ReportGenerator("Monthly Security Audit")
     report.add_paragraph("The security team reviewed the systems for vulnerabilities.")
-    report.add_paragraph("No critical issues were found, however some medium threats need further investigation.")
+    report.add_paragraph(
+        "No critical issues were found, however some medium threats need further investigation."
+    )
 
     return report
+
 
 # Example Test Function
 def test_report_generation():
@@ -114,6 +119,7 @@ def test_report_generation():
             raise Exception("PDF generation failed.")
     except Exception as e:
         print(f"\n\nTest FAILED : {e}")
+
 
 # Example test invocation
 test_report_generation()

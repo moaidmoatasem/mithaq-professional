@@ -1,20 +1,17 @@
 version: 2
 updates:
-  # Python dependencies
   - package-ecosystem: "pip"
     directory: "/"
     schedule:
       interval: "weekly"
-    open-pull-requests-limit: 10
-    
-  # Docker
-  - package-ecosystem: "docker"
-    directory: "/deploy"
-    schedule:
-      interval: "weekly"
-    
-  # GitHub Actions
-  - package-ecosystem: "github-actions"
-    directory: "/"
-    schedule:
-      interval: "weekly"
+      day: "monday"
+      time: "09:00"
+      timezone: "Africa/Cairo"
+    open-pull-requests-limit: 5
+    labels:
+      - "dependencies"
+    groups:
+      python-dependencies:
+        update-types:
+          - "minor"
+          - "patch"

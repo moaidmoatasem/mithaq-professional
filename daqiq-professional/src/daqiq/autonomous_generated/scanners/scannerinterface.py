@@ -7,6 +7,7 @@ Category: scanners
 import os
 from abc import abstractmethod
 
+
 class ScannerInterface:
     """
     Interface class to define common methods for scanners.
@@ -25,7 +26,7 @@ class ScannerInterface:
     def analyze_code_quality(self, directory):
         """
         Analyzes the code quality in a specified project directory.
-        
+
         :param directory: str, path to the project directory where analysis will occur.
         :return: A tuple containing dictionaries with issues for each file.
                  Each dictionary contains problem types as keys and their respective counts as values.
@@ -44,20 +45,28 @@ class VulnerabilityScanner(ScannerInterface):
     def analyze_vulnerabilities(self, directory):
         """
         Analyzes the vulnerabilities in specified project directory.
-        
+
         :param directory: str, path to the project directory where vulnerabilities will be analyzed.
         :return: A list of vulnerability objects with various details such as severity levels and affected files.
         """
         from sample_project import SampleVulnerability
+
         vulnerabilities = []
         # Implement logic to scan for vulnerabilities here (mock data for example)
-        return [SampleVulnerability(severity='Low', file_path='path/to/file.py', code_location="line:123", vulnerability_type="buffer_overflow")
-                for _ in range(5)]
+        return [
+            SampleVulnerability(
+                severity="Low",
+                file_path="path/to/file.py",
+                code_location="line:123",
+                vulnerability_type="buffer_overflow",
+            )
+            for _ in range(5)
+        ]
 
     def test_vulnerabilities(self, directory):
         """
         Validates the functionality of scanner on a specific project.
-        
+
         :param directory: str, path to the test directory. For this example, we hard-code it as 'test_directory'.
         :return: None, but prints successful message if all tests pass or an error if validation fails.
         """
@@ -70,28 +79,32 @@ def main():
     scanner = VulnerabilityScanner(project_directory="example_project")
     for vuln_issue in scanner.analyze_vulnerabilities("test/vulnerable"):
         print(f"Found vulnerability: {vuln_issue.severity} at line: {vuln_issue.code_location}")
-    
+
     # Example of error handling - simulate failing to find vulnerabilities
     try:
         scanner.scan_project()
     except NotImplementedError as e:
         print(e)
-    
+
     # Additional test cases (for example purposes):
     def verify_tests():
-        assert os.path.isfile("example_project/example.py"), "Project directory does not contain a file."
-        
-    from unittest import TestCase, main as run_test_runner
+        assert os.path.isfile(
+            "example_project/example.py"
+        ), "Project directory does not contain a file."
+
+    from unittest import TestCase
+    from unittest import main as run_test_runner
+
     class TestScanner(TestCase):
         def setUp(self):
             self.scanner = VulnerabilityScanner(project_directory="test_data")
-            
+
         # Example test case: simulate analysis on an actual vulnerable directory and assert vulnerabilities are found.
         def test_vulnerable_directory_scan(self):
             expected_files_count = 3
             for vuln_issue in self.scanner.analyze_vulnerabilities("test/vulnerable"):
                 pass  # Actual implementation of verifying that the number of vulnerabilities matches the expectation
-                
+
     if __name__ == "__main__":
         verify_tests()
         run_test_runner()

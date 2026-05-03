@@ -8,13 +8,14 @@ Category: api
 
 import requests
 
+
 class CveDatabaseIntegration:
     """
     This class provides an interface to interact with the CVE (Common Vulnerabilities and Exposures) database.
-    
-    The interface allows users to check if a specific CVE ID exists, retrieve details for a CVE ID, 
+
+    The interface allows users to check if a specific CVE ID exists, retrieve details for a CVE ID,
     and search for CVE IDs based on criteria such as product name or vendor.
-    
+
     Attributes:
         base_url (str): Base URL of the CVE database service endpoint.
 
@@ -23,13 +24,13 @@ class CveDatabaseIntegration:
         _get_cve_details(cve_id: str) -> dict: Retrieves details for the specified CVE ID.
         _search_by_criteria(criteria: dict) -> list: Performs search based on provided criteria.
     """
-    
-    base_url = 'https://api.example/api/v1/'  # Replace with actual database API
-    
+
+    base_url = "https://api.example/api/v1/"  # Replace with actual database API
+
     def check_cve_exists(self, cve_id: str) -> bool:
         """Check if a CVE ID exists in the database."""
-        response = requests.get(f"{self.base_url}cves/search", params={'key': cve_id})
-        return response.status_code == 200 and response.json().get('success') is True
+        response = requests.get(f"{self.base_url}cves/search", params={"key": cve_id})
+        return response.status_code == 200 and response.json().get("success") is True
 
     def get_cve_details(self, cve_id: str) -> dict:
         """Retrieve details for a specific CVE ID."""
@@ -40,21 +41,30 @@ class CveDatabaseIntegration:
 
     def search_by_criteria(self, **criteria: dict) -> list:
         """Perform a search for CVEs based on provided criteria."""
-        if 'key' not in criteria and not all(key in ('vendor', 'product') for key in criteria.keys()):
-            raise ValueError("Search criteria must include at least one of `key`, `vendor`, or `product`.")
-        
+        if "key" not in criteria and not all(
+            key in ("vendor", "product") for key in criteria.keys()
+        ):
+            raise ValueError(
+                "Search criteria must include at least one of `key`, `vendor`, or `product`."
+            )
+
         response = requests.post(f"{self.base_url}cves/search", json=criteria)
-        return [rec['details'] for rec in response.json().get('records', []) if self.check_cve_exists(rec['cve_id'])]
-    
+        return [
+            rec["details"]
+            for rec in response.json().get("records", [])
+            if self.check_cve_exists(rec["cve_id"])
+        ]
+
     def __init__(self, base_url: str):
         """Initialize the CVE Database Integration class with the base URL."""
         self.base_url = base_url
 
+
 # Example Usage
 if __name__ == "__main__":
     # 1. Create an instance of the class
-    cve_integration = CveDatabaseIntegration('https://api.example/api/v1/')
-    
+    cve_integration = CveDatabaseIntegration("https://api.example/api/v1/")
+
     # Example: Check a CVE ID exists and retrieve details if it does.
     try:
         cve_details = cve_integration.get_cve_details("CVE-2023-9876")
@@ -63,7 +73,9 @@ if __name__ == "__main__":
         print(e)
 
     # Example 2: Search for CVEs by a specific vendor and product
-    for cve_id_list in cve_integration.search_by_criteria(vendor="ExampleVendor", product="ExampleProduct"):
+    for cve_id_list in cve_integration.search_by_criteria(
+        vendor="ExampleVendor", product="ExampleProduct"
+    ):
         print(f"Found CVE {cve_id_list['key']}: {cve_id_list['title']}")
 
 # Tests should be run against the actual database API service endpoint.

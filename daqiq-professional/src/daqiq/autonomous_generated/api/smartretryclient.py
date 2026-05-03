@@ -6,9 +6,10 @@ Category: api
 
 import requests
 
+
 class SmartRetryClient:
     """A client to ensure smart retry handling. It retries failed requests based on specific conditions and ensures that retries are spaced out to avoid overwhelming servers.
-    
+
     Attributes:
         max_retries (int): The maximum number of times to retry the request.
         sleep_time (int): The time in seconds to wait between each retry.
@@ -18,7 +19,7 @@ class SmartRetryClient:
     def __init__(self, max_retries=3, sleep_time=1):
         self.max_retries = max_retries
         self.sleep_time = sleep_time
-        self.base_url = 'https://example.com/api'  # Replace with actual base URL
+        self.base_url = "https://example.com/api"  # Replace with actual base URL
 
     def make_request(self, request_method, url_suffix="", **kwargs):
         """
@@ -27,10 +28,10 @@ class SmartRetryClient:
         Args:
             request_method: The HTTP Method which is GET or POST or other.
             url_suffix: A suffix to be added to the base_url as part of forming complete URL for the request.
-            
+
         Returns:
             The response text from the server.
-        
+
         Raises:
             Exception: In case the number of retries has exceeded and requests are not successful.
         """
@@ -38,16 +39,20 @@ class SmartRetryClient:
         while num_retries < self.max_retries:
             try:
                 response = request_method(f"{self.base_url}/{url_suffix}", **kwargs)
-                if response.status_code == 200:  # Assuming a success is any HTTP status code in the 2xx range.
+                if (
+                    response.status_code == 200
+                ):  # Assuming a success is any HTTP status code in the 2xx range.
                     return response.text
                 else:
                     num_retries += 1  # Increase the retry count only after failing on some requests, since failure may not be persistent over all retries.
             except requests.exceptions.RequestException as e:
-                num_retries += 1  # Exception happened during request or a problem in connecting to server
-                print(f"Attempt {num_retries}: Request failed. Retrying... ({str(e)})"
-                    )
+                num_retries += (
+                    1  # Exception happened during request or a problem in connecting to server
+                )
+                print(f"Attempt {num_retries}: Request failed. Retrying... ({str(e)})")
 
         raise Exception("Maximum number of retries reached and request is still not successful")
+
 
 def example_usage():
     """Example usage of the smart retry client.
@@ -66,10 +71,10 @@ def example_usage():
     response = smart_retry_client.make_request(requests.get, url_suffix="/health")
     print(response)
 
+
 # Adding a doctest for example_usage function
 def check_example_usage():
     """Check the example usage of make_request() to see if it handles errors correctly."""
-    import sys
 
     try:
         # The following call should raise an error as there is no valid URL_suffix "/invalid-url"
@@ -78,9 +83,12 @@ def check_example_usage():
         print(f"Caught expected exception: {e}")
     else:
         print("An unexpected success. Function may be defective.")
-    
+
     # The following call should work and print the server status
-    assert "Health check successful." in SmartRetryClient().make_request(requests.get, url_suffix="/health"), "The response was not as expected."
+    assert "Health check successful." in SmartRetryClient().make_request(
+        requests.get, url_suffix="/health"
+    ), "The response was not as expected."
+
 
 # Run a dummy test to verify if the basic example usage code works as expected.
 check_example_usage()

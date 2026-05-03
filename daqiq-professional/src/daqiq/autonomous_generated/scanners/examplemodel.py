@@ -9,14 +9,17 @@ from pydantic import BaseModel
 
 app = FastAPI()
 
+
 class ExampleModel(BaseModel):
     """
     A simple data model to be used as input or output in the API.
-    
+
     Attributes:
         example_field (str): An example field for demonstration purposes.
     """
+
     example_field: str
+
 
 # Functionality of the scanner
 def perform_scanner_check(input_data: dict) -> ExampleModel:
@@ -24,19 +27,20 @@ def perform_scanner_check(input_data: dict) -> ExampleModel:
     response = ExampleModel(**input_data)
     return response
 
+
 @app.post("/scans", status_code=status.HTTP_201_CREATED, response_model=ExampleModel)
 async def scan_api(request: dict):
     """
     POST /scans - Endpoint to perform a custom scanner task.
 
     The input data is validated and used to initialize the 'perform_scanner_check' function.
-    
+
     Request Data:
         - required field 'example_field': A description of what this parameter represents.
 
     Response Model:
         :ExampleModel: Contains response data including 'example_field'.
-    
+
     Example Usage:
         curl -X POST -H "Content-Type: application/json" --data '{"example_field": "Some Value"}' https://yourapi.com/scans
 
@@ -50,10 +54,8 @@ async def scan_api(request: dict):
             **vars(check_data),
         }
     except Exception as e:
-        raise HTTPException(
-            detail=str(e), 
-            status_code=status.HTTP_422_UNPROCESSABLE_ENTITY
-        )
+        raise HTTPException(detail=str(e), status_code=status.HTTP_422_UNPROCESSABLE_ENTITY)
+
 
 @app.get("/scans", response_model=list[ExampleModel])
 async def scan_api_list() -> list[ExampleModel]:
@@ -64,38 +66,40 @@ async def scan_api_list() -> list[ExampleModel]:
 
     Responses:
         List of ExampleModel: The recently performed scan results.
-    
+
     Raises:
         HTTPException with status_code 404 if no scans are found.
     """
     # Placeholder logic for retrieving examples data from database or other sources
     return [ExampleModel(**{"example_field": "Some Value"})] * 3
 
+
 # Test cases to ensure API robustness and quality of function implementation
 import pytest
+
 
 @pytest.mark.asyncio
 async def test_scan_api(test_client):
     input_data = {"example_field": "This is a test"}
     response = await test_client.post("/scans", json=input_data)
     assert response.status_code == status.HTTP_201_CREATED
-    assert response.json() == {
-        **input_data,
-        'response_status': 'success'
-    }
+    assert response.json() == {**input_data, "response_status": "success"}
+
 
 def test_scan_api_list(test_client):
     response = test_client.get("/scans")
     assert len(response.json()) > 0
 
+
 if __name__ == "__main__":
     import unittest
+
     unittest.main()
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     # This is just a simple initialization and setup logic that might be used in a real-world environment. It's not part of the API.
-    
+
     from fastapi.testclient import TestClient
-    
+
     test_client = TestClient(app)
     test_scan_api(test_client=test_client)

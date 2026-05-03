@@ -4,18 +4,17 @@ Source: batch_1_20260501_125100.txt
 Category: api
 """
 
-import requests
+# Production-quality imports
 from typing import List
 
-# Production-quality imports
-from collections import defaultdict
+import requests
 
 
 class CVEDatabase:
     def __init__(self, api_url: str = "https://cve.cisa.gov/cve/api"):
         self.api_url = api_url
         self.client_id = None  # Can be set externally or as environment variable
-        self.token = None     # Can be set externally or as environment variable
+        self.token = None  # Can be set externally or as environment variable
 
     def fetch_cves(self, product_name: str) -> List[str]:
         """
@@ -24,29 +23,27 @@ class CVEDatabase:
         :param product_name: The product/name to look up in the CVE database.
         :return: A list of CVE IDs associated with the provided name.
         """
-        
-        params = {
-            "name": product_name
-        }
-        
+
+        params = {"name": product_name}
+
         url = f"{self.api_url}/search.cfm"
-        
+
         headers = self._build_headers()
-        
+
         response = requests.get(url, headers=headers, params=params)
         if not response.ok:
             raise Exception(f"Failed to fetch CVEs for {product_name}. Response: {response.text}")
 
         return [x["cve"] for x in response.json().get("rows")]
-    
+
     def _build_headers(self) -> dict:
         """
         Helper function to build headers with authentication information.
         """
-        
+
         if not (self.client_id and self.token):
             raise ValueError("Client ID and/or Token are required for API access.")
-        
+
         return {
             "Authorization": f"Bearer {self.api_token}",
         }
@@ -59,32 +56,31 @@ def example_usage(cve_db: CVEDatabase) -> None:
     :param cve_db: An instance of the CVEDatabase class.
     """
 
-    print(f"\nFinding CVEs for 'Apache HTTP Server'...")
+    print("\nFinding CVEs for 'Apache HTTP Server'...")
     cves_for_apache = cve_db.fetch_cves("Apache HTTP Server")
-    
+
     if not cves_for_apache:
         print("\nNo applicable CVEs found.")
     else:
         print(f"\nCVE IDs associated with Apache:\n{cves_for_apache}")
 
     # Fetch additional CVE for an older or specific version of the Apache
-    print(
-        "\nFinding CVEs specifically related to Apache 2.4.x versions..."
-    )
-    
+    print("\nFinding CVEs specifically related to Apache 2.4.x versions...")
+
     latest_cve_version = "Apache/2.4.*"
     cves_for_latest_version = cve_db.fetch_cves(latest_cve_version)
     if not cves_for_apache:
-       print("\nNo applicable CVE for the specific version found.")
+        print("\nNo applicable CVE for the specific version found.")
     else:
         print(
             f"\nCVE IDs specifically related to Apache 2.4.x versions:\n{cves_for_latest_version}"
         )
 
+
 def create_tests(cve_db: CVEDatabase) -> None:
     """
     Function to create unit tests using the provided CVEDatabase object.
-    
+
     Note: This sample shows how to mock API requests for testing purposes,
           but actual production integration would require real API calls.
     """
@@ -93,27 +89,26 @@ def create_tests(cve_db: CVEDatabase) -> None:
 
     # Assuming we have some known CVEs that are correct
     known_cve_for_apache = ["CVE-2019-7034"]
-    
+
     def test_finding_correct_cves(cve_db: CVEDatabase) -> None:
         cves_for_apache = cve_db.fetch_cves("Apache HTTP Server")
-        
-        if not all([c == 'CVE-2019-7034' for c in known_cve_for_apache]):
-            raise Exception(
-                "Test failed! Did not find the expected CVE IDs."
-            )
-            
+
+        if not all([c == "CVE-2019-7034" for c in known_cve_for_apache]):
+            raise Exception("Test failed! Did not find the expected CVE IDs.")
+
     # Running tests
     test_finding_correct_cves(cve_db)
-    
+
+
 if __name__ == "__main__":
     from dotenv import load_dotenv
-  
+
     # Load credentials and other sensitive variables from .env file if available
     load_dotenv()
 
     # Initialize API client with the necessary configuration
     cve_client = CVEDatabase(api_url="https://api.public-apis.com/cve/search")
-    
+
     example_usage(cve_client)
 
 # Assuming you'd set these up as per your environment's security practices

@@ -5,28 +5,27 @@ Category: reporting
 """
 
 import os
-from slack_sdk import WebClient
+
 from discord_webhook import DiscordWebhook
+from slack_sdk import WebClient
+
 
 class SlackDiscordIntegration:
     def __init__(self):
         # Initialize with slack webclient and discord webhook object
         self.slack_client = WebClient(os.environ.get("SLACK_BOT_TOKEN"))
         self.discord_webhook_url = os.getenv("DISCORD_WEBHOOK_URL")
-        
+
         # Error handling for missing environment variables
         if not self.slack_client:
             raise ValueError("SLACK_BOT_TOKEN is not set.")
         if not self.discord_webhook_url:
             raise ValueError("DISCORD_WEBHOOK_URL is not set.")
-            
+
     def send_to_slack(self, message):
         """Send a message to Slack via the webclient."""
         try:
-            response = self.slack_client.chat_postMessage(
-                channel="#general",
-                text=message
-            )
+            response = self.slack_client.chat_postMessage(channel="#general", text=message)
             if response["ok"]:
                 print("Message sent successfully to Slack")
         except Exception as e:
@@ -37,7 +36,7 @@ class SlackDiscordIntegration:
         try:
             discord_webhook = DiscordWebhook(url=self.discord_webhook_url)
             response = discord_webhook.send(message=message)
-            
+
             if not response.ok and response.status_code != 204:
                 raise Exception(f"Failed to send message: {response.text}")
             else:
@@ -49,7 +48,7 @@ class SlackDiscordIntegration:
         """Scan and reports the given messages over Slack and Discord."""
         if slack_message:
             self.send_to_slack(slack_message)
-            
+
         if discord_message:
             self.send_to_discord(discord_message)
 
@@ -58,23 +57,30 @@ class SlackDiscordIntegration:
 if __name__ == "__main__":
     # Initialize the Integration class with environ vars for authentication
     integration = SlackDiscordIntegration()
-    
+
     # Sending a test message to both Slack and Discord via this object's methods.
     slack_test_msg = "Hello! This is a test message from Slack."
     discord_test_msg = "Hey there, let's send this through Discord too!"
-    
+
     integration.scan_and_report(slack_message=slack_test_msg, discord_message=discord_test_msg)
 
 # Example of running tests
 import unittest
 from unittest.mock import patch
 
+
 class TestSlackDiscordIntegration(unittest.TestCase):
-    @patch.dict(os.environ, {'SLACK_BOT_TOKEN': 'TEST_SLACK_API_TOKEN', 'DISCORD_WEBHOOK_URL': 'https://hooks.discord.com/my_webhook_url'})
+    @patch.dict(
+        os.environ,
+        {
+            "SLACK_BOT_TOKEN": "TEST_SLACK_API_TOKEN",
+            "DISCORD_WEBHOOK_URL": "https://hooks.discord.com/my_webhook_url",
+        },
+    )
     def test_integration(self):
         integration = SlackDiscordIntegration()
         integration.scan_and_report(slack_message="Test message", discord_message="Test message")
-            
+
+
 if __name__ == "__main__":
     unittest.main()
-

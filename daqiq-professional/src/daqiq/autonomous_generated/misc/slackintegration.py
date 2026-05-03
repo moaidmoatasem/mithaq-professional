@@ -6,9 +6,10 @@ Category: misc
 
 import slack_sdk
 
+
 class SlackIntegration:
     def __init__(self):
-        self.client = slack_sdk.WebClient(token='your_slack_bot_token')
+        self.client = slack_sdk.WebClient(token="your_slack_bot_token")
 
     async def _send_message(self, channel_id, message_content):
         try:
@@ -28,8 +29,8 @@ class SlackIntegration:
             response = self.client.conversations_info(name=channel_name_or_id)
             if not response:
                 raise ValueError(f"Channel {channel_name_or_id} not found.")
-            channel_info = response.body['channels'][0]
-            channel_id = channel_info['id']
+            channel_info = response.body["channels"][0]
+            channel_id = channel_info["id"]
         else:
             channel_id = channel_name_or_id
 

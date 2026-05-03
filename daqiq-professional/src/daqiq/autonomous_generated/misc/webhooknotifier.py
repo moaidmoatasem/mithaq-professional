@@ -4,22 +4,24 @@ Source: batch_1_20260503_044450.txt
 Category: misc
 """
 
-import requests
 from urllib.parse import urlparse
+
+import requests
+
 
 class WebhookNotifier:
     def __init__(self, endpoint):
         """
         Initialize the WebhookNotifier instance with the webhook URL.
-        
+
         :param endpoint: The URL of the webhook to send notifications to.
         """
         self.endpoint = endpoint
-        
+
     def _validate_endpoint(self):
         """
         Validates if the provided endpoint is a valid URL. Throws an exception if invalid.
-        
+
         :raise ValueError: If the provided endpoint is invalid.
         """
         parsed_url = urlparse(self.endpoint)
@@ -33,11 +35,9 @@ class WebhookNotifier:
         :param data: The payload of the notification.
         """
         self._validate_endpoint()
-        response = requests.post(
-            url=self.endpoint,
-            json=data
-        )
+        response = requests.post(url=self.endpoint, json=data)
         return response.status_code
+
 
 def notify_on_create(resource_type, resource_id):
     """
@@ -51,6 +51,7 @@ def notify_on_create(resource_type, resource_id):
         {"resource_type": resource_type, "resource_id": resource_id}
     )
     print(f"Notified with status code: {response_code}")
+
 
 # Example Usage
 if __name__ == "__main__":

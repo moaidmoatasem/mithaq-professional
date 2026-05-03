@@ -4,8 +4,8 @@ Source: batch_1_20260501_124345.txt
 Category: ml
 """
 
-import json
 from jinja2 import Environment, FileSystemLoader
+
 
 # Mock data to represent real-world data collection for testing
 def get_report_data():
@@ -23,7 +23,7 @@ def get_report_data():
             "severity": "MEDIUM",
             "category": "Cross-Site Scripting (XSS)",
             "description": "A medium severity XSS vulnerability exists in the application.",
-        }
+        },
     ]
     return sample_reports
 
@@ -31,21 +31,21 @@ def get_report_data():
 class HTMLDashboardGenerator:
     """
     Generates an interactive HTML dashboard for reporting security vulnerabilities.
-    
+
     The HTML Dashboard includes features such as filtering, sorting data, and
     displaying charts to provide at-a-glance insights into potential vulnerabilities.
-    
+
     Methods:
     - generate_html_report(data): Generates the interactive HTML report from provided data.
-    
+
     Attributes:
     - environment: jinja2.Environment instance, used for rendering templates with Jinja2 engine.
     """
 
     def __init__(self):
         # Load Jinja2 template files
-        self.environment = Environment(loader=FileSystemLoader('templates'))
-        
+        self.environment = Environment(loader=FileSystemLoader("templates"))
+
     def generate_html_report(self, data: list):
         """
         Generates the HTML content of an interactive dashboard report.
@@ -62,25 +62,25 @@ class HTMLDashboardGenerator:
         Returns:
             None: The data is transformed into an HTML file and output to a directory.
         """
-        
+
         # Define the template for the report
-        TEMPLATE = self.environment.get_template('report.html')
-        
+        TEMPLATE = self.environment.get_template("report.html")
+
         # Render the template with provided data
         rendered_report = TEMPLATE.render(data=data)
-        
+
         # Write the rendered report to disk (for demonstration purposes, use your destination path here)
-        with open('/tmp/interactive_dashboard.html', 'w') as file:
+        with open("/tmp/interactive_dashboard.html", "w") as file:
             file.write(rendered_report)
+
 
 def generate_and_test_dashboard():
     # Generate a sample HTML report
     data = get_report_data()  # Get mock security reports data
     generator = HTMLDashboardGenerator()
-    
+
     generator.generate_html_report(data)
-    
+
+
 # Example usage (to verify the functionality without using deployed code path)
 generate_and_test_dashboard()
-
-    

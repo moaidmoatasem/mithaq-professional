@@ -5,12 +5,13 @@ Category: analyzers
 """
 
 import json
-from typing import List, Dict
+from typing import Dict, List
+
 
 class ExecutiveSummaryGenerator:
     def __init__(self):
         self._summary = {}
-    
+
     # Initialize or add metadata fields to _summary dictionary with default values
     def initialize_summary(self, title: str, date_generated: str) -> None:
         """
@@ -20,8 +21,8 @@ class ExecutiveSummaryGenerator:
         :param date_generated: Date and time when summary was generated (str in ISO format: YYYY-MM-DDTHH:mm:ssZ)
         :return: None
         """
-        self._summary['title'] = title
-        self._summary['date_generated'] = date_generated
+        self._summary["title"] = title
+        self._summary["date_generated"] = date_generated
 
     @property
     def summary(self) -> Dict:
@@ -31,12 +32,12 @@ class ExecutiveSummaryGenerator:
         :return: Dictionary containing all properties of _summary.
         """
         return self._summary
-    
+
     # Method to add a section to the executive summary with optional key and value restrictions
     def append_section(self, title: str, details: str, tags: List[str] = None) -> None:
         """
         Appends a specific section into the summary. Allows for specifying tags and ensuring no duplicate titles.
-        
+
         :param title: Title of the section (string)
         :param details: Details about the section (string)
         :param tags: Optional list of keywords to classify this section (list of strings)
@@ -44,35 +45,35 @@ class ExecutiveSummaryGenerator:
         """
         if not isinstance(title, str) or not isinstance(details, str):
             raise ValueError("Title and details must be strings.")
-        
+
         duplicate_entry = False
-        if 'sections' in self._summary:
-            for sec in self._summary['sections']:
+        if "sections" in self._summary:
+            for sec in self._summary["sections"]:
                 if title.lower() == sec.lower():
                     duplicate_entry = True
                     break
-        
+
         if duplicate_entry:
             raise ValueError(f"Section with title '{title}' already exists in summary.")
-        
+
         if tags and not isinstance(tags, list):
             raise TypeError("Tags must be a list of strings.")
-        
-        section_info = {'details': details}
+
+        section_info = {"details": details}
         if tags:
-            section_info['tags'] = set(tags)
-        self._summary['sections'] = [section_info] + self._summary.get("sections", [])
-    
+            section_info["tags"] = set(tags)
+        self._summary["sections"] = [section_info] + self._summary.get("sections", [])
+
     # Exception handling function for errors in generating executive summary
     def generate_summary(self) -> None:
         """
         Raises ValueError when title or details are not strings, or duplicates section titles/empty input.
-        
+
         :return: None
         """
-        if len(self._summary['sections']) <= 0:
+        if len(self._summary["sections"]) <= 0:
             raise ValueError("Summary cannot be generated without any sections.")
-        
+
     # Testing function using examples
     def test_summary_generator(self) -> None:
         """
@@ -80,10 +81,16 @@ class ExecutiveSummaryGenerator:
 
         :return: None
         """
-        self.initialize_summary(title='Financial Performance Overview', date_generated='2023-10-04T17:56:22Z')
-        self.append_section('Revenue Trends', 'Quarterly revenue projections for next 4 quarters.', ['financial_analysis'])
+        self.initialize_summary(
+            title="Financial Performance Overview", date_generated="2023-10-04T17:56:22Z"
+        )
+        self.append_section(
+            "Revenue Trends",
+            "Quarterly revenue projections for next 4 quarters.",
+            ["financial_analysis"],
+        )
         self.generate_summary()
-    
+
     # Testing function, ensure all methods run without errors
     def execute_tests(self) -> None:
         """
@@ -93,10 +100,11 @@ class ExecutiveSummaryGenerator:
         """
         self.test_summary_generator()
 
+
 # Example usage
 if __name__ == "__main__":
     generator = ExecutiveSummaryGenerator()
     generator.execute_tests()
-    
+
     # Displaying summary after tests (mock data for actual case)
     print(json.dumps(generator.summary, indent=4))

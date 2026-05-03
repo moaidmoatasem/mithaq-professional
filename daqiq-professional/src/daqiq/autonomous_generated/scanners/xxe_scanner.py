@@ -6,14 +6,15 @@ Category: scanners
 
 import re
 
+
 class XXE_Scanner:
     def __init__(self):
         pass
-    
+
     def perform_scan(self, xml_content):
         """
         This function performs an XML External Entity (XXE) scan on the given XML content.
-        
+
         Args:
             xml_content (str): The XML string to be scanned for XXE vulnerabilities.
 
@@ -21,34 +22,31 @@ class XXE_Scanner:
             list: A list of potential vulnerable entities found in the input. Each vulnerability is represented as a dictionary with keys 'entity_name' and '_value'.
         """
         potential_vulnerabilities = []
-        
+
         # Check if the XML content starts with <?xml
-        xml_declaration_injection_pattern = re.compile(r'^<\?\s*xml', re.IGNORECASE)
-        if not xml_content.startswith('<?xml'):
+        xml_declaration_injection_pattern = re.compile(r"^<\?\s*xml", re.IGNORECASE)
+        if not xml_content.startswith("<?xml"):
             raise ValueError("XML declaration is missing in the input.")
-        
+
         while True:
-            start_tag_regex = re.compile(r'<' + r'\?.*\?>', re.IGNORECASE)
-            match = start_tag_regex.search(xml_content, 1) 
-            if match is None: 
-                break 
-            
-            entity_name_start_index = max(0, xml_content.rfind('>', match.start()))
+            start_tag_regex = re.compile(r"<" + r"\?.*\?>", re.IGNORECASE)
+            match = start_tag_regex.search(xml_content, 1)
+            if match is None:
+                break
+
+            entity_name_start_index = max(0, xml_content.rfind(">", match.start()))
             # Extract the XXE entity name and its value
-            entity_start = match.group().replace('?', '').strip()
-            
-            entity_end_index = entity_start.index('?')
-            entity_value = xml_content[entity_start.index('?') + 3: entity_end_index]
-            entity_name = entity_start[:entity_start.index('?')]
-            
+            entity_start = match.group().replace("?", "").strip()
+
+            entity_end_index = entity_start.index("?")
+            entity_value = xml_content[entity_start.index("?") + 3 : entity_end_index]
+            entity_name = entity_start[: entity_start.index("?")]
+
             # Log the finding as a potential vulnerability
-            potential_vulnerabilities.append({
-                'entity_name': entity_name,
-                '_value': entity_value
-            })
-        
-            xml_content = xml_content[match.end():].strip()
-        
+            potential_vulnerabilities.append({"entity_name": entity_name, "_value": entity_value})
+
+            xml_content = xml_content[match.end() :].strip()
+
         return potential_vulnerabilities
 
     def test_scan(self, xml_data):
@@ -62,20 +60,21 @@ class XXE_Scanner:
         try:
             scanner = self.perform_scan(xml_data)
             if not scanner:
-                print(f"No potential XXE vulnerabilities found.\n")
-                
+                print("No potential XXE vulnerabilities found.\n")
+
             for vuln_info in scanner:
-                entity_name = vuln_info.get('entity_name', 'null')
-                entity_value = vuln_info.get('_value', 'null')
+                entity_name = vuln_info.get("entity_name", "null")
+                entity_value = vuln_info.get("_value", "null")
                 print(f"Detected XXE Vulnerability: {entity_name}, value {entity_value}")
         except ValueError as e:
             print(f"Error during scan: {e}\n")
-        
-if __name__ == '__main__':
+
+
+if __name__ == "__main__":
     xml_file_path = "path/to/xml/file.xml"
-    
-    with open(xml_file_path, 'r') as file:
+
+    with open(xml_file_path, "r") as file:
         content_to_scan = file.read()
-        
+
     scanner = XXE_Scanner()
     scanner.test_scan(content_to_scan)

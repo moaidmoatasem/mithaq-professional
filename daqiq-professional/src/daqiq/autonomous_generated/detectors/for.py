@@ -8,14 +8,15 @@ Category: detectors
 
 import logging
 from abc import ABC, abstractmethod
-from typing import List, Dict, Any
+from typing import List
+
 
 # Define abstract class for Vulnerability (VULN) and Attack Chain Components
 class Vulnerability(ABC):
     def __init__(self, name: str, description: str = "") -> None:
         self.name = name
         self.description = description
-    
+
     @abstractmethod
     def check(self) -> bool:
         """
@@ -24,12 +25,13 @@ class Vulnerability(ABC):
         """
         pass
 
+
 # Define abstract class for Attack Chain Component (ACT)
 class AttackChainComponent(Vulnerability, ABC):
     def __init__(self, name: str, description: str = None):
         super().__init__(name, f"Attack chain component {name}")
         self.description = description
-    
+
     @abstractmethod
     def detect(self) -> List[Vulnerability]:
         """
@@ -38,81 +40,95 @@ class AttackChainComponent(Vulnerability, ABC):
         """
         pass
 
+
 # Define a concrete attack chain component class
 class ExploitVulnerability(AttackChainComponent):
-    
     def __init__(self, name: str, target_vulnerability_name: str, description=None):
         super().__init__(name, f"Exploit for {target_vulnerability_name}")
         self.target_vulnerability_name = target_vulnerability_name
         self.description = description
-    
+
     def detect(self) -> List[Vulnerability]:
         # Logic to identify vulnerabilities based on the exploit scenario
         # This is intentionally simplified placeholder logic
         detected_vulns = []
-        
+
         for i in range(3):
             dummy_vuln = Vulnerability(f"DummyVuln{i+1}", "This is a dummy vulnerability")
             detected_vulns.append(dummy_vuln)
-            
+
         return [self] + detected_vulns
+
 
 # Define attack chain class
 class AttackChain:
     def __init__(self) -> None:
         self.components = []
-    
+
     def add_component(self, component: AttackChainComponent):
         if not isinstance(component, AttackChainComponent):
             raise ValueError("Must be an instance of AttackChainComponent")
         self.components.append(component)
-    
+
     def run_chain_detection(self) -> List[Vulnerability]:
         vulnerabilities_found = set()
         for component in self.components:
             found_vulns = component.detect()
             vulnerabilities_found.update(found_vulns)
-        
+
         return list(vulnerabilities_found)
+
 
 # Factory function to create attack chain components
 def create_attack_chain_component(component_type: str, **kwargs) -> AttackChainComponent:
-    if component_type == 'EXPLOIT':
-        target_vulnerability_name = kwargs.get('target_vulnerability', None)
-        description = kwargs.get('description', None)
-        
+    if component_type == "EXPLOIT":
+        target_vulnerability_name = kwargs.get("target_vulnerability", None)
+        description = kwargs.get("description", None)
+
         if not target_vulnerability_name:
             raise ValueError("Missing required parameter: target_vulnerability_name")
-            
-        return ExploitVulnerability(**{"name": component_type, **{'target_vulnerability': target_vulnerability_name}, **{'description': description}})
-    
+
+        return ExploitVulnerability(
+            **{
+                "name": component_type,
+                **{"target_vulnerability": target_vulnerability_name},
+                **{"description": description},
+            }
+        )
+
     else:
         raise NotImplementedError(f"Component type {component_type} is not implemented")
+
 
 # Example usage
 if __name__ == "__main__":
     logger = logging.getLogger(__name__)
-    logging.basicConfig(level=int(logging.DEBUG), format='%(asctime)s - %(levelname)s - %(message)s')
-    
+    logging.basicConfig(
+        level=int(logging.DEBUG), format="%(asctime)s - %(levelname)s - %(message)s"
+    )
+
     # Create an attack chain detector instance
     detector = AttackChain()
-    
+
     # Add ExploitVulnerability components to the attacker chaining logic
     try:
-        component1 = create_attack_chain_component(component_type='EXPLOIT', target_vulnerability_name='MySQLInjectionExploit')
-        component2 = create_attack_chain_component(component_type='OTHER_VULNERABILITY')
+        component1 = create_attack_chain_component(
+            component_type="EXPLOIT", target_vulnerability_name="MySQLInjectionExploit"
+        )
+        component2 = create_attack_chain_component(component_type="OTHER_VULNERABILITY")
         detector.add_component(component1)
         detector.add_component(component2)
 
         # Run the attack chain
         vulnerabilities = detector.run_chain_detection()
-        
+
         logger.info(f"Detected {len(vulnerabilities)} Vulnerability(s)")
         for vuln in vulnerabilities:
             logger.info(vuln.name)
-    
+
     except Exception as e:
         logger.error(str(e))
+
 
 # This is a mock-up application-level example test, not integration/unit tests
 def test_attack_chain(detections_target_to_vulnerabilities_count: int = 2):
@@ -125,7 +141,7 @@ def test_attack_chain(detections_target_to_vulnerabilities_count: int = 2):
 
     component1 = create_attack_chain_component("EXPLOIT", target_vulnerability_name="SQLInjection")
     component2 = create_attack_chain_component("OTHER_VULNERABILITY")
-    
+
     detector.add_component(component1)
     detector.add_component(component2)
 
@@ -133,8 +149,10 @@ def test_attack_chain(detections_target_to_vulnerabilities_count: int = 2):
     mock_vulns = [Vulnerability(f"DummyVuln{i}", f"Dummy Vulnerability {i+1}/3") for i in range(3)]
 
     component1.detect.return_value.extend([component1] + mock_vulns)
-    
+
     detector.run_chain_detection()
     detected_vulns.extend(component1.detect.call_args_list[0][0])
-    
-    assert len(detected_vulns) == detections_target_to_vulnerabilities_count, f"Unexpected number of vulnerabilities found: {len(detected_vulns)}"
+
+    assert (
+        len(detected_vulns) == detections_target_to_vulnerabilities_count
+    ), f"Unexpected number of vulnerabilities found: {len(detected_vulns)}"

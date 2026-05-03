@@ -6,30 +6,31 @@ Category: api
 
 import requests
 
+
 class BaseApi:
     def __init__(self):
         self.base_url = "https://api.example.com"
-    
+
     def _make_request(self, method, endpoint, data=None):
         """
         A helper method to make HTTP requests.
-        
+
         Parameters:
             - method (str): The HTTP request method. Ex: 'GET', 'POST'
             - endpoint (str): The API endpoint path
             - data (dict or None): Data dictionary to send in the body of the request
-        
+
         Returns:
             dict: A JSON response from the server.
-        
+
         Raises:
             Exception: If an error occurs while making the request.
         """
         url = f"{self.base_url}/{endpoint}"
         try:
-            if method == 'GET':
+            if method == "GET":
                 return requests.get(url)
-            elif method in ['POST', 'PUT']:
+            elif method in ["POST", "PUT"]:
                 if data is not None:
                     response = requests.request(method, url, json=data)
                 else:

@@ -5,8 +5,10 @@ Category: ml
 """
 
 import os
-from jinja2 import Template
+
 import fitz  # PyMuPDF
+from jinja2 import Template
+
 
 class PdfReportGenerator:
     """
@@ -22,24 +24,20 @@ class PdfReportGenerator:
         FileNotFoundError: If input files are missing or cannot be parsed.
         KeyError: If required keys are missing in report_data dictionary.
     """
-    
+
     def generate_pdf(self, report_data):
         try:
-            if not report_data.get('data'):
+            if not report_data.get("data"):
                 raise KeyError("Data is a required key in the report.")
-            
+
             processed_data = self.process_report_data(
-                data=report_data['data'],
-                template_file='pdf_template.html'
+                data=report_data["data"], template_file="pdf_template.html"
             )
-        
-            rendered_html = Template(
-                template_file='pdf_template.html'
-            ).render(processed_data)
+
+            rendered_html = Template(template_file="pdf_template.html").render(processed_data)
 
             html_content, image_objects_count = self.generate_pdf_from_data(
-                html_content=rendered_html,
-                output_file='report.pdf'
+                html_content=rendered_html, output_file="report.pdf"
             )
 
             # Assuming the data provided is structured properly and all required fields exist.
@@ -47,7 +45,7 @@ class PdfReportGenerator:
             raise FileNotFoundError("One or more input files missing.") from e
         except KeyError as e:
             raise ValueError(f"The required dict key 'data' not found in report_data: {e}")
-    
+
     def parse_excel_file(self, file_path):
         # Assume this function exists and parses the Excel data to a dictionary similar to `report_data`
         pass
@@ -55,7 +53,7 @@ class PdfReportGenerator:
     def process_report_data(self, data, template_file):
         # Custom processing logic here.
         return {
-            "example_key": data['summary']  # Placeholder for actual processing
+            "example_key": data["summary"]  # Placeholder for actual processing
         }
 
     def generate_pdf_from_data(self, html_content, output_file: str) -> tuple:
@@ -67,38 +65,34 @@ class PdfReportGenerator:
             - output_file (str): Path to save the generated PDF file.
 
         Returns:
-            A tuple containing the complete HTML content and number of images found in it. 
+            A tuple containing the complete HTML content and number of images found in it.
         """
 
         doc = fitz.open()
         page = doc.new_page(width=800, height=600)
-        page.insert_textbox( # Placeholder for actual insertion logic
+        page.insert_textbox(  # Placeholder for actual insertion logic
             text=html_content,
             rect=(50, 100, 750, 400),
         )
 
-        img_objects = [] 
+        img_objects = []
         # For simplicity, we assume `img_objects` manipulation occurs here.
-        
+
         doc.save(filename=output_file)
         return (html_content, len(img_objects))
 
     def __init__(self):
-        file_path = os.path.abspath(
-            os.path.join(os.getcwd(), 'pdf_template.html')
-        )
+        file_path = os.path.abspath(os.path.join(os.getcwd(), "pdf_template.html"))
         if not os.path.exists(file_path):
             raise FileNotFoundError(f"The template file '{file_path}' does not exist.")
-        
-if __name__ == '__main__':
+
+
+if __name__ == "__main__":
     # Example usage
     report_data = {
-        'data': {
-            'summary': "Report Summary",
-            'details_table': [
-                [1, 2, 3],
-                [4, 5, 6]
-            ]
+        "data": {
+            "summary": "Report Summary",
+            "details_table": [[1, 2, 3], [4, 5, 6]],
             # Add other data required for the renderer (not present in this example)
         }
     }
@@ -109,21 +103,20 @@ if __name__ == '__main__':
 # Example of writing tests, though not all cases possible due to unavailability of real files.
 import unittest
 
+
 class TestPdfReportGenerator(unittest.TestCase):
     def setUp(self):
         self.report_data_1 = {"data": None}  # This should raise a KeyError
         self.report_data_2 = {
-            "data": {
-                'details_table': [ ]
-            }
+            "data": {"details_table": []}
         }  # This should only have summary not table.
-        
+
     def test_wrong_inputs(self):
         pdf_generator = PdfReportGenerator()
         with self.assertRaises(ValueError) as error:
             pdf_generator.generate_pdf(report_data=self.report_data_1)
         assert "required dict key" in str(error.exception).lower()
-    
+
     def test_missing_template_file(self):
         # This will raise FileNotFoundError
         os.remove("pdf_template.html")  # Simulate file removal.

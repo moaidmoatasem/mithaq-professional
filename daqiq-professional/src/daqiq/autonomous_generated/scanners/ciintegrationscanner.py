@@ -5,14 +5,14 @@ Category: scanners
 """
 
 # Import necessary modules
-import os
 from subprocess import call
+
 
 class CIIntegrationScanner:
     """
     A class to run integration tests on security via commands.
-    The feature scanner runs commands through which we perform scans 
-    and analyze the results. It also includes error handling for both 
+    The feature scanner runs commands through which we perform scans
+    and analyze the results. It also includes error handling for both
     internal exceptions during task implementation and external command
     failures such as failed internet requests or file not found errors.
 
@@ -42,18 +42,18 @@ class CIIntegrationScanner:
     def execute_scan(command):
         """
         Executes the specified command and handles output/return codes appropriately:
-        
-        Args: 
-            - `command`: The shell command string to be executed. 
 
-         Returns: 
+        Args:
+            - `command`: The shell command string to be executed.
+
+         Returns:
             - Output of the command if successful, otherwise returns an error message.
 
         Raises:
             ValueError: If a critical external error occurs that's not handled by return code.
         """
         print(f"Executing command: {command}")
-        
+
         try:
             # Simulating an actual execution with subprocess.check_output
             result = call(command.split())
@@ -61,7 +61,7 @@ class CIIntegrationScanner:
                 return "Success. Command executed and output received."
             else:
                 return f"Error executing the command: {result}"
-                
+
         except Exception as e:
             print(f"An error occurred while attempting to run the command: {str(e)}")
             raise ValueError("Critical external error encountered.") from e
@@ -72,12 +72,12 @@ class CIIntegrationScanner:
 
          Args:
             - `config_path`: The path to the JSON configuration file defining the list of commands.
-        
-         Returns: 
+
+         Returns:
              A string indicating whether each command was successful or failed, along with any error messages.
 
          Raises:
-            ValueError if there's a critical issue in reading/config processing.  
+            ValueError if there's a critical issue in reading/config processing.
         """
         try:
             import json
@@ -86,22 +86,23 @@ class CIIntegrationScanner:
             # Validating and parsing the configuration file.
             if not Path(config_path).exists():
                 raise ValueError(f"Configuration file {config_path} does not exist.")
-            
-            with open(config_path, 'r') as cfg_file:
+
+            with open(config_path, "r") as cfg_file:
                 config = json.load(cfg_file)
-                
-            commands = config.get('commands')
+
+            commands = config.get("commands")
             if not commands or not isinstance(commands, list):
                 raise ValueError("The configuration must contain a non-empty `commands` field.")
 
             for index, command in enumerate(commands, 1):
                 result = self.execute_scan(command)
                 print(f"Command {index}: {result}")
-            
+
         except FileNotFoundError:
             print(f"The config file was not found at the specified path: {config_path}")
         except Exception as e:
             raise ValueError("Critical error encountered while processing config.") from e
+
 
 # Example Usage
 if __name__ == "__main__":

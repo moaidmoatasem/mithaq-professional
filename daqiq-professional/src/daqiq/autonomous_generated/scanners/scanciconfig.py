@@ -5,46 +5,61 @@ Category: scanners
 """
 
 import os
-from subprocess import check_output, CalledProcessError
+from subprocess import CalledProcessError, check_output
+
 
 class ScanCIConfig:
     def __init__(self, config_file):
         self.config_file = config_file
-        self.base_dir = os.path.dirname(config_file) or '.'  # Use current directory if no file specified
-        
+        self.base_dir = (
+            os.path.dirname(config_file) or "."
+        )  # Use current directory if no file specified
+
     def execute_scan(self, tool_binary, verbosity=0):
         try:
-            output = check_output([os.path.join(self.base_dir, tool_binary), '--config', self.config_file], stderr=subprocess.STDOUT)
-            return output.decode('utf8')
+            output = check_output(
+                [os.path.join(self.base_dir, tool_binary), "--config", self.config_file],
+                stderr=subprocess.STDOUT,
+            )
+            return output.decode("utf8")
         except CalledProcessError as e:
             print(f"Error occurred while executing the scan: {e.output.decode()}")
             return None
 
+
 def main():
     # Example usage
-    config_file = 'scan_config.ini'
-    
+    config_file = "scan_config.ini"
+
     scanner = ScanCIConfig(config_file)
-    test_result = scanner.execute_scan('my_scan_tool', verbosity=1)  # verbosity can be set to more than 0 for detailed output
-    
+    test_result = scanner.execute_scan(
+        "my_scan_tool", verbosity=1
+    )  # verbosity can be set to more than 0 for detailed output
+
     print(f"Scan Output: \n{test_result}")
-    
+
+
 # Run the main function if called standalone
 if __name__ == "__main__":
     # Ensure you have a configuration file and scan tool available as per your environment setup.
-    config_file_path = 'scan_config.ini'  # This should point to your actual configuration file for tools like my_scan_tool
+    config_file_path = "scan_config.ini"  # This should point to your actual configuration file for tools like my_scan_tool
     example_output = main()
-    
+
+
 # Additional test cases (hypothetical examples):
 def test_scan_execution(tmpdir, monkeypatch):
     monkeypatch.chdir(str(tmpdir))
-    tmpfile = tmpdir.join('test_scan_config.ini')
+    tmpfile = tmpdir.join("test_scan_config.ini")
     with tmpfile.open("w") as f:
         f.write("# Dummy content for this example")
-        
-    scan_tool_output = subprocess.check_output(["./nonexistent_tool", "--config", str(tmpfile)],
-                                                stderr=subprocess.STDOUT).decode('utf8')
-    
-    assert 'Could not find non-existent tool' in scan_tool_output, "Expected error message indicating lack of tool"
+
+    scan_tool_output = subprocess.check_output(
+        ["./nonexistent_tool", "--config", str(tmpfile)], stderr=subprocess.STDOUT
+    ).decode("utf8")
+
+    assert (
+        "Could not find non-existent tool" in scan_tool_output
+    ), "Expected error message indicating lack of tool"
+
 
 # Note: This hypothetical test does not run directly as the actual tool and config could be complex.

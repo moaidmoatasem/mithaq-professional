@@ -4,6 +4,7 @@ Source: batch_1_20260503_033916.txt
 Category: scanners
 """
 
+
 def is_command_injection_safe(expression_tree: ast.AST) -> bool:
     if isinstance(expression_tree, ast.Call):
         node = expression_tree
@@ -12,28 +13,35 @@ def is_command_injection_safe(expression_tree: ast.AST) -> bool:
                 break
             elif not isinstance(node, ast.Call) or node.args:
                 return False  # If we don't find an unsafe call, it isn't a command injection
-    
+
     for tree in ast.walk(expression_tree):
         scanned = bool(CommandLineScanner().visit(tree))
         if scanned:
             continue
-        
+
         result = True
-        if isinstance(tree, ast.Name) and any(attr in str(tree.id).split('.') for attr in shellcommand_names):
+        if isinstance(tree, ast.Name) and any(
+            attr in str(tree.id).split(".") for attr in shellcommand_names
+        ):
             return result  # Name that looks like shell command but isn't
 
     return False
 
+
 class UnsafeNames:
     def __init__(self):
         self._unsafe_shellcommand_names = (
-            'commands', 'exec', 'eval', 'system'
+            "commands",
+            "exec",
+            "eval",
+            "system",
             # Add more names as necessary
         )
-    
+
     @property
     def unsafe_shellcommand_names(self) -> str:
         return self._unsafe_shellcommand_names
+
 
 shellcommand_names = UnsafeNames().unsafe_shellcommand_names
 
@@ -42,10 +50,11 @@ def find_commands_injection(expressions):
     safe_expressions = list(filter(lambda e: not is_command_injection_safe(e), expressions))
     print(f"Number of potentially unsafe expressions found: {len(safe_expressions)}")
 
+
 # Example usage
 if __name__ == "__main__":
-    from ast import parse, NodeVisitor
-    
+    from ast import parse
+
     test_code = """
     import os
 
@@ -57,24 +66,28 @@ if __name__ == "__main__":
         shell_command = ('sudo ' + input())
         os.system(shell_command)
     """
-    
+
     ast_object = parse(test_code)
     expressions = ast.walk(ast_object)
-    
+
     find_commands_injection(expressions)
+
 
 # Example tests for completeness
 def test_scan():
     safe_expressions = (
-        # Safe code examples here, like `os.environ.get()`, 
+        # Safe code examples here, like `os.environ.get()`,
         # and any other code you can think of that isn't vulnerable to command injection.
     )
     unsafe_expressions = (
         # Unsafe examples with known vulnerabilities, such as:
-        ast.Call(func=ast.Attribute(value=ast.Name(id='os', ctx=enode.Load()), attr='system',
-                                    args=[], keywords=[])),
-        ast.Expr(value=ast.Str(s="sudo " + input(), kind=None))
+        ast.Call(
+            func=ast.Attribute(
+                value=ast.Name(id="os", ctx=enode.Load()), attr="system", args=[], keywords=[]
+            )
+        ),
+        ast.Expr(value=ast.Str(s="sudo " + input(), kind=None)),
     )
-    
+
     assert len(list(filter(is_command_injection_safe, safe_expressions))) == len(safe_expressions)
     assert len(list(filter(is_command_injection_safe, unsafe_expressions))) > 0

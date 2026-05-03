@@ -7,10 +7,11 @@ Category: scanners
 import requests
 from urllib3.exceptions import MaxRetryError
 
+
 class CICDIntegrationScanner:
     """
     A class to implement the CI/CD Pipeline scanner.
-    
+
     Attributes:
         base_url: The base URL for API calls.
         project_name: Name of the Project for which scanning is needed.
@@ -27,7 +28,7 @@ class CICDIntegrationScanner:
 
         Args:
             url: The URL to make the request to.
-        
+
         Returns:
             Response content if successful, None otherwise.
         """
@@ -39,13 +40,15 @@ class CICDIntegrationScanner:
             elif response.status_code >= 500 and response.status_code < 600:  # Server errors (5XX)
                 raise Exception(f"Server error occurred on {attempt + 1} attempt.")
             elif response.status_code >= 400 and response.status_code < 500:  # Client errors (4XX)
-                raise ValueError(f"Client error occurred on {attempt + 1} attempt, status code={response.status_code}")
+                raise ValueError(
+                    f"Client error occurred on {attempt + 1} attempt, status code={response.status_code}"
+                )
         raise MaxRetryError(None, url, "Max retries exceeded")
 
     def scan(self):
         """
         Performs a pipeline scan by making GET requests to the API.
-        
+
         Returns:
             A JSON object containing pipeline details if successful, None otherwise.
         """
@@ -59,14 +62,15 @@ class CICDIntegrationScanner:
 
         Args:
             data: JSON data content as bytes.
-        
+
         Returns:
             None
         """
         import json
+
         if not data:
             return
-        
+
         print("Pipeline Details:")
         pipeline_info = json.loads(data)
         for step, info in pipeline_info.items():

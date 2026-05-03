@@ -4,13 +4,14 @@ Source: batch_1_20260503_035631.txt
 Category: scanners
 """
 
-import os
 import logging
+import os
+
 
 class ScannerOptimizationTool:
     def __init__(self):
         self.logger = logging.getLogger(__name__)
-    
+
     @staticmethod
     def optimize_scanner(scanner_file_path: str) -> None:
         """
@@ -21,16 +22,16 @@ class ScannerOptimizationTool:
         """
 
         try:
-            with open(scanner_file_path, 'r') as scanner_file:
+            with open(scanner_file_path, "r") as scanner_file:
                 scanner_code = scanner_file.read()
-            
+
             # Placeholder for actual performance optimization logic
             optimized_scanner_code = optimizer.optimize(scanner_code)
-            
-            # Save optimized code back to the file 
-            with open(scanner_file_path, 'w') as scanner_file:
+
+            # Save optimized code back to the file
+            with open(scanner_file_path, "w") as scanner_file:
                 scanner_file.write(optimized_scanner_code)
-        
+
         except FileNotFoundError:
             ScannerOptimizationTool.logger.error(f"Scanner at {scanner_file_path} not found.")
         except Exception as e:
@@ -50,31 +51,31 @@ class ScannerOptimizationTool:
 
         try:
             for root, _, files in os.walk(scan_scripts_directory):
-                optimized_paths = [os.path.join(root, f) 
-                                    for f in files if f.endswith('.py')]
-        
+                optimized_paths = [os.path.join(root, f) for f in files if f.endswith(".py")]
+
                 for file_path in optimized_paths:
                     self.logger.info(f"Optimizing scanner at {file_path}")
                     self.optimize_scanner(file_path)
         except Exception as e:
             self.logger.exception(e)
 
+
 if __name__ == "__main__":
     # Example of running the optimizer without a separate script
-    test_directory = '/path/to/scan_scripts'
+    test_directory = "/path/to/scan_scripts"
     ScannerOptimizationTool().run_optimizers(test_directory)
 else:
     logging.basicConfig(level=logging.INFO)
 
 # Additional setup for unit tests if needed can be placed below as well
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     # Placeholder function to demonstrate optimizer usage in main
     def example_usage():
         tool = ScannerOptimizationTool()
-        test_file_path = '/path/to/testscanner.py'  # Assume this exists and is a valid .py file
+        test_file_path = "/path/to/testscanner.py"  # Assume this exists and is a valid .py file
         tool.optimize_scanner(test_file_path)
-    
+
     example_usage()
 
-# Additional setup for unit tests if needed goes below here  
+# Additional setup for unit tests if needed goes below here

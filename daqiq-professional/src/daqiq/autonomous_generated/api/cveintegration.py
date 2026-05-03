@@ -6,10 +6,11 @@ Category: api
 
 import requests
 
+
 class CVEIntegration:
     """
     A class to interface with the National Vulnerability Database (NVD) API for obtaining latest CVE information.
-    
+
     Note that NVD is a third-party resource and availability of APIs might vary, check https://nvd.nist.gov/ for current versions.
 
     Attributes:
@@ -17,7 +18,7 @@ class CVEIntegration:
 
     Methods:
         get_vulnerabilities(): Returns the latest vulnerabilities matching a given search criteria.
-        example_usage(): Provides an example usage of the interface. 
+        example_usage(): Provides an example usage of the interface.
 
     Error Handling:
         - This class is meant to handle API calls but assumes there's a network connectivity issue outside our control, error code details are not included for privacy concerns.
@@ -25,7 +26,7 @@ class CVEIntegration:
 
     def __init__(self):
         self.base_url = "https://services.nvd.nist.gov/api/v1"
-    
+
     def get_vulnerabilities(self, cve_query):
         """
         Retrieves CVE information for the specified search criteria.
@@ -42,8 +43,10 @@ class CVEIntegration:
         """
         headers = {"Accept": "application/json"}
         params = {"searchRequest": cve_query}
-        
-        response = requests.get(f"{self.base_url}/securityVulnerabilities", headers=headers, params=params)
+
+        response = requests.get(
+            f"{self.base_url}/securityVulnerabilities", headers=headers, params=params
+        )
         if response.status_code != 200:
             raise requests.HTTPError(response.text)
 
@@ -58,7 +61,7 @@ class CVEIntegration:
         """
         # Sample usage
         vulnerabilities = self.get_vulnerabilities("cpe:cpe_2.3:*")
-		
+
         # Example structure for returned data
         example_sample_data = vulnerabilities[:5]  # Limiting to simulate actual data retrieval
         return [vuln for vuln in example_sample_data]
@@ -74,15 +77,16 @@ class CVEIntegration:
         """
         query1 = "cpe:cpe_2.3:*"
         self.get_vulnerabilities(query1)  # Successfully retrieves
-        
+
         with self.assertRaises(requests.HTTPError):
             # Attempting an invalid search will raise an exception
             query_invalid = "dummy:query:"
             self.get_vulnerabilities(query_invalid)
-    
+
+
 if __name__ == "__main__":
     cve_integrator = CVEIntegration()
-    
+
     vulnerabilities = cve_integrator.get_vulnerabilities("cpe:cpe_2.3:*")
     print("Vulnerabilities:", vulnerabilities[:5])  # Print first few results
 

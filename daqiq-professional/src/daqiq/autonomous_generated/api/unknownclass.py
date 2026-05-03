@@ -9,6 +9,7 @@ import requests
 # Define a simple API endpoint to simulate vulnerability information retrieval.
 BASE_URL = "http://vuln/api/v1"
 
+
 def get_vulnerability_info(vendor_product_name):
     url = f"{BASE_URL}/{vendor_product_name}"
     try:
@@ -19,19 +20,21 @@ def get_vulnerability_info(vendor_product_name):
         print(f"An error occurred while fetching vulnerability information: {error}")
         return None
 
+
 # Function to compute the security severity score of a given vulnerability.
 def calculate_score(vulnerability):
     if not isinstance(vulnerability, dict):
         return 0
-    
+
     # Basic scoring logic - for demonstration purposes, we'll use weightings from CWE
-    vulnerability_type = vulnerability.get('cwe_id')
+    vulnerability_type = vulnerability.get("cwe_id")
     details_weight = 1
     impact_weight = int(vulnerability_type) * 2
 
-    total_score = (total_score + details_weight + impact_weight)
-    
+    total_score = total_score + details_weight + impact_weight
+
     return total_score if isinstance(total_score, int) else 0
+
 
 def assess_product_security(score_threshold):
     """
@@ -43,38 +46,44 @@ def assess_product_security(score_threshold):
     Returns:
         bool: Whether all identified security vulnerabilities have scores below the threshold.
     """
-    
+
     # Example data - these would typically be parsed from the vulnerability info
     products_with_vulnerabilities = {
-        'Product-A': True,
-        'Product-B': False,
+        "Product-A": True,
+        "Product-B": False,
     }
-    
+
     overall_score = 0
-    
+
     for product, has_vulnerability in products_with_vulnerabilities.items():
         if has_vulnerability:
             vulnerabilities = get_vulnerability_info(product)
-            
+
             if not vulnerabilities:
                 continue
-            
+
             total_score_in_product = 0
-            for vuln_details in vulnerabilities.get('vulnerabilities', []):
+            for vuln_details in vulnerabilities.get("vulnerabilities", []):
                 score = calculate_score(vuln_details)
                 total_score_in_product += score
-                
+
             overall_score += total_score_in_product
-    
+
     return overall_score < score_threshold
+
 
 # Example usage of the function.
 def main():
     score_threshold = 10
     if assess_product_security(score_threshold):
-        print(f"Overall product security is within acceptable limits with a score of {score_threshold}")
-    else:    
-        print(f"The current product has severe security vulnerabilities exceeding the score threshold: {score_threshold}")
+        print(
+            f"Overall product security is within acceptable limits with a score of {score_threshold}"
+        )
+    else:
+        print(
+            f"The current product has severe security vulnerabilities exceeding the score threshold: {score_threshold}"
+        )
+
 
 if __name__ == "__main__":
     main()

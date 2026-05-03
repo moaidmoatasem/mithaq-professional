@@ -7,16 +7,15 @@ Category: scanners
 #!/usr/bin/env python3
 
 import requests
-from typing import List, Dict
 
 
 class CVEDatabaseScanner:
     """
     This class implements functionality to connect and interact with the Common Vulnerabilities and Exposures (CVE) database.
-    
+
     :ivar base_url: str - The base URL of the CVE Database API endpoint.
     :ivar vulnerabilities: List[Dict] - A list containing dictionaries representing CVE entries with relevant fields filled in by successful requests.
-    
+
     Example Usage:
     >>> scanner = CVEDatabaseScanner()
     >>> response = scanner.get_vulnerabilities(max_results=10, severity="HIGH")
@@ -24,6 +23,7 @@ class CVEDatabaseScanner:
     >>> for vulnerability in response:
     ...     print(vuln)
     """
+
     def __init__(self):
         self.base_url = "https://api.example-cve-database.com/v2"
         self.vulnerabilities = []
@@ -37,7 +37,7 @@ class CVEDatabaseScanner:
         :param severity: (str) If specified, will return a filtered list of vulnerabilities based on the given severity level.
 
         :returns List[Dict]: A list containing dictionaries representing CVE entries with relevant fields filled in by successful requests.
-        
+
         Example Usage:
         >>> responses = scanning.get_vulnerabilities(max_results=10)
         >>> scanned_list_of_cve_dicts = responses['results']
@@ -47,7 +47,7 @@ class CVEDatabaseScanner:
             raise ValueError("Valid severities are: 'LOW', 'MEDIUM', or 'HIGH'")
         if max_results > 100:
             raise ValueError("Max results cannot exceed 100")
-        
+
         params["max"] = max_results
         if severity is not None:
             params["min_severity"] = severity
@@ -60,11 +60,11 @@ class CVEDatabaseScanner:
 
         try:
             content = response.json()
-            self.vulnerabilities.extend(content.get('results'))
+            self.vulnerabilities.extend(content.get("results"))
         except ValueError as e:
             raise ValueError("Failed to parse JSON data from the API") from e
 
-        return content.get('results')
+        return content.get("results")
 
     def __str__(self):
         vulnerabilities_str = "\n".join(str(cve) for cve in self.vulnerabilities)
@@ -75,12 +75,13 @@ def main():
     # Example Usage
     scanner = CVEDatabaseScanner()
     vulnerabilities = scanner.get_vulnerabilities(max_results=5, severity="HIGH")
-    
+
     print(f"High Severity Vulnerabilities Found: {len(vulnerabilities)}\n")
     for vulnerability in vulnerabilities:
         print(str(vulnerability))
-    
+
     return None
+
 
 if __name__ == "__main__":
     main()

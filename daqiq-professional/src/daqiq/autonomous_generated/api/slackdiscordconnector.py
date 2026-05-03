@@ -6,16 +6,17 @@ Category: api
 
 import os
 
+
 class SlackDiscordConnector:
     """
     A class to handle Slack and Discord integrations.
-    
+
     Attributes:
         SLACK_API_TOKEN (str): The API token for interacting with Slack.
         DISCORD_WEBHOOK_URL (str): The webhook URL for posting messages to Discord channel.
         slack_enabled (bool): Indicates if the integration is enabled via Slack settings.
         discord_enabled (bool): Indicates if the integration is enabled via Discord settings.
-    
+
     Methods:
         validate_integrations: Validates and configures the integrations based on environment variables.
         check_status: Checks the status of enabled Slack/Discord integrations.
@@ -34,32 +35,34 @@ class SlackDiscordConnector:
     def parse_integrations(environ):
         """
         PARSES the integration configurations specified in environment variables.
-        
+
         Args:
             environ (dict): Dictionary containing environment variable keys and values.
-            
+
         Returns:
             A boolean indicating if any of the integrations are enabled, or None if no valid config is found.
 
         """
         # Check for SLACK_API_TOKEN configuration
-        slack_configured = 'SLACK_API_TOKEN' in os.environ and os.environ['SLACK_API_TOKEN'] is not ''
+        slack_configured = "SLACK_API_TOKEN" in os.environ and os.environ["SLACK_API_TOKEN"] != ""
         self.slpack_enabled = slack_configured
 
         # Check for DISCORD_WEBHOOK_URL configuration
-        discord_configured = 'DISCORD_WEBHOOK_URL' in os.environ and os.environ['DISCORD_WEBHOOK_URL'] != ''
+        discord_configured = (
+            "DISCORD_WEBHOOK_URL" in os.environ and os.environ["DISCORD_WEBHOOK_URL"] != ""
+        )
         self.discord_enabled = discord_configured
 
     def validate_integrations(self):
         """
         Validates and configures the integrations, using environment variables to determine available/configured configurations.
-        
+
         Args:
             None
-            
+
         Returns:
             A boolean indicating if at least one integration is enabled.
-            
+
         """
         # Initialize parse_integraions for env vars and update internal state
         self.parse_integrations(os.environ)
@@ -68,35 +71,37 @@ class SlackDiscordConnector:
 
     def check_status(self):
         """
-        Checks the status of enabled Slack/Discord integrations and updates attributes. 
-        
+        Checks the status of enabled Slack/Discord integrations and updates attributes.
+
         Args:
             None
-            
+
         Returns:
             A boolean indicating if at least one integration is successfully configured and active.
-            
+
         """
-        import slack_sdk
         import discord_webhook
+        import slack_sdk
 
         # Initialize connections, validate settings are correctly filled out with actual API tokens/webhooks
         if self.SLACK_API_TOKEN is not None or not self.slack_enabled:
-            try: 
-                token = os.environ['SLACK_API_TOKEN']
+            try:
+                token = os.environ["SLACK_API_TOKEN"]
                 slack_client = slack_sdk.WebClient(token)
                 response = slack_client.test_api_call()
-                self.SLACK_API_TOKEN = 'Valid Token'  # Dummy value, actual should be validated
+                self.SLACK_API_TOKEN = "Valid Token"  # Dummy value, actual should be validated
                 if response is not None and len(response) > 0:
-                    self.slack_enabled = True 
-            except Exception as e: 
+                    self.slack_enabled = True
+            except Exception:
                 self.slack_enabled = False
 
-        if self.DISCORD_WEBHOOK_URL is not None or not self.discord_enabled:  
+        if self.DISCORD_WEBHOOK_URL is not None or not self.discord_enabled:
             try:
-                discord_webhook.send(self.DISCORD_WEBHOOK_URL) # Assuming successful send for status
-                self.discord_enabled = True 
-            except Exception as e:
+                discord_webhook.send(
+                    self.DISCORD_WEBHOOK_URL
+                )  # Assuming successful send for status
+                self.discord_enabled = True
+            except Exception:
                 self.discord_enabled = False
 
         return self.slack_enabled and self.discord_enabled
@@ -107,10 +112,10 @@ class SlackDiscordConnector:
 
         Args:
             token (str): The API token for communicating with Slack.
-        
+
         Returns:
             None
-        If no valid token is set the slack_enable will remain as False. 
+        If no valid token is set the slack_enable will remain as False.
 
         """
         self.SLACK_API_TOKEN = token
@@ -121,32 +126,34 @@ class SlackDiscordConnector:
 
         Args:
             webhook_url (str): The URL where incoming webhooked requests should be sent.
-        
+
         Returns:
             None
         If no valid URL is set the discord_enabled will remain as False.
-       
+
         """
         self.DISCORD_WEBHOOK_URL = webhook_url
 
     def example_usage(self):
         # Example Usage: Enables integration and checks status for Slack and Discord
-        os.environ['SLACK_API_TOKEN'] = 'your_slack_api_token'
-        os.environ['DISCORD_WEBHOOK_URL'] = 'your_discord_webhook_url'
+        os.environ["SLACK_API_TOKEN"] = "your_slack_api_token"
+        os.environ["DISCORD_WEBHOOK_URL"] = "your_discord_webhook_url"
 
         connector = SlackDiscordConnector()
         if not self.validate_integrations():
             print("Invalid Integrations. Please check environment variables.")
-        
+
         status = self.check_status()
         if not status:
-            raise Exception('One or more integrations are not enabled successfully')
+            raise Exception("One or more integrations are not enabled successfully")
+
 
 # Example Test Usage
 def test_slack_connector(test_token: str):
-    os.environ['SLACK_API_TOKEN'] = test_token
+    os.environ["SLACK_API_TOKEN"] = test_token
     slack_test_client = SlackDiscordConnector()
 
+
 def test_discord_connector(webhook_url: str):
-    os.environ['DISCORD_WEBHOOK_URL'] = webhook_url
+    os.environ["DISCORD_WEBHOOK_URL"] = webhook_url
     discord_test_client = SlackDiscordConnector()

@@ -9,11 +9,15 @@ Category: scanners
 import unittest
 from subprocess import run
 
+
 class TestFeatureScanner(unittest.TestCase):
     def test_run_code_coverage(self):
         # Example code to simulate running Coverage reports and passing in the 'PATH_FEATURES' environment variable.
-        exit_code = run(["coverage", "run", "--omit=venv/*", '--include="*py"', f"{PATH_FEATURES}*"]).returncode
+        exit_code = run(
+            ["coverage", "run", "--omit=venv/*", '--include="*py"', f"{PATH_FEATURES}*"]
+        ).returncode
         self.assertEqual(exit_code, 0)
+
 
 if __name__ == "__main__":
     suite = unittest.TestLoader().loadTestsFromTestCase(TestFeatureScanner)

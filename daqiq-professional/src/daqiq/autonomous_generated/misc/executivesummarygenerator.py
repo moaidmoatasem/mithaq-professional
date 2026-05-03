@@ -6,19 +6,20 @@ Category: misc
 
 import json
 
+
 class ExecutiveSummaryGenerator:
     """
     A tool to generate executive summaries of datasets or files.
-    
+
     :methods:
-        - `generate_summary(data_file_path=None, dataset_dicts=[])`: 
+        - `generate_summary(data_file_path=None, dataset_dicts=[])`:
             Generates a summary in JSON format given file paths or dictionaries representing data. Handles errors and validates input.
-    
+
     Example Usage:
-    
+
     >>> exec_sum_gen = ExecutiveSummaryGenerator()
     >>> summary_data = exec_sum_gen.generate_summary(
-    ...     data_file_path="data.txt", 
+    ...     data_file_path="data.txt",
     ...     dataset_dicts=[
     ...         {"name": "Alice Smith", "age": 35, "role": "Developer"},
     ...         {"name": "Bob Johnson", "age": 28, "role": "Designer"}
@@ -26,10 +27,10 @@ class ExecutiveSummaryGenerator:
     ... )
     >>> print(json.dumps(summary_data, indent=4))
     """
-    
+
     def generate_summary(self, data_file_path=None, dataset_dicts=[]):
         summary_data = []
-        
+
         if data_file_path and not any(dataset_dict for dataset_dict in dataset_dicts):
             with open(data_file_path) as file:
                 for line in file:
@@ -43,26 +44,30 @@ class ExecutiveSummaryGenerator:
                     raise ValueError("Each dictionary must contain 'name', 'age', and 'role' keys.")
         elif not data_file_path and not dataset_dicts:
             return {"Error": "Either `data_file_path` or `dataset_dicts` is required."}
-        
+
         if len(summary_data) == 0:
             error_message = {
                 "Error": "No valid input data found. Please provide either a file path to read from, or a list of dictionaries."
             }
             raise ValueError(json.dumps(error_message))
-        
+
         # Example transformation logic - replace this with actual summarization
         for i, dataset_dict in enumerate(summary_data):
-            summary_data[i]['summary'] = f"Details about {dataset_dict['name']} ({dataset_dict['role']}, age: {dataset_dict['age']})"
-            
+            summary_data[i]["summary"] = (
+                f"Details about {dataset_dict['name']} ({dataset_dict['role']}, age: {dataset_dict['age']})"
+            )
+
         return {"executive_summary": summary_data}
+
 
 # Example Test Cases
 import unittest
 
+
 class TestExecutiveSummaryGenerator(unittest.TestCase):
     def setUp(self):
         self.exec_sum_gen = ExecutiveSummaryGenerator()
-    
+
     def test_generate_summary_file_path(self):
         with open("test.txt", "w") as file:
             file.write('{"name": "Alice Smith", "age": 35, "role": "Developer"}\n')
@@ -74,71 +79,73 @@ class TestExecutiveSummaryGenerator(unittest.TestCase):
                 "name": "Alice Smith",
                 "age": 35,
                 "role": "Developer",
-                "summary": f"Details about Alice Smith (Developer, age: 35)"
+                "summary": "Details about Alice Smith (Developer, age: 35)",
             },
             {
                 "name": "Bob Johnson",
                 "age": 28,
                 "role": "Designer",
-                "summary": f"Details about Bob Johnson (Designer, age: 28)"
-            }
+                "summary": "Details about Bob Johnson (Designer, age: 28)",
+            },
         ]
-        
+
         self.assertEqual(len(result["executive_summary"]), len(expected_output))
         for i in range(len(expected_output)):
             self.assertDictEqual(result["executive_summary"][i], expected_output[i])
-    
+
     def test_generate_summary_lists(self):
         summary_data = [
             {"name": "Alice Smith", "age": 35, "role": "Developer"},
-            {"name": "Bob Johnson", "age": 28, "role": "Designer"}
+            {"name": "Bob Johnson", "age": 28, "role": "Designer"},
         ]
-        
+
         result = self.exec_sum_gen.generate_summary(dataset_dicts=summary_data)
-        
+
         expected_output = [
             {
                 "name": "Alice Smith",
                 "age": 35,
                 "role": "Developer",
-                "summary": f"Details about Alice Smith (Developer, age: 35)"
+                "summary": "Details about Alice Smith (Developer, age: 35)",
             },
             {
                 "name": "Bob Johnson",
                 "age": 28,
                 "role": "Designer",
-                "summary": f"Details about Bob Johnson (Designer, age: 28)"
-            }
+                "summary": "Details about Bob Johnson (Designer, age: 28)",
+            },
         ]
-        
+
         self.assertEqual(len(result["executive_summary"]), len(expected_output))
         for i in range(len(expected_output)):
             self.assertDictEqual(result["executive_summary"][i], expected_output[i])
-    
+
     def test_no_data(self):
         with self.assertRaises(ValueError) as context:
             self.exec_sum_gen.generate_summary(data_file_path="nonexistent.txt")
-        
+
         self.assertEqual(
             str(context.exception),
-            json.dumps({"Error": "No valid input data found. Please provide either a file path to read from, or a list of dictionaries."})
+            json.dumps(
+                {
+                    "Error": "No valid input data found. Please provide either a file path to read from, or a list of dictionaries."
+                }
+            ),
         )
-    
+
     def test_invalid_data(self):
-        summary_data = [
-            {"name": "Alice Smith", "age": 35},
-            {"name": "Bob Johnson"}
-        ]
-        
+        summary_data = [{"name": "Alice Smith", "age": 35}, {"name": "Bob Johnson"}]
+
         with self.assertRaises(ValueError) as context:
             result = self.exec_sum_gen.generate_summary(dataset_dicts=summary_data)
-        
-        error_message = json.dumps({
-            "Error": 'Each dictionary must contain "name", "age", and "role" keys.'
-        })
-        
+
+        error_message = json.dumps(
+            {"Error": 'Each dictionary must contain "name", "age", and "role" keys.'}
+        )
+
         self.assertEqual(str(context.exception), error_message)
+
 
 # Run the tests
 if __name__ == "__main__":
-    unittest.main(argv=['first-arg-is-ignored'], exit=False)
+    unittest.main(argv=["first-arg-is-ignored"], exit=False)

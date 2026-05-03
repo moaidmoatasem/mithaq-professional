@@ -7,27 +7,29 @@ Category: api
 import aiohttp
 from slack_sdk import WebClient
 
+
 class SlackConnector:
     """
     A class to handle basic operations with the Slack API.
-    
+
     Attributes:
         client (WebClient): An authenticated Slack client instance.
         slack_token (str, optional): The token provided for the application's integration. Defaults to None.
-        
-    Methods:   
+
+    Methods:
         send_message(channel_id, message_text): Send a direct message in the specified channel.
         get_user_by_id(user_id): Get user details by their ID.
-    
+
     """
+
     def __init__(self):
         self.client = WebClient()
-    
+
     async def send_message(self, channel_id, message_text):
         """
         Send a message to a specified Slack channel.
 
-        Parameters: 
+        Parameters:
             channel_id (str): The ID of the Slack channel to send the message to.
             message_text (str): The text content of the message to be sent.
 
@@ -36,90 +38,95 @@ class SlackConnector:
         """
         async with aiohttp.ClientSession() as session:
             return await self.client.chat_postMessage(
-                channel=channel_id, 
-                text=message_text,
-                session=session
+                channel=channel_id, text=message_text, session=session
             )
-    
+
     def get_user_by_id(self, user_id):
         """
         Get user details using a given Slack ID.
 
-        Parameters: 
+        Parameters:
             user_id (str): The Slack user or team ID to fetch the information for.
 
         Returns:
             dict: JSON response from the server with status and data associated with the request.
         """
         return self.client.users_info(user=user_id)
-    
+
+
 def main():
     """
     Example usage of the SlackConnector class.
-    This function creates an instance of SlackConnector, sends a message, 
+    This function creates an instance of SlackConnector, sends a message,
     gets user details by ID, and handles expected errors using exception handling.
     """
     slack_connector = SlackConnector()
-    
+
     # Channel ID for which to send a message
     channel_id = "Cxxxxxxxxxxxx"
     # Message text to be sent
     message_text = "Hello, this is a test message from python."
-    
+
     try:
         response = slack_connector.send_message(channel_id, message_text)
         print("Message sent successfully:", response)
-        
+
         user_id = "U1234567890"
         get_response = slack_connector.get_user_by_id(user_id=user_id)
-        if get_response['ok']:
+        if get_response["ok"]:
             print(f"User details fetched for ID {user_id}: {get_response}")
         else:
             print("Failed to fetch user information.")
     except Exception as e:
         print(f"An error occurred: {e}")
 
+
 if __name__ == "__main__":
-    import sys
     import argparse
 
     # Initialize argument parser
     parser = argparse.ArgumentParser(description="Example usage of SlackConnector class")
     # Argument for the slack_token (optional)
-    parser.add_argument('--slack-token', type=str, default=None,
-                        help='An optional token provided for the application\'s integration.')
-    
+    parser.add_argument(
+        "--slack-token",
+        type=str,
+        default=None,
+        help="An optional token provided for the application's integration.",
+    )
+
     args = vars(parser.parse_args())
-    
+
     slack_connector = SlackConnector()
-    
-    if args['slack-token']:
-        slack_connector.client.token = args['slack-token']
-        
+
+    if args["slack-token"]:
+        slack_connector.client.token = args["slack-token"]
+
     main()
+
 
 # Example test function (this would be in a separate file for testing)
 def test_slack_connect():
     """
     A basic example to show how you might do unit tests with unittest or pytest.
-    
+
     This is just an example, the actual implementation will depend on your project's structure and setup.
     """
     slack = SlackConnector()
     expected_channel_id = "C1234567890"
     result = slack.send_message(expected_channel_id, "This is a test message")
     assert result["ok"]
-    
+
+
 if __name__ == "__test__":
     import unittest
-    
+
     class TestSlackConnect(unittest.TestCase):
         def setUp(self):
             self.slack = SlackConnector()
-            
+
         def test_send_message(self):
             expected_channel_id = "C1234567890"
             result = self.slack.send_message(expected_channel_id, "This is a test message")
             assert result["ok"]
-    
+
     unittest.main(argv=[""], exit=False)

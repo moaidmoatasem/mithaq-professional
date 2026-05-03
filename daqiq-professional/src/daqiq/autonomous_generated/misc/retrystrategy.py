@@ -7,6 +7,7 @@ Category: misc
 import logging
 from abc import ABC, abstractmethod
 
+
 class RetryStrategy(ABC):
     """
     Base class for retry strategies. Subclasses must implement `wait` and `should_retry`
@@ -32,6 +33,7 @@ class RetryStrategy(ABC):
         """
         raise NotImplementedError("max_attempts not implemented")
 
+
 class FixedRateRetryStrategy(RetryStrategy):
     """Fixed Rate Retry Strategy that retries a fixed number of times with a specified interval before failing."""
 
@@ -40,8 +42,9 @@ class FixedRateRetryStrategy(RetryStrategy):
         self.interval = interval_seconds
 
     def wait(self) -> None:
-        logging.debug(f'Retrying operation in {self.interval} seconds after {self.attempts - 1}')
+        logging.debug(f"Retrying operation in {self.interval} seconds after {self.attempts - 1}")
         import time
+
         time.sleep(self.interval)
 
     @property
@@ -63,24 +66,26 @@ class RetryContextManager(RetryStrategy):
         """
         Returns the maximum attempts for nested context managers.
         If this RetryContextManager has a max_attempts then that value is returned. It else returns 1 (no other retries)
-        
+
         :return: integer of max_attempts or one if not set.
         """
-        return self.strategy.max_attempts if hasattr(self.strategy, 'max_attempts') else 1
+        return self.strategy.max_attempts if hasattr(self.strategy, "max_attempts") else 1
 
     def __exit__(self, exc_type, exc_val, exc_tb):
         """
         Logs and handles exceptions based on whether the operation should be retried.
 
-        :param exc_type: 
+        :param exc_type:
         :param exc_val:
         :param exc_tb:
         :return: None
         """
         if self.strategy.should_retry(exc_type, exc_val, exc_tb):
-            logging.debug(f'Operation not completed yet. Retrying... {self.max_attempts - 1} attempts remaining.')
+            logging.debug(
+                f"Operation not completed yet. Retrying... {self.max_attempts - 1} attempts remaining."
+            )
         else:
-            logging.error('Operation failed after retries. Giving up.')
+            logging.error("Operation failed after retries. Giving up.")
 
     @abstractmethod
     def should_retry(self, exception: Exception) -> bool:

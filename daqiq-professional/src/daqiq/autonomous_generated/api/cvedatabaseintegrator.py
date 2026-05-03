@@ -7,23 +7,25 @@ Category: api
 #!/usr/bin/env python3
 
 import json
+from typing import Dict, List
+
 import requests
-from typing import List, Dict
+
 
 class CveDatabaseIntegrator:
     """
     This class provides methods to retrieve and process CVE (Common Vulnerabilities and Exposures) data from the official database.
-    
+
     Attributes:
         CVE_URL: str = "https://cve-details.api/v1/cves/"
-    
+
     Methods:
-        get_cves(page_number: int, per_page: int) -> Dict[str, Any]: 
+        get_cves(page_number: int, per_page: int) -> Dict[str, Any]:
             Fetches CVE details for a given page.
-        
+
         validate_cves(cve_details: List[Dict]) -> None:
             Validates the retrieved CVEs against pre-defined criteria and handles any potential errors.
-        
+
         example_usage() -> void:
             Demonstrates how to use the CveDatabaseIntegrator class with an example usage scenario.
 
@@ -46,7 +48,7 @@ class CveDatabaseIntegrator:
     def validate_cves(cve_details: List[dict]) -> bool:
         """
         Validates the retrieved CVEs against pre-defined criteria and handles any potential errors.
-        
+
         Args:
             cve_details (List[Dict]): A list of dictionaries containing parsed data for each CVE.
 
@@ -70,17 +72,20 @@ class CveDatabaseIntegrator:
             Dict: A dictionary containing the response data. The exact keys are API dependent.
         """
         url_params = {"page": page_number, "per_page": per_page}
-        cves_response = requests.get(f"{CveDatabaseIntegrator.CVE_URL}", params=url_params, timeout=self.timeout_seconds)
+        cves_response = requests.get(
+            f"{CveDatabaseIntegrator.CVE_URL}", params=url_params, timeout=self.timeout_seconds
+        )
         return json.loads(cves_response.content) if cves_response.status_code == 200 else {}
 
     def example_usage(self):
         """
         Demonstrates how to use the CveDatabaseIntegrator class with an example usage scenario.
-        
+
         This function is used to demonstrate data handling and validation logic. It showcases how these methods would be integrated into a full-use case.
         """
         cves = self.get_cves(1, 50)
-        if not self.validate_cves(cves): 
+        if not self.validate_cves(cves):
             raise ValueError("CVE retrieval failed")
+
 
 cve_integrator = CveDatabaseIntegrator()

@@ -5,39 +5,39 @@ Category: misc
 """
 
 # Importing necessary libraries for testing and code execution
-import os
-from subprocess import check_output, CalledProcessError
+from subprocess import CalledProcessError, check_output
+
 
 class ScanTask:
     """
     This class is responsible for executing tasks within a CI/CD pipeline. It includes features such as running checks or
     scans on the source code or other artifacts. Error handling has been implemented to ensure robustness. The method also provides
     an example of how one might use this task.
-    
+
     Methods:
         perform_scan: Executes the scan/task and handles any errors that may occur during process execution.
-        
+
     Example Usage:
         # Assuming `scan_task` is an instance of ScanTask and has been initialized with a necessary configuration
         if not 'IGNORE_ERRORS' in os.environ:
             result = scan_task.perform_scan("example_source_code.txt")
             print(result)
-    
+
     """
 
     def __init__(self, source_path: str):
         """
         Initializes the task with the path to the source code or artifact being scanned.
-        
+
         Args:
             source_path (str): The directory containing the artifacts/files for scanning.
         """
         self.source_path = source_path
-    
+
     def perform_scan(self):
         """
         Executes the scan and returns any output. Handles any errors which may occur during script execution gracefully.
-        
+
         Returns:
             str: Output from the executed task, or an error message if one occurred.
         """
@@ -52,6 +52,7 @@ class ScanTask:
             # Logs or raises non-CalledProcessErr handled exceptions like file not found, permission errors, etc.
             return str(e)
 
+
 # Example Usage Function
 def run_example_usage():
     """
@@ -60,8 +61,9 @@ def run_example_usage():
     """
     # Instance creation with a directory path
     scan_task = ScanTask("/path/to/source/code")
-    
+
     print(scan_task.perform_scan())
+
 
 if __name__ == "__main__":
     run_example_usage()

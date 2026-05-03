@@ -6,6 +6,7 @@ Category: scanners
 
 import requests
 
+
 class PipelineIntegrationScanner:
     """
     A class to perform initial checks on CI/CD pipeline features.
@@ -14,15 +15,15 @@ class PipelineIntegrationScanner:
     ----------
     url : str
         The URL of the endpoint that will be tested.
-    
+
     Methods
-    --------  
+    --------
     scan_pipeline():
         Sends a request to the endpoint to verify its functionality.
         Raises an exception if any validation check fails.
-        
+
     get_endpoint_response(url):
-        Helper method for sending a GET request and parsing JSON response. 
+        Helper method for sending a GET request and parsing JSON response.
     """
 
     def __init__(self, url: str):
@@ -31,7 +32,7 @@ class PipelineIntegrationScanner:
     def scan_pipeline(self) -> None:
         """
         Sends a GET request to the endpoint and checks its response structure.
-        
+
         Raises Exception if there are any issues with status_code or content.
         """
 
@@ -40,7 +41,7 @@ class PipelineIntegrationScanner:
             response.raise_for_status()  # Raise an HTTPError for bad responses
         except requests.RequestException as e:
             raise Exception(f"Failed to connect. Error: {e}")
-        
+
         if not response.ok:
             raise Exception("HTTP error occurred - status code invalid")
 
@@ -53,12 +54,14 @@ class PipelineIntegrationScanner:
     def get_endpoint_response(self, endpoint_response: str) -> dict:
         """
         Helper function to extract JSON content from the response.
-        
+
         :param endpoint_response: Raw string of response received from server
         :return: Parsed response data as a dictionary
         """
         import json
+
         return json.loads(endpoint_response)
+
 
 # Example usage
 def main() -> None:
@@ -66,23 +69,25 @@ def main() -> None:
     url = "https://example.com/api/status"
 
     scanner = PipelineIntegrationScanner(url)
-    
+
     try:
         print("Scanning... ", end="")
         scanner.scan_pipeline()
         print("Pipeline integration is functional. ")
-    except Exception as e:  
+    except Exception as e:
         print(f"An error occurred: {e}")
+
 
 # Run the example usage
 if __name__ == "__main__":
     main()
+
 
 def test_scan_pipeline():
     """
     A set of tests to ensure the PipelineIntegrationScanner works correctly.
 
     Note: This would be defined in pytest or another testing framework.
-    For brevity, we are not going into detail here but this is a placeholder comment indicating where to add tests. 
+    For brevity, we are not going into detail here but this is a placeholder comment indicating where to add tests.
 
-"""
+    """

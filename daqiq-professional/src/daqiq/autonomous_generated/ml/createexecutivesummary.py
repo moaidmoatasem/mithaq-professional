@@ -23,7 +23,7 @@ Usage:
 
 import argparse
 import json
-from typing import List, Dict
+from typing import List
 
 
 class CreateExecutiveSummary:
@@ -35,28 +35,28 @@ class CreateExecutiveSummary:
     def read_file(file_path: str) -> (str, str):
         """
         Read content from a single JSON file.
-        
+
         Args:
             file_path: Path to the input JSON file.
 
         Returns:
             Tuple of string values: title, content
-            
+
         Raises:
             FileNotFoundError: When the source file cannot be found.
             ValueError: If the JSON is corrupted or improperly formatted.
         """
-        with open(file_path, 'r') as file:
+        with open(file_path, "r") as file:
             data = json.load(file)
-         
+
         return (data["title"], str(data))
-    
+
     def process_files(self):
-        """ 
+        """
         Process the list of input files and capture errors.
 
         Checks that all required inputs/files are provided and read them successfully.
-        
+
         Returns:
             None
         """
@@ -71,7 +71,7 @@ class CreateExecutiveSummary:
             except (FileNotFoundError, json.JSONDecodeError):
                 self.error_list.append(f"Issue reading {file_path}. Error details in error list.")
                 raise
-    
+
     def generate_summary(self) -> str:
         """
         Generate a comprehensive summary based on processed files.
@@ -80,50 +80,58 @@ class CreateExecutiveSummary:
         """
         if not self.input_files or not self.error_list:
             return "No summaries generated due to missing input files."
-        
+
         # Placeholder for actual summary generation logic - this will be filled in by subclass
         return "<html><head></head><body>Generated Executive Summary Based On Input Files</body></html>"
-    
+
     def generate_html_document(self, output: str) -> None:
         """
         Generates an HTML document summarizing input files.
 
         Args:
             output (str): Path to the output file.
-        
+
         Raises:
             IOError: If there is a problem with writing the resulting file.
         """
         summary = self.generate_summary()
         try:
-            with open(output, 'w') as file:
+            with open(output, "w") as file:
                 file.write(summary)
             print(f"Successfully created HTML executive summary at {output}.")
         except IOError as e:
             self.error_list.append(f"Issue writing output file: {str(e)}")
 
+
 def main():
-    parser = argparse.ArgumentParser(description='Generate an executive summary based on input files.')
-    
+    parser = argparse.ArgumentParser(
+        description="Generate an executive summary based on input files."
+    )
+
     # Required option to specify the JSON files
-    parser.add_argument('--input_files', required=True, help='Comma-delimited list of input JSON file paths')
+    parser.add_argument(
+        "--input_files", required=True, help="Comma-delimited list of input JSON file paths"
+    )
     # Optional flag for output (default to 'output_summary.html')
-    parser.add_argument('-o', '--output', default='output_summary.html', help='Path to generated HTML summary')
+    parser.add_argument(
+        "-o", "--output", default="output_summary.html", help="Path to generated HTML summary"
+    )
 
     args = parser.parse_args()
 
     generator = CreateExecutiveSummary()
-    generator.input_files = args.input_files.strip().split(',')
-    
+    generator.input_files = args.input_files.strip().split(",")
+
     # Run error handling and processing of files
     try:
         generator.process_files()
     except ValueError as ve:
         print(f"ValueError: {ve}")
         exit(1)
-    
+
     # Generate the summary
     generator.generate_html_document(args.output)
+
 
 if __name__ == "__main__":
     main()

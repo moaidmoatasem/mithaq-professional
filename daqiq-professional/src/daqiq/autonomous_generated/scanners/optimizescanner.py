@@ -7,15 +7,16 @@ Category: scanners
 #!/usr/bin/env python3
 
 import logging
-from pathlib import Path
 import time
+from pathlib import Path
+
 
 class OptimizeScanner:
     """
     Base class for optimizing scanners.
-    
+
     Subclasses should implement the scan method to perform optimization tasks.
-    
+
     Attributes:
         log (logging.Logger): Logger instance for handling logs.
     """
@@ -23,11 +24,11 @@ class OptimizeScanner:
     def __init__(self, path: str):
         self.log = logging.getLogger(self.__class__.__name__)
         self.path = Path(path)
-        
+
     def _log_msg(self, action: str):
         msg = f"{action} {self.path.absolute()}"
         self.log.info(msg)
-        
+
     def scan(self) -> None:
         """
         Perform optimization tasks on the provided path.
@@ -43,42 +44,43 @@ class OptimizeScanner:
         except Exception as e:
             self._log_msg(f"Error: {str(e)}")
             raise
-    
+
     def test_scan(self):
         """
         Perform an optimized scan for testing purposes.
-        
+
         Returns:
             bool: True if the scan completes successfully, False otherwise.
         """
         try:
             self.log.setLevel(logging.INFO)
             logging.basicConfig(level=logging.INFO)
-            
+
             self.scan()
             return True
         except Exception as e:
             msg = f"Test Scan Failed with Error: {str(e)}"
             self.log.error(msg)
             return False
-    
+
     def optimize_all(self):
         """
         Iterate through directories under the provided path and optimize each one.
-        
+
         This method is meant for illustrative purposes; actual optimized features would be added here.
         """
         for dirpath in self.path.iterdir():
             if dirpath.is_dir():
                 OptimizeScanner(dirpath)
-                
+
     def __str__(self):
         return f"OptimizeScanner[path={self.path}]"
 
+
 import unittest
 
+
 class TestOptimizeScanner(unittest.TestCase):
-    
     def test_scan_success(self):
         """
         Test the scan method successfully completes without any errors.
@@ -88,7 +90,7 @@ class TestOptimizeScanner(unittest.TestCase):
             ret = scanner.test_scan()
         except Exception as e:
             self.fail(f"Test Scan Failed with Error: {str(e)}")
-        
+
         self.assertTrue(ret, "Scan should complete successfully")
 
     def test_scan_failure(self):
@@ -96,13 +98,13 @@ class TestOptimizeScanner(unittest.TestCase):
         Test the scan method fails due to an expected error.
         """
         Path("nonexistent").mkdir()
-        
+
         scanner = OptimizeScanner(Path("nonexistent"))
         try:
-            ret = scanner.test_scan()            
+            ret = scanner.test_scan()
         except Exception as e:
             self.assertNotEqual(str(e), "", "Error message should not be empty")
-                            
+
+
 if __name__ == "__main__":
     unittest.main()
-

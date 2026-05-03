@@ -4,7 +4,6 @@ Source: batch_1_20260501_054228.txt
 Category: scanners
 """
 
-import os
 
 def path_traversal_scanner(file_path):
     """
@@ -15,7 +14,7 @@ def path_traversal_scanner(file_path):
     - file_path (str): The file path to analyze for potential path traversal issues.
 
     Returns:
-    - bool: True if a vulnerability is found, False otherwise. 
+    - bool: True if a vulnerability is found, False otherwise.
 
     Example usage:
     >>> path_traversal_scanner('/usr/local/bin/bash')
@@ -24,15 +23,16 @@ def path_traversal_scanner(file_path):
     True
     """
 
-    components = file_path.split('/')
+    components = file_path.split("/")
     for i, component in enumerate(components):
-        if component == '..':
+        if component == "..":
             return True
-        elif not component or i >= 1 and '.' in component:
+        elif not component or i >= 1 and "." in component:
             # Relative traversal detected, likely to fail or bypass security checks.
             return True
     else:
         return False
+
 
 def comprehensive_tests():
     """
@@ -40,12 +40,17 @@ def comprehensive_tests():
     """
 
     print("Testing with a safe path (no '../' sequence):")
-    assert not path_traversal_scanner('/usr/local/bin/bash'), "Test failed - unexpected vulnerability found in /usr/local/bin/bash"
+    assert not path_traversal_scanner(
+        "/usr/local/bin/bash"
+    ), "Test failed - unexpected vulnerability found in /usr/local/bin/bash"
 
     print("Testing with a path containing '/../':")
-    assert path_traversal_scanner('/usr/./local/file.txt'), "Test failed - no vulnerability found in '/usr/./local/file.txt'."
+    assert path_traversal_scanner(
+        "/usr/./local/file.txt"
+    ), "Test failed - no vulnerability found in '/usr/./local/file.txt'."
 
-    print(f"All tests passed successfully.")
+    print("All tests passed successfully.")
+
 
 if __name__ == "__main__":
     comprehensive_tests()

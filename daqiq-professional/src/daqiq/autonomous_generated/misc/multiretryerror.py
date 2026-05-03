@@ -6,14 +6,17 @@ Category: misc
 
 import time
 
+
 class MultiRetryError(Exception):
     """Exception base class for multi-retry scenarios."""
+
     pass
+
 
 class RetryManager:
     """
     Retry Manager is designed to handle smart retries in different contexts.
-    
+
     It supports configuring retry policies (backoff and max attempts) and
     will automatically manage retries under given constraints.
     """
@@ -49,8 +52,9 @@ class RetryManager:
                     raise e
                 else:
                     if attempt > 0:
-                        delay = min(RetryManager.attempt_limit - (attempt - 1),
-                                     backoff_time * (2 ** attempt))
+                        delay = min(
+                            RetryManager.attempt_limit - (attempt - 1), backoff_time * (2**attempt)
+                        )
                         time.sleep(delay)
                         last_exception = e
                     else:
@@ -60,7 +64,9 @@ class RetryManager:
 
         # If max attempts reached without success, throw the last caught exception.
         if last_exception is not None and isinstance(last_exception, Exception):
-            raise MultiRetryError(f"Max retry attempts reached ({RetryManager.attempt_limit}) with error: {last_exception}")
+            raise MultiRetryError(
+                f"Max retry attempts reached ({RetryManager.attempt_limit}) with error: {last_exception}"
+            )
         else:
             return backoff_time + time.time()
 
@@ -69,17 +75,19 @@ class RetryManager:
         if max_delay is not None:
             max_delay = min(RetryManager.attempt_limit * backoff_factor, max_delay)
         delay = initial_delay
-        for _ in range(RetryManager.attempt_limit - 1): # Back off up to attempt limit-1 times.
+        for _ in range(RetryManager.attempt_limit - 1):  # Back off up to attempt limit-1 times.
             Delay = min(max_delay or (backoff_factor * delay), delay + delay / backoff_factor)
             time.sleep(Delay) if Delay < 30 else None
             delay = Delay
 
-        return delay 
+        return delay
+
 
 # Example usage
 def risky_function():
     """Simulates an operation with non-deterministic outcome and possible failure."""
     from random import randint
+
     result = randint(0, 5)
     if result == 1:
         raise Exception("This is a simulated error")
@@ -87,26 +95,30 @@ def risky_function():
         print(f"Operation completed successfully: {result}")
     return result
 
+
 # Test Functionality
 def test_risky_function_with_manager():
     """Function to verify RetryManager functionality."""
-    
+
     # Scenario: No retries needed (one successful attempt).
     retry_mgr = RetryManager()
     assert retry_mgr.execute_with_retry(risky_function, (), 1) == 0
-    
+
     # Scenario: Two retries are needed due to a temporary outage.
     retry_mgr = RetryManager(attempt_limit=2)
     try:
         retry_mgr.execute_with_retry(risky_function, (), 1)
     except MultiRetryError as error:
-        assert str(error).startswith("Max retry attempts reached (3)") and "Simulated exception" not in str(error) # Ensures last exception is caught.
+        assert str(error).startswith(
+            "Max retry attempts reached (3)"
+        ) and "Simulated exception" not in str(error)  # Ensures last exception is caught.
         del error
 
     # Scenario: Three retries are exhausted with last attempt successful due to non-retryable exception.
     delay = RetryManager.get_backoff_from_config(1, backoff_factor=2)
     retry_mgr = RetryManager(attempt_limit=3)
     assert retry_mgr.execute_with_retry(risky_function, (), 1) == 1
+
 
 # Test Suite
 if __name__ == "__main__":

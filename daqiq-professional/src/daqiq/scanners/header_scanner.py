@@ -13,8 +13,13 @@ from datetime import datetime
 
 class SimpleScanner:
     """Basic security scanner that actually works"""
-
-    def __init__(self, target_url):
+    
+    def __init__(self, target_url: str):
+        parsed = urlparse(target_url)
+        if parsed.scheme not in ('http', 'https'):
+            raise ValueError(f"Unsupported scheme '{parsed.scheme}'. Only http/https are allowed.")
+        if not parsed.netloc:
+            raise ValueError("Invalid URL: missing hostname.")
         self.target = target_url
         self.results = {
             "target": target_url,
@@ -75,9 +80,11 @@ class SimpleScanner:
                     print(f"  [!] {method} is ALLOWED (Status: {response.status_code})")
                 else:
                     print(f"  [✓] {method} is blocked")
-            except:
-                print(f"  [✓] {method} is blocked")
-
+            except (requests.exceptions.ConnectionError,
+                    requests.exceptions.Timeout,
+                    requests.exceptions.SSLError) as e:
+                print(f"  [✓] {method} is blocked or unreachable")
+    
     def scan_ssl_tls(self):
         """Check SSL/TLS configuration"""
         print(f"\n[*] Checking SSL/TLS")

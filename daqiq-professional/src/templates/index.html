@@ -100,21 +100,26 @@
             document.getElementById('loading').style.display = 'none';
         }
         
+        function escapeHtml(str) {
+            const map = {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#039;'};
+            return String(str).replace(/[&<>"']/g, m => map[m]);
+        }
+
         function displayResults(data) {
-            let html = '<h3>Scan Results for ' + data.target + '</h3>';
-            html += '<p>Vulnerabilities found: ' + data.count + '</p>';
-            
+            let html = '<h3>Scan Results for ' + escapeHtml(data.target) + '</h3>';
+            html += '<p>Vulnerabilities found: ' + escapeHtml(String(data.count)) + '</p>';
+
             if (data.vulnerabilities.length > 0) {
                 data.vulnerabilities.forEach(v => {
-                    html += '<div class="vuln ' + v.severity.toLowerCase() + '">';
-                    html += '<strong>' + v.type + '</strong> [' + v.severity + ']<br>';
-                    html += v.description;
+                    html += '<div class="vuln ' + escapeHtml(v.severity.toLowerCase()) + '">';
+                    html += '<strong>' + escapeHtml(v.type) + '</strong> [' + escapeHtml(v.severity) + ']<br>';
+                    html += escapeHtml(v.description);
                     html += '</div>';
                 });
             } else {
-                html += '<p style="color: #00ff88;">✅ No vulnerabilities detected!</p>';
+                html += '<p style="color: #00ff88;">&#x2705; No vulnerabilities detected!</p>';
             }
-            
+
             document.getElementById('results').innerHTML = html;
         }
     </script>

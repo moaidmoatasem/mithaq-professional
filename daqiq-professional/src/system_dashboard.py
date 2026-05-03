@@ -34,8 +34,8 @@ if scan_reports:
         try:
             with open(report) as f:
                 data = json.load(f)
-                total_vulns += len(data.get("vulnerabilities", []))
-        except:
+                total_vulns += len(data.get('vulnerabilities', []))
+        except (json.JSONDecodeError, OSError):
             pass
 
 metrics["total_vulnerabilities_found"] = total_vulns
@@ -46,7 +46,7 @@ for py_file in Path("daqiq").rglob("*.py"):
     try:
         with open(py_file) as f:
             total_lines += len(f.readlines())
-    except:
+    except OSError:
         pass
 
 metrics["lines_of_code"] = total_lines

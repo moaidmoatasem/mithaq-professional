@@ -1,0 +1,36 @@
+[
+  {
+    "model": "tinyllama",
+    "inference_time": 8.47,
+    "response_length": 657,
+    "success": true,
+    "timestamp": "2026-05-03T17:32:29.030003"
+  },
+  {
+    "model": "qwen2.5-coder:3b",
+    "inference_time": 97.98,
+    "response_length": 2929,
+    "success": true,
+    "timestamp": "2026-05-03T17:34:07.278361"
+  },
+  {
+    "model": "qwen2.5:3b",
+    "error": "Command '['ollama', 'run', 'qwen2.5:3b', 'Write a Python function to detect SQL injection in a string']' timed out after 120 seconds",
+    "success": false
+  },
+  {
+    "model": "qwen2.5-coder:7b",
+    "error": "Command '['ollama', 'run', 'qwen2.5-coder:7b', 'Write a Python function to detect SQL injection in a string']' timed out after 120 seconds",
+    "success": false
+  },
+  {
+    "model": "qwen3.5",
+    "error": "Command '['ollama', 'run', 'qwen3.5', 'Write a Python function to detect SQL injection in a string']' timed out after 120 seconds",
+    "success": false
+  },
+  {
+    "model": "deepseek-coder-v2:16b",
+    "error": "Command '['ollama', 'run', 'deepseek-coder-v2:16b', 'Write a Python function to detect SQL injection in a string']' timed out after 120 seconds",
+    "success": false
+  }
+]

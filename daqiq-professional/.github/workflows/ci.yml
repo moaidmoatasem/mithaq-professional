@@ -20,23 +20,19 @@ jobs:
 
     - name: Install dependencies
       run: |
-        cd daqiq-professional
         pip install -r requirements.txt
         pip install pytest pytest-cov black pylint
 
     - name: Run Black (code formatting)
       run: |
-        cd daqiq-professional
         black --check src/ scripts/ || echo "Black formatting differences found (non-blocking)"
 
     - name: Run Pylint
       run: |
-        cd daqiq-professional
         pylint src/daqiq --fail-under=7.5 || echo "Pylint score below 7.5 (non-blocking)"
 
     - name: Run unit tests only
       run: |
-        cd daqiq-professional
         echo "✅ Skipping integration tests (require LLM connections)"
         echo "✅ Code quality checks completed"
 

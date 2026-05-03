@@ -1,0 +1,50 @@
+
+name: Auto-Update README
+
+on:
+  release:
+    types: [published]
+  workflow_dispatch:
+
+jobs:
+  update-readme:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          token: ${{ secrets.GITHUB_TOKEN }}
+      
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      
+      - name: Update README badges and version
+        run: |
+          # Get latest release version
+          VERSION=$(gh release view --json tagName -q .tagName)
+          
+          # Update version badge in README
+          sed -i "s|badge/version-[^-]*-|badge/version-${VERSION}-|g" README.md
+          
+          # Update installation command with latest version
+          sed -i "s|daqiq:[^[:space:]]*|daqiq:${VERSION}|g" README.md
+          
+          # Count features
+          FEATURES=$(find daqiq -name "*.py" -type f | grep -v __pycache__ | wc -l)
+          sed -i "s|badge/features-[0-9]*-|badge/features-${FEATURES}-|g" README.md
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      
+      - name: Commit changes
+        uses: EndBug/add-and-commit@v9
+        with:
+          author_name: GitHub Actions
+          author_email: actions@github.com
+          message: 'docs: auto-update README with release ${{ github.event.release.tag_name }}'
+          add: 'README.md'

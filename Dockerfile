@@ -1,55 +1,52 @@
-# Multi-stage build for minimal size
-FROM python:3.11-slim AS builder
-
-WORKDIR /build
+# ===== STAGE 1: Builder =====
+FROM python:3.12-slim AS builder
 
 # Install build dependencies
 RUN apt-get update && apt-get install -y --no-install-recommends \
-    gcc \
-    g++ \
+    build-essential \
+    git \
     && rm -rf /var/lib/apt/lists/*
 
-# Copy requirements and install
+# Create virtual environment
+RUN python -m venv /opt/venv
+ENV PATH="/opt/venv/bin:$PATH"
+
+# Copy and install dependencies
+WORKDIR /build
 COPY requirements.txt .
-RUN pip install --user --no-cache-dir --compile -r requirements.txt
+RUN pip install --no-cache-dir --upgrade pip && \
+    pip install --no-cache-dir -r requirements.txt
 
-# Production image
-FROM python:3.11-slim
+# ===== STAGE 2: Runtime =====
+FROM python:3.12-slim AS runtime
 
-LABEL maintainer="Moaid EL-Moatasem Bellah"
-LABEL description="DAQIQ - AI-Powered Security Framework"
-LABEL version="1.0.0"
-
-WORKDIR /app
-
-# Copy Python packages from builder
-COPY --from=builder /root/.local /root/.local
-
-# Install runtime dependencies
+# Install runtime dependencies only
 RUN apt-get update && apt-get install -y --no-install-recommends \
     curl \
-    ca-certificates \
-    && rm -rf /var/lib/apt/lists/* \
-    && apt-get clean
+    && rm -rf /var/lib/apt/lists/*
 
-# Copy application
-COPY daqiq/ ./daqiq/
-COPY *.py ./
+# Create non-root user
+RUN groupadd -r daqiq && useradd -r -g daqiq -d /app -s /sbin/nologin daqiq
 
-# Create necessary directories
-RUN mkdir -p output logs /app/.cache
+# Copy virtual environment from builder
+COPY --from=builder /opt/venv /opt/venv
+ENV PATH="/opt/venv/bin:$PATH"
 
-# Set environment
-ENV PATH=/root/.local/bin:$PATH \
-    PYTHONUNBUFFERED=1 \
-    PYTHONDONTWRITEBYTECODE=1 \
-    PYTHONHASHSEED=0 \
-    MALLOC_TRIM_THRESHOLD_=100000 \
-    CREWAI_TELEMETRY_OPT_OUT=true
+# Set working directory
+WORKDIR /app
+
+# Copy application code
+COPY --chown=daqiq:daqiq . .
+
+# Switch to non-root user
+USER daqiq
+
+# Expose port
+EXPOSE 8000
 
 # Health check
-HEALTHCHECK --interval=30s --timeout=10s --start-period=5s --retries=3 \
-    CMD python -c "import sys; sys.exit(0)" || exit 1
+HEALTHCHECK --interval=30s --timeout=5s --start-period=10s --retries=3 \
+    CMD curl -f http://localhost:8000/health || exit 1
 
-# Default command
-CMD ["python", "daqiq_simple_scanner.py", "--help"]
+# Run application
+CMD ["uvicorn", "daqiq.main:app", "--host", "0.0.0.0", "--port", "8000"]

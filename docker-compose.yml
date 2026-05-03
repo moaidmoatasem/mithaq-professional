@@ -1,123 +1,47 @@
+
 version: '3.8'
 
 services:
-  # Ollama AI Service
-  ollama:
-    image: ollama/ollama:latest
-    container_name: daqiq-ollama
-    volumes:
-      - ollama-data:/root/.ollama
+  daqiq:
+    build:
+      context: .
+      dockerfile: Dockerfile
     ports:
-      - "11434:11434"
+      - "8000:8000"
     environment:
-      - OLLAMA_MAX_LOADED_MODELS=2
-      - OLLAMA_NUM_PARALLEL=2
-    networks:
-      - daqiq-net
-    deploy:
-      resources:
-        limits:
-          cpus: '4'
-          memory: 6G
-        reservations:
-          memory: 2G
+      - OLLAMA_HOST=ollama:11434
+      - REDIS_HOST=redis
+      - REDIS_PORT=6379
+    depends_on:
+      - redis
+      - ollama
     restart: unless-stopped
     healthcheck:
-      test: ["CMD", "ollama", "list"]
+      test: ["CMD", "curl", "-f", "http://localhost:8000/health"]
       interval: 30s
-      timeout: 10s
+      timeout: 5s
       retries: 3
 
-  # DAQIQ Scanner Service
-  scanner:
-    build:
-      context: .
-      dockerfile: Dockerfile
-    container_name: daqiq-scanner
-    depends_on:
-      - ollama
-    volumes:
-      - ./output:/app/output
-      - ./logs:/app/logs
-    environment:
-      - OLLAMA_BASE_URL=http://ollama:11434
-      - CREWAI_TELEMETRY_OPT_OUT=true
-    networks:
-      - daqiq-net
-    deploy:
-      resources:
-        limits:
-          cpus: '2'
-          memory: 2G
-        reservations:
-          memory: 512M
-    restart: unless-stopped
-    command: tail -f /dev/null
-
-  # Web Dashboard
-  dashboard:
-    build:
-      context: .
-      dockerfile: Dockerfile
-    container_name: daqiq-dashboard
-    depends_on:
-      - scanner
-      - ollama
-    ports:
-      - "5000:5000"
-    volumes:
-      - ./output:/app/output
-    environment:
-      - FLASK_ENV=production
-      - OLLAMA_BASE_URL=http://ollama:11434
-    networks:
-      - daqiq-net
-    deploy:
-      resources:
-        limits:
-          cpus: '1'
-          memory: 512M
-    restart: unless-stopped
-    command: python daqiq_web.py
-
-  # Redis Cache (for scan results)
   redis:
-    image: redis:7-alpine
-    container_name: daqiq-redis
+    image: redis:7.4.0-alpine
+    ports:
+      - "6379:6379"
     volumes:
-      - redis-data:/data
-    networks:
-      - daqiq-net
+      - redis_data:/data
+    restart: unless-stopped
+
+  ollama:
+    image: ollama/ollama:latest
+    ports:
+      - "11434:11434"
+    volumes:
+      - ollama_data:/root/.ollama
+    restart: unless-stopped
     deploy:
       resources:
         limits:
-          memory: 256M
-    restart: unless-stopped
-    command: redis-server --maxmemory 200mb --maxmemory-policy allkeys-lru
-
-  # Nginx Reverse Proxy
-  nginx:
-    image: nginx:alpine
-    container_name: daqiq-nginx
-    depends_on:
-      - dashboard
-    ports:
-      - "80:80"
-    volumes:
-      - ./nginx.conf:/etc/nginx/nginx.conf:ro
-    networks:
-      - daqiq-net
-    restart: unless-stopped
-
-networks:
-  daqiq-net:
-    driver: bridge
-    ipam:
-      config:
-        - subnet: 172.20.0.0/16
+          memory: 4G
 
 volumes:
-  ollama-data:
-    driver: local
-  redis-data:
-    driver: local
+  redis_data:
+  ollama_data:

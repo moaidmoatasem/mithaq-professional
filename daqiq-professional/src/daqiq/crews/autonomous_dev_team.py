@@ -24,15 +24,15 @@ class AutonomousDevTeam:
     - QA Tester
     - DevOps Engineer
     """
-    
+
     def __init__(self, model: str = "ollama/qwen2.5:3b"):
         self.llm = LLM(model=model, base_url="http://localhost:11434")
         self.project_path = "output/autonomous_project"
         os.makedirs(self.project_path, exist_ok=True)
-        
+
     def create_team(self):
         """Create all team members"""
-        
+
         # 1. Product Manager - The Orchestrator
         product_manager = Agent(
             role="Product Manager",
@@ -41,9 +41,9 @@ class AutonomousDevTeam:
             clear roadmaps with milestones and phases. You break down projects 
             into manageable tasks and track progress.""",
             llm=self.llm,
-            verbose=True
+            verbose=True,
         )
-        
+
         # 2. Technical Architect
         architect = Agent(
             role="Technical Architect",
@@ -52,9 +52,9 @@ class AutonomousDevTeam:
             High-Level Design (HLD) and Low-Level Design (LLD) documents. 
             You choose appropriate design patterns and ensure scalability.""",
             llm=self.llm,
-            verbose=True
+            verbose=True,
         )
-        
+
         # 3. Tech Lead
         tech_lead = Agent(
             role="Tech Lead",
@@ -63,9 +63,9 @@ class AutonomousDevTeam:
             quality, security, and best practices. You ensure the team follows 
             architectural decisions and coding standards.""",
             llm=self.llm,
-            verbose=True
+            verbose=True,
         )
-        
+
         # 4. Senior Developer
         senior_dev = Agent(
             role="Senior Developer",
@@ -74,9 +74,9 @@ class AutonomousDevTeam:
             maintainable, production-ready code. You follow SOLID principles 
             and write comprehensive documentation.""",
             llm=self.llm,
-            verbose=True
+            verbose=True,
         )
-        
+
         # 5. Backend Developer
         backend_dev = Agent(
             role="Backend Developer",
@@ -84,9 +84,9 @@ class AutonomousDevTeam:
             backstory="""You specialize in backend development, creating 
             robust APIs, database schemas, and business logic.""",
             llm=self.llm,
-            verbose=True
+            verbose=True,
         )
-        
+
         # 6. Security Developer
         security_dev = Agent(
             role="Security Developer",
@@ -95,9 +95,9 @@ class AutonomousDevTeam:
             security controls, vulnerability scanners, and secure coding 
             practices.""",
             llm=self.llm,
-            verbose=True
+            verbose=True,
         )
-        
+
         # 7. Code Reviewer
         code_reviewer = Agent(
             role="Code Reviewer",
@@ -106,9 +106,9 @@ class AutonomousDevTeam:
             bugs, security issues, performance problems, and adherence to 
             coding standards.""",
             llm=self.llm,
-            verbose=True
+            verbose=True,
         )
-        
+
         # 8. QA Engineer
         qa_engineer = Agent(
             role="QA Engineer",
@@ -117,9 +117,9 @@ class AutonomousDevTeam:
             comprehensive unit tests, integration tests, and ensures 
             test coverage meets standards.""",
             llm=self.llm,
-            verbose=True
+            verbose=True,
         )
-        
+
         # 9. DevOps Engineer
         devops = Agent(
             role="DevOps Engineer",
@@ -127,24 +127,24 @@ class AutonomousDevTeam:
             backstory="""You are a DevOps expert who creates deployment 
             pipelines, manages integrations, and ensures smooth releases.""",
             llm=self.llm,
-            verbose=True
+            verbose=True,
         )
-        
+
         return {
-            'pm': product_manager,
-            'architect': architect,
-            'tech_lead': tech_lead,
-            'senior_dev': senior_dev,
-            'backend_dev': backend_dev,
-            'security_dev': security_dev,
-            'reviewer': code_reviewer,
-            'qa': qa_engineer,
-            'devops': devops
+            "pm": product_manager,
+            "architect": architect,
+            "tech_lead": tech_lead,
+            "senior_dev": senior_dev,
+            "backend_dev": backend_dev,
+            "security_dev": security_dev,
+            "reviewer": code_reviewer,
+            "qa": qa_engineer,
+            "devops": devops,
         }
-    
+
     def create_project_workflow(self, team: Dict, project_description: str):
         """Create complete project workflow"""
-        
+
         # PHASE 1: Planning & Architecture
         task_roadmap = Task(
             description=f"""Create a detailed project roadmap for: {project_description}
@@ -158,9 +158,9 @@ class AutonomousDevTeam:
             
             Output a structured markdown roadmap.""",
             expected_output="Detailed project roadmap with phases and milestones",
-            agent=team['pm']
+            agent=team["pm"],
         )
-        
+
         task_hld = Task(
             description=f"""Design High-Level Architecture for: {project_description}
             
@@ -173,10 +173,10 @@ class AutonomousDevTeam:
             
             Output a comprehensive HLD document.""",
             expected_output="High-Level Design document",
-            agent=team['architect'],
-            context=[task_roadmap]
+            agent=team["architect"],
+            context=[task_roadmap],
         )
-        
+
         task_lld = Task(
             description="""Create Low-Level Design based on the HLD.
             
@@ -189,10 +189,10 @@ class AutonomousDevTeam:
             
             Output detailed LLD document.""",
             expected_output="Low-Level Design document with patterns",
-            agent=team['architect'],
-            context=[task_hld]
+            agent=team["architect"],
+            context=[task_hld],
         )
-        
+
         # PHASE 2: Development (Parallel)
         task_core_feature = Task(
             description="""Implement the core feature based on LLD.
@@ -205,10 +205,10 @@ class AutonomousDevTeam:
             
             Output complete Python code.""",
             expected_output="Core feature implementation",
-            agent=team['senior_dev'],
-            context=[task_lld]
+            agent=team["senior_dev"],
+            context=[task_lld],
         )
-        
+
         task_backend = Task(
             description="""Implement backend services and APIs based on LLD.
             
@@ -220,10 +220,10 @@ class AutonomousDevTeam:
             
             Output complete backend code.""",
             expected_output="Backend service implementation",
-            agent=team['backend_dev'],
-            context=[task_lld]
+            agent=team["backend_dev"],
+            context=[task_lld],
         )
-        
+
         task_security = Task(
             description="""Implement security features based on LLD.
             
@@ -235,10 +235,10 @@ class AutonomousDevTeam:
             
             Output security module code.""",
             expected_output="Security implementation",
-            agent=team['security_dev'],
-            context=[task_lld]
+            agent=team["security_dev"],
+            context=[task_lld],
         )
-        
+
         # PHASE 3: Code Review
         task_review = Task(
             description="""Review all implemented code for quality and security.
@@ -252,10 +252,10 @@ class AutonomousDevTeam:
             
             Output code review report with recommendations.""",
             expected_output="Comprehensive code review report",
-            agent=team['reviewer'],
-            context=[task_core_feature, task_backend, task_security]
+            agent=team["reviewer"],
+            context=[task_core_feature, task_backend, task_security],
         )
-        
+
         # PHASE 4: Testing
         task_testing = Task(
             description="""Write comprehensive tests for all components.
@@ -268,10 +268,10 @@ class AutonomousDevTeam:
             
             Output complete test suite.""",
             expected_output="Complete test suite code",
-            agent=team['qa'],
-            context=[task_review]
+            agent=team["qa"],
+            context=[task_review],
         )
-        
+
         # PHASE 5: Integration & Deployment
         task_integration = Task(
             description="""Create integration and deployment plan.
@@ -285,10 +285,10 @@ class AutonomousDevTeam:
             
             Output deployment guide.""",
             expected_output="Deployment and integration guide",
-            agent=team['devops'],
-            context=[task_testing]
+            agent=team["devops"],
+            context=[task_testing],
         )
-        
+
         # PHASE 6: Final Review by Tech Lead
         task_tech_lead_approval = Task(
             description="""Review entire project for approval.
@@ -302,10 +302,10 @@ class AutonomousDevTeam:
             
             Output final approval report.""",
             expected_output="Tech lead approval and final recommendations",
-            agent=team['tech_lead'],
-            context=[task_integration, task_review, task_testing]
+            agent=team["tech_lead"],
+            context=[task_integration, task_review, task_testing],
         )
-        
+
         return [
             task_roadmap,
             task_hld,
@@ -316,80 +316,87 @@ class AutonomousDevTeam:
             task_review,
             task_testing,
             task_integration,
-            task_tech_lead_approval
+            task_tech_lead_approval,
         ]
-    
+
     def run_project(self, project_description: str):
         """Run complete development project"""
-        
-        print("="*80)
+
+        print("=" * 80)
         print("🚀 AUTONOMOUS SOFTWARE DEVELOPMENT TEAM")
-        print("="*80)
+        print("=" * 80)
         print(f"\nProject: {project_description}\n")
-        
+
         # Create team
         print("👥 Assembling development team...")
         team = self.create_team()
         print(f"✅ Team assembled: {len(team)} members\n")
-        
+
         # Create workflow
         print("📋 Creating project workflow...")
         tasks = self.create_project_workflow(team, project_description)
         print(f"✅ Workflow created: {len(tasks)} tasks\n")
-        
+
         # Create crew
         crew = Crew(
             agents=list(team.values()),
             tasks=tasks,
             process=Process.sequential,  # Sequential ensures proper workflow
-            verbose=True
+            verbose=True,
         )
-        
+
         # Execute
         print("🎬 Starting development process...\n")
         start_time = datetime.now()
-        
+
         result = crew.kickoff()
-        
+
         end_time = datetime.now()
         duration = (end_time - start_time).total_seconds()
-        
+
         # Save results
         self._save_project_outputs(result, project_description, duration)
-        
+
         return result
-    
+
     def _save_project_outputs(self, result, project_desc: str, duration: float):
         """Save all project outputs"""
-        
+
         timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
         project_folder = f"{self.project_path}/{timestamp}_project"
         os.makedirs(project_folder, exist_ok=True)
-        
+
         # Save complete output
-        with open(f"{project_folder}/complete_project.md", 'w') as f:
+        with open(f"{project_folder}/complete_project.md", "w") as f:
             f.write(f"# Autonomous Development Project\n\n")
             f.write(f"**Project:** {project_desc}\n")
             f.write(f"**Duration:** {duration:.2f} seconds\n")
             f.write(f"**Timestamp:** {timestamp}\n\n")
             f.write("---\n\n")
             f.write(str(result))
-        
+
         # Save metadata
         metadata = {
-            'project': project_desc,
-            'timestamp': timestamp,
-            'duration_seconds': duration,
-            'team_size': 9,
-            'phases': ['Planning', 'Architecture', 'Development', 'Review', 'Testing', 'Deployment']
+            "project": project_desc,
+            "timestamp": timestamp,
+            "duration_seconds": duration,
+            "team_size": 9,
+            "phases": [
+                "Planning",
+                "Architecture",
+                "Development",
+                "Review",
+                "Testing",
+                "Deployment",
+            ],
         }
-        
-        with open(f"{project_folder}/metadata.json", 'w') as f:
+
+        with open(f"{project_folder}/metadata.json", "w") as f:
             json.dump(metadata, f, indent=2)
-        
-        print("\n" + "="*80)
+
+        print("\n" + "=" * 80)
         print("✅ PROJECT COMPLETED!")
-        print("="*80)
+        print("=" * 80)
         print(f"📁 Output saved to: {project_folder}/")
         print(f"⏱️  Duration: {duration:.2f} seconds")
         print(f"👥 Team members: 9")
@@ -399,7 +406,7 @@ class AutonomousDevTeam:
 if __name__ == "__main__":
     # Example usage
     team = AutonomousDevTeam()
-    
+
     project = """
     Build a web vulnerability scanner with the following features:
     - XSS detection
@@ -409,5 +416,5 @@ if __name__ == "__main__":
     - RESTful API for scanning
     - Web dashboard for results
     """
-    
+
     team.run_project(project)

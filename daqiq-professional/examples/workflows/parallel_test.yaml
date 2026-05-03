@@ -1,0 +1,5 @@
+name: parallel_test
+description: parallel_test workflow
+agents:
+  - name: agent_1
+    type: scanner

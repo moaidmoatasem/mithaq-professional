@@ -1,4 +1,5 @@
 import logging
+
 """
 AI Workflows Orchestrator for daqiq.
 
@@ -11,11 +12,12 @@ TODO:
 from typing import Callable, Dict, Any, List
 from daqiq.ai_workflows_orchestrator import orchestrate_ai_workflows
 
-
 logger = logging.getLogger(__name__)
+
 
 def echo_agent(payload):
     return {"echo": payload}
+
 
 context = {
     "project_name": "Demo AI Orchestration",
@@ -101,7 +103,9 @@ def orchestrate_ai_workflows(context: Dict[str, Any]) -> Dict[str, Any]:
         agent_name = step.get("agent")
         agent_input = step.get("input", {})
 
-        print(f"[daqiq-ai] Executing step {idx}: {step_name} using agent '{agent_name}'")
+        print(
+            f"[daqiq-ai] Executing step {idx}: {step_name} using agent '{agent_name}'"
+        )
 
         result_record: Dict[str, Any] = {
             "index": idx,

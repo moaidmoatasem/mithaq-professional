@@ -3,8 +3,10 @@
 Swarm Iteration #5 - INTEGRATION
 Integrate the orchestration API into main DAQIQ workflow
 """
+
 import sys
-sys.path.insert(0, '.')
+
+sys.path.insert(0, ".")
 
 from daqiq.agents.micro_swarm.micro_agent import MicroAgent, MicroAgentConfig
 from daqiq.agents.micro_swarm.swarm_orchestrator import MicroSwarm
@@ -17,14 +19,15 @@ print("""
 ╚══════════════════════════════════════════════════════════════╝
 """)
 
+
 def create_workflow_yaml_example(context: str):
     """Create example workflow YAML files"""
-    examples_dir = Path('daqiq-professional/examples/workflows')
+    examples_dir = Path("daqiq-professional/examples/workflows")
     examples_dir.mkdir(parents=True, exist_ok=True)
-    
+
     # Example 1: Simple security scan
-    simple_workflow = examples_dir / 'security_scan_workflow.yaml'
-    simple_workflow.write_text('''# Security Scan Workflow
+    simple_workflow = examples_dir / "security_scan_workflow.yaml"
+    simple_workflow.write_text("""# Security Scan Workflow
 name: "Basic Security Scan"
 description: "Run a comprehensive security scan using DAQIQ agents"
 
@@ -54,11 +57,11 @@ tasks:
 output:
   format: "json"
   file: "scan_results.json"
-''')
-    
+""")
+
     # Example 2: Parallel testing workflow
-    parallel_workflow = examples_dir / 'parallel_test_workflow.yaml'
-    parallel_workflow.write_text('''# Parallel Testing Workflow
+    parallel_workflow = examples_dir / "parallel_test_workflow.yaml"
+    parallel_workflow.write_text("""# Parallel Testing Workflow
 name: "Parallel Exploit Testing"
 description: "Test multiple endpoints in parallel for SQL injection"
 
@@ -80,17 +83,18 @@ execution:
 burhan_standard:
   require_proof: true
   min_confidence: 0.95
-''')
-    
+""")
+
     return {
-        'examples_created': 2,
-        'files': [str(simple_workflow), str(parallel_workflow)]
+        "examples_created": 2,
+        "files": [str(simple_workflow), str(parallel_workflow)],
     }
+
 
 def create_yaml_parser(context: str):
     """Create YAML workflow parser"""
-    parser_file = Path('daqiq-professional/src/daqiq/workflow_parser.py')
-    
+    parser_file = Path("daqiq-professional/src/daqiq/workflow_parser.py")
+
     parser_code = '''"""
 Workflow YAML Parser
 Converts YAML workflow definitions into executable agent configurations
@@ -161,20 +165,21 @@ def load_workflow(workflow_file: str) -> Dict[str, Any]:
     parser = WorkflowParser(workflow_file)
     return parser.parse()
 '''
-    
+
     parser_file.write_text(parser_code)
-    
+
     return {
-        'file': str(parser_file),
-        'classes': ['WorkflowParser'],
-        'functions': ['load_workflow']
+        "file": str(parser_file),
+        "classes": ["WorkflowParser"],
+        "functions": ["load_workflow"],
     }
+
 
 def integrate_with_cli(context: str):
     """Update CLI to support workflow files"""
-    cli_file = Path('daqiq-professional/scripts/daqiq_cli_orchestrate.py')
+    cli_file = Path("daqiq-professional/scripts/daqiq_cli_orchestrate.py")
     code = cli_file.read_text()
-    
+
     # Add workflow file support to orchestrate command
     new_orchestrate = '''@cli.command()
 @click.option('--config', required=True, help='Workflow config file (YAML)')
@@ -202,7 +207,7 @@ def orchestrate(config, output):
     
     except Exception as e:
         click.echo(f"❌ Error: {e}")'''
-    
+
     # Replace old orchestrate command
     code = code.replace(
         '''@cli.command()
@@ -211,20 +216,25 @@ def orchestrate(config):
     """Run an orchestration workflow"""
     click.echo(f"🎯 Orchestrating workflow from {config}")
     # TODO: Call orchestrate_workflow(config)''',
-        new_orchestrate
+        new_orchestrate,
     )
-    
+
     cli_file.write_text(code)
-    
+
     return {
-        'file': str(cli_file),
-        'updates': ['Added YAML workflow support', 'Integrated workflow_parser', 'Added real execution']
+        "file": str(cli_file),
+        "updates": [
+            "Added YAML workflow support",
+            "Integrated workflow_parser",
+            "Added real execution",
+        ],
     }
+
 
 def create_integration_tests(context: str):
     """Create integration tests for the workflow system"""
-    test_file = Path('daqiq-professional/tests/test_workflow_integration.py')
-    
+    test_file = Path("daqiq-professional/tests/test_workflow_integration.py")
+
     test_code = '''"""
 Integration tests for workflow orchestration
 """
@@ -274,44 +284,53 @@ def test_workflow_execution():
     assert result.success is True
     assert result.duration >= 0
 '''
-    
+
     test_file.write_text(test_code)
-    
+
     return {
-        'file': str(test_file),
-        'tests': 3,
-        'coverage': 'workflow_parser + orchestration_api'
+        "file": str(test_file),
+        "tests": 3,
+        "coverage": "workflow_parser + orchestration_api",
     }
+
 
 # Create integration swarm
 agents = [
-    MicroAgent(MicroAgentConfig(
-        role="WorkflowExampleCreator",
-        purpose="Create example YAML workflows",
-        tool_function=create_workflow_yaml_example
-    )),
-    MicroAgent(MicroAgentConfig(
-        role="YAMLParserBuilder",
-        purpose="Build YAML workflow parser",
-        tool_function=create_yaml_parser
-    )),
-    MicroAgent(MicroAgentConfig(
-        role="CLIIntegrator",
-        purpose="Integrate workflows into CLI",
-        tool_function=integrate_with_cli
-    )),
-    MicroAgent(MicroAgentConfig(
-        role="IntegrationTester",
-        purpose="Create integration tests",
-        tool_function=create_integration_tests
-    ))
+    MicroAgent(
+        MicroAgentConfig(
+            role="WorkflowExampleCreator",
+            purpose="Create example YAML workflows",
+            tool_function=create_workflow_yaml_example,
+        )
+    ),
+    MicroAgent(
+        MicroAgentConfig(
+            role="YAMLParserBuilder",
+            purpose="Build YAML workflow parser",
+            tool_function=create_yaml_parser,
+        )
+    ),
+    MicroAgent(
+        MicroAgentConfig(
+            role="CLIIntegrator",
+            purpose="Integrate workflows into CLI",
+            tool_function=integrate_with_cli,
+        )
+    ),
+    MicroAgent(
+        MicroAgentConfig(
+            role="IntegrationTester",
+            purpose="Create integration tests",
+            tool_function=create_integration_tests,
+        )
+    ),
 ]
 
 tasks = [
     "Create example workflow YAML files",
     "Build YAML parser for workflows",
     "Integrate parser into CLI",
-    "Create integration tests"
+    "Create integration tests",
 ]
 
 # Deploy integration swarm
@@ -319,22 +338,31 @@ swarm = MicroSwarm(max_parallel=4)
 results = swarm.deploy(agents, tasks)
 
 # Print summary
-print("\n" + "="*70)
+print("\n" + "=" * 70)
 print("INTEGRATION COMPLETE")
-print("="*70)
+print("=" * 70)
 for result in results:
-    if result['success']:
+    if result["success"]:
         print(f"\n✅ {result['agent']}:")
-        for key, value in result['result'].items():
+        for key, value in result["result"].items():
             print(f"   {key}: {value}")
 
 # Auto-commit
-print("\n" + "="*70)
+print("\n" + "=" * 70)
 print("GIT OPERATIONS")
-print("="*70)
+print("=" * 70)
 try:
-    subprocess.run(['git', 'add', '-A'], check=True)
-    subprocess.run(['git', 'commit', '--no-verify', '-m', '[MicroSwarm Iteration #5] Full workflow integration + YAML support'], check=True)
+    subprocess.run(["git", "add", "-A"], check=True)
+    subprocess.run(
+        [
+            "git",
+            "commit",
+            "--no-verify",
+            "-m",
+            "[MicroSwarm Iteration #5] Full workflow integration + YAML support",
+        ],
+        check=True,
+    )
     print("✅ Integration committed!")
 except Exception as e:
     print(f"⚠️  Commit issue: {e}")

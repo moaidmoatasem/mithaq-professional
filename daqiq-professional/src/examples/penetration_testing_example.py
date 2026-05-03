@@ -21,7 +21,7 @@ def main():
     validation = tester.validate_vulnerability(
         vuln_id="CVE-2024-SQLI-001",
         target="E-commerce checkout page",
-        proof_of_concept="' OR '1'='1' -- injection in payment_id parameter"
+        proof_of_concept="' OR '1'='1' -- injection in payment_id parameter",
     )
 
     print(f"Task ID: {validation.task_id}")

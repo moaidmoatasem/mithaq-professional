@@ -21,10 +21,12 @@ NOTES_FILE = Path("daqiq-professional/AGENT_NOTES_ORCHESTRATION.md")
 OUTPUT_DIR = Path("orchestration_iterations")
 OUTPUT_DIR.mkdir(exist_ok=True)
 
+
 def log(message):
     """Log to console"""
-    timestamp = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
+    timestamp = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
     print(f"[{timestamp}] {message}")
+
 
 def read_mission():
     """Read the mission file"""
@@ -33,28 +35,31 @@ def read_mission():
         exit(1)
     return MISSION_FILE.read_text()
 
+
 def read_notes():
     """Read existing notes"""
     if NOTES_FILE.exists():
         return NOTES_FILE.read_text()
     return ""
 
+
 def append_notes(content):
     """Append to notes file"""
-    with open(NOTES_FILE, 'a') as f:
+    with open(NOTES_FILE, "a") as f:
         f.write(f"\n## Iteration {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}\n\n")
         f.write(content + "\n")
+
 
 # Read mission and context
 log("📖 Reading mission and context...")
 mission = read_mission()
 existing_notes = read_notes()
 
-log("\n" + "="*70)
+log("\n" + "=" * 70)
 log("MISSION:")
-log("="*70)
+log("=" * 70)
 print(mission)
-log("="*70)
+log("=" * 70)
 
 # Initialize AI crew
 log("\n🤖 Initializing AI crew...")
@@ -99,25 +104,27 @@ log("Task: Analyze codebase and propose next step")
 # Execute using the correct API
 agent_configs = [
     {
-        'role': 'Orchestration Architect',
-        'goal': 'Understand the current orchestration code and propose improvements',
-        'backstory': 'Expert in AI workflow orchestration, system design, and incremental refactoring'
+        "role": "Orchestration Architect",
+        "goal": "Understand the current orchestration code and propose improvements",
+        "backstory": "Expert in AI workflow orchestration, system design, and incremental refactoring",
     }
 ]
 
 task_configs = [
     {
-        'description': task_context,
-        'expected_output': 'Structured analysis with files checked, understanding gained, next step, and TODO list'
+        "description": task_context,
+        "expected_output": "Structured analysis with files checked, understanding gained, next step, and TODO list",
     }
 ]
 
 start_time = time.time()
-results = crew.run_parallel_batches(agent_configs=agent_configs, task_configs=task_configs)
+results = crew.run_parallel_batches(
+    agent_configs=agent_configs, task_configs=task_configs
+)
 duration = time.time() - start_time
 
 # Extract result text
-result_text = str(results[0]['result']) if results else "No output generated"
+result_text = str(results[0]["result"]) if results else "No output generated"
 
 log(f"\n✅ Iteration complete! Duration: {duration:.1f}s")
 
@@ -130,11 +137,11 @@ log(f"📄 Saved to: {output_file}")
 append_notes(result_text)
 log(f"📝 Updated: {NOTES_FILE}")
 
-log("\n" + "="*70)
+log("\n" + "=" * 70)
 log("🎉 ITERATION COMPLETE")
-log("="*70)
+log("=" * 70)
 log("\nNext steps:")
 log("1. Review the output file")
 log("2. Review updated AGENT_NOTES_ORCHESTRATION.md")
 log("3. Run this script again for the next iteration")
-log("="*70)
+log("=" * 70)

@@ -82,7 +82,9 @@ class TesterAgent(BaseAgent):
         # Sanitize target
         sanitized_target = self.sanitize_input(target)
 
-        reasoning = f"Validating exploitability of {vuln_id} with proof-of-concept testing"
+        reasoning = (
+            f"Validating exploitability of {vuln_id} with proof-of-concept testing"
+        )
 
         return self.create_instruction(
             task_id=f"validate-{vuln_id.replace('-', '')}",

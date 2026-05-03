@@ -3,8 +3,10 @@
 Swarm Iteration #8 - COMPLETE THE SYSTEM
 Final polish: Documentation, Docker, and production readiness
 """
+
 import sys
-sys.path.insert(0, '.')
+
+sys.path.insert(0, ".")
 
 from daqiq.agents.micro_swarm.micro_agent import MicroAgent, MicroAgentConfig
 from daqiq.agents.micro_swarm.swarm_orchestrator import MicroSwarm
@@ -18,11 +20,12 @@ print("""
 ╚══════════════════════════════════════════════════════════════╝
 """)
 
+
 def create_comprehensive_readme(context: str):
     """Create comprehensive README for the autonomous system"""
-    readme = Path('daqiq-professional/AUTONOMOUS_SYSTEM_README.md')
-    
-    content = '''# 🤖 DAQIQ Autonomous Agent System
+    readme = Path("daqiq-professional/AUTONOMOUS_SYSTEM_README.md")
+
+    content = """# 🤖 DAQIQ Autonomous Agent System
 
 ## Overview
 
@@ -140,21 +143,18 @@ No humans wrote code. Agents analyzed, designed, implemented, tested, and docume
 ## License
 
 Part of the DAQIQ security testing framework.
-'''
-    
+"""
+
     readme.write_text(content)
-    
-    return {
-        'file': str(readme),
-        'sections': 12,
-        'size': len(content)
-    }
+
+    return {"file": str(readme), "sections": 12, "size": len(content)}
+
 
 def create_dockerfile(context: str):
     """Create Dockerfile for containerized deployment"""
-    dockerfile = Path('daqiq-professional/Dockerfile')
-    
-    content = '''FROM python:3.12-slim
+    dockerfile = Path("daqiq-professional/Dockerfile")
+
+    content = """FROM python:3.12-slim
 
 LABEL maintainer="DAQIQ Autonomous Agents"
 LABEL description="Autonomous agent swarm for security testing"
@@ -187,13 +187,13 @@ RUN mkdir -p /app/workflow_results
 
 # Default command - run demo
 CMD ["python", "scripts/demo_workflow_execution.py"]
-'''
-    
+"""
+
     dockerfile.write_text(content)
-    
+
     # Create .dockerignore
-    dockerignore = Path('daqiq-professional/.dockerignore')
-    dockerignore.write_text('''__pycache__/
+    dockerignore = Path("daqiq-professional/.dockerignore")
+    dockerignore.write_text("""__pycache__/
 *.pyc
 *.pyo
 *.pyd
@@ -211,19 +211,20 @@ venv/
 htmlcov/
 *.log
 .DS_Store
-''')
-    
+""")
+
     return {
-        'dockerfile': str(dockerfile),
-        'dockerignore': str(dockerignore),
-        'base_image': 'python:3.12-slim'
+        "dockerfile": str(dockerfile),
+        "dockerignore": str(dockerignore),
+        "base_image": "python:3.12-slim",
     }
+
 
 def create_usage_guide(context: str):
     """Create step-by-step usage guide"""
-    guide = Path('daqiq-professional/USAGE_GUIDE.md')
-    
-    content = '''# 🚀 DAQIQ Autonomous Agents - Usage Guide
+    guide = Path("daqiq-professional/USAGE_GUIDE.md")
+
+    content = """# 🚀 DAQIQ Autonomous Agents - Usage Guide
 
 ## For First-Time Users
 
@@ -384,25 +385,22 @@ python -c "import yaml; yaml.safe_load(open('workflow.yaml'))"
 ---
 
 Built by autonomous agents 🤖
-'''
-    
+"""
+
     guide.write_text(content)
-    
-    return {
-        'file': str(guide),
-        'sections': 8,
-        'examples': 15
-    }
+
+    return {"file": str(guide), "sections": 8, "examples": 15}
+
 
 def update_main_readme(context: str):
     """Update the main project README"""
-    readme = Path('README.md')
-    
+    readme = Path("README.md")
+
     if readme.exists():
         current = readme.read_text()
-        
+
         # Add autonomous agents section
-        new_section = '''
+        new_section = """
 
 ## 🤖 Autonomous Agent System
 
@@ -434,46 +432,55 @@ See [AUTONOMOUS_SYSTEM_README.md](daqiq-professional/AUTONOMOUS_SYSTEM_README.md
 - ⏱️ 7 autonomous iterations
 
 Built entirely by MicroGPT swarm 🚀
-'''
-        
+"""
+
         # Append if not already there
-        if 'Autonomous Agent System' not in current:
+        if "Autonomous Agent System" not in current:
             readme.write_text(current + new_section)
-            return {'updated': True, 'added_section': True}
+            return {"updated": True, "added_section": True}
         else:
-            return {'updated': False, 'reason': 'Already has autonomous section'}
+            return {"updated": False, "reason": "Already has autonomous section"}
     else:
-        return {'updated': False, 'reason': 'README.md not found'}
+        return {"updated": False, "reason": "README.md not found"}
+
 
 # Create production swarm
 agents = [
-    MicroAgent(MicroAgentConfig(
-        role="DocumentationWriter",
-        purpose="Create comprehensive README",
-        tool_function=create_comprehensive_readme
-    )),
-    MicroAgent(MicroAgentConfig(
-        role="DockerBuilder",
-        purpose="Create Dockerfile for deployment",
-        tool_function=create_dockerfile
-    )),
-    MicroAgent(MicroAgentConfig(
-        role="GuideCreator",
-        purpose="Create usage guide",
-        tool_function=create_usage_guide
-    )),
-    MicroAgent(MicroAgentConfig(
-        role="READMEUpdater",
-        purpose="Update main README",
-        tool_function=update_main_readme
-    ))
+    MicroAgent(
+        MicroAgentConfig(
+            role="DocumentationWriter",
+            purpose="Create comprehensive README",
+            tool_function=create_comprehensive_readme,
+        )
+    ),
+    MicroAgent(
+        MicroAgentConfig(
+            role="DockerBuilder",
+            purpose="Create Dockerfile for deployment",
+            tool_function=create_dockerfile,
+        )
+    ),
+    MicroAgent(
+        MicroAgentConfig(
+            role="GuideCreator",
+            purpose="Create usage guide",
+            tool_function=create_usage_guide,
+        )
+    ),
+    MicroAgent(
+        MicroAgentConfig(
+            role="READMEUpdater",
+            purpose="Update main README",
+            tool_function=update_main_readme,
+        )
+    ),
 ]
 
 tasks = [
     "Create comprehensive system README",
     "Create Dockerfile for containerization",
     "Create step-by-step usage guide",
-    "Update main project README"
+    "Update main project README",
 ]
 
 # Deploy production swarm
@@ -481,22 +488,31 @@ swarm = MicroSwarm(max_parallel=4)
 results = swarm.deploy(agents, tasks)
 
 # Print summary
-print("\n" + "="*70)
+print("\n" + "=" * 70)
 print("PRODUCTION READY!")
-print("="*70)
+print("=" * 70)
 for result in results:
-    if result['success']:
+    if result["success"]:
         print(f"\n✅ {result['agent']}:")
-        for key, value in result['result'].items():
+        for key, value in result["result"].items():
             print(f"   {key}: {value}")
 
 # Auto-commit
-print("\n" + "="*70)
+print("\n" + "=" * 70)
 print("GIT OPERATIONS")
-print("="*70)
+print("=" * 70)
 try:
-    subprocess.run(['git', 'add', '-A'], check=True)
-    subprocess.run(['git', 'commit', '--no-verify', '-m', '[MicroSwarm Iteration #8] Production ready - docs, Docker, guides'], check=True)
+    subprocess.run(["git", "add", "-A"], check=True)
+    subprocess.run(
+        [
+            "git",
+            "commit",
+            "--no-verify",
+            "-m",
+            "[MicroSwarm Iteration #8] Production ready - docs, Docker, guides",
+        ],
+        check=True,
+    )
     print("✅ Production changes committed!")
 except Exception as e:
     print(f"⚠️  Commit issue: {e}")

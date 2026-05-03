@@ -1,5 +1,10 @@
 # Daqiq Security Framework
 
+
+[![Tests](https://github.com/moaidmoatasem/daqiq-professional/actions/workflows/test.yml/badge.svg)](https://github.com/moaidmoatasem/daqiq-professional/actions/workflows/test.yml)
+[![Docker Build](https://github.com/moaidmoatasem/daqiq-professional/actions/workflows/docker.yml/badge.svg)](https://github.com/moaidmoatasem/daqiq-professional/actions/workflows/docker.yml)
+
+
 **AI-powered security testing framework with multi-agent orchestration**
 
 [![Tests](https://img.shields.io/badge/tests-passing-success)](tests/)

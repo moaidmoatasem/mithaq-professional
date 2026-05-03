@@ -18,7 +18,8 @@ class Sanitizer:
     AWS_KEY_PATTERN = re.compile(r"AKIA[A-Z0-9]{16}")
     JWT_PATTERN = re.compile(r"eyJ[A-Za-z0-9_-]+\.[A-Za-z0-9_-]+\.[A-Za-z0-9_-]+")
     PROMPT_INJECTION_PATTERN = re.compile(
-        r"\b(ignore previous|new instructions|disregard|forget everything)\b", re.IGNORECASE
+        r"\b(ignore previous|new instructions|disregard|forget everything)\b",
+        re.IGNORECASE,
     )
 
     def sanitize(self, text: str) -> SanitizedOutput:
@@ -57,7 +58,9 @@ class Sanitizer:
         injection_matches = self.PROMPT_INJECTION_PATTERN.findall(text)
         for match in injection_matches:
             secrets_found.append(f"PROMPT_INJECTION:{match}")
-            sanitized_text = self.PROMPT_INJECTION_PATTERN.sub("[REDACTED]", sanitized_text)
+            sanitized_text = self.PROMPT_INJECTION_PATTERN.sub(
+                "[REDACTED]", sanitized_text
+            )
 
         sanitization_applied = len(secrets_found) > 0
 

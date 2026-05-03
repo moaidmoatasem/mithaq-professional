@@ -18,13 +18,14 @@ print("""
 tests_passed = 0
 tests_failed = 0
 
+
 def test(name, func):
     """Run a test and track results"""
     global tests_passed, tests_failed
     print(f"\n{'='*70}")
     print(f"🧪 Testing: {name}")
-    print('='*70)
-    
+    print("=" * 70)
+
     try:
         func()
         print(f"✅ PASSED: {name}")
@@ -36,30 +37,36 @@ def test(name, func):
         tests_failed += 1
         return False
 
+
 # Test 1: Import core modules
 def test_imports():
     from daqiq.scanners.header_scanner import SimpleScanner
     from daqiq.core.memory_efficient_parallel import MemoryEfficientCrew
+
     print("✓ Core modules imported successfully")
+
 
 # Test 2: Check file structure
 def test_structure():
     required_dirs = [
-        'daqiq/agents',
-        'daqiq/core',
-        'daqiq/scanners',
-        'daqiq/crews',
+        "daqiq/agents",
+        "daqiq/core",
+        "daqiq/scanners",
+        "daqiq/crews",
     ]
     for dir_path in required_dirs:
         assert Path(dir_path).exists(), f"Missing: {dir_path}"
     print(f"✓ All {len(required_dirs)} required directories exist")
 
+
 # Test 3: Scanner functionality
 def test_scanner():
     from daqiq.scanners.header_scanner import SimpleScanner
+
     scanner = SimpleScanner("https://example.com")
     assert scanner.target == "https://example.com"
     print("✓ Scanner initialized correctly")
+
 
 # Test 4: AI-generated scanners exist
 def test_generated_scanners():
@@ -69,43 +76,49 @@ def test_generated_scanners():
     print(f"✓ Found {count} AI-generated scanners")
     assert count > 0, "No generated scanners found"
 
+
 # Test 5: Scan reports exist
 def test_scan_reports():
     reports = list(Path(".").glob("scan_report_*.json"))
     print(f"✓ Found {len(reports)} scan reports")
-    
+
     if reports:
         # Verify JSON structure
-        with open(reports[0], 'r') as f:
+        with open(reports[0], "r") as f:
             data = json.load(f)
-            assert 'target' in data
-            assert 'vulnerabilities' in data
+            assert "target" in data
+            assert "vulnerabilities" in data
         print(f"✓ Report structure valid")
+
 
 # Test 6: Memory efficient parallel module
 def test_parallel():
     from daqiq.core.memory_efficient_parallel import MemoryEfficientCrew
+
     crew = MemoryEfficientCrew(batch_size=2)
     assert crew.batch_size == 2
     print("✓ Memory-efficient parallel system initialized")
+
 
 # Test 7: CLI exists
 def test_cli():
     cli_path = Path("daqiq_cli.py")
     assert cli_path.exists(), "CLI not found"
-    with open(cli_path, 'r') as f:
+    with open(cli_path, "r") as f:
         content = f.read()
-        assert 'argparse' in content
+        assert "argparse" in content
     print("✓ CLI interface exists and configured")
+
 
 # Test 8: Docker configuration
 def test_docker():
     dockerfile = Path("Dockerfile")
     compose = Path("docker-compose.yml")
-    
+
     assert dockerfile.exists(), "Dockerfile not found"
     assert compose.exists(), "docker-compose.yml not found"
     print("✓ Docker configuration files present")
+
 
 # Run all tests
 print("\n🚀 Starting test suite...\n")
@@ -120,9 +133,9 @@ test("CLI Interface", test_cli)
 test("Docker Configuration", test_docker)
 
 # Summary
-print("\n" + "="*70)
+print("\n" + "=" * 70)
 print("📊 TEST SUMMARY")
-print("="*70)
+print("=" * 70)
 print(f"✅ Passed: {tests_passed}")
 print(f"❌ Failed: {tests_failed}")
 print(f"📈 Success Rate: {(tests_passed/(tests_passed+tests_failed)*100):.1f}%")

@@ -1,0 +1,30 @@
+name: Docker Build
+
+on:
+  push:
+    branches: [ main ]
+    tags: [ 'v*' ]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    
+    steps:
+    - uses: actions/checkout@v4
+    
+    - name: Set up Docker Buildx
+      uses: docker/setup-buildx-action@v3
+    
+    - name: Build Docker image
+      run: |
+        cd daqiq-professional
+        docker build -t daqiq-autonomous:latest .
+    
+    - name: Test Docker image
+      run: |
+        docker run --rm daqiq-autonomous:latest python --version
+    
+    - name: Tag image
+      if: startsWith(github.ref, 'refs/tags/v')
+      run: |
+        docker tag daqiq-autonomous:latest daqiq-autonomous:${{ github.ref_name }}

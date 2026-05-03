@@ -1,0 +1,5 @@
+name: api_testing
+description: api_testing workflow
+agents:
+  - name: agent_1
+    type: scanner

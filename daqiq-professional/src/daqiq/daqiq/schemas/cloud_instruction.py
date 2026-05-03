@@ -18,8 +18,12 @@ class CloudInstruction(BaseModel):
         "analyze_threat_model",
         "design_architecture",
     ] = Field(..., description="Action to perform")
-    target: str = Field(..., description="Target of the action (e.g., file, URL, CVE-ID)")
-    confidence: float = Field(..., ge=0.0, le=1.0, description="Confidence score (0.0-1.0)")
+    target: str = Field(
+        ..., description="Target of the action (e.g., file, URL, CVE-ID)"
+    )
+    confidence: float = Field(
+        ..., ge=0.0, le=1.0, description="Confidence score (0.0-1.0)"
+    )
     reasoning: str = Field(..., description="Reasoning behind the action")
 
     @field_validator("target")

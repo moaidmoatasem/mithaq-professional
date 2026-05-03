@@ -3,8 +3,10 @@
 Swarm Iteration #7 - FULLY AUTONOMOUS
 Agents analyze, prioritize, and implement next features themselves
 """
+
 import sys
-sys.path.insert(0, '.')
+
+sys.path.insert(0, ".")
 
 from daqiq.agents.micro_swarm.micro_agent import MicroAgent, MicroAgentConfig
 from daqiq.agents.micro_swarm.swarm_orchestrator import MicroSwarm
@@ -18,27 +20,28 @@ print("""
 ╚══════════════════════════════════════════════════════════════╝
 """)
 
+
 def analyze_gaps(context: str):
     """Analyze what's missing from the system"""
     gaps = {
-        'missing_features': [
-            'Real vulnerability scanner integration',
-            'Result sanitization logic',
-            'Workflow result persistence',
-            'More workflow examples',
-            'Performance metrics',
-            'Error recovery mechanisms'
+        "missing_features": [
+            "Real vulnerability scanner integration",
+            "Result sanitization logic",
+            "Workflow result persistence",
+            "More workflow examples",
+            "Performance metrics",
+            "Error recovery mechanisms",
         ],
-        'priority': 'high',
-        'recommended_next': [
-            'Add result persistence (save to files)',
-            'Create 3 more workflow examples',
-            'Add execution metrics and timing'
-        ]
+        "priority": "high",
+        "recommended_next": [
+            "Add result persistence (save to files)",
+            "Create 3 more workflow examples",
+            "Add execution metrics and timing",
+        ],
     }
-    
-    notes = Path('daqiq-professional/ITERATION_7_ANALYSIS.md')
-    notes.write_text(f'''# Iteration #7 Analysis - Autonomous Planning
+
+    notes = Path("daqiq-professional/ITERATION_7_ANALYSIS.md")
+    notes.write_text(f"""# Iteration #7 Analysis - Autonomous Planning
 
 ## Current System Status
 - ✅ MicroGPT swarm framework
@@ -59,14 +62,15 @@ The swarm recommends implementing result persistence first, as it enables:
 - Workflow output tracking
 - Historical analysis
 - Debugging capabilities
-''')
-    
+""")
+
     return gaps
+
 
 def create_result_persistence(context: str):
     """Add result persistence to workflow execution"""
-    persistence_file = Path('daqiq-professional/src/daqiq/result_persistence.py')
-    
+    persistence_file = Path("daqiq-professional/src/daqiq/result_persistence.py")
+
     code = '''"""
 Result Persistence - Save and load workflow execution results
 """
@@ -144,22 +148,23 @@ class ResultStore:
         results.sort(reverse=True)
         return self.load_result(results[0])
 '''
-    
+
     persistence_file.write_text(code)
-    
+
     return {
-        'file': str(persistence_file),
-        'class': 'ResultStore',
-        'methods': ['save_result', 'load_result', 'list_results', 'get_latest']
+        "file": str(persistence_file),
+        "class": "ResultStore",
+        "methods": ["save_result", "load_result", "list_results", "get_latest"],
     }
+
 
 def create_more_workflows(context: str):
     """Create additional workflow examples"""
-    examples_dir = Path('daqiq-professional/examples/workflows')
-    
+    examples_dir = Path("daqiq-professional/examples/workflows")
+
     # Example 3: API Testing Workflow
-    api_test = examples_dir / 'api_testing_workflow.yaml'
-    api_test.write_text('''# API Security Testing Workflow
+    api_test = examples_dir / "api_testing_workflow.yaml"
+    api_test.write_text("""# API Security Testing Workflow
 name: "API Security Test Suite"
 description: "Comprehensive API endpoint security testing"
 
@@ -201,11 +206,11 @@ output:
   format: "json"
   file: "api_test_results.json"
   save_to_store: true
-''')
-    
+""")
+
     # Example 4: Quick Scan Workflow
-    quick_scan = examples_dir / 'quick_scan_workflow.yaml'
-    quick_scan.write_text('''# Quick Security Scan
+    quick_scan = examples_dir / "quick_scan_workflow.yaml"
+    quick_scan.write_text("""# Quick Security Scan
 name: "Quick Vulnerability Scan"
 description: "Fast security scan for rapid feedback"
 
@@ -229,11 +234,11 @@ output:
   format: "json"
   file: "quick_scan_results.json"
   save_to_store: true
-''')
-    
+""")
+
     # Example 5: Full Audit Workflow
-    full_audit = examples_dir / 'full_audit_workflow.yaml'
-    full_audit.write_text('''# Complete Security Audit
+    full_audit = examples_dir / "full_audit_workflow.yaml"
+    full_audit.write_text("""# Complete Security Audit
 name: "Full Security Audit"
 description: "Comprehensive security audit with all scanners"
 
@@ -282,18 +287,19 @@ burhan_standard:
   require_proof: true
   min_confidence: 0.95
   manual_verification: true
-''')
-    
+""")
+
     return {
-        'workflows_created': 3,
-        'files': [str(api_test), str(quick_scan), str(full_audit)]
+        "workflows_created": 3,
+        "files": [str(api_test), str(quick_scan), str(full_audit)],
     }
+
 
 def add_metrics_tracking(context: str):
     """Add performance metrics to workflow execution"""
-    api_file = Path('daqiq-professional/src/daqiq/orchestration_api.py')
+    api_file = Path("daqiq-professional/src/daqiq/orchestration_api.py")
     code = api_file.read_text()
-    
+
     # Add metrics tracking to WorkflowExecutor
     metrics_code = '''
     def collect_metrics(self) -> Dict[str, Any]:
@@ -305,58 +311,67 @@ def add_metrics_tracking(context: str):
             'execution_mode': self.config.get('execution', {}).get('mode', 'sequential')
         }
 '''
-    
+
     # Find WorkflowExecutor class and add method
-    if 'def collect_metrics' not in code:
+    if "def collect_metrics" not in code:
         code = code.replace(
-            '    def generate_report(self) -> Dict[str, Any]:',
-            metrics_code + '\n    def generate_report(self) -> Dict[str, Any]:'
+            "    def generate_report(self) -> Dict[str, Any]:",
+            metrics_code + "\n    def generate_report(self) -> Dict[str, Any]:",
         )
-    
+
     # Update generate_report to include metrics
     if "'workflow':" in code and "'agents_used':" in code:
         code = code.replace(
             "return {\n            'workflow': self.config.get('name', 'Unknown'),",
-            "metrics = self.collect_metrics()\n        return {\n            'workflow': self.config.get('name', 'Unknown'),\n            'metrics': metrics,"
+            "metrics = self.collect_metrics()\n        return {\n            'workflow': self.config.get('name', 'Unknown'),\n            'metrics': metrics,",
         )
-    
+
     api_file.write_text(code)
-    
+
     return {
-        'file': str(api_file),
-        'feature': 'metrics_tracking',
-        'method_added': 'collect_metrics'
+        "file": str(api_file),
+        "feature": "metrics_tracking",
+        "method_added": "collect_metrics",
     }
+
 
 # Create autonomous swarm
 agents = [
-    MicroAgent(MicroAgentConfig(
-        role="GapAnalyzer",
-        purpose="Analyze system gaps and prioritize",
-        tool_function=analyze_gaps
-    )),
-    MicroAgent(MicroAgentConfig(
-        role="PersistenceBuilder",
-        purpose="Add result persistence",
-        tool_function=create_result_persistence
-    )),
-    MicroAgent(MicroAgentConfig(
-        role="WorkflowCreator",
-        purpose="Create more workflow examples",
-        tool_function=create_more_workflows
-    )),
-    MicroAgent(MicroAgentConfig(
-        role="MetricsAdder",
-        purpose="Add performance metrics",
-        tool_function=add_metrics_tracking
-    ))
+    MicroAgent(
+        MicroAgentConfig(
+            role="GapAnalyzer",
+            purpose="Analyze system gaps and prioritize",
+            tool_function=analyze_gaps,
+        )
+    ),
+    MicroAgent(
+        MicroAgentConfig(
+            role="PersistenceBuilder",
+            purpose="Add result persistence",
+            tool_function=create_result_persistence,
+        )
+    ),
+    MicroAgent(
+        MicroAgentConfig(
+            role="WorkflowCreator",
+            purpose="Create more workflow examples",
+            tool_function=create_more_workflows,
+        )
+    ),
+    MicroAgent(
+        MicroAgentConfig(
+            role="MetricsAdder",
+            purpose="Add performance metrics",
+            tool_function=add_metrics_tracking,
+        )
+    ),
 ]
 
 tasks = [
     "Analyze what's missing and prioritize",
     "Implement result persistence",
     "Create 3 more workflow examples",
-    "Add execution metrics tracking"
+    "Add execution metrics tracking",
 ]
 
 # Deploy autonomous swarm
@@ -364,22 +379,31 @@ swarm = MicroSwarm(max_parallel=4)
 results = swarm.deploy(agents, tasks)
 
 # Print summary
-print("\n" + "="*70)
+print("\n" + "=" * 70)
 print("AUTONOMOUS ITERATION COMPLETE")
-print("="*70)
+print("=" * 70)
 for result in results:
-    if result['success']:
+    if result["success"]:
         print(f"\n✅ {result['agent']}:")
-        for key, value in result['result'].items():
+        for key, value in result["result"].items():
             print(f"   {key}: {value}")
 
 # Auto-commit
-print("\n" + "="*70)
+print("\n" + "=" * 70)
 print("GIT OPERATIONS")
-print("="*70)
+print("=" * 70)
 try:
-    subprocess.run(['git', 'add', '-A'], check=True)
-    subprocess.run(['git', 'commit', '--no-verify', '-m', '[MicroSwarm Iteration #7] Autonomous expansion - persistence, workflows, metrics'], check=True)
+    subprocess.run(["git", "add", "-A"], check=True)
+    subprocess.run(
+        [
+            "git",
+            "commit",
+            "--no-verify",
+            "-m",
+            "[MicroSwarm Iteration #7] Autonomous expansion - persistence, workflows, metrics",
+        ],
+        check=True,
+    )
     print("✅ Autonomous changes committed!")
 except Exception as e:
     print(f"⚠️  Commit issue: {e}")

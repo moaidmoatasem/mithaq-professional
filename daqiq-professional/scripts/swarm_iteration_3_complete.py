@@ -3,8 +3,10 @@
 Swarm Iteration #3 - COMPLETE THE IMPLEMENTATION
 Fill in the TODO functions in orchestration_api.py
 """
+
 import sys
-sys.path.insert(0, '.')
+
+sys.path.insert(0, ".")
 
 from daqiq.agents.micro_swarm.micro_agent import MicroAgent, MicroAgentConfig
 from daqiq.agents.micro_swarm.swarm_orchestrator import MicroSwarm
@@ -17,11 +19,12 @@ print("""
 ╚══════════════════════════════════════════════════════════════╝
 """)
 
+
 def implement_orchestrate_workflow(context: str):
     """Implement the orchestrate_workflow function"""
-    api_file = Path('daqiq-professional/src/daqiq/orchestration_api.py')
+    api_file = Path("daqiq-professional/src/daqiq/orchestration_api.py")
     code = api_file.read_text()
-    
+
     # Replace the TODO in orchestrate_workflow
     implementation = '''    """
     Execute an AI workflow based on configuration
@@ -57,22 +60,31 @@ def implement_orchestrate_workflow(context: str):
             duration=time.time() - start,
             errors=[str(e)]
         )'''
-    
-    code = code.replace('    # TODO: Implementation\n    return WorkflowResult(\n        success=True,\n        outputs={},\n        duration=0.0\n    )', implementation)
+
+    code = code.replace(
+        "    # TODO: Implementation\n    return WorkflowResult(\n        success=True,\n        outputs={},\n        duration=0.0\n    )",
+        implementation,
+    )
     api_file.write_text(code)
-    
-    return {'function': 'orchestrate_workflow', 'status': 'Implemented with error handling'}
+
+    return {
+        "function": "orchestrate_workflow",
+        "status": "Implemented with error handling",
+    }
+
 
 def implement_register_agent(context: str):
     """Implement the register_agent function"""
-    api_file = Path('daqiq-professional/src/daqiq/orchestration_api.py')
+    api_file = Path("daqiq-professional/src/daqiq/orchestration_api.py")
     code = api_file.read_text()
-    
+
     # Add agent registry
-    if 'AGENT_REGISTRY' not in code:
-        code = code.replace('from dataclasses import dataclass', 
-                           'from dataclasses import dataclass\nimport uuid\n\nAGENT_REGISTRY: Dict[str, Any] = {}')
-    
+    if "AGENT_REGISTRY" not in code:
+        code = code.replace(
+            "from dataclasses import dataclass",
+            "from dataclasses import dataclass\nimport uuid\n\nAGENT_REGISTRY: Dict[str, Any] = {}",
+        )
+
     implementation = '''    """
     Register an AI agent with the orchestrator
     
@@ -92,22 +104,26 @@ def implement_register_agent(context: str):
     }
     
     return AgentID(id=agent_id, role=role)'''
-    
-    code = code.replace('    # TODO: Implementation  \n    return AgentID(id="agent_001", role=agent.role if hasattr(agent, \'role\') else "unknown")', implementation)
-    
+
+    code = code.replace(
+        '    # TODO: Implementation  \n    return AgentID(id="agent_001", role=agent.role if hasattr(agent, \'role\') else "unknown")',
+        implementation,
+    )
+
     # Add datetime import
-    if 'from datetime import datetime' not in code:
-        code = code.replace('import uuid', 'import uuid\nfrom datetime import datetime')
-    
+    if "from datetime import datetime" not in code:
+        code = code.replace("import uuid", "import uuid\nfrom datetime import datetime")
+
     api_file.write_text(code)
-    
-    return {'function': 'register_agent', 'status': 'Implemented with registry'}
+
+    return {"function": "register_agent", "status": "Implemented with registry"}
+
 
 def implement_execute_parallel(context: str):
     """Implement the execute_parallel function"""
-    api_file = Path('daqiq-professional/src/daqiq/orchestration_api.py')
+    api_file = Path("daqiq-professional/src/daqiq/orchestration_api.py")
     code = api_file.read_text()
-    
+
     implementation = '''    """
     Execute multiple agents in parallel
     
@@ -146,16 +162,17 @@ def implement_execute_parallel(context: str):
     
     results.sort(key=lambda x: x.get('index', 0))
     return results'''
-    
-    code = code.replace('    # TODO: Implementation\n    return []', implementation)
+
+    code = code.replace("    # TODO: Implementation\n    return []", implementation)
     api_file.write_text(code)
-    
-    return {'function': 'execute_parallel', 'status': 'Implemented with threading'}
+
+    return {"function": "execute_parallel", "status": "Implemented with threading"}
+
 
 def add_comprehensive_tests(context: str):
     """Add tests for all API functions"""
-    test_file = Path('daqiq-professional/tests/test_orchestration_api.py')
-    
+    test_file = Path("daqiq-professional/tests/test_orchestration_api.py")
+
     test_code = '''"""
 Tests for Orchestration API
 """
@@ -206,40 +223,49 @@ def test_execute_parallel():
     assert len(results) == 3
     assert all('success' in r for r in results)
 '''
-    
+
     test_file.write_text(test_code)
-    
-    return {'file': str(test_file), 'tests': 4, 'status': 'Comprehensive tests added'}
+
+    return {"file": str(test_file), "tests": 4, "status": "Comprehensive tests added"}
+
 
 # Create completion swarm
 agents = [
-    MicroAgent(MicroAgentConfig(
-        role="WorkflowImplementer",
-        purpose="Implement orchestrate_workflow",
-        tool_function=implement_orchestrate_workflow
-    )),
-    MicroAgent(MicroAgentConfig(
-        role="RegistryImplementer",
-        purpose="Implement register_agent",
-        tool_function=implement_register_agent
-    )),
-    MicroAgent(MicroAgentConfig(
-        role="ParallelImplementer",
-        purpose="Implement execute_parallel",
-        tool_function=implement_execute_parallel
-    )),
-    MicroAgent(MicroAgentConfig(
-        role="TestCreator",
-        purpose="Add comprehensive tests",
-        tool_function=add_comprehensive_tests
-    ))
+    MicroAgent(
+        MicroAgentConfig(
+            role="WorkflowImplementer",
+            purpose="Implement orchestrate_workflow",
+            tool_function=implement_orchestrate_workflow,
+        )
+    ),
+    MicroAgent(
+        MicroAgentConfig(
+            role="RegistryImplementer",
+            purpose="Implement register_agent",
+            tool_function=implement_register_agent,
+        )
+    ),
+    MicroAgent(
+        MicroAgentConfig(
+            role="ParallelImplementer",
+            purpose="Implement execute_parallel",
+            tool_function=implement_execute_parallel,
+        )
+    ),
+    MicroAgent(
+        MicroAgentConfig(
+            role="TestCreator",
+            purpose="Add comprehensive tests",
+            tool_function=add_comprehensive_tests,
+        )
+    ),
 ]
 
 tasks = [
     "Implement orchestrate_workflow with error handling",
     "Implement register_agent with registry",
     "Implement execute_parallel with threading",
-    "Create comprehensive test suite"
+    "Create comprehensive test suite",
 ]
 
 # Deploy completion swarm
@@ -247,22 +273,31 @@ swarm = MicroSwarm(max_parallel=4)
 results = swarm.deploy(agents, tasks)
 
 # Print summary
-print("\n" + "="*70)
+print("\n" + "=" * 70)
 print("IMPLEMENTATION COMPLETION")
-print("="*70)
+print("=" * 70)
 for result in results:
-    if result['success']:
+    if result["success"]:
         print(f"\n✅ {result['agent']}:")
-        for key, value in result['result'].items():
+        for key, value in result["result"].items():
             print(f"   {key}: {value}")
 
 # Auto-commit
-print("\n" + "="*70)
+print("\n" + "=" * 70)
 print("GIT OPERATIONS")
-print("="*70)
+print("=" * 70)
 try:
-    subprocess.run(['git', 'add', '-A'], check=True)
-    subprocess.run(['git', 'commit', '--no-verify', '-m', '[MicroSwarm Iteration #3] Completed all API implementations + tests'], check=True)
+    subprocess.run(["git", "add", "-A"], check=True)
+    subprocess.run(
+        [
+            "git",
+            "commit",
+            "--no-verify",
+            "-m",
+            "[MicroSwarm Iteration #3] Completed all API implementations + tests",
+        ],
+        check=True,
+    )
     print("✅ All implementations committed!")
 except Exception as e:
     print(f"⚠️  Commit issue: {e}")

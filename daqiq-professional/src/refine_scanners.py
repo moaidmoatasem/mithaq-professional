@@ -403,20 +403,20 @@ if __name__ == "__main__":
 
 # Write refined scanners
 scanners = {
-    'xss_scanner.py': xss_scanner_fixed,
-    'csrf_scanner.py': csrf_scanner_fixed,
-    'open_redirect_scanner.py': open_redirect_scanner_fixed,
+    "xss_scanner.py": xss_scanner_fixed,
+    "csrf_scanner.py": csrf_scanner_fixed,
+    "open_redirect_scanner.py": open_redirect_scanner_fixed,
 }
 
 for filename, code in scanners.items():
     filepath = output_dir / filename
-    with open(filepath, 'w') as f:
+    with open(filepath, "w") as f:
         f.write(code)
     print(f"✅ Created: {filepath}")
 
-print("\n" + "="*70)
+print("\n" + "=" * 70)
 print("✅ Refined scanners created!")
-print("="*70)
+print("=" * 70)
 print(f"📁 Location: {output_dir}/")
 print("\nTest them:")
 for filename in scanners.keys():

@@ -6,9 +6,9 @@ from daqiq.agents.architect_agent import ArchitectAgent
 def main():
     """Demonstrate threat modeling for a mobile banking app."""
     print("🔒 DAQIQ Security Framework - Threat Modeling Example\n")
-    
+
     architect = ArchitectAgent()
-    
+
     print("📋 Agent Capabilities:")
     caps = architect.get_capabilities()
     print(f"  Role: {caps['role']}")

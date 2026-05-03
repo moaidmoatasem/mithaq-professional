@@ -15,50 +15,54 @@ app = Flask(__name__)
 # Store scan results
 scan_history = []
 
-@app.route('/')
+
+@app.route("/")
 def index():
     """Main dashboard"""
-    return render_template('index.html', history=scan_history)
+    return render_template("index.html", history=scan_history)
 
-@app.route('/api/scan', methods=['POST'])
+
+@app.route("/api/scan", methods=["POST"])
 def run_scan():
     """Run security scan"""
     data = request.json
-    target_url = data.get('url')
-    
+    target_url = data.get("url")
+
     if not target_url:
-        return jsonify({'error': 'No URL provided'}), 400
-    
+        return jsonify({"error": "No URL provided"}), 400
+
     # Run scan
     scanner = SimpleScanner(target_url)
     scanner.scan_security_headers()
     scanner.scan_http_methods()
     scanner.scan_ssl_tls()
-    
+
     # Store result
     result = {
-        'id': len(scan_history) + 1,
-        'timestamp': datetime.now().isoformat(),
-        'target': target_url,
-        'vulnerabilities': scanner.results['vulnerabilities'],
-        'count': len(scanner.results['vulnerabilities'])
+        "id": len(scan_history) + 1,
+        "timestamp": datetime.now().isoformat(),
+        "target": target_url,
+        "vulnerabilities": scanner.results["vulnerabilities"],
+        "count": len(scanner.results["vulnerabilities"]),
     }
-    
+
     scan_history.append(result)
-    
+
     return jsonify(result)
 
-@app.route('/api/history')
+
+@app.route("/api/history")
 def get_history():
     """Get scan history"""
     return jsonify(scan_history)
 
-if __name__ == '__main__':
+
+if __name__ == "__main__":
     # Create templates directory
-    Path('templates').mkdir(exist_ok=True)
-    
+    Path("templates").mkdir(exist_ok=True)
+
     # Create simple HTML template
-    html_template = '''
+    html_template = """
 <!DOCTYPE html>
 <html>
 <head>
@@ -180,15 +184,15 @@ if __name__ == '__main__':
     </script>
 </body>
 </html>
-    '''
-    
-    with open('templates/index.html', 'w') as f:
+    """
+
+    with open("templates/index.html", "w") as f:
         f.write(html_template)
-    
-    print("\n" + "="*70)
+
+    print("\n" + "=" * 70)
     print("🚀 DAQIQ Web Dashboard Starting...")
-    print("="*70)
+    print("=" * 70)
     print("\n📱 Open in browser: http://localhost:5000")
     print("\n✅ Ready to scan!\n")
-    
-    app.run(debug=True, host='0.0.0.0', port=5000)
+
+    app.run(debug=True, host="0.0.0.0", port=5000)

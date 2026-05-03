@@ -1,0 +1,5 @@
+name: quick_scan
+description: quick_scan workflow
+agents:
+  - name: agent_1
+    type: scanner

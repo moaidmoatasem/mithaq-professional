@@ -10,11 +10,11 @@ import urllib.parse
 def sql_injection_scan(api_url, input_value):
     """
     Scan for SQL injection vulnerabilities
-    
+
     Args:
         api_url (str): Target API endpoint URL
         input_value (str): Input value to test for injection
-        
+
     Returns:
         bool: True when scan completes
     """
@@ -25,7 +25,7 @@ def sql_injection_scan(api_url, input_value):
     error_responses = (
         "Error: SQLDataAccessException",
         "Error: Invalid SQL statement",
-        "Error parsing request"
+        "Error parsing request",
     )
 
     # Pre-generated payloads for various injection techniques
@@ -39,14 +39,19 @@ def sql_injection_scan(api_url, input_value):
 
     # Loop through each payload and try to execute a SQL query
     for sql_payload in sql_payloads:
-        query = f"SELECT * FROM vulnerable_table WHERE column_name LIKE '%{sql_payload}%'"
+        query = (
+            f"SELECT * FROM vulnerable_table WHERE column_name LIKE '%{sql_payload}%'"
+        )
 
         try:
             response = requests.get(f"{api_url}/{query}", timeout=5)
 
             # Check if standard SQL errors contain specific error codes related to payload injection
             for err_response in error_responses:
-                if 'syntax' in str(err_response).lower() or 'failed' in err_response.lower():
+                if (
+                    "syntax" in str(err_response).lower()
+                    or "failed" in err_response.lower()
+                ):
                     print(f"⚠️  SQL Injection possible at {sql_payload}")
                     vulnerabilities_found.append(sql_payload)
 
@@ -65,10 +70,10 @@ def sql_injection_scan(api_url, input_value):
 
 
 if __name__ == "__main__":
-    print("="*70)
+    print("=" * 70)
     print("SQL Injection Scanner - DAQIQ")
-    print("="*70)
-    
+    print("=" * 70)
+
     # Example usage
     # sql_injection_scan("http://example.com/api", "test_input")
     print("\nUsage: sql_injection_scan(api_url, input_value)")

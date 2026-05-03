@@ -1,0 +1,5 @@
+name: full_audit
+description: full_audit workflow
+agents:
+  - name: agent_1
+    type: scanner

@@ -1,0 +1,71 @@
+name: Autonomous Iteration
+
+on:
+  workflow_dispatch:
+    inputs:
+      iteration_type:
+        description: 'Type of iteration to run'
+        required: false
+        default: 'auto'
+        type: choice
+        options:
+          - auto
+          - feature
+          - bugfix
+          - optimization
+
+jobs:
+  autonomous_build:
+    runs-on: ubuntu-latest
+    
+    steps:
+    - uses: actions/checkout@v4
+      with:
+        fetch-depth: 0
+    
+    - name: Set up Python
+      uses: actions/setup-python@v5
+      with:
+        python-version: '3.12'
+    
+    - name: Install dependencies
+      run: |
+        pip install -r daqiq-professional/requirements.txt
+    
+    - name: Determine next iteration
+      id: next_iter
+      run: |
+        LAST=$(ls daqiq-professional/scripts/swarm_iteration_*.py 2>/dev/null | tail -1)
+        if [[ $LAST =~ iteration_([0-9]+) ]]; then
+          NEXT=$((${BASH_REMATCH[1]} + 1))
+        else
+          NEXT=1
+        fi
+        echo "iteration=$NEXT" >> $GITHUB_OUTPUT
+    
+    - name: Run autonomous iteration
+      run: |
+        ITERATION=${{ steps.next_iter.outputs.iteration }}
+        echo "🤖 Running autonomous iteration #$ITERATION"
+        
+        # Create iteration script if needed
+        SCRIPT="daqiq-professional/scripts/swarm_iteration_${ITERATION}_${{ inputs.iteration_type }}.py"
+        
+        if [ -f "$SCRIPT" ]; then
+          PYTHONPATH=. python "$SCRIPT"
+        else
+          echo "⚠️  No iteration script found at $SCRIPT"
+          echo "Creating placeholder for manual review"
+        fi
+    
+    - name: Create Pull Request
+      uses: peter-evans/create-pull-request@v5
+      with:
+        commit-message: '[Autonomous] Iteration #${{ steps.next_iter.outputs.iteration }}'
+        title: '🤖 Autonomous Iteration #${{ steps.next_iter.outputs.iteration }}'
+        body: |
+          Autonomous iteration completed by AI agents.
+          
+          Review changes and merge if approved.
+        branch: autonomous-iteration-${{ steps.next_iter.outputs.iteration }}
+        delete-branch: true

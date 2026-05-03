@@ -3,8 +3,10 @@
 Swarm Iteration #6 - LIVE EXECUTION
 Make workflows actually execute with real agents
 """
+
 import sys
-sys.path.insert(0, '.')
+
+sys.path.insert(0, ".")
 
 from daqiq.agents.micro_swarm.micro_agent import MicroAgent, MicroAgentConfig
 from daqiq.agents.micro_swarm.swarm_orchestrator import MicroSwarm
@@ -17,10 +19,11 @@ print("""
 ╚══════════════════════════════════════════════════════════════╝
 """)
 
+
 def create_agent_factory(context: str):
     """Create factory to instantiate agents from workflow config"""
-    factory_file = Path('daqiq-professional/src/daqiq/agent_factory.py')
-    
+    factory_file = Path("daqiq-professional/src/daqiq/agent_factory.py")
+
     code = '''"""
 Agent Factory - Creates agent instances from workflow configurations
 """
@@ -106,20 +109,21 @@ class AgentFactory:
         
         return agents
 '''
-    
+
     factory_file.write_text(code)
-    
+
     return {
-        'file': str(factory_file),
-        'classes': ['AgentFactory'],
-        'methods': ['create_agent', 'create_agents_from_workflow']
+        "file": str(factory_file),
+        "classes": ["AgentFactory"],
+        "methods": ["create_agent", "create_agents_from_workflow"],
     }
+
 
 def implement_workflow_executor(context: str):
     """Implement the actual workflow execution engine"""
-    api_file = Path('daqiq-professional/src/daqiq/orchestration_api.py')
+    api_file = Path("daqiq-professional/src/daqiq/orchestration_api.py")
     code = api_file.read_text()
-    
+
     # Add WorkflowExecutor class
     executor_class = '''
 
@@ -173,26 +177,26 @@ class WorkflowExecutor:
             'results': self.results
         }
 '''
-    
+
     # Insert before the last function
     code = code.replace(
-        'def execute_parallel(',
-        executor_class + '\n\ndef execute_parallel('
+        "def execute_parallel(", executor_class + "\n\ndef execute_parallel("
     )
-    
+
     api_file.write_text(code)
-    
+
     return {
-        'file': str(api_file),
-        'class_added': 'WorkflowExecutor',
-        'methods': ['setup_agents', 'execute_tasks', 'generate_report']
+        "file": str(api_file),
+        "class_added": "WorkflowExecutor",
+        "methods": ["setup_agents", "execute_tasks", "generate_report"],
     }
+
 
 def update_orchestrate_workflow(context: str):
     """Update orchestrate_workflow to use WorkflowExecutor"""
-    api_file = Path('daqiq-professional/src/daqiq/orchestration_api.py')
+    api_file = Path("daqiq-professional/src/daqiq/orchestration_api.py")
     code = api_file.read_text()
-    
+
     # Find and replace orchestrate_workflow implementation
     new_impl = '''def orchestrate_workflow(config: Dict) -> WorkflowResult:
     """
@@ -236,24 +240,26 @@ def update_orchestrate_workflow(context: str):
             duration=time.time() - start,
             errors=[str(e)]
         )'''
-    
+
     # Replace the function
     import re
-    pattern = r'def orchestrate_workflow\(config: Dict\) -> WorkflowResult:.*?(?=\ndef |\nclass |\Z)'
-    code = re.sub(pattern, new_impl + '\n', code, flags=re.DOTALL)
-    
+
+    pattern = r"def orchestrate_workflow\(config: Dict\) -> WorkflowResult:.*?(?=\ndef |\nclass |\Z)"
+    code = re.sub(pattern, new_impl + "\n", code, flags=re.DOTALL)
+
     api_file.write_text(code)
-    
+
     return {
-        'file': str(api_file),
-        'function': 'orchestrate_workflow',
-        'status': 'Updated to use WorkflowExecutor'
+        "file": str(api_file),
+        "function": "orchestrate_workflow",
+        "status": "Updated to use WorkflowExecutor",
     }
+
 
 def create_demo_runner(context: str):
     """Create a demo script that runs a workflow end-to-end"""
-    demo_file = Path('daqiq-professional/scripts/demo_workflow_execution.py')
-    
+    demo_file = Path("daqiq-professional/scripts/demo_workflow_execution.py")
+
     demo_code = '''#!/usr/bin/env python3
 """
 Demo: End-to-End Workflow Execution
@@ -303,45 +309,54 @@ print("\\n" + "="*70)
 print("🎉 Demo complete! Your autonomous agents work!")
 print("="*70)
 '''
-    
+
     demo_file.write_text(demo_code)
     demo_file.chmod(0o755)
-    
+
     return {
-        'file': str(demo_file),
-        'executable': True,
-        'purpose': 'End-to-end demo of workflow execution'
+        "file": str(demo_file),
+        "executable": True,
+        "purpose": "End-to-end demo of workflow execution",
     }
+
 
 # Create execution swarm
 agents = [
-    MicroAgent(MicroAgentConfig(
-        role="AgentFactoryBuilder",
-        purpose="Create agent factory",
-        tool_function=create_agent_factory
-    )),
-    MicroAgent(MicroAgentConfig(
-        role="ExecutorImplementer",
-        purpose="Implement WorkflowExecutor",
-        tool_function=implement_workflow_executor
-    )),
-    MicroAgent(MicroAgentConfig(
-        role="OrchestratorUpdater",
-        purpose="Update orchestrate_workflow",
-        tool_function=update_orchestrate_workflow
-    )),
-    MicroAgent(MicroAgentConfig(
-        role="DemoCreator",
-        purpose="Create demo script",
-        tool_function=create_demo_runner
-    ))
+    MicroAgent(
+        MicroAgentConfig(
+            role="AgentFactoryBuilder",
+            purpose="Create agent factory",
+            tool_function=create_agent_factory,
+        )
+    ),
+    MicroAgent(
+        MicroAgentConfig(
+            role="ExecutorImplementer",
+            purpose="Implement WorkflowExecutor",
+            tool_function=implement_workflow_executor,
+        )
+    ),
+    MicroAgent(
+        MicroAgentConfig(
+            role="OrchestratorUpdater",
+            purpose="Update orchestrate_workflow",
+            tool_function=update_orchestrate_workflow,
+        )
+    ),
+    MicroAgent(
+        MicroAgentConfig(
+            role="DemoCreator",
+            purpose="Create demo script",
+            tool_function=create_demo_runner,
+        )
+    ),
 ]
 
 tasks = [
     "Create agent factory for workflow agents",
     "Implement WorkflowExecutor class",
     "Update orchestrate_workflow to use executor",
-    "Create end-to-end demo script"
+    "Create end-to-end demo script",
 ]
 
 # Deploy execution swarm
@@ -349,22 +364,31 @@ swarm = MicroSwarm(max_parallel=4)
 results = swarm.deploy(agents, tasks)
 
 # Print summary
-print("\n" + "="*70)
+print("\n" + "=" * 70)
 print("LIVE EXECUTION IMPLEMENTATION")
-print("="*70)
+print("=" * 70)
 for result in results:
-    if result['success']:
+    if result["success"]:
         print(f"\n✅ {result['agent']}:")
-        for key, value in result['result'].items():
+        for key, value in result["result"].items():
             print(f"   {key}: {value}")
 
 # Auto-commit
-print("\n" + "="*70)
+print("\n" + "=" * 70)
 print("GIT OPERATIONS")
-print("="*70)
+print("=" * 70)
 try:
-    subprocess.run(['git', 'add', '-A'], check=True)
-    subprocess.run(['git', 'commit', '--no-verify', '-m', '[MicroSwarm Iteration #6] Live workflow execution engine'], check=True)
+    subprocess.run(["git", "add", "-A"], check=True)
+    subprocess.run(
+        [
+            "git",
+            "commit",
+            "--no-verify",
+            "-m",
+            "[MicroSwarm Iteration #6] Live workflow execution engine",
+        ],
+        check=True,
+    )
     print("✅ Execution engine committed!")
 except Exception as e:
     print(f"⚠️  Commit issue: {e}")

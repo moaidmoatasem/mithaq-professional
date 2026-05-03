@@ -3,8 +3,10 @@
 Swarm Iteration #4 - POLISH & CLEANUP
 Fix duplicate docstrings and complete register_agent
 """
+
 import sys
-sys.path.insert(0, '.')
+
+sys.path.insert(0, ".")
 
 from pathlib import Path
 import subprocess
@@ -17,18 +19,19 @@ print("""
 """)
 
 # Fix the API file
-api_file = Path('daqiq-professional/src/daqiq/orchestration_api.py')
+api_file = Path("daqiq-professional/src/daqiq/orchestration_api.py")
 code = api_file.read_text()
+
 
 # Remove duplicate docstrings (keep only first occurrence)
 def remove_duplicate_docstrings(text):
     """Remove consecutive duplicate docstrings"""
-    lines = text.split('\n')
+    lines = text.split("\n")
     result = []
     prev_line = None
     in_docstring = False
     docstring_lines = []
-    
+
     for line in lines:
         if '"""' in line and not in_docstring:
             in_docstring = True
@@ -36,8 +39,10 @@ def remove_duplicate_docstrings(text):
         elif '"""' in line and in_docstring:
             docstring_lines.append(line)
             # Check if this docstring is a duplicate
-            docstring_text = '\n'.join(docstring_lines)
-            if docstring_text not in '\n'.join(result[-20:] if len(result) > 20 else result):
+            docstring_text = "\n".join(docstring_lines)
+            if docstring_text not in "\n".join(
+                result[-20:] if len(result) > 20 else result
+            ):
                 result.extend(docstring_lines)
             in_docstring = False
             docstring_lines = []
@@ -45,24 +50,25 @@ def remove_duplicate_docstrings(text):
             docstring_lines.append(line)
         else:
             result.append(line)
-    
-    return '\n'.join(result)
+
+    return "\n".join(result)
+
 
 # Apply cleanup
 cleaned_code = remove_duplicate_docstrings(code)
 
 # Add missing imports at the top if not present
-if 'import uuid' not in cleaned_code:
+if "import uuid" not in cleaned_code:
     cleaned_code = cleaned_code.replace(
-        'from dataclasses import dataclass',
-        'from dataclasses import dataclass\nimport uuid\nfrom datetime import datetime'
+        "from dataclasses import dataclass",
+        "from dataclasses import dataclass\nimport uuid\nfrom datetime import datetime",
     )
 
 # Add AGENT_REGISTRY if missing
-if 'AGENT_REGISTRY' not in cleaned_code:
+if "AGENT_REGISTRY" not in cleaned_code:
     cleaned_code = cleaned_code.replace(
-        'from datetime import datetime',
-        'from datetime import datetime\n\nAGENT_REGISTRY: Dict[str, Any] = {}'
+        "from datetime import datetime",
+        "from datetime import datetime\n\nAGENT_REGISTRY: Dict[str, Any] = {}",
     )
 
 # Fix register_agent to actually use registry
@@ -112,8 +118,8 @@ print("   - Fixed register_agent implementation")
 print("   - Added proper imports")
 
 # Create final summary document
-summary = Path('daqiq-professional/AUTONOMOUS_DEVELOPMENT_SUMMARY.md')
-summary.write_text('''# Autonomous Development Session Summary
+summary = Path("daqiq-professional/AUTONOMOUS_DEVELOPMENT_SUMMARY.md")
+summary.write_text("""# Autonomous Development Session Summary
 
 **Date:** May 2, 2026 (1:41 AM - 2:00 AM EEST)  
 **Duration:** 19 minutes  
@@ -178,12 +184,21 @@ MicroGPT swarm with:
 2. Integrate with existing DAQIQ workflows
 3. Expand swarm capabilities
 4. Add more autonomous iterations
-''')
+""")
 
 print("✅ Created AUTONOMOUS_DEVELOPMENT_SUMMARY.md")
 
 # Commit everything
-subprocess.run(['git', 'add', '-A'], check=True)
-subprocess.run(['git', 'commit', '--no-verify', '-m', '[MicroSwarm Iteration #4] Polish and cleanup'], check=True)
+subprocess.run(["git", "add", "-A"], check=True)
+subprocess.run(
+    [
+        "git",
+        "commit",
+        "--no-verify",
+        "-m",
+        "[MicroSwarm Iteration #4] Polish and cleanup",
+    ],
+    check=True,
+)
 
 print("\n🎉 All iterations complete! Ready to push!")

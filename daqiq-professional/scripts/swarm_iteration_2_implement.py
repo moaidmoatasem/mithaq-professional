@@ -3,8 +3,10 @@
 Swarm Iteration #2 - IMPLEMENTATION
 Based on iteration #1 analysis, now BUILD the improvements
 """
+
 import sys
-sys.path.insert(0, '.')
+
+sys.path.insert(0, ".")
 
 from daqiq.agents.micro_swarm.micro_agent import MicroAgent, MicroAgentConfig
 from daqiq.agents.micro_swarm.swarm_orchestrator import MicroSwarm
@@ -17,54 +19,56 @@ print("""
 ╚══════════════════════════════════════════════════════════════╝
 """)
 
+
 # Implementation agents
 def add_logging_and_exceptions(file_path: str):
     """Add logging and exception handling to orchestrator"""
     path = Path(file_path)
     if not path.exists():
-        return {'error': 'File not found'}
-    
+        return {"error": "File not found"}
+
     code = path.read_text()
-    
+
     # Add logging import if missing
     improvements = []
-    if 'import logging' not in code:
-        code = 'import logging\n' + code
-        improvements.append('Added logging import')
-    
+    if "import logging" not in code:
+        code = "import logging\n" + code
+        improvements.append("Added logging import")
+
     # Add logger initialization if missing
-    if 'logger = logging.getLogger' not in code:
-        logger_line = '\nlogger = logging.getLogger(__name__)\n'
+    if "logger = logging.getLogger" not in code:
+        logger_line = "\nlogger = logging.getLogger(__name__)\n"
         # Insert after imports
-        lines = code.split('\n')
+        lines = code.split("\n")
         for i, line in enumerate(lines):
-            if line.startswith('class ') or line.startswith('def '):
+            if line.startswith("class ") or line.startswith("def "):
                 lines.insert(i, logger_line)
                 break
-        code = '\n'.join(lines)
-        improvements.append('Added logger initialization')
-    
+        code = "\n".join(lines)
+        improvements.append("Added logger initialization")
+
     # Write back
     path.write_text(code)
-    
+
     return {
-        'file': file_path,
-        'improvements': improvements,
-        'status': 'Updated with logging'
+        "file": file_path,
+        "improvements": improvements,
+        "status": "Updated with logging",
     }
+
 
 def add_mocked_tests(test_file: str):
     """Add mocked tests to avoid LLM dependencies"""
     path = Path(test_file)
     if not path.exists():
-        return {'error': 'Test file not found'}
-    
+        return {"error": "Test file not found"}
+
     code = path.read_text()
-    
+
     # Add mock imports
-    if 'from unittest.mock import' not in code:
-        code = 'from unittest.mock import Mock, patch\n' + code
-    
+    if "from unittest.mock import" not in code:
+        code = "from unittest.mock import Mock, patch\n" + code
+
     # Add a new mocked test
     new_test = '''
 
@@ -77,22 +81,19 @@ def test_orchestrator_with_mock():
         # assert orchestrator is not None
         pass  # Placeholder for actual test
 '''
-    
-    if 'test_orchestrator_with_mock' not in code:
+
+    if "test_orchestrator_with_mock" not in code:
         code += new_test
-    
+
     path.write_text(code)
-    
-    return {
-        'file': test_file,
-        'tests_added': 1,
-        'status': 'Added mocked test'
-    }
+
+    return {"file": test_file, "tests_added": 1, "status": "Added mocked test"}
+
 
 def implement_api_functions(context: str):
     """Create the proposed API implementation"""
-    api_file = Path('daqiq-professional/src/daqiq/orchestration_api.py')
-    
+    api_file = Path("daqiq-professional/src/daqiq/orchestration_api.py")
+
     api_code = '''"""
 Orchestration API - Public interface for running AI workflows
 """
@@ -157,20 +158,21 @@ def execute_parallel(agents: List[Any], tasks: List[Any]) -> List[Any]:
     # TODO: Implementation
     return []
 '''
-    
+
     api_file.parent.mkdir(parents=True, exist_ok=True)
     api_file.write_text(api_code)
-    
+
     return {
-        'file': str(api_file),
-        'functions_implemented': 3,
-        'status': 'API skeleton created'
+        "file": str(api_file),
+        "functions_implemented": 3,
+        "status": "API skeleton created",
     }
+
 
 def create_cli(context: str):
     """Create CLI commands for orchestration"""
-    cli_file = Path('daqiq-professional/scripts/daqiq_cli_orchestrate.py')
-    
+    cli_file = Path("daqiq-professional/scripts/daqiq_cli_orchestrate.py")
+
     cli_code = '''#!/usr/bin/env python3
 """
 DAQIQ CLI - Orchestration commands
@@ -206,45 +208,52 @@ def status(id):
 if __name__ == '__main__':
     cli()
 '''
-    
+
     cli_file.write_text(cli_code)
     cli_file.chmod(0o755)
-    
+
     return {
-        'file': str(cli_file),
-        'commands_created': 3,
-        'status': 'CLI commands created'
+        "file": str(cli_file),
+        "commands_created": 3,
+        "status": "CLI commands created",
     }
+
 
 # Create implementation swarm
 agents = [
-    MicroAgent(MicroAgentConfig(
-        role="CodeRefactorer",
-        purpose="Add logging and exception handling",
-        tool_function=add_logging_and_exceptions
-    )),
-    MicroAgent(MicroAgentConfig(
-        role="TestWriter",
-        purpose="Add mocked tests",
-        tool_function=add_mocked_tests
-    )),
-    MicroAgent(MicroAgentConfig(
-        role="APIImplementer",
-        purpose="Implement API functions",
-        tool_function=implement_api_functions
-    )),
-    MicroAgent(MicroAgentConfig(
-        role="CLIBuilder",
-        purpose="Create CLI commands",
-        tool_function=create_cli
-    ))
+    MicroAgent(
+        MicroAgentConfig(
+            role="CodeRefactorer",
+            purpose="Add logging and exception handling",
+            tool_function=add_logging_and_exceptions,
+        )
+    ),
+    MicroAgent(
+        MicroAgentConfig(
+            role="TestWriter",
+            purpose="Add mocked tests",
+            tool_function=add_mocked_tests,
+        )
+    ),
+    MicroAgent(
+        MicroAgentConfig(
+            role="APIImplementer",
+            purpose="Implement API functions",
+            tool_function=implement_api_functions,
+        )
+    ),
+    MicroAgent(
+        MicroAgentConfig(
+            role="CLIBuilder", purpose="Create CLI commands", tool_function=create_cli
+        )
+    ),
 ]
 
 tasks = [
     "daqiq-professional/src/daqiq/ai_workflows_orchestrator.py",
     "daqiq-professional/tests/test_ai_workflows_orchestrator.py",
     "Implement API based on iteration #1 design",
-    "Create CLI commands"
+    "Create CLI commands",
 ]
 
 # Deploy implementation swarm
@@ -252,22 +261,31 @@ swarm = MicroSwarm(max_parallel=4)
 results = swarm.deploy(agents, tasks)
 
 # Print summary
-print("\n" + "="*70)
+print("\n" + "=" * 70)
 print("IMPLEMENTATION COMPLETE")
-print("="*70)
+print("=" * 70)
 for result in results:
-    if result['success']:
+    if result["success"]:
         print(f"\n✅ {result['agent']}:")
-        for key, value in result['result'].items():
+        for key, value in result["result"].items():
             print(f"   {key}: {value}")
 
 # Auto-commit
-print("\n" + "="*70)
+print("\n" + "=" * 70)
 print("GIT OPERATIONS")
-print("="*70)
+print("=" * 70)
 try:
-    subprocess.run(['git', 'add', '-A'], check=True)
-    subprocess.run(['git', 'commit', '--no-verify', '-m', '[MicroSwarm Iteration #2] Implemented logging, tests, API, CLI'], check=True)
+    subprocess.run(["git", "add", "-A"], check=True)
+    subprocess.run(
+        [
+            "git",
+            "commit",
+            "--no-verify",
+            "-m",
+            "[MicroSwarm Iteration #2] Implemented logging, tests, API, CLI",
+        ],
+        check=True,
+    )
     print("✅ All changes committed!")
 except Exception as e:
     print(f"⚠️  Commit issue: {e}")

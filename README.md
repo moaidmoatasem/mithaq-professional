@@ -1,5 +1,6 @@
 # Daqiq Security Framework
 
+📚 [View Complete Documentation](./daqiq-professional/MASTER_DOCUMENTATION.md) 
 
 [![Tests](https://github.com/moaidmoatasem/daqiq-professional/actions/workflows/test.yml/badge.svg)](https://github.com/moaidmoatasem/daqiq-professional/actions/workflows/test.yml)
 [![Docker Build](https://github.com/moaidmoatasem/daqiq-professional/actions/workflows/docker.yml/badge.svg)](https://github.com/moaidmoatasem/daqiq-professional/actions/workflows/docker.yml)

@@ -46,3 +46,9 @@ scan_report_*.json
 unified_scan_*.json
 scan_reports/
 swarm_outputs/
+
+# Scan reports and outputs
+scan_report_*.json
+unified_scan_*.json
+scan_reports/
+swarm_outputs/

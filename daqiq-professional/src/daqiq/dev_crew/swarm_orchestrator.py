@@ -175,7 +175,7 @@ class SwarmOrchestrator:
         else:
             prompt = self._build_patch_prompt(spec, last_error)
 
-        async with httpx.AsyncClient(timeout=120) as client:
+        async with httpx.AsyncClient(timeout=300) as client:
             try:
                 resp = await client.post(
                     f"{OLLAMA_URL}/api/generate",
@@ -356,7 +356,7 @@ Produce the complete fixed file. Python code only. No explanation.
     def _stub_scanner(self, spec: CWESpec) -> str:
         """Fallback stub when Ollama is unavailable."""
         return f'''# Auto-generated stub — Ollama unavailable during generation
-from daqiq.core.base_scanner import BaseScanner, ScanResult, Severity
+from daqiq.core.base_scanner import BaseScanner, ScanResult
 
 
 class Stub{spec.cwe_id.replace("-", "")}Scanner(BaseScanner):

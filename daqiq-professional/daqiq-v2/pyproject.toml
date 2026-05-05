@@ -1,0 +1,33 @@
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[project]
+name = "daqiq"
+dynamic = ["version"]
+version = "0.3.0"
+description = "AI-powered security scanner with plugin architecture"
+readme = "README.md"
+requires-python = ">=3.10"
+license = "MIT"
+dependencies = [
+    "httpx>=0.27.0",
+    "pydantic>=2.0",
+    "rich>=13.0",
+    "typer>=0.9",
+    "pytest>=7.0",
+    "pytest-cov>=4.0",
+    "pytest-asyncio>=0.21",
+]
+
+[project.optional-dependencies]
+dev = [
+    "ruff>=0.5",
+    "bandit>=1.7",
+    "crewai>=0.100",
+    "crewai-tools>=0.8"
+]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+cov_fail_under = 15

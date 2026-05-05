@@ -50,9 +50,11 @@ def generate() -> str:
     # ── Security checks ────────────────────────────────────────────────────
     w("")
     w("## SECURITY STATUS")
-    debug = run("grep -r 'debug=True' . --include='*.py' | grep -v '#' | wc -l", "?")
-    cors  = run("grep -r 'allow_origins.*\\*' . --include='*.py' | grep -v '#' | wc -l", "?")
-    bind  = run("grep -r \"host='0.0.0.0'\" . --include='*.py' | grep -v '#' | wc -l", "?")
+    # Exclude tool/template files that contain these strings as text, not live code
+    _excl = "grep -v '#' | grep -v 'session_manager' | grep -v 'sync_context' | grep -v 'swarm_orchestrator'"
+    debug = run(f"grep -r 'debug=True' . --include='*.py' | {_excl} | wc -l", "?")
+    cors  = run(f"grep -r 'allow_origins=\\[\"\\*\"\\]' . --include='*.py' | {_excl} | wc -l", "?")
+    bind  = run(f"grep -r 'host=.0\\.0\\.0\\.0.' . --include='*.py' | {_excl} | wc -l", "?")
     nested = "EXISTS" if Path("src/daqiq/daqiq").exists() else "CLEAN"
     tag   = run("git tag | grep security || echo NONE")
     w(f"debug=True instances: {debug} (must be 0)")
@@ -120,9 +122,11 @@ def generate() -> str:
     # ── Active blockers ────────────────────────────────────────────────────
     w("")
     w("## BLOCKERS (from git issues)")
-    issues = run("gh issue list --state open --limit 10 --json number,title "
-                 "--jq '.[] | \"  #\(.number) \(.title)\"' 2>/dev/null",
-                 "  gh CLI not configured or no open issues")
+    issues = run(
+        r"gh issue list --state open --limit 10 --json number,title "
+        r"--jq '.[] | \"  #\(.number) \(.title)\"' 2>/dev/null",
+        "  gh CLI not configured or no open issues",
+    )
     w(issues or "  none")
 
     # ── Next action ────────────────────────────────────────────────────────

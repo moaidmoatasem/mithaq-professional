@@ -9,12 +9,6 @@ import sys
 import time
 from pathlib import Path
 
-print("""
-╔══════════════════════════════════════════════════════════════╗
-║  🧪 PRODUCTION READINESS TEST SUITE                         ║
-╚══════════════════════════════════════════════════════════════╝
-""")
-
 tests_passed = 0
 tests_failed = 0
 
@@ -99,32 +93,31 @@ def test_dependencies():
     except ImportError as e:
         raise AssertionError(f"Missing dependency: {e}")
 
-# Run all tests
-print("\n🚀 Starting production readiness tests...\n")
+if __name__ == "__main__":
+    print("\n🚀 Starting production readiness tests...\n")
 
-test("Ollama Service Running", test_ollama)
-test("AI Model Loaded", test_model)
-test("Scanner Modules", test_scanners)
-test("Quick Security Scan", test_quick_scan)
-test("AI Agents Available", test_ai_agents)
-test("Memory Efficiency", test_memory)
-test("Framework Structure", test_structure)
-test("Python Dependencies", test_dependencies)
+    test("Ollama Service Running", test_ollama)
+    test("AI Model Loaded", test_model)
+    test("Scanner Modules", test_scanners)
+    test("Quick Security Scan", test_quick_scan)
+    test("AI Agents Available", test_ai_agents)
+    test("Memory Efficiency", test_memory)
+    test("Framework Structure", test_structure)
+    test("Python Dependencies", test_dependencies)
 
-# Summary
-print("\n" + "="*70)
-print("📊 PRODUCTION READINESS SUMMARY")
-print("="*70)
-print(f"✅ Passed: {tests_passed}")
-print(f"❌ Failed: {tests_failed}")
-print(f"📈 Success Rate: {(tests_passed/(tests_passed+tests_failed)*100):.1f}%")
+    print("\n" + "="*70)
+    print("📊 PRODUCTION READINESS SUMMARY")
+    print("="*70)
+    print(f"✅ Passed: {tests_passed}")
+    print(f"❌ Failed: {tests_failed}")
+    print(f"📈 Success Rate: {(tests_passed/(tests_passed+tests_failed)*100):.1f}%")
 
-if tests_failed == 0:
-    print("\n🎉 SYSTEM IS PRODUCTION READY!")
-    print("✅ All critical systems operational")
-    print("✅ Ready for real-world security testing")
-    sys.exit(0)
-else:
-    print(f"\n⚠️  {tests_failed} test(s) failed")
-    print("Fix issues before production deployment")
-    sys.exit(1)
+    if tests_failed == 0:
+        print("\n🎉 SYSTEM IS PRODUCTION READY!")
+        print("✅ All critical systems operational")
+        print("✅ Ready for real-world security testing")
+        sys.exit(0)
+    else:
+        print(f"\n⚠️  {tests_failed} test(s) failed")
+        print("Fix issues before production deployment")
+        sys.exit(1)

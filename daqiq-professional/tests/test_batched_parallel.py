@@ -69,48 +69,19 @@ task_configs = [
     }
 ]
 
-print("""
-╔══════════════════════════════════════════════════════════════╗
-║  🚀 MEMORY-EFFICIENT BATCHED PARALLEL EXECUTION              ║
-║                                                              ║
-║  Strategy: Batch 2 agents at a time, clean memory between   ║
-║  Benefit: 2-3x faster than sequential, minimal RAM increase ║
-║  Perfect for: 8GB RAM systems                                ║
-╚══════════════════════════════════════════════════════════════╝
-""")
+if __name__ == "__main__":
+    crew = MemoryEfficientCrew(
+        model="ollama/qwen2.5:3b",
+        batch_size=2
+    )
 
-# Create memory-efficient crew with batch size of 2
-crew = MemoryEfficientCrew(
-    model="ollama/qwen2.5:3b",
-    batch_size=2  # 2 agents at a time
-)
-
-print("\n📋 Configuration:")
-print(f"   Model: qwen2.5:3b")
-print(f"   Total scanners to generate: {len(task_configs)}")
-print(f"   Batch size: 2 (RAM-optimized)")
-print(f"   Expected batches: 3")
-print(f"\n⏳ This will take approximately 15-20 minutes...")
-
-try:
-    # Run batched execution
-    results = crew.run_parallel_batches(agent_configs, task_configs)
-    
-    # Save results
-    crew.save_results(results, output_dir="output/scanner_modules")
-    
-    print("\n" + "="*70)
-    print("🎉 SUCCESS!")
-    print("="*70)
-    print(f"✅ Generated {len(results)} scanner modules")
-    print(f"📁 Saved to: output/scanner_modules/")
-    print("\nGenerated scanners:")
-    for i, agent in enumerate(agent_configs, 1):
-        print(f"  {i}. {agent['role']}")
-
-except KeyboardInterrupt:
-    print("\n\n⚠️  Interrupted by user")
-    sys.exit(1)
-except Exception as e:
-    print(f"\n\n❌ Error: {e}")
-    sys.exit(1)
+    try:
+        results = crew.run_parallel_batches(agent_configs, task_configs)
+        crew.save_results(results, output_dir="output/scanner_modules")
+        print(f"Generated {len(results)} scanner modules → output/scanner_modules/")
+    except KeyboardInterrupt:
+        print("Interrupted by user")
+        sys.exit(1)
+    except Exception as e:
+        print(f"Error: {e}")
+        sys.exit(1)

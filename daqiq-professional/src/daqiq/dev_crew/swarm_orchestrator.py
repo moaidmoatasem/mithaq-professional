@@ -24,6 +24,7 @@ from __future__ import annotations
 import asyncio
 import json
 import logging
+import os
 import shutil
 import subprocess
 import tempfile
@@ -39,7 +40,7 @@ logging.basicConfig(level=logging.INFO, format="%(asctime)s [%(levelname)s] %(me
 logger = logging.getLogger("daqiq.swarm")
 
 OLLAMA_URL   = "http://localhost:11434"
-OLLAMA_MODEL = "qwen2.5-coder:7b"
+OLLAMA_MODEL = os.getenv("DAQIQ_OLLAMA_MODEL", "qwen2.5-coder:3b")
 MAX_RETRIES  = 3
 CANDIDATES   = Path("candidates/generated_scanners")
 MANIFESTS    = Path("manifests/cwe_queue.yaml")
@@ -243,7 +244,7 @@ Produce the complete fixed file. Python code only. No explanation.
 
         # Bandit security scan
         ban = subprocess.run(
-            ["bandit", "-r", str(scanner_file), "-ll", "-f", "text"],
+            ["bandit", "--severity-level", "medium", str(scanner_file)],
             capture_output=True, text=True
         )
         if ban.returncode != 0:

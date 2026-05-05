@@ -3,6 +3,7 @@ DAQIQ REST API Server
 FastAPI-based API for remote workflow execution
 """
 
+import os
 from fastapi import FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
@@ -21,12 +22,16 @@ app = FastAPI(
     version="1.0.0",
 )
 
-# Enable CORS
+_ALLOWED_ORIGINS = os.getenv(
+    "DAQIQ_CORS_ORIGINS",
+    "http://localhost:5000,http://127.0.0.1:5000"
+).split(",")
+
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],
-    allow_methods=["*"],
-    allow_headers=["*"],
+    allow_origins=_ALLOWED_ORIGINS,
+    allow_methods=["GET", "POST"],
+    allow_headers=["Content-Type", "Authorization"],
 )
 
 
@@ -117,4 +122,6 @@ async def get_results(workflow_name: str):
 if __name__ == "__main__":
     import uvicorn
 
-    uvicorn.run(app, host="0.0.0.0", port=8000)
+    host = os.getenv("DAQIQ_API_HOST", "127.0.0.1")
+    port = int(os.getenv("DAQIQ_API_PORT", "8000"))
+    uvicorn.run(app, host=host, port=port)

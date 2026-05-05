@@ -1,99 +1,60 @@
-# CLAUDE.md — DAQIQ Memory File
-# Auto-loaded by Claude Code every session.
-# Updated: May 2026 — V4.1 (incorporates Gemini + Copilot + Arch reviews)
+# CLAUDE.md — DAQIQ v4.1 (COMPRESSED)
+# Rule: This file must stay under 120 lines. Prune ruthlessly on every update.
+# Claude Code reads this every session. Every token here costs money.
 
-## Current state
-- Phase: 1 (Foundation cleanup — in progress)
-- Version: v0.1.1-security
-- Plan: docs/plan/development_plan.md + DAQIQ_FINAL_PLAN_V4.md
-- Test coverage: ~30% (target: 80% by v1.0)
+## STATE
+Phase: 1 (cleanup) | Version: v0.1.1 | Coverage: ~30%
+Canonical source: src/daqiq/ ONLY
 
-## What's broken right now (fix before anything else)
-1. 131 files showing as "modified" — line-ending noise (git config + reset)
-2. src/daqiq/daqiq/ nested duplicate directory — delete it
-3. Phase 2 commits lost at fd731b6 — cherry-pick them
-4. api/main.py CORS wildcard + 0.0.0.0 binding — restrict both
-5. 5 dead plan files in repo — delete them
+## BROKEN RIGHT NOW — FIX FIRST, IN ORDER
+1. git config core.autocrlf input && git rm --cached -r . && git reset --hard HEAD
+2. rm -rf src/daqiq/daqiq/ && git commit -m "fix: nested daqiq/daqiq/"
+3. git log --oneline --all | grep -E "fd731b6|dd9a8be|93eee97" → cherry-pick all three
+4. api/main.py: allow_origins=["http://localhost:5000"] AND host=os.getenv("UVICORN_HOST","127.0.0.1")
+5. rm -f DAQIQ_DEVELOPMENT_PLAN.md STRATEGIC_ROADMAP.md src/DAQIQ_MASTER_PLAN.md docs/roadmap/PRODUCT_ROADMAP.md
+6. git tag -a v0.1.1-security -m "Phase 0 done" && git push origin main --tags
 
-## Architectural invariants (cannot be violated)
-1. Every scanner inherits from BaseScanner
-2. Siyaada bridge is fail-closed — drop on inability to sanitize
-3. No raw data (credentials, source, binaries, IPs) leaves local hardware
-4. HIGH/CRITICAL findings require Burhan validation before reporting
-5. src/daqiq/ is the ONLY canonical source path
-6. Candidates/ is NEVER counted as working scanners
+## INVARIANTS (never violate)
+- BaseScanner contract for every scanner
+- Siyaada: fail-closed, telemetry on every drop, alert if drop_rate > 20%
+- Raw data (Tier 1): never leaves local hardware
+- Burhan: CONFIRMED/PROBABLE/UNVERIFIED/DISCARDED (not binary pass/fail)
+- Sandbox: STANDARD profile (web) or MOBILE profile (APK/Frida) — two profiles only
+- Watchdog: kill Burhan containers after 30s — prevents OOM
 
-## NEW: PoC Confidence Score (replaces binary pass/fail)
-Accepted from Gemini + Copilot reviews:
-- CONFIRMED  → PoC succeeded → SHA-256 signed Burhan stamp
-- PROBABLE   → Env mismatch / timeout → human review queue, labeled in report
-- UNVERIFIED → No safe primitive for this surface → labeled in report
-- DISCARDED  → PoC definitively failed → removed from report
-NEVER drop PROBABLE findings silently.
+## DATA TIERS (from GOV-01)
+Tier 1 (RAW): Terminal output, HTTP responses, decompiled code → local only, shred after 72h
+Tier 2 (SANITIZED): Post-Siyaada → cloud-safe, structural metadata only
+Tier 3 (TRACE): SHA-256 signed SQLite ledger → 7yr retention, CBE-distributable
 
-## NEW: Siyaada drop telemetry (first-class feature)
-Accepted from all three reviews:
-- Track: attempts, successes, drops, drop_reasons, duration_ms
-- Expose in CLI output and SQLite
-- Alert if drop_rate > 20% after 10 attempts
-- This prevents fail-closed from being an invisible black box
+## VALIDATION GATE (5 steps, all required)
+1. Unit positive (mocked HTTP, must find vuln)
+2. Unit negative (mocked HTTP, must NOT fire)
+3. DVWA integration (localhost:8080)
+4. WebGoat false-positive (localhost:8090)
+5. bandit + CWE docstring + ruff
 
-## NEW: Two sandbox profiles
-Accepted from Copilot:
-- STANDARD: web/infra — strict, cap_drop ALL, seccomp enabled
-- MOBILE: APK/Frida — adds SYS_PTRACE, larger RAM, separate network
-  Mobile profile requires audit note in every container start log.
+## NEW FILES (copy from project outputs to these paths)
+src/daqiq/ai/siyaada.py         (with SiyaadaTelemetry)
+src/daqiq/agents/burhan.py      (with PoC Confidence Score + watchdog)
+src/daqiq/core/sandbox.py       (STANDARD + MOBILE profiles)
+src/daqiq/dev_crew/scanner_generator.py  (qwen2.5-coder:7b, $0)
 
-## NEW: Watchdog timer for Burhan agents
-Accepted from Arch review:
-- POC_TIMEOUT_SECONDS = 30 (kill stalled containers)
-- BurhanAgent._kill_stalled_container() frees memory before next spawn
-- Prevents hanging exploits from OOMing worker nodes
+## DELEGATE TO LOCAL OLLAMA (do not use Claude tokens)
+- Scanner boilerplate from CWE → dev_crew/scanner_generator.py
+- Test stubs → dev_crew/scanner_generator.py
+- pyproject.toml/Dockerfile edits → Claude Code bash directly
+- Linting fixes (ruff --fix) → run directly, no LLM needed
+- Git operations → run directly
 
-## Validation gate (5 steps — mandatory for every scanner)
-1. Unit test: positive case (finds vuln with mocked HTTP)
-2. Unit test: negative case (no false positive when vuln absent)
-3. Integration test: fires on DVWA running in Docker (localhost:8080)
-4. Does NOT fire on OWASP WebGoat safe pages (localhost:8090)
-5. bandit clean + CWE in docstring + remediation guidance
+## TOKEN BUDGET
+muhandis_plan=2000 | triage_chunk=4000 | burhan_poc=1500 | max_output=1000
+Target: $0.009/scan std | $0.003/scan cached | $0.00 local-only
 
-## Token budget rules
-- Use local Ollama (qwen2.5-coder:7b) for boilerplate — $0
-- Provider-side caching for static prompts (cache_control)
-- Pre-flight token count before dispatch
-- Budgets: muhandis_plan=2000, triage_chunk=4000, burhan_poc=1500, max_output=1000
-- Target: ~$0.009/scan standard, ~$0.003/scan cached, $0 local-only
+## AUTONOMY CEILING (human must approve)
+CRITICAL finding approval | Siyaada PR merges | Release tags | New LLM backends
 
-## Source of truth paths
-- Plan: DAQIQ_FINAL_PLAN_V4.md (authoritative)
-- Arch: docs/ARCHITECTURE.md
-- This file: CLAUDE.md (overrides plan where they differ — reality wins)
-
-## What NOT to do
-- Do NOT count candidates/ as official scanners
-- Do NOT update README before the code matches
-- Do NOT skip the validation gate. Ever.
-- Do NOT add aider-chat as a dependency
-- Do NOT bind any service to 0.0.0.0 without env var override
-- Do NOT log raw findings — only sanitized finding descriptors
-- Do NOT use binary pass/fail for Burhan — use PoC Confidence Score
-- Do NOT let Siyaada drop silently — telemetry must record every drop
-- Do NOT publish to community before Phase 3 (20+ validated scanners)
-- Do NOT merge PRs touching Siyaada without human review
-
-## Autonomy ceiling (human approval required)
-- Approving CRITICAL findings (Burhan confirms, human reviews)
-- Merging PRs touching Siyaada bridge
-- Pushing release tags
-- Adding new LLM backends
-- Removing or weakening the validation gate
-- Changing fail-closed to fail-open
-
-## New files to add in Phase 2
-src/daqiq/ai/siyaada.py         ← with SiyaadaTelemetry
-src/daqiq/agents/burhan.py      ← with PoC Confidence Score + watchdog
-src/daqiq/core/sandbox.py       ← with STANDARD + MOBILE profiles
-src/daqiq/dev_crew/scanner_generator.py  ← qwen2.5-coder:7b local
-
-## Planning reference
-Full planning conversation: https://claude.ai/chat/c86be7c3-891a-47f5-bcaf-bf759da12550
+## NEVER DO
+count candidates/ | update README before code | skip validation gate
+add aider-chat dep | bind 0.0.0.0 | log raw findings | binary Burhan pass/fail
+community launch before Phase 3 (20+ validated scanners)

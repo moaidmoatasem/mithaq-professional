@@ -9,12 +9,6 @@ import subprocess
 import json
 from pathlib import Path
 
-print("""
-╔══════════════════════════════════════════════════════════════╗
-║  🧪 DAQIQ COMPLETE SYSTEM TEST                              ║
-╚══════════════════════════════════════════════════════════════╝
-""")
-
 tests_passed = 0
 tests_failed = 0
 
@@ -107,29 +101,30 @@ def test_docker():
     assert compose.exists(), "docker-compose.yml not found"
     print("✓ Docker configuration files present")
 
-# Run all tests
-print("\n🚀 Starting test suite...\n")
+if __name__ == "__main__":
+    # Run all tests
+    print("\n🚀 Starting test suite...\n")
 
-test("Module Imports", test_imports)
-test("Directory Structure", test_structure)
-test("Scanner Initialization", test_scanner)
-test("AI-Generated Scanners", test_generated_scanners)
-test("Scan Reports", test_scan_reports)
-test("Parallel Execution System", test_parallel)
-test("CLI Interface", test_cli)
-test("Docker Configuration", test_docker)
+    test("Module Imports", test_imports)
+    test("Directory Structure", test_structure)
+    test("Scanner Initialization", test_scanner)
+    test("AI-Generated Scanners", test_generated_scanners)
+    test("Scan Reports", test_scan_reports)
+    test("Parallel Execution System", test_parallel)
+    test("CLI Interface", test_cli)
+    test("Docker Configuration", test_docker)
 
-# Summary
-print("\n" + "="*70)
-print("📊 TEST SUMMARY")
-print("="*70)
-print(f"✅ Passed: {tests_passed}")
-print(f"❌ Failed: {tests_failed}")
-print(f"📈 Success Rate: {(tests_passed/(tests_passed+tests_failed)*100):.1f}%")
+    # Summary
+    print("\n" + "="*70)
+    print("📊 TEST SUMMARY")
+    print("="*70)
+    print(f"✅ Passed: {tests_passed}")
+    print(f"❌ Failed: {tests_failed}")
+    print(f"📈 Success Rate: {(tests_passed/(tests_passed+tests_failed)*100):.1f}%")
 
-if tests_failed == 0:
-    print("\n🎉 ALL TESTS PASSED! System is fully operational!")
-    sys.exit(0)
-else:
-    print(f"\n⚠️  {tests_failed} test(s) failed. Review errors above.")
-    sys.exit(1)
+    if tests_failed == 0:
+        print("\n🎉 ALL TESTS PASSED! System is fully operational!")
+        sys.exit(0)
+    else:
+        print(f"\n⚠️  {tests_failed} test(s) failed. Review errors above.")
+        sys.exit(1)

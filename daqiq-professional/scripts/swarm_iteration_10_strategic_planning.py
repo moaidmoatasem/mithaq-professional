@@ -177,11 +177,15 @@ app = FastAPI(
 )
 
 # Enable CORS
+import os as _os
+_allowed_origins = _os.getenv(
+    "DAQIQ_CORS_ORIGINS", "http://localhost:5000,http://127.0.0.1:5000"
+).split(",")
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],
-    allow_methods=["*"],
-    allow_headers=["*"],
+    allow_origins=_allowed_origins,
+    allow_methods=["GET", "POST"],
+    allow_headers=["Content-Type", "Authorization"],
 )
 
 # Models

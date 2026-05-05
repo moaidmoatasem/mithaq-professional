@@ -1,0 +1,56 @@
+[project]
+name = "daqiq"
+version = "0.1.1"
+description = "Daqiq Security Framework - Precision in Sovereignty"
+authors = [
+    {name = "Moaid EL-Moatasem Bellah"}
+]
+requires-python = ">=3.10"
+dependencies = [
+    "pydantic>=2.0",
+    "httpx>=0.27.0",
+    "python-dotenv>=1.0.0",
+]
+
+[tool.setuptools.packages.find]
+where = ["src"]
+
+[tool.setuptools.package-data]
+daqiq = ["py.typed"]
+
+[project.optional-dependencies]
+dev = [
+    "pytest>=8.0.0",
+    "pytest-cov>=4.1.0",
+    "pytest-asyncio>=0.23.0",
+    "bandit>=1.7.8",
+    "ruff>=0.4.0",
+    "pre-commit>=3.7.0",
+]
+
+[tool.ruff]
+line-length = 100
+target-version = "py310"
+
+[tool.ruff.lint]
+select = ["E", "F", "I", "N", "W", "B", "S"]
+ignore = ["E501", "S101"]
+
+[tool.bandit]
+exclude_dirs = ["tests", "venv", ".venv", "candidates"]
+skips = ["B101"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+python_files = ["test_*.py"]
+python_functions = ["test_*"]
+addopts = "-v --tb=short"
+
+[tool.coverage.run]
+source = ["daqiq"]
+omit = ["tests/*", "venv/*", "candidates/*"]
+
+[tool.coverage.report]
+fail_under = 25
+precision = 2
+show_missing = true

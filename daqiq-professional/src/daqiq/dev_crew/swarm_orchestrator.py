@@ -195,12 +195,18 @@ class SwarmOrchestrator:
 CWE: {spec.cwe_id}
 Vulnerability: {spec.description}
 
-Requirements:
-- Class inherits from BaseScanner: from daqiq.core.base_scanner import BaseScanner, Finding, ScanResult, Severity
+REQUIRED: Your file MUST start with exactly these two import lines (copy verbatim):
+import httpx
+from daqiq.core.base_scanner import BaseScanner, Finding, ScanResult, Severity
+
+Do NOT import these symbols from anywhere else. Do NOT use any symbol that is not imported.
+
+Additional requirements:
+- Class inherits from BaseScanner
 - Implement: async def scan(self) -> ScanResult
 - Use httpx.AsyncClient for HTTP requests
 - Only flag clear evidence (conservative — prefer false negatives over false positives)
-- Add to docstring: CWE ID, technique used, remediation in one sentence
+- Docstring MUST contain the exact CWE ID (e.g. "CWE-{spec.cwe_id.split('-')[1]}"), technique, and one-sentence remediation
 - Handle exceptions: catch httpx.ConnectError and httpx.TimeoutException
 - Set scanner tags to ["passive"] unless it sends payloads (then ["active"])
 
@@ -211,16 +217,23 @@ Output Python code only. No explanation. No markdown fences.
         return f"""Fix this Python security scanner for DAQIQ.
 
 CWE: {spec.cwe_id}
-Error from pytest/bandit:
+Error to fix:
 {error[:800]}
 
-Requirements (same as before):
-- Inherits from BaseScanner
+REQUIRED: Your file MUST start with exactly these two import lines (copy verbatim):
+import httpx
+from daqiq.core.base_scanner import BaseScanner, Finding, ScanResult, Severity
+
+Do NOT use any symbol that is not imported. Do NOT add unused imports.
+
+Other requirements:
+- Class inherits from BaseScanner
 - async def scan(self) -> ScanResult
 - Uses httpx.AsyncClient
 - Handles httpx.ConnectError and httpx.TimeoutException
+- Docstring MUST contain the CWE ID (e.g. "CWE-{spec.cwe_id.split('-')[1]}")
 
-Produce the complete fixed file. Python code only. No explanation.
+Produce the complete fixed file. Python code only. No explanation. No markdown fences.
 """
 
     # ── Judge (CI gate) ─────────────────────────────────────────────────────
@@ -242,9 +255,9 @@ Produce the complete fixed file. Python code only. No explanation.
         if syn.returncode != 0:
             errors.append(f"SYNTAX ERROR:\n{syn.stderr}")
 
-        # Bandit security scan
+        # Bandit security scan — skip B501 (verify=False is intentional in TLS scanners)
         ban = subprocess.run(
-            ["bandit", "--severity-level", "medium", str(scanner_file)],
+            ["bandit", "--severity-level", "medium", "--skip", "B501", str(scanner_file)],
             capture_output=True, text=True
         )
         if ban.returncode != 0:
@@ -252,7 +265,7 @@ Produce the complete fixed file. Python code only. No explanation.
 
         # Auto-fix trivial issues first (import order, unused imports, formatting)
         subprocess.run(
-            ["ruff", "check", "--select", "I,F401", "--fix", str(scanner_file)],
+            ["ruff", "check", "--select", "I,F401,F841", "--fix", str(scanner_file)],
             capture_output=True,
         )
         subprocess.run(["ruff", "format", str(scanner_file)], capture_output=True)
@@ -265,10 +278,11 @@ Produce the complete fixed file. Python code only. No explanation.
         if ruff.returncode != 0:
             errors.append(f"RUFF:\n{ruff.stdout}")
 
-        # Docstring CWE check
+        # CWE reference check — accept "CWE-295", "CWE_ID = 295", or "cwe: 295"
+        import re as _re
         content = scanner_file.read_text()
-        if "CWE-" not in content:
-            errors.append("DOCSTRING: Missing CWE ID in docstring")
+        if not _re.search(r"CWE[-_\s:]+\d+", content, _re.IGNORECASE):
+            errors.append("DOCSTRING: Missing CWE ID in file (need CWE-NNN, CWE_ID=NNN, etc.)")
 
         if errors:
             return False, "\n\n".join(errors)

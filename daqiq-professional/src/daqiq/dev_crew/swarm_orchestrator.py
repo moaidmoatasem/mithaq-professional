@@ -250,7 +250,14 @@ Produce the complete fixed file. Python code only. No explanation.
         if ban.returncode != 0:
             errors.append(f"BANDIT:\n{ban.stdout}")
 
-        # Auto-fix trivial issues first\n        subprocess.run(["ruff", "check", "--select", "I", "--fix", str(scanner_file)], capture_output=True)\n        subprocess.run(["ruff", "format", str(scanner_file)], capture_output=True)\n\n        # Ruff lint
+        # Auto-fix trivial issues first (import order, formatting)
+        subprocess.run(
+            ["ruff", "check", "--select", "I", "--fix", str(scanner_file)],
+            capture_output=True,
+        )
+        subprocess.run(["ruff", "format", str(scanner_file)], capture_output=True)
+
+        # Ruff lint
         ruff = subprocess.run(
             ["ruff", "check", str(scanner_file)],
             capture_output=True, text=True

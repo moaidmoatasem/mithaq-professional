@@ -250,9 +250,9 @@ Produce the complete fixed file. Python code only. No explanation.
         if ban.returncode != 0:
             errors.append(f"BANDIT:\n{ban.stdout}")
 
-        # Auto-fix trivial issues first (import order, formatting)
+        # Auto-fix trivial issues first (import order, unused imports, formatting)
         subprocess.run(
-            ["ruff", "check", "--select", "I", "--fix", str(scanner_file)],
+            ["ruff", "check", "--select", "I,F401", "--fix", str(scanner_file)],
             capture_output=True,
         )
         subprocess.run(["ruff", "format", str(scanner_file)], capture_output=True)

@@ -28,6 +28,22 @@ class AgentID:
     role: str
 
 
+def get_workflow_status(workflow_id: str) -> Dict[str, Any]:
+    """
+    Get the status/latest result of a workflow by ID/name.
+
+    Args:
+        workflow_id: The ID or name of the workflow
+
+    Returns:
+        Dict containing the workflow status and results, or None if not found
+    """
+    from mithaq.result_persistence import ResultStore
+
+    store = ResultStore()
+    return store.get_latest(workflow_id)
+
+
 def orchestrate_workflow(config: Dict) -> WorkflowResult:
     """
     Execute an AI workflow based on configuration

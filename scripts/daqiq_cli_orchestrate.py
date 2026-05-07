@@ -72,10 +72,9 @@ def status(id):
     """Check workflow status"""
     click.echo(f"📊 Checking status for workflow: {id}")
     try:
-        from mithaq.result_persistence import ResultStore
+        from mithaq.orchestration_api import get_workflow_status
 
-        store = ResultStore()
-        result = store.get_latest(id)
+        result = get_workflow_status(id)
 
         if result:
             click.echo(f"✅ Latest result found for {id}:")

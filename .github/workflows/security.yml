@@ -26,12 +26,13 @@ jobs:
       run: |
         pip install -e ".[dev]"
     
+    - name: Set up Snyk
+      uses: snyk/actions/setup@master
+
     - name: Run Snyk Security Scan
-      uses: snyk/actions/python@master
+      run: snyk test --severity-threshold=high
       env:
         SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
-      with:
-        args: --severity-threshold=high --package-manager=pip --file=requirements.txt
 
   codeql-analysis:
     runs-on: ubuntu-latest

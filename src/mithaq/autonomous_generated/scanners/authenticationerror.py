@@ -4,6 +4,7 @@ Source: batch_1_20260503_044748.txt
 Category: scanners
 """
 
+import hmac
 import os
 from functools import wraps
 
@@ -25,20 +26,33 @@ class AuthenticationError(Exception):
 def requires_authentication(f):
     @wraps(f)
     def wrapper(*args, **kwargs):
-        auth_token = request.headers.get("Authorization", "").split()[1]
+        auth_header = request.headers.get("Authorization", "")
+        parts = auth_header.split()
+        if len(parts) != 2 or parts[0].lower() != "bearer":
+            raise AuthenticationError("Unauthorized: Invalid Authorization header")
 
-        if auth_token:
-            user = MOCK_ACCESS_CONTROL.get(request.identity, None)
+        auth_token = parts[1]
+        expected_token = os.environ.get("MITHAQ_AUTH_TOKEN")
 
-            if not user or auth_token != "mock_token":  # Mock token example
-                raise AuthenticationError("Unauthorized")
+        if not expected_token:
+            # Secure fail-closed: if no token is configured, no one can authenticate
+            raise AuthenticationError("Unauthorized: System not configured")
 
-            authorized_scanners = [
-                sec for sec in app.scanner_permissions for user_permission in user
-            ]
+        # Use request.identity if it exists, otherwise default to None
+        identity = getattr(request, "identity", None)
+        user = MOCK_ACCESS_CONTROL.get(identity, None)
 
-            if request.path in authorized_scanners:
-                return f(*args, **kwargs)
+        if not user or not hmac.compare_digest(auth_token, expected_token):
+            raise AuthenticationError("Unauthorized")
+
+        # Use app.scanner_permissions if it exists
+        scanner_permissions = getattr(app, "scanner_permissions", [])
+        authorized_scanners = [
+            sec for sec in scanner_permissions for _ in user
+        ]
+
+        if request.path in authorized_scanners or not authorized_scanners:
+            return f(*args, **kwargs)
 
         raise AuthenticationError("Access Denied: Invalid credentials or permissions.")
 
@@ -61,7 +75,8 @@ def handle_scan():
         scanner_id = request.json.get("scannerId")
 
         # Perform the actual scanning logic - Example: Using a mock scan module
-        result = scan(url_to_scan, "Scanner_{}".format(scanner_id))
+        result = mock_scan(url_to_scan)
+        result["scanner_id"] = scanner_id
 
     except Exception as e:
         return jsonify({"error": str(e)}), 500
@@ -76,7 +91,7 @@ def mock_scan(url):
     :param url: The URL to be scanned
     :type url: str
     """
-    payload = {"scanned_url": "http://example.com", "status": "completed"}
+    payload = {"scanned_url": url, "status": "completed"}
     return payload
 
 
@@ -94,7 +109,8 @@ def add_scanner():
     scanner_ids = request.json.get("scannerIds")
 
     # Example logic for adding scanners - Here we're just setting a global flag
-    _MOCK_ACCESS_CONTROL["admin"]["scanner"].extend(scanner_ids)
+    if "admin" in MOCK_ACCESS_CONTROL:
+        MOCK_ACCESS_CONTROL["admin"].extend(scanner_ids)
 
     return jsonify({"success": True, "message": "Scanners added successfully"})
 
@@ -109,14 +125,20 @@ def create_app():
         such as checking for database connectivity or API key validity. Here, it simply updates the global mock_access_control dictionary with any new permissions defined via routes.
         """
         # Example check: If a scanner was added/authorized, update the MOCK_ACCESS_CONTROL
-        if _MOCK_ACCESS_CONTROL["admin"]["scanner"]:
+        if "admin" in MOCK_ACCESS_CONTROL:
             user = "admin"
+            scanner_permissions = getattr(app, "scanner_permissions", set())
+            user_permissions = MOCK_ACCESS_CONTROL.get(user, [])
+
             authorized_scanners = [
-                sec for sec in app.scanner_permissions for user_permission in user
+                sec for sec in scanner_permissions for _ in user_permissions
             ]
 
             if request.path in authorized_scanners:
-                app.scanner_permissions.update(_MOCK_ACCESS_CONTROL["admin"]["scanner"])
+                if isinstance(scanner_permissions, set):
+                    scanner_permissions.update(user_permissions)
+                elif isinstance(scanner_permissions, list):
+                    app.scanner_permissions.extend(user_permissions)
 
                 # Implement real access control checks as needed - Using decorators and middleware
                 raise AuthenticationError("Access Denied: Invalid credentials or permissions.")
@@ -128,10 +150,10 @@ if __name__ == "__main__":
     scan_permissions = ["scan"]
 
     if os.environ.get("FLASK_APP_SECRET"):
-        _MOCK_ACCESS_CONTROL["admin"] = {"scan": scan_permissions}
+        MOCK_ACCESS_CONTROL["admin"] = scan_permissions
 
     # Example: Set global variables and start Flask application
-    app.scanner_permissions = MOCK_ACCESS_CONTROL["admin"].copy()
+    app.scanner_permissions = list(MOCK_ACCESS_CONTROL.get("admin", []))
 
     add_scanner_route = "/api/add-scanners"
     add_scanner_method = {"method": "POST", "route": add_scanner_route}
@@ -150,23 +172,12 @@ if __name__ == "__main__":
     routes = [handle_scan, add_scanner]
 
     for route in auth_routes + routes:
+        endpoint = getattr(route, "endpoint", str(route))
         app.add_url_rule(
-            app.view_functions[route].endpoint,
-            methods=[app.view_functions[route].methods],
-            view_func=requires_authentication(app.view_functions[route]),
-            endpoint=route,
+            endpoint,
+            methods=["POST"], # Default to POST as per most routes here
+            view_func=requires_authentication(route),
+            endpoint=endpoint + "_auth",
         )
-
-    _mock_access_control_route = "/api/mock-access-control"
-    _mock_access_control_methods = {"method": "GET", "route": "/api/mock-access-control"}
-
-    if _mock_access_control_route not in [i["route"] for i in app.url_map.iter_rules()]:
-        # Handle get request to /api/mock-access-control
-        method = _mock_access_control_methods["method"]
-        route = _mock_access_control_methods["route"]
-
-        @app.route(route, methods=[method])
-        def mock_route():
-            return MOCK_ACCESS_CONTROL
 
     app.run()

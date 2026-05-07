@@ -22,12 +22,13 @@ jobs:
           python -m pip install --upgrade pip
           pip install -e '.[dev]'
 
-      - name: Run Snyk Security Scan
-        uses: snyk/actions/python@master
-        env:
-          SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
-        with:
-          args: --severity-threshold=high
+    - name: Run Snyk Security Scan
+      uses: snyk/actions/python@master
+      env:
+        SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
+      with:
+        args: --package-manager=pip --file=requirements.txt --severity-threshold=high
+        args: --severity-threshold=high --file=requirements.txt
 
   codeql-analysis:
     runs-on: ubuntu-latest
@@ -39,12 +40,20 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      - name: Initialize CodeQL
-        uses: github/codeql-action/init@v3
-        with:
-          languages: python
+    - name: Perform CodeQL Analysis
+      id: analyze
+      uses: github/codeql-action/analyze@v3
+      with:
+        upload: false
+        output: codeql-results
+      uses: github/codeql-action/analyze@v4
+      with:
+        upload: false
+        output: ${{ runner.temp }}/results
 
-      - name: Perform CodeQL Analysis
-        uses: github/codeql-action/analyze@v3
-        with:
-          upload: false
+    - name: Upload CodeQL results as artifact
+      uses: actions/upload-artifact@v4
+      with:
+        name: codeql-results
+        path: ${{ runner.temp }}/results
+        path: ${{ runner.workspace }}/results

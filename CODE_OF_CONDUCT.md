@@ -19,7 +19,13 @@ Maintainers have the right and responsibility to remove, edit, or reject comment
 ## 4. Scope
 This Code of Conduct applies both within project spaces and in public spaces when an individual is representing the project or its community. Examples of representing a project or community include using an official project e-mail address, posting via an official social media account, or acting as an appointed representative at an online or offline event. Representation of a project may be further defined and clarified by project maintainers.
 
-## 5. Enforcement
+## 5. Agent and Human Interactions
+MITHAQ relies heavily on AI agents. The following rules govern interactions:
+- **Agent Autonomy:** Agents are permitted to operate autonomously within predefined bounds (e.g., executing established scanners, writing standard code).
+- **Human-in-the-Loop (HITL):** Critical security changes (e.g., modifications to DAREE3, SIYAADA, AL-BURHAN, or core orchestration) **REQUIRE** explicit human review and cryptographic approval. Agents must halt and wait for this approval.
+- **Agent Handoffs:** Agents must communicate clearly defined state and context during handoffs, adhering to the `AgentState` schema to prevent context pollution.
+
+## 6. Enforcement
 Instances of abusive, harassing, or otherwise unacceptable behavior may be reported by contacting the project team. All complaints will be reviewed and investigated and will result in a response that is deemed necessary and appropriate to the circumstances. The project team will maintain confidentiality with regard to the reporter of an incident. 
 
 ---

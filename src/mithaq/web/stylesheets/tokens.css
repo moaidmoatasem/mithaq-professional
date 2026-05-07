@@ -16,13 +16,13 @@
   /* ---------- HUD SECONDARIES (cyber palette) ---------- */
   --hud-cyan:      #00e5ff;   /* data / telemetry / signal */
   --hud-cyan-glow: rgba(0, 229, 255, 0.35);
-  --hud-violet:    #7d5cff;   /* AI / agent activity */
+  --hud-violet:    var(--mithaq-accent);   /* AI / agent activity */
   --hud-violet-glow: rgba(125, 92, 255, 0.40);
   --hud-amber:     #ffb020;   /* attention / scanning */
   --hud-mint:      #00ff88;   /* legacy success / OK */
 
-  /* ---------- BACKGROUNDS (deepened, near-black) ---------- */
-  --bg-canvas:    #08090c;   /* page background — deep cyber */
+  /* ---------- BACKGROUNDS (Obsidian) ---------- */
+  --bg-canvas:    #0A0A0A;   /* Obsidian — deep cyber */
   --bg-canvas-2:  #0d0f14;   /* canvas alt */
   --bg-surface:   #12141a;   /* panel / card */
   --bg-elevated:  #1a1d26;   /* input / chip / inner-card */

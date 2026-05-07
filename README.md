@@ -62,5 +62,5 @@ MIT License
 
 ## 👨‍💻 Author
 
-**Moaid EL-Moatasem Bellah** - Cairo, Egypt
+**Moayed Badawy** - Cairo, Egypt
 

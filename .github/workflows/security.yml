@@ -1,45 +1,33 @@
 name: Security Scanning
 
-on:
-  push:
-    branches: [ main ]
-  pull_request:
-    branches: [ main ]
+"on":
   schedule:
-    - cron: '0 0 * * 0'  # Weekly on Sunday
+    - cron: "0 0 * * 0"  # Weekly on Sunday
   workflow_dispatch:
 
 jobs:
   dependency-scan:
     runs-on: ubuntu-latest
-    
+
     steps:
-    - uses: actions/checkout@v4
+      - uses: actions/checkout@v4
 
-    - name: Set up Python
-      uses: actions/setup-python@v5
-      with:
-        python-version: '3.11'
-        cache: 'pip'
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
 
-    - name: Install dependencies
-      run: |
-        pip install -e ".[dev]"
-    
-    - name: Set up Python
-      uses: actions/setup-python@v5
-      with:
-        python-version: "3.11"
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -e '.[dev]'
 
-    - name: Install dependencies
-      run: pip install -e ".[dev]"
-
-    - name: Run Snyk Security Scan
-      uses: snyk/actions/python@master
-      env:
-        SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
-      with:
-        args: --severity-threshold=high --file=requirements.txt
+      - name: Run Snyk Security Scan
+        uses: snyk/actions/python@master
+        env:
+          SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
+        with:
+          args: --severity-threshold=high
 
   codeql-analysis:
     runs-on: ubuntu-latest
@@ -49,24 +37,14 @@ jobs:
       contents: read
 
     steps:
-    - uses: actions/checkout@v4
+      - uses: actions/checkout@v4
 
-    - name: Initialize CodeQL
-      uses: github/codeql-action/init@v4
-      with:
-        languages: python
+      - name: Initialize CodeQL
+        uses: github/codeql-action/init@v3
+        with:
+          languages: python
 
-    - name: Perform CodeQL Analysis
-      uses: github/codeql-action/analyze@v3
-      with:
-        upload: false
-        output: codeql-results
-      uses: github/codeql-action/analyze@v4
-      with:
-        upload: false
-
-    - name: Upload CodeQL results as artifact
-      uses: actions/upload-artifact@v4
-      with:
-        name: codeql-results
-        path: ${{ runner.workspace }}/results
+      - name: Perform CodeQL Analysis
+        uses: github/codeql-action/analyze@v3
+        with:
+          upload: false

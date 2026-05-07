@@ -5,6 +5,7 @@ Category: api
 """
 
 # Production-quality imports
+from functools import lru_cache
 from typing import List
 
 import requests
@@ -16,6 +17,7 @@ class CVEDatabase:
         self.client_id = None  # Can be set externally or as environment variable
         self.token = None  # Can be set externally or as environment variable
 
+    @lru_cache(maxsize=128)
     def fetch_cves(self, product_name: str) -> List[str]:
         """
         Fetch CVEs for a given product name.
@@ -45,7 +47,7 @@ class CVEDatabase:
             raise ValueError("Client ID and/or Token are required for API access.")
 
         return {
-            "Authorization": f"Bearer {self.api_token}",
+            "Authorization": f"Bearer {self.token}",
         }
 
 

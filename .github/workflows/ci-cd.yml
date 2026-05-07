@@ -64,12 +64,20 @@ jobs:
     - name: Run Bandit (security linter)
       run: |
         pip install bandit
-        bandit -r src/mithaq -f sarif -o bandit-results.sarif || echo "Bandit found issues"
+        bandit -r src/mithaq -f sarif -o bandit-results.sarif || true
 
     - name: Run Safety (dependency check)
       run: |
         pip install safety
-        safety check --full-report || echo "Safety found vulnerable dependencies"
+        safety check --full-report || true
+
+    - name: Run Trivy security scan
+      uses: aquasecurity/trivy-action@master
+      with:
+        scan-type: 'fs'
+        scan-ref: '.'
+        format: 'sarif'
+        output: 'trivy-results.sarif'
 
     - name: Upload Bandit to GitHub Security
       uses: github/codeql-action/upload-sarif@v3

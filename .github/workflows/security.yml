@@ -26,6 +26,14 @@ jobs:
       run: |
         pip install -e ".[dev]"
     
+    - name: Set up Python
+      uses: actions/setup-python@v5
+      with:
+        python-version: "3.11"
+
+    - name: Install dependencies
+      run: pip install -e ".[dev]"
+
     - name: Run Snyk Security Scan
       uses: snyk/actions/python@master
       env:
@@ -52,6 +60,7 @@ jobs:
       uses: github/codeql-action/analyze@v3
       with:
         upload: false
+        output: codeql-results
       uses: github/codeql-action/analyze@v4
       with:
         upload: false

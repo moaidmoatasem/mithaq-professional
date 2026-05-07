@@ -1,17 +1,8 @@
 # Security Policy
 
-## Reporting a Vulnerability
-
+## Reporting Vulnerabilities
 **Email**: moayedbadawy@gmail.com
-**Response Time**: Within 24 hours
+**Response**: Within 24 hours
 
-### What to Include
-- Vulnerability description
-- Steps to reproduce
-- Potential impact
+Thank you for keeping mithaq secure! 🛡️
 
-### Timeline
-- Critical issues: Fixed within 7 days
-- Other issues: Fixed within 30 days
-
-Thank you for helping keep DAQIQ secure! 🛡️

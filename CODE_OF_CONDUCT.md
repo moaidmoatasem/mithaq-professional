@@ -2,7 +2,7 @@
 
 ## Our Pledge
 
-We pledge to make participation in DAQIQ a harassment-free experience for everyone, regardless of age, body size, disability, ethnicity, gender identity and expression, level of experience, nationality, personal appearance, race, religion, or sexual identity and orientation.
+We pledge to make participation in mithaq a harassment-free experience for everyone, regardless of age, body size, disability, ethnicity, gender identity and expression, level of experience, nationality, personal appearance, race, religion, or sexual identity and orientation.
 
 ## Our Standards
 
@@ -26,3 +26,4 @@ Instances of abusive, harassing, or otherwise unacceptable behavior may be repor
 ## Attribution
 
 This Code of Conduct is adapted from the [Contributor Covenant](https://www.contributor-covenant.org), version 2.1.
+

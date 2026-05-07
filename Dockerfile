@@ -1,52 +1,33 @@
-# ===== STAGE 1: Builder =====
-FROM python:3.12-slim AS builder
+FROM python:3.12-slim
 
-# Install build dependencies
-RUN apt-get update && apt-get install -y --no-install-recommends \
-    build-essential \
-    git \
-    && rm -rf /var/lib/apt/lists/*
-
-# Create virtual environment
-RUN python -m venv /opt/venv
-ENV PATH="/opt/venv/bin:$PATH"
-
-# Copy and install dependencies
-WORKDIR /build
-COPY requirements.txt .
-RUN pip install --no-cache-dir --upgrade pip && \
-    pip install --no-cache-dir -r requirements.txt
-
-# ===== STAGE 2: Runtime =====
-FROM python:3.12-slim AS runtime
-
-# Install runtime dependencies only
-RUN apt-get update && apt-get install -y --no-install-recommends \
-    curl \
-    && rm -rf /var/lib/apt/lists/*
-
-# Create non-root user
-RUN groupadd -r daqiq && useradd -r -g daqiq -d /app -s /sbin/nologin daqiq
-
-# Copy virtual environment from builder
-COPY --from=builder /opt/venv /opt/venv
-ENV PATH="/opt/venv/bin:$PATH"
+LABEL maintainer="mithaq Autonomous Agents"
+LABEL description="Autonomous agent swarm for security testing"
 
 # Set working directory
 WORKDIR /app
 
-# Copy application code
-COPY --chown=daqiq:daqiq . .
+# Install system dependencies
+RUN apt-get update && apt-get install -y \
+    git \
+    && rm -rf /var/lib/apt/lists/*
 
-# Switch to non-root user
-USER daqiq
+# Copy requirements
+COPY requirements.txt .
 
-# Expose port
-EXPOSE 8000
+# Install Python dependencies
+RUN pip install --no-cache-dir -r requirements.txt
 
-# Health check
-HEALTHCHECK --interval=30s --timeout=5s --start-period=10s --retries=3 \
-    CMD curl -f http://localhost:8000/health || exit 1
+# Copy application code (fix: remove non-existent mithaq/ directory)
+COPY src/ ./src/
+COPY scripts/ ./scripts/ 
+COPY examples/ ./examples/
 
-# Run application
-CMD ["uvicorn", "daqiq.main:app", "--host", "0.0.0.0", "--port", "8000"]
+# Set PYTHONPATH
+ENV PYTHONPATH=/app/src:/app
+
+# Create workflow results directory
+RUN mkdir -p /app/workflow_results
+
+# Default command
+CMD ["python", "-m", "mithaq.cli"]
+

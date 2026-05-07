@@ -1,6 +1,6 @@
-# Contributing to DAQIQ
+# Contributing to mithaq
 
-Thank you for your interest in contributing to DAQIQ! 🚀
+Thank you for your interest in contributing to mithaq! 🚀
 
 ## Development Workflow
 
@@ -8,7 +8,7 @@ Thank you for your interest in contributing to DAQIQ! 🚀
 
 \`\`\`bash
 git checkout -b feature/your-feature-name
-pytest --cov=daqiq
+pytest --cov=mithaq
 git commit -m "feat: Add your feature"
 \`\`\`
 
@@ -19,3 +19,4 @@ git commit -m "feat: Add your feature"
 - Use Ruff for formatting
 
 Thank you for contributing! 🙏
+

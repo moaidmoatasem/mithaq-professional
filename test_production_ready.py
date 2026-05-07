@@ -55,14 +55,14 @@ def test_model():
 
 # Test 3: Scanner Modules
 def test_scanners():
-    scanners = list(Path('daqiq/scanners').glob('*.py'))
+    scanners = list(Path('mithaq/scanners').glob('*.py'))
     assert len(scanners) >= 3, f"Only {len(scanners)} scanners found"
     print(f"✓ {len(scanners)} scanner modules available")
 
 # Test 4: Run Quick Scan
 def test_quick_scan():
     result = subprocess.run(
-        ['python', 'daqiq_simple_scanner.py', 'https://example.com'],
+        ['python', 'mithaq_simple_scanner.py', 'https://example.com'],
         capture_output=True,
         timeout=30
     )
@@ -71,20 +71,20 @@ def test_quick_scan():
 
 # Test 5: AI Agents
 def test_ai_agents():
-    agents = list(Path('daqiq/agents').rglob('*.py'))
+    agents = list(Path('mithaq/agents').rglob('*.py'))
     assert len(agents) >= 5, f"Only {len(agents)} agents found"
     print(f"✓ {len(agents)} AI agents available")
 
 # Test 6: Memory Efficiency
 def test_memory():
-    from daqiq.core.memory_efficient_parallel import MemoryEfficientCrew
+    from mithaq.core.memory_efficient_parallel import MemoryEfficientCrew
     crew = MemoryEfficientCrew(batch_size=2)
     assert crew.batch_size == 2, "Batch configuration failed"
     print("✓ Memory-efficient system configured")
 
 # Test 7: Framework Structure
 def test_structure():
-    required = ['daqiq/agents', 'daqiq/core', 'daqiq/scanners', 'daqiq/crews']
+    required = ['mithaq/agents', 'mithaq/core', 'mithaq/scanners', 'mithaq/crews']
     for path in required:
         assert Path(path).exists(), f"Missing: {path}"
     print(f"✓ All {len(required)} core directories present")
@@ -128,3 +128,4 @@ else:
     print(f"\n⚠️  {tests_failed} test(s) failed")
     print("Fix issues before production deployment")
     sys.exit(1)
+

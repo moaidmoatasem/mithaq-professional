@@ -6,7 +6,7 @@ Creates production-ready versions
 
 from pathlib import Path
 
-output_dir = Path("daqiq/scanners/refined")
+output_dir = Path("mithaq/scanners/refined")
 output_dir.mkdir(exist_ok=True)
 
 print("🔧 Refining AI-generated scanners...\n")
@@ -421,3 +421,4 @@ print(f"📁 Location: {output_dir}/")
 print("\nTest them:")
 for filename in scanners.keys():
     print(f"  python {output_dir}/{filename} https://example.com")
+

@@ -4,7 +4,7 @@ Test memory-efficient batched parallel execution
 Generates 6 security scanners in 3 batches of 2
 """
 
-from daqiq.core.memory_efficient_parallel import MemoryEfficientCrew
+from mithaq.core.memory_efficient_parallel import MemoryEfficientCrew
 import sys
 
 # Define 6 different security scanner agents
@@ -114,3 +114,4 @@ except KeyboardInterrupt:
 except Exception as e:
     print(f"\n\n❌ Error: {e}")
     sys.exit(1)
+

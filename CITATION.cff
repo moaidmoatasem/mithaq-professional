@@ -1,12 +1,12 @@
 cff-version: 1.2.0
-message: "If you use DAQIQ in your research, please cite it as below."
+message: "If you use mithaq in your research, please cite it as below."
 authors:
   - family-names: "EL-Moatasem Bellah"
     given-names: "Moaid"
-title: "DAQIQ: Autonomous AI-Powered Security Testing Framework"
+title: "mithaq: Autonomous AI-Powered Security Testing Framework"
 version: 0.1.0
 date-released: 2026-05-03
-url: "https://github.com/moaidmoatasem/daqiq-professional"
+url: "https://github.com/moaidmoatasem/mithaq-professional"
 license: MIT
 keywords:
   - security testing
@@ -14,3 +14,4 @@ keywords:
   - AI agents
   - autonomous scanning
   - vulnerability detection
+

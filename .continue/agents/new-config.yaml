@@ -1,7 +1,7 @@
-# Daqiq Security Framework - Continue.dev Configuration
+# mithaq Security Framework - Continue.dev Configuration
 # Local Ollama setup with qwen3.5
 
-name: Daqiq Local Development
+name: mithaq Local Development
 version: 1.0.0
 schema: v1
 
@@ -38,3 +38,4 @@ slashCommands:
 
 # MCP Servers (optional, can leave empty for now)
 mcpServers: []
+

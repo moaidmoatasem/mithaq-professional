@@ -7,7 +7,7 @@ Let AI agents work on the roadmap continuously
 import time
 from pathlib import Path
 from datetime import datetime
-from daqiq.core.memory_efficient_parallel import MemoryEfficientCrew
+from mithaq.core.memory_efficient_parallel import MemoryEfficientCrew
 
 print("""
 ╔══════════════════════════════════════════════════════════════╗
@@ -179,3 +179,4 @@ log("╚════════════════════════
 
 print(f"\n📁 Check {output_dir}/ for all generated code!")
 print(f"📝 Full log: {log_file}")
+

@@ -1,12 +1,12 @@
 #!/usr/bin/env python3
 """
-DAQIQ - AI-Powered Security Testing Framework
+mithaq - AI-Powered Security Testing Framework
 Main CLI
 """
 
 import sys
 import argparse
-from daqiq.scanners.header_scanner import SimpleScanner
+from mithaq.scanners.header_scanner import SimpleScanner
 
 
 def scan_command(args):
@@ -17,7 +17,7 @@ def scan_command(args):
 
 def generate_command(args):
     """Generate new security tools using AI"""
-    from daqiq.crews.autonomous_dev_team import AutonomousDevTeam
+    from mithaq.crews.autonomous_dev_team import AutonomousDevTeam
     
     team = AutonomousDevTeam()
     team.run_project(args.description)
@@ -25,13 +25,13 @@ def generate_command(args):
 
 def main():
     parser = argparse.ArgumentParser(
-        description='DAQIQ - AI-Powered Security Testing Framework',
+        description='mithaq - AI-Powered Security Testing Framework',
         formatter_class=argparse.RawDescriptionHelpFormatter,
         epilog="""
 Examples:
-  daqiq scan https://example.com
-  daqiq generate "XSS vulnerability scanner"
-  daqiq scan --help
+  mithaq scan https://example.com
+  mithaq generate "XSS vulnerability scanner"
+  mithaq scan --help
         """
     )
     
@@ -57,3 +57,4 @@ Examples:
 
 if __name__ == '__main__':
     main()
+

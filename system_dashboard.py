@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-DAQIQ System Dashboard
+mithaq System Dashboard
 Real-time system status and metrics
 """
 
@@ -10,7 +10,7 @@ from datetime import datetime
 
 print("""
 ╔══════════════════════════════════════════════════════════════╗
-║  📊 DAQIQ FRAMEWORK - SYSTEM DASHBOARD                      ║
+║  📊 mithaq FRAMEWORK - SYSTEM DASHBOARD                      ║
 ╚══════════════════════════════════════════════════════════════╝
 """)
 
@@ -18,9 +18,9 @@ print("""
 metrics = {}
 
 # Count files
-metrics['total_files'] = sum(1 for _ in Path('daqiq').rglob('*.py'))
-metrics['scanner_files'] = len(list(Path('daqiq/scanners').glob('*.py')))
-metrics['agent_files'] = sum(1 for _ in Path('daqiq/agents').rglob('*.py'))
+metrics['total_files'] = sum(1 for _ in Path('mithaq').rglob('*.py'))
+metrics['scanner_files'] = len(list(Path('mithaq/scanners').glob('*.py')))
+metrics['agent_files'] = sum(1 for _ in Path('mithaq/agents').rglob('*.py'))
 metrics['test_files'] = len(list(Path('.').glob('test_*.py')))
 
 # Count reports
@@ -42,7 +42,7 @@ metrics['total_vulnerabilities_found'] = total_vulns
 
 # Count lines of code
 total_lines = 0
-for py_file in Path('daqiq').rglob('*.py'):
+for py_file in Path('mithaq').rglob('*.py'):
     try:
         with open(py_file) as f:
             total_lines += len(f.readlines())
@@ -80,12 +80,12 @@ print("🎯 AVAILABLE SYSTEMS")
 print("="*70)
 
 systems = {
-    'Quick Scanner': Path('daqiq_simple_scanner.py').exists(),
-    'Web Dashboard': Path('daqiq_web.py').exists(),
+    'Quick Scanner': Path('mithaq_simple_scanner.py').exists(),
+    'Web Dashboard': Path('mithaq_web.py').exists(),
     'AI Dev Team': Path('test_full_dev_team.py').exists(),
     'Batched Parallel': Path('test_batched_parallel.py').exists(),
     'Docker Setup': Path('Dockerfile').exists(),
-    'Refined Scanners': Path('daqiq/scanners/refined').exists(),
+    'Refined Scanners': Path('mithaq/scanners/refined').exists(),
 }
 
 for system, available in systems.items():
@@ -97,12 +97,12 @@ print("📁 DIRECTORY STRUCTURE")
 print("="*70)
 
 key_dirs = [
-    'daqiq/agents',
-    'daqiq/core',
-    'daqiq/scanners',
-    'daqiq/scanners/generated',
-    'daqiq/scanners/refined',
-    'daqiq/crews',
+    'mithaq/agents',
+    'mithaq/core',
+    'mithaq/scanners',
+    'mithaq/scanners/generated',
+    'mithaq/scanners/refined',
+    'mithaq/crews',
 ]
 
 for dir_path in key_dirs:
@@ -118,10 +118,10 @@ print("🚀 QUICK COMMANDS")
 print("="*70)
 print("""
 Scan a website:
-  python daqiq_simple_scanner.py https://example.com
+  python mithaq_simple_scanner.py https://example.com
 
 Start web dashboard:
-  python daqiq_web.py
+  python mithaq_web.py
 
 Generate new tools:
   python test_batched_parallel.py
@@ -136,3 +136,4 @@ System tests:
 print("="*70)
 print(f"📅 Generated: {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}")
 print("="*70)
+

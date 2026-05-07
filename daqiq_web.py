@@ -1,11 +1,11 @@
 #!/usr/bin/env python3
 """
-DAQIQ Web Dashboard
+mithaq Web Dashboard
 Simple Flask UI for running scans
 """
 
 from flask import Flask, render_template, request, jsonify
-from daqiq.scanners.header_scanner import SimpleScanner
+from mithaq.scanners.header_scanner import SimpleScanner
 from pathlib import Path
 import json
 from datetime import datetime
@@ -62,7 +62,7 @@ if __name__ == '__main__':
 <!DOCTYPE html>
 <html>
 <head>
-    <title>DAQIQ Security Scanner</title>
+    <title>mithaq Security Scanner</title>
     <style>
         body { 
             font-family: Arial, sans-serif; 
@@ -118,7 +118,7 @@ if __name__ == '__main__':
     </style>
 </head>
 <body>
-    <h1>🔍 DAQIQ Security Scanner</h1>
+    <h1>🔍 mithaq Security Scanner</h1>
     
     <div class="scan-form">
         <h2>Run Scan</h2>
@@ -186,9 +186,10 @@ if __name__ == '__main__':
         f.write(html_template)
     
     print("\n" + "="*70)
-    print("🚀 DAQIQ Web Dashboard Starting...")
+    print("🚀 mithaq Web Dashboard Starting...")
     print("="*70)
     print("\n📱 Open in browser: http://localhost:5000")
     print("\n✅ Ready to scan!\n")
     
     app.run(debug=True, host='0.0.0.0', port=5000)
+

@@ -1,7 +1,7 @@
-# Daqiq Security Framework - Master Plan
+# mithaq Security Framework - Master Plan
 
 ## Project Overview
-**Name:** Daqiq (دقيق) - "Precision" in Arabic  
+**Name:** mithaq (دقيق) - "Precision" in Arabic  
 **Mission:** AI-powered mobile security auditing for MENA enterprises  
 **Timeline:** 30 weeks (Apr 26 - Nov 30, 2026)  
 **Budget:** $0 (free tier APIs only)
@@ -23,3 +23,4 @@ Cloud receives only abstract breadcrumbs. All sensitive data stays local.
 - 80% test coverage requirement
 
 See TODO.md for complete roadmap.
+

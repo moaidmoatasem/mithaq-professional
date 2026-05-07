@@ -16,4 +16,5 @@ COPY . .
 ENV PYTHONPATH=/workspace
 
 # Default command runs an agent task
-CMD ["python", "daqiq-professional/scripts/agent_worker.py"]
+CMD ["python", "mithaq-professional/scripts/agent_worker.py"]
+

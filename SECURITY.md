@@ -1,7 +1,7 @@
 # Security Policy
 
 ## Reporting Vulnerabilities
-**Email**: moayedbadawy@gmail.com
+**Email**: moaid.elmoatasem.bellah@gmail.com
 **Response**: Within 24 hours
 
 Thank you for keeping mithaq secure! 🛡️

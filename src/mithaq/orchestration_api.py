@@ -72,10 +72,16 @@ def register_agent(agent: Any) -> AgentID:
     Returns:
         AgentID for the registered agent
     """
-    # TODO: Implementation
-    return AgentID(
-        id="agent_001", role=agent.role if hasattr(agent, "role") else "unknown"
-    )
+    agent_id = str(uuid.uuid4())
+    role = agent.role if hasattr(agent, "role") else "unknown"
+
+    AGENT_REGISTRY[agent_id] = {
+        "agent": agent,
+        "role": role,
+        "registered_at": datetime.now().isoformat(),
+    }
+
+    return AgentID(id=agent_id, role=role)
 
 
 class WorkflowExecutor:
@@ -138,85 +144,8 @@ class WorkflowExecutor:
     def generate_report(self) -> Dict[str, Any]:
         """Generate execution report"""
         metrics = self.collect_metrics()
-        metrics = self.collect_metrics()
-        metrics = self.collect_metrics()
         return {
             "workflow": self.config.get("name", "Unknown"),
-            "metrics": metrics,
-            "metrics": metrics,
-            "metrics": metrics,
-            "agents_used": len(self.agents),
-            "tasks_completed": len(self.results),
-            "results": self.results,
-        }
-
-
-class WorkflowExecutor:
-    """Executes workflows with real agents"""
-
-    def __init__(self, workflow_config: Dict[str, Any]):
-        self.config = workflow_config
-        self.agents = []
-        self.results = []
-
-    def setup_agents(self):
-        """Initialize agents from workflow config"""
-        from mithaq.agent_factory import AgentFactory
-
-        self.agents = AgentFactory.create_agents_from_workflow(self.config)
-        return len(self.agents)
-
-    def execute_tasks(self) -> List[Any]:
-        """Execute all tasks in the workflow"""
-        tasks = self.config.get("tasks", [])
-
-        # Check if parallel execution
-        execution_mode = self.config.get("execution", {}).get("mode", "sequential")
-
-        if execution_mode == "parallel" and len(self.agents) > 0:
-            # Use parallel execution
-            task_descriptions = [task.get("description", "") for task in tasks]
-            self.results = execute_parallel(self.agents, task_descriptions)
-        else:
-            # Sequential execution
-            for i, task in enumerate(tasks):
-                if i < len(self.agents):
-                    agent = self.agents[i]
-                    # Execute agent task
-                    result = {
-                        "task": task.get("name", "unknown"),
-                        "agent": (
-                            agent.config.role
-                            if hasattr(agent, "config")
-                            else str(agent)
-                        ),
-                        "status": "completed",
-                        "description": task.get("description", ""),
-                    }
-                    self.results.append(result)
-
-        return self.results
-
-    def collect_metrics(self) -> Dict[str, Any]:
-        """Collect execution metrics"""
-        return {
-            "agents_deployed": len(self.agents),
-            "tasks_executed": len(self.results),
-            "workflow_name": self.config.get("name", "unknown"),
-            "execution_mode": self.config.get("execution", {}).get(
-                "mode", "sequential"
-            ),
-        }
-
-    def generate_report(self) -> Dict[str, Any]:
-        """Generate execution report"""
-        metrics = self.collect_metrics()
-        metrics = self.collect_metrics()
-        metrics = self.collect_metrics()
-        return {
-            "workflow": self.config.get("name", "Unknown"),
-            "metrics": metrics,
-            "metrics": metrics,
             "metrics": metrics,
             "agents_used": len(self.agents),
             "tasks_completed": len(self.results),
@@ -270,4 +199,3 @@ def execute_parallel(agents: List[Any], tasks: List[Any]) -> List[Any]:
 
     results.sort(key=lambda x: x.get("index", 0))
     return results
-

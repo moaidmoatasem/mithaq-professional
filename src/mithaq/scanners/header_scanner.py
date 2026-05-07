@@ -6,6 +6,7 @@ Minimal viable product - Actually works!
 
 import requests
 import argparse
+import concurrent.futures
 from urllib.parse import urlparse
 import json
 from datetime import datetime
@@ -66,24 +67,33 @@ class SimpleScanner:
 
         dangerous_methods = ["PUT", "DELETE", "TRACE", "CONNECT"]
 
-        for method in dangerous_methods:
+        def check_method(method):
             try:
                 response = requests.request(method, self.target, timeout=5)
-                if response.status_code not in [405, 501]:
-                    vuln = {
-                        "type": "Dangerous HTTP Method",
-                        "severity": "High",
-                        "method": method,
-                        "description": f"{method} method is allowed",
-                    }
-                    self.results["vulnerabilities"].append(vuln)
-                    print(f"  [!] {method} is ALLOWED (Status: {response.status_code})")
-                else:
-                    print(f"  [✓] {method} is blocked")
+                return method, response, None
             except (requests.exceptions.ConnectionError,
                     requests.exceptions.Timeout,
                     requests.exceptions.SSLError) as e:
-                print(f"  [✓] {method} is blocked or unreachable")
+                return method, None, e
+
+        with concurrent.futures.ThreadPoolExecutor(max_workers=len(dangerous_methods)) as executor:
+            results = executor.map(check_method, dangerous_methods)
+
+            for method, response, error in results:
+                if error:
+                    print(f"  [✓] {method} is blocked or unreachable")
+                else:
+                    if response.status_code not in [405, 501]:
+                        vuln = {
+                            "type": "Dangerous HTTP Method",
+                            "severity": "High",
+                            "method": method,
+                            "description": f"{method} method is allowed",
+                        }
+                        self.results["vulnerabilities"].append(vuln)
+                        print(f"  [!] {method} is ALLOWED (Status: {response.status_code})")
+                    else:
+                        print(f"  [✓] {method} is blocked")
     
     def scan_ssl_tls(self):
         """Check SSL/TLS configuration"""

@@ -1,0 +1,304 @@
+/* ============================================================
+   MITHAQ Design System — Colors & Type
+   Reverse-engineered from daqiq-professional/src/daqiq_web.py
+   ============================================================ */
+
+@import url('https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600;700&family=IBM+Plex+Sans+Arabic:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;700&display=swap');
+
+:root {
+  /* ---------- BRAND (blue-forward) ---------- */
+  --daqiq-accent:        #2b7fff;   /* electric blue — primary brand */
+  --daqiq-accent-hover:  #1e6ce6;   /* hover */
+  --daqiq-accent-press:  #1559cc;   /* active/press */
+  --daqiq-accent-tint:   rgba(43, 127, 255, 0.10);
+  --daqiq-accent-glow:   rgba(43, 127, 255, 0.40);
+
+  /* ---------- HUD SECONDARIES (cyber palette) ---------- */
+  --hud-cyan:      #00e5ff;   /* data / telemetry / signal */
+  --hud-cyan-glow: rgba(0, 229, 255, 0.35);
+  --hud-violet:    #7d5cff;   /* AI / agent activity */
+  --hud-violet-glow: rgba(125, 92, 255, 0.40);
+  --hud-amber:     #ffb020;   /* attention / scanning */
+  --hud-mint:      #00ff88;   /* legacy success / OK */
+
+  /* ---------- BACKGROUNDS (deepened, near-black) ---------- */
+  --bg-canvas:    #08090c;   /* page background — deep cyber */
+  --bg-canvas-2:  #0d0f14;   /* canvas alt */
+  --bg-surface:   #12141a;   /* panel / card */
+  --bg-elevated:  #1a1d26;   /* input / chip / inner-card */
+  --bg-overlay:   rgba(8, 9, 12, 0.92);
+
+  /* ---------- FOREGROUNDS ---------- */
+  --fg1:  #ffffff;           /* primary text */
+  --fg2:  #b8b8b8;           /* secondary text */
+  --fg3:  #7a7a7a;           /* tertiary / placeholder */
+  --fg-on-accent: #000000;   /* text on neon-mint button */
+
+  /* ---------- BORDERS ---------- */
+  --border-1: #2a2f3a;       /* input border */
+  --border-2: #1d2029;       /* subtle separator */
+  --border-hud: rgba(0, 229, 255, 0.25);
+  --border-accent: var(--mithaq-accent);
+
+  /* ---------- SEVERITY (from daqiq_web.py severity ramp) ---------- */
+  --sev-critical: #ff4444;
+  --sev-high:     #ff4444;   /* source treats high == critical color */
+  --sev-medium:   #ffaa00;
+  --sev-low:      #ffff00;
+  --sev-info:     #4a9eff;
+  --sev-safe:     var(--mithaq-accent);
+
+  --sev-critical-bg: rgba(255, 68, 68, 0.08);
+  --sev-medium-bg:   rgba(255, 170, 0, 0.08);
+  --sev-low-bg:      rgba(255, 255, 0, 0.06);
+  --sev-safe-bg:     rgba(0, 255, 136, 0.08);
+
+  /* ---------- TYPE FAMILIES ---------- */
+  --font-sans:   'IBM Plex Sans', 'IBM Plex Sans Arabic', system-ui, -apple-system, sans-serif;
+  --font-mono:   'JetBrains Mono', 'SF Mono', Menlo, Consolas, monospace;
+  --font-arabic: 'IBM Plex Sans Arabic', 'IBM Plex Sans', system-ui, sans-serif;
+
+  /* ---------- TYPE SCALE ---------- */
+  --fs-display: 48px;
+  --fs-h1:      32px;
+  --fs-h2:      22px;
+  --fs-h3:      18px;
+  --fs-body:    16px;
+  --fs-small:   14px;
+  --fs-mono:    13px;
+  --fs-micro:   12px;
+
+  --fw-regular: 400;
+  --fw-medium:  500;
+  --fw-semibold: 600;
+  --fw-bold:    700;
+
+  --lh-tight: 1.2;
+  --lh-snug:  1.35;
+  --lh-body:  1.55;
+
+  /* ---------- SPACING (4px grid) ---------- */
+  --sp-xs:  4px;
+  --sp-sm:  8px;
+  --sp-md:  12px;
+  --sp-lg:  16px;
+  --sp-xl:  20px;
+  --sp-2xl: 24px;
+  --sp-3xl: 32px;
+  --sp-4xl: 48px;
+  --sp-5xl: 64px;
+
+  /* ---------- RADII ---------- */
+  --r-sm: 4px;        /* inputs, chips */
+  --r-md: 8px;        /* panels, cards */
+  --r-lg: 12px;       /* extrapolated for larger surfaces */
+
+  /* ---------- ELEVATION & GLOW ---------- */
+  --ring-accent: 0 0 0 1px var(--daqiq-accent-glow);
+  --ring-focus:  0 0 0 2px var(--daqiq-accent-glow), 0 0 24px -4px var(--daqiq-accent-glow);
+  --ring-error:  0 0 0 2px rgba(255, 68, 68, 0.40);
+  --ring-hud:    0 0 0 1px var(--border-hud);
+
+  --glow-accent: 0 0 20px -2px var(--mithaq-accent-glow);
+  --glow-cyan:   0 0 20px -2px var(--hud-cyan-glow);
+  --glow-violet: 0 0 20px -2px var(--hud-violet-glow);
+  --glow-error:  0 0 20px -2px rgba(255, 68, 68, 0.45);
+
+  /* ---------- LAYOUT ---------- */
+  --container-max: 1200px;
+  --container-pad: var(--sp-xl);
+
+  /* ---------- MOTION ---------- */
+  --dur-instant: 60ms;
+  --dur-fast:    120ms;
+  --dur-base:    220ms;
+  --dur-slow:    420ms;
+  --dur-cinema:  680ms;
+
+  --ease-out:    cubic-bezier(0.2, 0, 0, 1);
+  --ease-in-out: cubic-bezier(0.65, 0, 0.35, 1);
+  --ease-snap:   cubic-bezier(0.16, 1, 0.3, 1);
+  --ease-cyber:  cubic-bezier(0.83, 0, 0.17, 1); /* steep techy curve */
+}
+
+/* ============================================================
+   SEMANTIC ELEMENT STYLES
+   ============================================================ */
+
+html, body {
+  background: var(--bg-canvas);
+  color: var(--fg1);
+  font-family: var(--font-sans);
+  font-size: var(--fs-body);
+  line-height: var(--lh-body);
+  font-weight: var(--fw-regular);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+h1, .h1 {
+  font-size: var(--fs-h1);
+  font-weight: var(--fw-bold);
+  line-height: var(--lh-tight);
+  color: var(--mithaq-accent);   /* H1 takes the accent */
+  letter-spacing: -0.01em;
+}
+
+h2, .h2 {
+  font-size: var(--fs-h2);
+  font-weight: var(--fw-bold);
+  line-height: var(--lh-snug);
+  color: var(--fg1);
+}
+
+h3, .h3 {
+  font-size: var(--fs-h3);
+  font-weight: var(--fw-semibold);
+  line-height: var(--lh-snug);
+  color: var(--fg1);
+}
+
+.display {
+  font-size: var(--fs-display);
+  font-weight: var(--fw-bold);
+  line-height: var(--lh-tight);
+  letter-spacing: -0.02em;
+}
+
+p, .body {
+  font-size: var(--fs-body);
+  line-height: var(--lh-body);
+  color: var(--fg1);
+}
+
+.small, small {
+  font-size: var(--fs-small);
+  color: var(--fg2);
+}
+
+code, kbd, pre, .mono {
+  font-family: var(--font-mono);
+  font-size: var(--fs-mono);
+  font-weight: var(--fw-regular);
+}
+
+code {
+  background: var(--bg-elevated);
+  padding: 2px 6px;
+  border-radius: var(--r-sm);
+  color: var(--mithaq-accent);
+}
+
+pre {
+  background: var(--bg-elevated);
+  padding: var(--sp-lg);
+  border-radius: var(--r-md);
+  overflow-x: auto;
+  color: var(--fg1);
+  line-height: 1.5;
+}
+
+a {
+  color: var(--mithaq-accent);
+  text-decoration: none;
+}
+a:hover { text-decoration: underline; }
+
+.brand-mark {
+  font-family: var(--font-sans);
+  font-weight: var(--fw-bold);
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--mithaq-accent);
+}
+
+.arabic {
+  font-family: var(--font-arabic);
+  direction: rtl;
+}
+
+/* ============================================================
+   COMPONENT PRIMITIVES (canonical from daqiq_web.py)
+   ============================================================ */
+
+.btn-primary {
+  background: var(--mithaq-accent);
+  color: var(--fg-on-accent);
+  border: 0;
+  padding: 10px 20px;
+  font-size: var(--fs-body);
+  font-weight: var(--fw-bold);
+  border-radius: var(--r-sm);
+  cursor: pointer;
+  transition: background var(--dur-base) var(--ease-out);
+  font-family: inherit;
+}
+.btn-primary:hover  { background: var(--mithaq-accent-hover); }
+.btn-primary:active { background: var(--mithaq-accent-press); }
+
+.btn-ghost {
+  background: transparent;
+  color: var(--fg1);
+  border: 1px solid var(--border-1);
+  padding: 10px 20px;
+  border-radius: var(--r-sm);
+  cursor: pointer;
+  font-family: inherit;
+  font-size: var(--fs-body);
+  transition: background var(--dur-base) var(--ease-out);
+}
+.btn-ghost:hover { background: rgba(255, 255, 255, 0.06); }
+
+.input {
+  width: 100%;
+  background: var(--bg-elevated);
+  border: 1px solid var(--border-1);
+  color: var(--fg1);
+  padding: 10px 12px;
+  border-radius: var(--r-sm);
+  font-size: var(--fs-body);
+  font-family: inherit;
+}
+.input:focus {
+  outline: none;
+  border-color: var(--mithaq-accent);
+  box-shadow: var(--ring-focus);
+}
+
+.panel {
+  background: var(--bg-surface);
+  padding: var(--sp-xl);
+  border-radius: var(--r-md);
+}
+
+.vuln-card {
+  background: var(--bg-elevated);
+  padding: var(--sp-md) var(--sp-lg);
+  border-radius: var(--r-sm);
+  border-left: 4px solid var(--sev-medium);
+}
+.vuln-card.high     { border-left-color: var(--sev-high);     background: var(--sev-critical-bg); }
+.vuln-card.critical { border-left-color: var(--sev-critical); background: var(--sev-critical-bg); }
+.vuln-card.medium   { border-left-color: var(--sev-medium); }
+.vuln-card.low      { border-left-color: var(--sev-low); }
+.vuln-card.safe     { border-left-color: var(--sev-safe);    background: var(--sev-safe-bg); }
+
+.badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  font-family: var(--font-mono);
+  font-size: var(--fs-micro);
+  font-weight: var(--fw-medium);
+  padding: 2px 8px;
+  border-radius: var(--r-sm);
+  background: var(--bg-elevated);
+  color: var(--fg1);
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+.badge.critical { background: var(--sev-critical); color: #000; }
+.badge.high     { background: var(--sev-high);     color: #000; }
+.badge.medium   { background: var(--sev-medium);   color: #000; }
+.badge.low      { background: var(--sev-low);      color: #000; }
+.badge.safe     { background: var(--sev-safe);     color: #000; }

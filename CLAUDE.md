@@ -1,61 +1,17 @@
-# CLAUDE.md — mithaq v4.1 (COMPRESSED)
-# Rule: This file must stay under 120 lines. Prune ruthlessly on every update.
-# Claude Code reads this every session. Every token here costs money.
+# MITHAQ AI Developer Directive
 
-## STATE
-Phase: 1 (cleanup) | Version: v0.1.1 | Coverage: ~30%
-Canonical source: src/mithaq/ ONLY
+You are a Principal Software Engineer contributing to the **MITHAQ** project (formerly DAQIQ). You must adhere to these invariants when generating code, tests, or documentation.
 
-## BROKEN RIGHT NOW — FIX FIRST, IN ORDER
-1. git config core.autocrlf input && git rm --cached -r . && git reset --hard HEAD
-2. rm -rf src/mithaq/mithaq/ && git commit -m "fix: nested mithaq/mithaq/"
-3. git log --oneline --all | grep -E "fd731b6|dd9a8be|93eee97" → cherry-pick all three
-4. api/main.py: allow_origins=["http://localhost:5000"] AND host=os.getenv("UVICORN_HOST","127.0.0.1")
-5. rm -f mithaq_DEVELOPMENT_PLAN.md STRATEGIC_ROADMAP.md src/mithaq_MASTER_PLAN.md docs/roadmap/PRODUCT_ROADMAP.md
-6. git tag -a v0.1.1-security -m "Phase 0 done" && git push origin main --tags
+## Core Architectural Invariants (Non-Negotiable)
+1. **Sovereignty First (DAREE3):** Do not write code that assumes outbound internet access. The execution nodes operate in a 100% air-gapped, fail-closed Docker network.
+2. **Data Scrubbing (SIYAADA):** If you write an orchestration script that connects to an external API (like Groq), you MUST pipe the payload through `src.mithaq.ai.siyaada` to redact PII and code snippets.
+3. **Forensic Immutability (AL-BURHAN):** All security findings must trigger a local Proof of Concept (PoC). The output must be logged using SQLite in WAL mode and signed with a SHA-256 hash (The Mithaq Trace).
+4. **Shred Receipts:** When writing cleanup logic for containers or temp files, implement cryptographic erasure (shredding keys) rather than simple `rm`. Output a JSON shred receipt.
 
-## INVARIANTS (never violate)
-- BaseScanner contract for every scanner
-- Siyaada: fail-closed, telemetry on every drop, alert if drop_rate > 20%
-- Raw data (Tier 1): never leaves local hardware
-- Burhan: CONFIRMED/PROBABLE/UNVERIFIED/DISCARDED (not binary pass/fail)
-- Sandbox: STANDARD profile (web) or MOBILE profile (APK/Frida) — two profiles only
-- Watchdog: kill Burhan containers after 30s — prevents OOM
+## Code Standards
+- **Python:** Use strong typing (PEP 484). Follow `black` and `isort` formatting.
+- **Error Handling:** Use `src.mithaq.autonomous_generated.misc.smartretry` for transient failures. Implement AIMD circuit breakers for inter-agent API calls.
+- **Naming:** NEVER use the word "daqiq". Use "mithaq" for the core system, "daree3" for networking, "siyaada" for sanitization, and "al_burhan" for validation.
 
-## DATA TIERS (from GOV-01)
-Tier 1 (RAW): Terminal output, HTTP responses, decompiled code → local only, shred after 72h
-Tier 2 (SANITIZED): Post-Siyaada → cloud-safe, structural metadata only
-Tier 3 (TRACE): SHA-256 signed SQLite ledger → 7yr retention, CBE-distributable
-
-## VALIDATION GATE (5 steps, all required)
-1. Unit positive (mocked HTTP, must find vuln)
-2. Unit negative (mocked HTTP, must NOT fire)
-3. DVWA integration (localhost:8080)
-4. WebGoat false-positive (localhost:8090)
-5. bandit + CWE docstring + ruff
-
-## NEW FILES (copy from project outputs to these paths)
-src/mithaq/ai/siyaada.py         (with SiyaadaTelemetry)
-src/mithaq/agents/burhan.py      (with PoC Confidence Score + watchdog)
-src/mithaq/core/sandbox.py       (STANDARD + MOBILE profiles)
-src/mithaq/dev_crew/scanner_generator.py  (qwen2.5-coder:7b, $0)
-
-## DELEGATE TO LOCAL OLLAMA (do not use Claude tokens)
-- Scanner boilerplate from CWE → dev_crew/scanner_generator.py
-- Test stubs → dev_crew/scanner_generator.py
-- pyproject.toml/Dockerfile edits → Claude Code bash directly
-- Linting fixes (ruff --fix) → run directly, no LLM needed
-- Git operations → run directly
-
-## TOKEN BUDGET
-muhandis_plan=2000 | triage_chunk=4000 | burhan_poc=1500 | max_output=1000
-Target: $0.009/scan std | $0.003/scan cached | $0.00 local-only
-
-## AUTONOMY CEILING (human must approve)
-CRITICAL finding approval | Siyaada PR merges | Release tags | New LLM backends
-
-## NEVER DO
-count candidates/ | update README before code | skip validation gate
-add aider-chat dep | bind 0.0.0.0 | log raw findings | binary Burhan pass/fail
-community launch before Phase 3 (20+ validated scanners)
-
+## Deployment Target
+The primary target is `deploy/docker-compose.yml` optimized for local Ryzen 9/Ollama inference. Avoid bloated cloud dependencies.

@@ -45,7 +45,7 @@ class BurhanVerdict(str, Enum):
 @dataclass
 class BurhanTrace:
     """
-    The mithaq Trace artifact. SHA-256 signed forensic log.
+    The MITHAQ Trace artifact. SHA-256 signed forensic log.
     Every CONFIRMED or PROBABLE finding generates one.
     """
     finding_title:     str
@@ -178,11 +178,13 @@ class BurhanAgent:
                         evidence=result.get("evidence", ""),
                         confidence_notes="PoC executed successfully"
                     )
+                    signature = trace.sign()
+                    logger.info("MITHAQ Trace generated and signed for finding: %s", finding.title)
                     return BurhanResult(
                         finding_title=finding.title,
                         verdict=BurhanVerdict.CONFIRMED,
                         trace=trace,
-                        signature=trace.sign(),
+                        signature=signature,
                     )
 
                 # Not exploitable — discard

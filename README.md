@@ -1,66 +1,48 @@
-# 🔍 mithaq - AI-Powered Autonomous Security Framework
+# MITHAQ (ميثاق) | The Sovereign Security Standard
+**Precision in Sovereignty (الدقة في السيادة)**
 
-[![Production Ready](https://img.shields.io/badge/status-production-green.svg)](https://github.com/moaidmoatasem/mithaq-professional)
-[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
-[![Python 3.11+](https://img.shields.io/badge/python-3.11+-blue.svg)](https://www.python.org/downloads/)
+MITHAQ is an air-gapped, sovereign AI security and quality intelligence platform. Designed explicitly for highly regulated infrastructures (EGY-FIN CSF, SAMA CSF, DORA), it tests traditional software, mobile applications, and embedded AI systems entirely on local hardware.
 
-> **Built in 3 hours** | **4,056+ lines of code** | **$0 operating cost** | **Production-ready**
+MITHAQ operates on a mathematically provable "Trident of Truth": it finds vulnerabilities, proves them with non-destructive local execution, and cryptographically signs the evidence—without your source code, credentials, or customer data ever leaving your hardware.
 
-mithaq is an autonomous AI-powered security testing framework featuring 11 specialized AI agents, 8+ vulnerability scanners, and memory-efficient parallel execution - all running 100% locally with zero cost.
+---
 
-## ✨ Key Features
+## 🛡️ The Trident Architecture
 
-- 🤖 **11 Autonomous AI Agents** (PM, Architect, Developers, QA)
-- 🔍 **8+ Security Scanners** (XSS, CSRF, SQLi, Headers, SSL, etc.)
-- ⚡ **2-3x Faster** with memory-efficient parallel execution
-- 💰 **$0 Cost** - 100% local AI (Ollama)
-- 🌐 **Web Dashboard** - Beautiful UI
-- 🐳 **Docker Ready** - Production optimized
+The platform divides cognitive execution across a highly restricted multi-agent swarm, governed by strict physical and cryptographic boundaries.
 
-## 🚀 Quick Start
+### 1. DAREE3 (The Shield)
+The fail-closed network perimeter. DAREE3 drops all unauthorized outbound connections, physically severing local execution nodes from the external internet to enforce absolute zero-egress.
 
-\`\`\`bash
-git clone git@github.com:moaidmoatasem/mithaq-professional.git
+### 2. SIYAADA (Sovereignty)
+The redaction engine. In hybrid configurations, any data requiring cloud processing is forced through SIYAADA, which strips all PII, credentials, and proprietary code before egress is permitted.
+
+### 3. AL-BURHAN (The Proof)
+The validation sandbox. No HIGH/CRITICAL finding is reported without Al-Burhan executing a live, non-destructive Proof of Concept (PoC) against the target.
+
+### 📜 Mithaq Trace & Evidence Governance
+Every action is recorded via SQLite WAL/WORM storage and signed with a SHA-256 cryptographic hash. This generates legally binding **Shred Receipts** for compliance audits, proving both the vulnerability and the subsequent cryptographic erasure of the test data.
+
+---
+
+## 🚀 Quick Start (Air-Gapped Local Deployment)
+
+MITHAQ is built for Docker-native, offline execution. 
+
+```bash
+# 1. Clone the repository
+git clone https://github.com/moaidmoatasem/mithaq-professional.git
 cd mithaq-professional
-pip install -r requirements.txt
-ollama serve &
-ollama pull qwen2.5:3b
-python src/mithaq_simple_scanner.py https://example.com
-\`\`\`
 
-## 📊 Stats
+# 2. Configure environment (No external APIs required)
+cp .env.example .env
 
-| Metric | Value |
-|--------|-------|
-| AI Agents | 11 |
-| Scanners | 8+ |
-| Speed | 2-3x faster |
-| Memory | 4-6GB |
-| Cost | $0 |
+# 3. Initialize the DAREE3 perimeter and local Ollama swarm
+bash launch_perfection.sh
+```
 
-## 🏗️ Architecture
+## ⚖️ Licensing & The Ethical Open-Core
+We refuse to utilize the "SSO Wall of Shame." Core security features (SSO, RBAC, audit logging, local scanning) are provided under **MIT/Apache**. The proprietary multi-agent orchestrator and advanced Arabic RTL/OCR modules are dual-licensed (**AGPLv3/BSL**) to protect localized intelligence from hyperscaler cannibalization.
 
-\`\`\`
-mithaq-professional/
-├── src/mithaq/          # Core framework
-│   ├── agents/         # 11 AI agents
-│   ├── scanners/       # Security scanners
-│   ├── core/           # Orchestration
-│   └── crews/          # Multi-agent teams
-├── docs/               # Documentation
-├── tests/              # Test suite
-└── deploy/             # Docker configs
-\`\`\`
-
-## 🛠️ Built With
-
-- Python 3.11+ | CrewAI | Ollama | Flask | Docker
-
-## 📄 License
-
-MIT License
-
-## 👨‍💻 Author
-
-**Moayed Badawy** - Cairo, Egypt
-
+---
+*Internal Ref: MTH-9941-R | Status: Phase 1 Enforced*

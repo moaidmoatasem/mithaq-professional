@@ -1,5 +1,5 @@
 [project]
-name = "mithaq"
+name = "mithaq-core"
 version = "0.1.1"
 description = "mithaq Security Framework - Precision in Sovereignty"
 authors = [

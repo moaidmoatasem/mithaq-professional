@@ -7,7 +7,7 @@ from typing import Dict, List, Any, Optional
 from enum import Enum
 from pydantic import BaseModel, Field
 from mithaq.agents.cloud.strategic_planner import StrategicPlanner, ThreatAnalysisTask
-from mithaq.core.sanitization.redactor import DataRedactor, RedactionLevel
+from mithaq.siyaada.redactor import DataRedactor, RedactionLevel
 
 
 class ExecutionMode(Enum):

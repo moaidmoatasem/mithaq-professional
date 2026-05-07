@@ -1,4 +1,4 @@
-from mithaq.core.sanitization.redactor import DataRedactor, RedactionLevel
+from mithaq.siyaada.redactor import DataRedactor, RedactionLevel
 
 # Test data with secrets
 test_data = {
@@ -14,7 +14,7 @@ test_data = {
     }
 }
 
-print("🔒 Testing Data Redaction Layer\n")
+print("Testing Data Redaction Layer\n")
 print("Original Data:")
 print(test_data)
 print("\n" + "="*60 + "\n")
@@ -25,20 +25,20 @@ redactor = DataRedactor(level=RedactionLevel.MODERATE)
 # Redact data
 result = redactor.redact_dict(test_data)
 
-print("✅ Sanitized Data:")
+print("Sanitized Data:")
 print(result.sanitized_data)
 print("\n" + "="*60 + "\n")
 
-print(f"🔍 Redacted Fields: {', '.join(result.redacted_fields)}")
-print(f"🔐 Hash Signature: {result.hash_signature}")
-print(f"✓ Safe for Cloud: {result.is_safe}")
+print(f"Redacted Fields: {', '.join(result.redacted_fields)}")
+print(f"Hash Signature: {result.hash_signature}")
+print(f"Safe for Cloud: {result.is_safe}")
 
 if result.warnings:
-    print(f"⚠️  Warnings: {', '.join(result.warnings)}")
+    print(f"Warnings: {', '.join(result.warnings)}")
 
 # Test breadcrumb creation
 print("\n" + "="*60 + "\n")
-print("📍 Cloud Breadcrumb (Metadata Only):")
+print("Cloud Breadcrumb (Metadata Only):")
 breadcrumb = redactor.create_breadcrumb(test_data, metadata_only=True)
 print(breadcrumb)
 

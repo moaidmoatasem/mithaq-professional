@@ -2,12 +2,32 @@
 Orchestration API - Public interface for running AI workflows
 """
 
-from typing import Dict, List, Any
+from typing import Dict, List, Any, Optional
 from dataclasses import dataclass
 import uuid
+import json
+import os
 from datetime import datetime
+from pathlib import Path
 
-AGENT_REGISTRY: Dict[str, Any] = {}
+# Persistence for agents
+AGENT_REGISTRY_PATH = Path("workflow_results/agent_registry.json")
+
+
+def _load_agent_registry() -> Dict[str, Any]:
+    if not AGENT_REGISTRY_PATH.exists():
+        return {}
+    try:
+        with open(AGENT_REGISTRY_PATH, "r") as f:
+            return json.load(f)
+    except Exception:
+        return {}
+
+
+def _save_agent_registry(registry: Dict[str, Any]):
+    AGENT_REGISTRY_PATH.parent.mkdir(exist_ok=True)
+    with open(AGENT_REGISTRY_PATH, "w") as f:
+        json.dump(registry, f, indent=2)
 
 
 @dataclass
@@ -17,7 +37,7 @@ class WorkflowResult:
     success: bool
     outputs: Dict[str, Any]
     duration: float
-    errors: List[str] = None
+    errors: Optional[List[str]] = None
 
 
 @dataclass
@@ -72,15 +92,16 @@ def register_agent(agent: Any) -> AgentID:
     Returns:
         AgentID for the registered agent
     """
+    registry = _load_agent_registry()
     agent_id = str(uuid.uuid4())
     role = agent.role if hasattr(agent, "role") else "unknown"
 
-    AGENT_REGISTRY[agent_id] = {
-        "agent": agent,
+    registry[agent_id] = {
         "role": role,
         "registered_at": datetime.now().isoformat(),
     }
 
+    _save_agent_registry(registry)
     return AgentID(id=agent_id, role=role)
 
 

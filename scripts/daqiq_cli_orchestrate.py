@@ -4,6 +4,10 @@ mithaq CLI - Orchestration commands
 """
 
 import click
+import json
+from mithaq.workflow_parser import load_workflow
+from mithaq.orchestration_api import orchestrate_workflow, register_agent
+from mithaq.result_persistence import ResultStore
 
 
 @click.group()
@@ -20,9 +24,6 @@ def orchestrate(config, output):
     click.echo(f"🎯 Orchestrating workflow from {config}")
 
     try:
-        from mithaq.workflow_parser import load_workflow
-        from mithaq.orchestration_api import orchestrate_workflow
-
         # Load workflow YAML
         workflow_config = load_workflow(config)
         click.echo(f"   Loaded: {workflow_config.get('name', 'Unnamed')}")
@@ -32,8 +33,6 @@ def orchestrate(config, output):
 
         if result.success:
             # Save results
-            from mithaq.result_persistence import ResultStore
-
             store = ResultStore()
             store.save_result(workflow_config.get("name", "Unnamed"), result.outputs)
 
@@ -52,8 +51,6 @@ def register(role):
     """Register a new agent"""
     click.echo(f"🤖 Registering agent with role: {role}")
     try:
-        from mithaq.orchestration_api import register_agent
-
         # Create a mock agent object for registration
         class MockAgent:
             def __init__(self, role):
@@ -72,15 +69,11 @@ def status(id):
     """Check workflow status"""
     click.echo(f"📊 Checking status for workflow: {id}")
     try:
-        from mithaq.result_persistence import ResultStore
-
         store = ResultStore()
         result = store.get_latest(id)
 
         if result:
             click.echo(f"✅ Latest result found for {id}:")
-            import json
-
             click.echo(json.dumps(result, indent=2))
         else:
             click.echo(f"❓ No results found for workflow: {id}")
@@ -90,4 +83,3 @@ def status(id):
 
 if __name__ == "__main__":
     cli()
-

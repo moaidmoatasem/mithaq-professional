@@ -33,8 +33,16 @@ jobs:
 
     - name: Run unit tests only
       run: |
-        echo "✅ Skipping integration tests (require LLM connections)"
+        pytest tests/unit/
         echo "✅ Code quality checks completed"
+
+    - name: Upload coverage to Codecov
+      if: always()
+      uses: codecov/codecov-action@v4
+      with:
+        token: ${{ secrets.CODECOV_TOKEN }}
+        fail_ci_if_error: false
+        verbose: true
 
     - name: Summary
       run: |

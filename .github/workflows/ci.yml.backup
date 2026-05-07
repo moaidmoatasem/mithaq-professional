@@ -44,4 +44,3 @@ jobs:
       run: |
         echo "✅ CI checks completed"
         echo "Note: Integration tests require local Ollama/OpenAI setup"
-

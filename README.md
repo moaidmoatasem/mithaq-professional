@@ -45,4 +45,5 @@ bash launch_perfection.sh
 We refuse to utilize the "SSO Wall of Shame." Core security features (SSO, RBAC, audit logging, local scanning) are provided under **MIT/Apache**. The proprietary multi-agent orchestrator and advanced Arabic RTL/OCR modules are dual-licensed (**AGPLv3/BSL**) to protect localized intelligence from hyperscaler cannibalization.
 
 ---
+*Official Website: [cherenkov-security.com](https://cherenkov-security.com/#roadmap)*
 *Internal Ref: MTH-9941-R | Status: Phase 1 Enforced*

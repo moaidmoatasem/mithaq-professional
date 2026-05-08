@@ -24,20 +24,15 @@ jobs:
     - name: Install dependencies
       run: |
         python -m pip install --upgrade pip
-        pip install -e '.[dev]'
+        pip install -e ".[dev]"
+    
+    - name: Set up Snyk
+      uses: snyk/actions/setup@master
 
-      - name: Run Snyk Security Scan
-        uses: snyk/actions/setup@master
-        env:
-          SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
-        with:
-          snyk-version: 'latest'
-
-      - name: Snyk Test
-        run: |
-          snyk test --package-manager=pip --file=requirements.txt --severity-threshold=high --skip-unresolved
-        env:
-          SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
+    - name: Run Snyk Security Scan
+      run: snyk test --severity-threshold=high
+      env:
+        SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
 
   codeql-analysis:
     runs-on: ubuntu-latest
@@ -58,10 +53,10 @@ jobs:
         uses: github/codeql-action/analyze@v3
         with:
           upload: false
-          output: ${{ runner.workspace }}/results
+          output: sarif-results
 
       - name: Upload CodeQL results as artifact
         uses: actions/upload-artifact@v4
         with:
           name: codeql-results
-          path: ${{ runner.workspace }}/results
+          path: sarif-results

@@ -54,13 +54,13 @@ So that I can identify weak authentication mechanisms
 **Interfaces:**
 ```python
 class AuthenticationScanner(BaseScanner):
-    def scan(self, target: str) -> ScanResult:
-        """Scan for authentication vulnerabilities."""
-        pass
-    
-    def check_password_policy(self, endpoint: str) -> PolicyResult:
-        """Validate password policy strength."""
-        pass
+ def scan(self, target: str) -> ScanResult:
+ """Scan for authentication vulnerabilities."""
+ pass
+ 
+ def check_password_policy(self, endpoint: str) -> PolicyResult:
+ """Validate password policy strength."""
+ pass
 ```
 
 **Dependencies:**
@@ -73,9 +73,9 @@ class AuthenticationScanner(BaseScanner):
 **Algorithm:**
 1. Discover authentication endpoints
 2. Test for common vulnerabilities:
-   - Missing authentication
-   - Weak passwords
-   - Insecure tokens
+ - Missing authentication
+ - Weak passwords
+ - Insecure tokens
 3. Validate results
 4. Generate report
 
@@ -83,11 +83,11 @@ class AuthenticationScanner(BaseScanner):
 ```python
 @dataclass
 class AuthVulnerability:
-    endpoint: str
-    vuln_type: str
-    severity: str
-    evidence: Dict[str, Any]
-    remediation: str
+ endpoint: str
+ vuln_type: str
+ severity: str
+ evidence: Dict[str, Any]
+ remediation: str
 ```
 ```
 
@@ -171,11 +171,11 @@ class AuthVulnerability:
 
 # 1. Add timeout to prevent hanging
 def scan(self, target: str, timeout: int = 30) -> ScanResult:
-    pass
+ pass
 
 # 2. Use specific exception
-except ValueError as e:  # Instead of generic Exception
-    logger.error(f"Invalid target: {e}")
+except ValueError as e: # Instead of generic Exception
+ logger.error(f"Invalid target: {e}")
 ```
 
 ---

@@ -76,11 +76,11 @@ reachable by anyone on the same network.
 ```python
 # cherenkov_web.py — replace the __main__ block entirely
 if __name__ == '__main__':
-    import os
-    debug = os.getenv('FLASK_DEBUG', 'false').lower() == 'true'
-    host  = os.getenv('FLASK_HOST', '127.0.0.1')   # localhost by default
-    port  = int(os.getenv('FLASK_PORT', '5000'))
-    app.run(debug=debug, host=host, port=port)
+ import os
+ debug = os.getenv('FLASK_DEBUG', 'false').lower == 'true'
+ host = os.getenv('FLASK_HOST', '127.0.0.1') # localhost by default
+ port = int(os.getenv('FLASK_PORT', '5000'))
+ app.run(debug=debug, host=host, port=port)
 ```
 
 Add to .env.example:
@@ -98,10 +98,10 @@ validation is the second layer.
 ```javascript
 // templates/index.html — JavaScript fix
 function escapeHtml(str) {
-    const map = {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#039;'};
-    return String(str).replace(/[&<>"']/g, m => map[m]);
+ const map = {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#039;'};
+ return String(str).replace(/[&<>"']/g, m => map[m]);
 }
-// Replace:  html += '<h3>Scan Results for ' + data.target + '</h3>';
+// Replace: html += '<h3>Scan Results for ' + data.target + '</h3>';
 // With:
 html += '<h3>Scan Results for ' + escapeHtml(data.target) + '</h3>';
 ```
@@ -111,21 +111,21 @@ html += '<h3>Scan Results for ' + escapeHtml(data.target) + '</h3>';
 from urllib.parse import urlparse
 
 @app.route('/api/scan', methods=['POST'])
-def run_scan():
-    data = request.json
-    target_url = data.get('url', '').strip()
+def run_scan:
+ data = request.json
+ target_url = data.get('url', '').strip
 
-    if not target_url:
-        return jsonify({'error': 'URL is required'}), 400
-    try:
-        parsed = urlparse(target_url)
-        if parsed.scheme not in ('http', 'https'):
-            return jsonify({'error': 'Only http/https URLs are supported'}), 400
-        if not parsed.netloc:
-            return jsonify({'error': 'Invalid URL: missing hostname'}), 400
-    except Exception:
-        return jsonify({'error': 'Invalid URL format'}), 400
-    # ... rest of function
+ if not target_url:
+ return jsonify({'error': 'URL is required'}), 400
+ try:
+ parsed = urlparse(target_url)
+ if parsed.scheme not in ('http', 'https'):
+ return jsonify({'error': 'Only http/https URLs are supported'}), 400
+ if not parsed.netloc:
+ return jsonify({'error': 'Invalid URL: missing hostname'}), 400
+ except Exception:
+ return jsonify({'error': 'Invalid URL format'}), 400
+ # ... rest of function
 ```
 
 ### 3.3 Bare Exception Handlers (HIGH)
@@ -141,14 +141,14 @@ grep -rn "except Exception: pass" . --include="*.py"
 ```python
 # Before
 except:
-    print(f" [✓] {method} is blocked")
+ print(f" [✓] {method} is blocked")
 
 # After
 except (requests.exceptions.ConnectionError,
-        requests.exceptions.Timeout,
-        requests.exceptions.SSLError) as e:
-    logger.debug("Method %s unreachable: %s", method, e)
-    print(f" [✓] {method} is blocked or unreachable")
+ requests.exceptions.Timeout,
+ requests.exceptions.SSLError) as e:
+ logger.debug("Method %s unreachable: %s", method, e)
+ print(f" [✓] {method} is blocked or unreachable")
 ```
 
 ### 3.4 URL Input Validation
@@ -157,13 +157,13 @@ except (requests.exceptions.ConnectionError,
 from urllib.parse import urlparse
 
 class SimpleScanner:
-    def __init__(self, target_url: str):
-        parsed = urlparse(target_url)
-        if parsed.scheme not in ('http', 'https'):
-            raise ValueError(f"Unsupported scheme '{parsed.scheme}'.")
-        if not parsed.netloc:
-            raise ValueError("Invalid URL: missing hostname.")
-        self.target = target_url
+ def __init__(self, target_url: str):
+ parsed = urlparse(target_url)
+ if parsed.scheme not in ('http', 'https'):
+ raise ValueError(f"Unsupported scheme '{parsed.scheme}'.")
+ if not parsed.netloc:
+ raise ValueError("Invalid URL: missing hostname.")
+ self.target = target_url
 ```
 
 ### 3.5 HTTP Methods Consent Warning
@@ -172,12 +172,12 @@ The scanner sends PUT/DELETE without warning. This can modify server state.
 
 ```python
 def scan_http_methods(self):
-    print("\n[!] WARNING: This sends PUT/DELETE/TRACE requests to the target.")
-    print("    Only run against systems you own or have written authorisation to test.")
-    consent = input("    Continue? (yes/no): ").strip().lower()
-    if consent != 'yes':
-        print("    Skipping HTTP methods scan.")
-        return
+ print("\n[!] WARNING: This sends PUT/DELETE/TRACE requests to the target.")
+ print(" Only run against systems you own or have written authorisation to test.")
+ consent = input(" Continue? (yes/no): ").strip.lower
+ if consent != 'yes':
+ print(" Skipping HTTP methods scan.")
+ return
 ```
 
 ### 3.6 Phase 0 Commit
@@ -289,32 +289,32 @@ version = "0.1.1"
 description = "Local-first AI security testing framework"
 requires-python = ">=3.10"
 dependencies = [
-    "pydantic>=2.0",
-    "httpx>=0.27.0",
-    "python-dotenv>=1.0.0",
-    "requests>=2.31.0",
-    "rich>=13.0.0",
-    "typer>=0.12.0",
+ "pydantic>=2.0",
+ "httpx>=0.27.0",
+ "python-dotenv>=1.0.0",
+ "requests>=2.31.0",
+ "rich>=13.0.0",
+ "typer>=0.12.0",
 ]
 
 [project.optional-dependencies]
 web = [
-    "fastapi>=0.111.0",
-    "uvicorn[standard]>=0.29.0",
+ "fastapi>=0.111.0",
+ "uvicorn[standard]>=0.29.0",
 ]
 ai = [
-    "crewai>=0.28.0",
-    "langchain-community>=0.0.20",
+ "crewai>=0.28.0",
+ "langchain-community>=0.0.20",
 ]
 dev = [
-    "pytest>=8.0.0",
-    "pytest-cov>=5.0.0",
-    "pytest-asyncio>=0.23.0",
-    "ruff>=0.4.0",
-    "bandit>=1.7.8",
-    "pre-commit>=3.7.0",
-    "hypothesis>=6.0.0",
-    "pip-audit>=2.7.0",
+ "pytest>=8.0.0",
+ "pytest-cov>=5.0.0",
+ "pytest-asyncio>=0.23.0",
+ "ruff>=0.4.0",
+ "bandit>=1.7.8",
+ "pre-commit>=3.7.0",
+ "hypothesis>=6.0.0",
+ "pip-audit>=2.7.0",
 ]
 
 [project.scripts]
@@ -396,46 +396,46 @@ from dataclasses import dataclass, field
 from enum import Enum
 
 class Severity(str, Enum):
-    CRITICAL = "critical"
-    HIGH     = "high"
-    MEDIUM   = "medium"
-    LOW      = "low"
-    INFO     = "info"
+ CRITICAL = "critical"
+ HIGH = "high"
+ MEDIUM = "medium"
+ LOW = "low"
+ INFO = "info"
 
 @dataclass
 class Finding:
-    scanner:     str
-    title:       str
-    severity:    Severity
-    description: str
-    evidence:    str        = ""
-    remediation: str        = ""
-    cwe_id:      str|None   = None
-    cvss_score:  float|None = None
+ scanner: str
+ title: str
+ severity: Severity
+ description: str
+ evidence: str = ""
+ remediation: str = ""
+ cwe_id: str|None = None
+ cvss_score: float|None = None
 
 @dataclass
 class ScanResult:
-    target:       str
-    scanner:      str
-    findings:     list[Finding] = field(default_factory=list)
-    error:        str|None      = None
-    scan_time_ms: int           = 0
+ target: str
+ scanner: str
+ findings: list[Finding] = field(default_factory=list)
+ error: str|None = None
+ scan_time_ms: int = 0
 
 class BaseScanner(ABC):
-    name:        str       = ""
-    description: str       = ""
-    severity:    Severity  = Severity.INFO
-    tags:        list[str] = field(default_factory=list)
+ name: str = ""
+ description: str = ""
+ severity: Severity = Severity.INFO
+ tags: list[str] = field(default_factory=list)
 
-    def __init__(self, target: str, timeout: int = 10):
-        self.target  = target
-        self.timeout = timeout
+ def __init__(self, target: str, timeout: int = 10):
+ self.target = target
+ self.timeout = timeout
 
-    @abstractmethod
-    async def scan(self) -> ScanResult: ...
+ @abstractmethod
+ async def scan(self) -> ScanResult: ...
 
-    def finding(self, **kwargs) -> Finding:
-        return Finding(scanner=self.name, **kwargs)
+ def finding(self, **kwargs) -> Finding:
+ return Finding(scanner=self.name, **kwargs)
 ```
 
 Auto-discovery registry — drop a file in scanners/ and it's registered:
@@ -447,15 +447,15 @@ from .base_scanner import BaseScanner
 
 _registry: dict[str, type[BaseScanner]] = {}
 
-def load_all_scanners() -> None:
-    path = Path(__file__).parent.parent / "scanners"
-    for _, name, _ in pkgutil.iter_modules([str(path)]):
-        module = importlib.import_module(f"cherenkov.scanners.{name}")
-        for attr in dir(module):
-            obj = getattr(module, attr)
-            if (isinstance(obj, type) and issubclass(obj, BaseScanner)
-                    and obj is not BaseScanner and obj.name):
-                _registry[obj.name] = obj
+def load_all_scanners -> None:
+ path = Path(__file__).parent.parent / "scanners"
+ for _, name, _ in pkgutil.iter_modules([str(path)]):
+ module = importlib.import_module(f"cherenkov.scanners.{name}")
+ for attr in dir(module):
+ obj = getattr(module, attr)
+ if (isinstance(obj, type) and issubclass(obj, BaseScanner)
+ and obj is not BaseScanner and obj.name):
+ _registry[obj.name] = obj
 ```
 
 ### 5.3 Async Scan Engine with Rate Limiting
@@ -472,50 +472,50 @@ from .base_scanner import ScanResult
 logger = logging.getLogger(__name__)
 
 class ScanEngine:
-    def __init__(self, concurrency: int = 10, requests_per_sec: float = 5.0):
-        self.concurrency      = concurrency
-        self.requests_per_sec = requests_per_sec
-        self._last_req        = 0.0
-        load_all_scanners()
+ def __init__(self, concurrency: int = 10, requests_per_sec: float = 5.0):
+ self.concurrency = concurrency
+ self.requests_per_sec = requests_per_sec
+ self._last_req = 0.0
+ load_all_scanners
 
-    async def _rate_limit(self) -> None:
-        if self.requests_per_sec <= 0:
-            return
-        gap = 1.0 / self.requests_per_sec
-        elapsed = time.monotonic() - self._last_req
-        if elapsed < gap:
-            await asyncio.sleep(gap - elapsed)
-        self._last_req = time.monotonic()
+ async def _rate_limit(self) -> None:
+ if self.requests_per_sec <= 0:
+ return
+ gap = 1.0 / self.requests_per_sec
+ elapsed = time.monotonic - self._last_req
+ if elapsed < gap:
+ await asyncio.sleep(gap - elapsed)
+ self._last_req = time.monotonic
 
-    async def run(
-        self,
-        target:        str,
-        scanner_names: list[str] | None = None,
-        tags:          list[str] | None = None,
-    ) -> list[ScanResult]:
-        scanners = all_scanners()
-        if scanner_names:
-            scanners = {k: v for k, v in scanners.items() if k in scanner_names}
-        if tags:
-            scanners = {k: v for k, v in scanners.items()
-                       if any(t in getattr(v, 'tags', []) for t in tags)}
+ async def run(
+ self,
+ target: str,
+ scanner_names: list[str] | None = None,
+ tags: list[str] | None = None,
+ ) -> list[ScanResult]:
+ scanners = all_scanners
+ if scanner_names:
+ scanners = {k: v for k, v in scanners.items if k in scanner_names}
+ if tags:
+ scanners = {k: v for k, v in scanners.items
+ if any(t in getattr(v, 'tags', []) for t in tags)}
 
-        sem = asyncio.Semaphore(self.concurrency)
+ sem = asyncio.Semaphore(self.concurrency)
 
-        async def run_one(name, cls):
-            async with sem:
-                await self._rate_limit()
-                t0 = time.monotonic()
-                try:
-                    result = await cls(target).scan()
-                    result.scan_time_ms = int((time.monotonic() - t0) * 1000)
-                    return result
-                except Exception as e:
-                    logger.warning("Scanner %s failed: %s", name, e)
-                    return ScanResult(target=target, scanner=name, error=str(e),
-                                     scan_time_ms=int((time.monotonic() - t0) * 1000))
+ async def run_one(name, cls):
+ async with sem:
+ await self._rate_limit
+ t0 = time.monotonic
+ try:
+ result = await cls(target).scan
+ result.scan_time_ms = int((time.monotonic - t0) * 1000)
+ return result
+ except Exception as e:
+ logger.warning("Scanner %s failed: %s", name, e)
+ return ScanResult(target=target, scanner=name, error=str(e),
+ scan_time_ms=int((time.monotonic - t0) * 1000))
 
-        return await asyncio.gather(*[run_one(n, c) for n, c in scanners.items()])
+ return await asyncio.gather(*[run_one(n, c) for n, c in scanners.items])
 ```
 
 ### 5.4 SQLite Persistence Layer
@@ -531,44 +531,44 @@ from datetime import datetime, timedelta
 from dataclasses import asdict
 from ..core.base_scanner import ScanResult
 
-DB_PATH = Path.home() / ".cherenkov" / "results.db"
+DB_PATH = Path.home / ".cherenkov" / "results.db"
 
-def init_db() -> None:
-    DB_PATH.parent.mkdir(parents=True, exist_ok=True)
-    with sqlite3.connect(DB_PATH) as conn:
-        conn.execute("""
-            CREATE TABLE IF NOT EXISTS scans (
-                id         INTEGER PRIMARY KEY AUTOINCREMENT,
-                target     TEXT NOT NULL,
-                started_at TEXT NOT NULL,
-                results    TEXT NOT NULL
-            )""")
-        conn.execute("CREATE INDEX IF NOT EXISTS idx_target ON scans(target)")
+def init_db -> None:
+ DB_PATH.parent.mkdir(parents=True, exist_ok=True)
+ with sqlite3.connect(DB_PATH) as conn:
+ conn.execute("""
+ CREATE TABLE IF NOT EXISTS scans (
+ id INTEGER PRIMARY KEY AUTOINCREMENT,
+ target TEXT NOT NULL,
+ started_at TEXT NOT NULL,
+ results TEXT NOT NULL
+ )""")
+ conn.execute("CREATE INDEX IF NOT EXISTS idx_target ON scans(target)")
 
 def save_scan(target: str, results: list[ScanResult]) -> int:
-    with sqlite3.connect(DB_PATH) as conn:
-        cur = conn.execute(
-            "INSERT INTO scans (target, started_at, results) VALUES (?, ?, ?)",
-            (target, datetime.utcnow().isoformat(), json.dumps([asdict(r) for r in results]))
-        )
-        return cur.lastrowid
+ with sqlite3.connect(DB_PATH) as conn:
+ cur = conn.execute(
+ "INSERT INTO scans (target, started_at, results) VALUES (?, ?, ?)",
+ (target, datetime.utcnow.isoformat, json.dumps([asdict(r) for r in results]))
+ )
+ return cur.lastrowid
 
 def get_scan(scan_id: int) -> list | None:
-    with sqlite3.connect(DB_PATH) as conn:
-        row = conn.execute("SELECT results FROM scans WHERE id=?", (scan_id,)).fetchone()
-    return json.loads(row[0]) if row else None
+ with sqlite3.connect(DB_PATH) as conn:
+ row = conn.execute("SELECT results FROM scans WHERE id=?", (scan_id,)).fetchone
+ return json.loads(row[0]) if row else None
 
 def list_scans(limit: int = 50) -> list[dict]:
-    with sqlite3.connect(DB_PATH) as conn:
-        rows = conn.execute(
-            "SELECT id, target, started_at FROM scans ORDER BY id DESC LIMIT ?", (limit,)
-        ).fetchall()
-    return [{"id": r[0], "target": r[1], "started_at": r[2]} for r in rows]
+ with sqlite3.connect(DB_PATH) as conn:
+ rows = conn.execute(
+ "SELECT id, target, started_at FROM scans ORDER BY id DESC LIMIT ?", (limit,)
+ ).fetchall
+ return [{"id": r[0], "target": r[1], "started_at": r[2]} for r in rows]
 
 def prune_old_scans(days: int = 90) -> int:
-    cutoff = (datetime.utcnow() - timedelta(days=days)).isoformat()
-    with sqlite3.connect(DB_PATH) as conn:
-        return conn.execute("DELETE FROM scans WHERE started_at < ?", (cutoff,)).rowcount
+ cutoff = (datetime.utcnow - timedelta(days=days)).isoformat
+ with sqlite3.connect(DB_PATH) as conn:
+ return conn.execute("DELETE FROM scans WHERE started_at < ?", (cutoff,)).rowcount
 ```
 
 ### 5.5 Canonical Project Structure
@@ -576,34 +576,34 @@ def prune_old_scans(days: int = 90) -> int:
 ```
 cherenkov-professional/
 ├── src/cherenkov/
-│   ├── cli.py
-│   ├── core/
-│   │   ├── base_scanner.py
-│   │   ├── engine.py
-│   │   ├── registry.py
-│   │   └── report.py
-│   ├── scanners/          ← validated only
-│   ├── api/
-│   │   └── main.py        ← FastAPI
-│   ├── storage/
-│   │   └── database.py
-│   └── ai/
-│       ├── triage.py
-│       └── orchestrator.py
+│ ├── cli.py
+│ ├── core/
+│ │ ├── base_scanner.py
+│ │ ├── engine.py
+│ │ ├── registry.py
+│ │ └── report.py
+│ ├── scanners/ ← validated only
+│ ├── api/
+│ │ └── main.py ← FastAPI
+│ ├── storage/
+│ │ └── database.py
+│ └── ai/
+│ ├── triage.py
+│ └── orchestrator.py
 ├── tests/
-│   ├── unit/
-│   ├── integration/
-│   └── fixtures/
+│ ├── unit/
+│ ├── integration/
+│ └── fixtures/
 ├── candidates/
-│   ├── README.md
-│   └── generated_scanners/
+│ ├── README.md
+│ └── generated_scanners/
 ├── docs/
 ├── scripts/dev/ scripts/docker/
 ├── tools/
 ├── .github/workflows/ .github/ISSUE_TEMPLATE/
 ├── pyproject.toml
 ├── Dockerfile
-├── Dockerfile.minimal   ← two only
+├── Dockerfile.minimal ← two only
 ├── docker-compose.yml
 └── README.md
 ```
@@ -618,39 +618,39 @@ from rich.table import Table
 from .core.engine import ScanEngine
 from .storage.database import init_db, save_scan
 
-app     = typer.Typer(name="cherenkov")
-console = Console()
+app = typer.Typer(name="cherenkov")
+console = Console
 
-@app.command()
+@app.command
 def scan(
-    target:  str       = typer.Argument(...),
-    output:  str       = typer.Option("table", "-o"),
-    rps:     float     = typer.Option(5.0, "--rps", help="Max requests/sec"),
-    timeout: int       = typer.Option(10),
+ target: str = typer.Argument(...),
+ output: str = typer.Option("table", "-o"),
+ rps: float = typer.Option(5.0, "--rps", help="Max requests/sec"),
+ timeout: int = typer.Option(10),
 ):
-    init_db()
-    engine  = ScanEngine(requests_per_sec=rps)
-    results = asyncio.run(engine.run(target))
-    scan_id = save_scan(target, results)
-    console.print(f"Scan #{scan_id} complete.")
+ init_db
+ engine = ScanEngine(requests_per_sec=rps)
+ results = asyncio.run(engine.run(target))
+ scan_id = save_scan(target, results)
+ console.print(f"Scan #{scan_id} complete.")
 
 @app.command("list-scanners")
-def list_scanners():
-    from .core.registry import load_all_scanners, all_scanners
-    load_all_scanners()
-    t = Table("Name", "Description", "Tags")
-    for name, cls in all_scanners().items():
-        t.add_row(name, cls.description, ", ".join(getattr(cls, 'tags', [])))
-    console.print(t)
+def list_scanners:
+ from .core.registry import load_all_scanners, all_scanners
+ load_all_scanners
+ t = Table("Name", "Description", "Tags")
+ for name, cls in all_scanners.items:
+ t.add_row(name, cls.description, ", ".join(getattr(cls, 'tags', [])))
+ console.print(t)
 
-@app.command()
+@app.command
 def history(limit: int = typer.Option(20, "-n")):
-    from .storage.database import list_scans, init_db
-    init_db()
-    t = Table("ID", "Target", "Started at")
-    for r in list_scans(limit):
-        t.add_row(str(r['id']), r['target'], r['started_at'])
-    console.print(t)
+ from .storage.database import list_scans, init_db
+ init_db
+ t = Table("ID", "Target", "Started at")
+ for r in list_scans(limit):
+ t.add_row(str(r['id']), r['target'], r['started_at'])
+ console.print(t)
 ```
 
 ---
@@ -766,53 +766,53 @@ Tasks:
 
 Respond in valid JSON only:
 {{
-  "prioritized_findings": [{{"title":"...","reason":"...","exploitability":"high|medium|low"}}],
-  "risk_patterns": ["..."],
-  "remediations": {{"finding_title": "remediation text"}}
+ "prioritized_findings": [{{"title":"...","reason":"...","exploitability":"high|medium|low"}}],
+ "risk_patterns": ["..."],
+ "remediations": {{"finding_title": "remediation text"}}
 }}"""
 
 MAX_FINDINGS_PER_CHUNK = 15
 
 class LLMTriage:
-    def __init__(self, model="qwen2.5-coder:7b", ollama_url="http://localhost:11434"):
-        self.model      = model
-        self.ollama_url = ollama_url
+ def __init__(self, model="qwen2.5-coder:7b", ollama_url="http://localhost:11434"):
+ self.model = model
+ self.ollama_url = ollama_url
 
-    def _chunks(self, findings: list) -> list:
-        return [findings[i:i+MAX_FINDINGS_PER_CHUNK]
-                for i in range(0, len(findings), MAX_FINDINGS_PER_CHUNK)]
+ def _chunks(self, findings: list) -> list:
+ return [findings[i:i+MAX_FINDINGS_PER_CHUNK]
+ for i in range(0, len(findings), MAX_FINDINGS_PER_CHUNK)]
 
-    async def triage(self, results: list[ScanResult]) -> dict:
-        findings = [f for r in results for f in r.findings]
-        target   = results[0].target if results else "unknown"
+ async def triage(self, results: list[ScanResult]) -> dict:
+ findings = [f for r in results for f in r.findings]
+ target = results[0].target if results else "unknown"
 
-        if not findings:
-            return {"prioritized_findings": [], "risk_patterns": [], "remediations": {}}
+ if not findings:
+ return {"prioritized_findings": [], "risk_patterns": [], "remediations": {}}
 
-        merged = {"prioritized_findings": [], "risk_patterns": [], "remediations": {}}
+ merged = {"prioritized_findings": [], "risk_patterns": [], "remediations": {}}
 
-        try:
-            async with httpx.AsyncClient(timeout=120) as client:
-                for chunk in self._chunks(findings):
-                    text = "\n".join(
-                        f"- [{f.severity.upper()}] {f.title}: {f.description}"
-                        for f in chunk
-                    )
-                    resp = await client.post(
-                        f"{self.ollama_url}/api/generate",
-                        json={"model": self.model,
-                              "prompt": TRIAGE_PROMPT.format(target=target, findings=text),
-                              "stream": False}
-                    )
-                    resp.raise_for_status()
-                    r = json.loads(resp.json().get("response", "{}"))
-                    merged["prioritized_findings"].extend(r.get("prioritized_findings", []))
-                    merged["risk_patterns"].extend(r.get("risk_patterns", []))
-                    merged["remediations"].update(r.get("remediations", {}))
-            return merged
-        except httpx.ConnectError:
-            logger.info("Ollama unavailable — returning results without AI triage")
-            return {"error": "Ollama not available", "raw_findings": [f.title for f in findings]}
+ try:
+ async with httpx.AsyncClient(timeout=120) as client:
+ for chunk in self._chunks(findings):
+ text = "\n".join(
+ f"- [{f.severity.upper}] {f.title}: {f.description}"
+ for f in chunk
+ )
+ resp = await client.post(
+ f"{self.ollama_url}/api/generate",
+ json={"model": self.model,
+ "prompt": TRIAGE_PROMPT.format(target=target, findings=text),
+ "stream": False}
+ )
+ resp.raise_for_status
+ r = json.loads(resp.json.get("response", "{}"))
+ merged["prioritized_findings"].extend(r.get("prioritized_findings", []))
+ merged["risk_patterns"].extend(r.get("risk_patterns", []))
+ merged["remediations"].update(r.get("remediations", {}))
+ return merged
+ except httpx.ConnectError:
+ logger.info("Ollama unavailable — returning results without AI triage")
+ return {"error": "Ollama not available", "raw_findings": [f.title for f in findings]}
 ```
 
 ### 7.3 Model Recommendations
@@ -839,10 +839,10 @@ not do triage. Every scanner it generates still must pass every gate step.
 ### 8.1 Output Formats
 
 ```bash
-cherenkov scan https://example.com --output table   # default
-cherenkov scan https://example.com --output json    # machine-readable
-cherenkov scan https://example.com --output sarif   # CI/CD (GitHub Code Scanning)
-cherenkov scan https://example.com --output html    # standalone report
+cherenkov scan https://example.com --output table # default
+cherenkov scan https://example.com --output json # machine-readable
+cherenkov scan https://example.com --output sarif # CI/CD (GitHub Code Scanning)
+cherenkov scan https://example.com --output html # standalone report
 ```
 
 SARIF v2.1 output enables direct GitHub Code Scanning and GitLab SAST
@@ -852,9 +852,9 @@ feature for professional pipeline adoption.
 ### 8.2 Supply Chain Security
 
 ```bash
-pip-audit                              # dependency CVE audit
-cyclonedx-py requirements > sbom.xml  # generate SBOM
-pre-commit run --all-files             # lint + security hooks
+pip-audit # dependency CVE audit
+cyclonedx-py requirements > sbom.xml # generate SBOM
+pre-commit run --all-files # lint + security hooks
 ```
 
 ### 8.3 CI/CD Pipeline
@@ -864,21 +864,21 @@ pre-commit run --all-files             # lint + security hooks
 name: CI
 on: [push, pull_request]
 jobs:
-  test:
-    runs-on: ubuntu-latest
-    strategy:
-      matrix:
-        python-version: ["3.10", "3.11", "3.12"]
-    steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-python@v5
-        with: {python-version: "${{ matrix.python-version }}"}
-      - run: pip install -e .[dev]
-      - run: ruff check .
-      - run: bandit -r src/ -ll
-      - run: pip-audit
-      - run: pytest --cov=cherenkov --cov-fail-under=80
-      - uses: codecov/codecov-action@v4
+ test:
+ runs-on: ubuntu-latest
+ strategy:
+ matrix:
+ python-version: ["3.10", "3.11", "3.12"]
+ steps:
+ - uses: actions/checkout@v4
+ - uses: actions/setup-python@v5
+ with: {python-version: "${{ matrix.python-version }}"}
+ - run: pip install -e .[dev]
+ - run: ruff check .
+ - run: bandit -r src/ -ll
+ - run: pip-audit
+ - run: pytest --cov=cherenkov --cov-fail-under=80
+ - uses: codecov/codecov-action@v4
 ```
 
 ### 8.4 v1.0 Definition of Done
@@ -907,7 +907,7 @@ All boxes must be checked. No exceptions.
 docker run -d -p 8080:80 vulnerables/web-dvwa
 docker run -d -p 8081:80 webpwnized/mutillidae
 
-pytest tests/unit/           # fast, no network
+pytest tests/unit/ # fast, no network
 pytest tests/integration/ -m requires_dvwa
 pytest --cov=cherenkov --cov-report=html
 ```
@@ -922,32 +922,32 @@ from cherenkov.scanners.security_headers import SecurityHeadersScanner
 from cherenkov.core.base_scanner import Severity
 
 @pytest.mark.asyncio
-async def test_missing_csp_flagged():
-    with patch("httpx.AsyncClient.get") as mock:
-        mock.return_value = AsyncMock(headers={}, status_code=200)
-        result = await SecurityHeadersScanner("https://example.com").scan()
-    finding = next((f for f in result.findings if "Content-Security-Policy" in f.title), None)
-    assert finding is not None
-    assert finding.severity == Severity.MEDIUM
+async def test_missing_csp_flagged:
+ with patch("httpx.AsyncClient.get") as mock:
+ mock.return_value = AsyncMock(headers={}, status_code=200)
+ result = await SecurityHeadersScanner("https://example.com").scan
+ finding = next((f for f in result.findings if "Content-Security-Policy" in f.title), None)
+ assert finding is not None
+ assert finding.severity == Severity.MEDIUM
 
 @pytest.mark.asyncio
-async def test_no_false_positive_with_all_headers():
-    headers = {
-        "Content-Security-Policy": "default-src 'self'",
-        "X-Frame-Options": "DENY",
-        "Strict-Transport-Security": "max-age=31536000",
-        "X-Content-Type-Options": "nosniff",
-    }
-    with patch("httpx.AsyncClient.get") as mock:
-        mock.return_value = AsyncMock(headers=headers, status_code=200)
-        result = await SecurityHeadersScanner("https://example.com").scan()
-    assert result.findings == []
+async def test_no_false_positive_with_all_headers:
+ headers = {
+ "Content-Security-Policy": "default-src 'self'",
+ "X-Frame-Options": "DENY",
+ "Strict-Transport-Security": "max-age=31536000",
+ "X-Content-Type-Options": "nosniff",
+ }
+ with patch("httpx.AsyncClient.get") as mock:
+ mock.return_value = AsyncMock(headers=headers, status_code=200)
+ result = await SecurityHeadersScanner("https://example.com").scan
+ assert result.findings == []
 
 @pytest.mark.asyncio
 @pytest.mark.requires_dvwa
-async def test_dvwa_integration():
-    result = await SecurityHeadersScanner("http://localhost:8080").scan()
-    assert len(result.findings) > 0
+async def test_dvwa_integration:
+ result = await SecurityHeadersScanner("http://localhost:8080").scan
+ assert len(result.findings) > 0
 ```
 
 ### 9.3 Coverage Targets Per Phase
@@ -990,7 +990,7 @@ RUN pip install --no-cache-dir --prefix=/install .
 FROM base AS final
 COPY --from=builder /install /usr/local
 COPY src/ ./src/
-USER cherenkov                           # ← non-root
+USER cherenkov # ← non-root
 EXPOSE 8000
 CMD ["uvicorn", "cherenkov.api.main:app", "--host", "0.0.0.0", "--port", "8000"]
 ```
@@ -1006,19 +1006,19 @@ Delete Dockerfile.agent, Dockerfile.optimized, Dockerfile.simple.
 
 ```yaml
 services:
-  cherenkov:
-    build: .
-    ports: ["127.0.0.1:8000:8000"]   # localhost only
-    volumes: ["cherenkov-data:/home/cherenkov/.cherenkov"]
-    environment: [cherenkov_OLLAMA_URL=http://ollama:11434]
-    depends_on: [ollama]
-  ollama:
-    image: ollama/ollama:latest
-    ports: ["127.0.0.1:11434:11434"]
-    volumes: ["ollama-data:/root/.ollama"]
+ cherenkov:
+ build: .
+ ports: ["127.0.0.1:8000:8000"] # localhost only
+ volumes: ["cherenkov-data:/home/cherenkov/.cherenkov"]
+ environment: [cherenkov_OLLAMA_URL=http://ollama:11434]
+ depends_on: [ollama]
+ ollama:
+ image: ollama/ollama:latest
+ ports: ["127.0.0.1:11434:11434"]
+ volumes: ["ollama-data:/root/.ollama"]
 volumes:
-  cherenkov-data:
-  ollama-data:
+ cherenkov-data:
+ ollama-data:
 ```
 
 ---

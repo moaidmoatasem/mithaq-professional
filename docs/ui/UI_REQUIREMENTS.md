@@ -55,16 +55,16 @@ This document is the ground truth for all front-end implementation. Any design d
 
 ```
 ┌─────────────────────────────────────────────────────────┐
-│  [FORENSIC HEADER]                                       │
+│ [FORENSIC HEADER] │
 ├──────────────────────────────────┬──────────────────────┤
-│                                  │                      │
-│   TACTICAL OPERATIONS PANEL      │  THREAT INTEL PANEL  │
-│   (75% — 3fr)                    │  (25% — 1fr)         │
-│                                  │                      │
-│   - State Machine Visualizer     │  - Target HUD        │
-│   - Operation Stream (Log)       │  - VulnCard list     │
-│   - System Capacity Meter        │  - Cherenkov Trace   │
-│                                  │                      │
+│ │ │
+│ TACTICAL OPERATIONS PANEL │ THREAT INTEL PANEL │
+│ (75% — 3fr) │ (25% — 1fr) │
+│ │ │
+│ - State Machine Visualizer │ - Target HUD │
+│ - Operation Stream (Log) │ - VulnCard list │
+│ - System Capacity Meter │ - Cherenkov Trace │
+│ │ │
 └──────────────────────────────────┴──────────────────────┘
 ```
 
@@ -195,13 +195,13 @@ A responsive 2–4 column grid of `StatCard` atoms.
 1. **Brand Mark** — `CHERENKOV` in `--font-sans` bold, electric blue, glitch FX (`fx-glitch`, `data-text` attr)
 2. **Mission Timer** — `JetBrains Mono`, format `HH:MM:SS`, live-incrementing from audit start
 3. **MEISSNER Status** — `PulseDot` + label. States:
-   - `MEISSNER: LOCKED` (green) — zero-egress enforced
-   - `MEISSNER: PERMEABLE` (amber) — hybrid cloud mode active
-   - `MEISSNER: BREACH` (red) — fail-closed triggered
+ - `MEISSNER: LOCKED` (green) — zero-egress enforced
+ - `MEISSNER: PERMEABLE` (amber) — hybrid cloud mode active
+ - `MEISSNER: BREACH` (red) — fail-closed triggered
 4. **ABLATION Status** — `CyberBadge` type `safe`. States:
-   - `ABLATION SYNCED` (safe/green)
-   - `ABLATION ACTIVE` (amber, pulsing) — redaction in progress
-   - `ABLATION FAILED` (critical) — triggers fail-closed
+ - `ABLATION SYNCED` (safe/green)
+ - `ABLATION ACTIVE` (amber, pulsing) — redaction in progress
+ - `ABLATION FAILED` (critical) — triggers fail-closed
 
 **Layout:** `display: flex; justify-content: space-between; align-items: center`
 **Border:** `border-bottom: 1px solid --border-hud`
@@ -215,22 +215,22 @@ A responsive 2–4 column grid of `StatCard` atoms.
 1. **Panel Header:** `h2` "Tactical Operations" + `▶ INITIATE SEQUENCE` CyberButton (primary)
 2. **StatGrid:** `NODES MAPPED`, `PAYLOADS DELIVERED`, `ANOMALIES ISOLATED`, `TRACES SIGNED`
 3. **Execution State Machine Visualizer** *(new):*
-   ```
-   [MONITORING] → [MEISSNER LOCKDOWN] → [ABLATION SWEEP] → [KINETIC ENGAGEMENT] → [TOKAMAK CONTAINMENT] → [TRACE SIGNED]
-   ```
-   - Connected by animated dashed lines (`fx-march`)
-   - Active step: Bismuth purple glow + `fx-sweep` animation
-   - Completed step: Mint green check + dim
-   - Failed step: Critical red + glitch FX
+ ```
+ [MONITORING] → [MEISSNER LOCKDOWN] → [ABLATION SWEEP] → [KINETIC ENGAGEMENT] → [TOKAMAK CONTAINMENT] → [TRACE SIGNED]
+ ```
+ - Connected by animated dashed lines (`fx-march`)
+ - Active step: Bismuth purple glow + `fx-sweep` animation
+ - Completed step: Mint green check + dim
+ - Failed step: Critical red + glitch FX
 4. **Operation Stream:** `JetBrains Mono` log container. Rules:
-   - Each line appended with 1.2s type-on animation
-   - Prefix: `[+]` for info, `[!]` for alerts (red), `[✓]` for verified (mint)
-   - Auto-scroll to bottom
-   - Max 500 lines, then oldest purged
-   - Scrollable, height: fixed `320px`
+ - Each line appended with 1.2s type-on animation
+ - Prefix: `[+]` for info, `[!]` for alerts (red), `[✓]` for verified (mint)
+ - Auto-scroll to bottom
+ - Max 500 lines, then oldest purged
+ - Scrollable, height: fixed `320px`
 5. **System Capacity Meter:** AIMD-driven `cyber-meter` bar
-   - Label: `SWARM CAPACITY`
-   - Color transitions: <30% = red, 30–70% = amber, >70% = mint
+ - Label: `SWARM CAPACITY`
+ - Color transitions: <30% = red, 30–70% = amber, >70% = mint
 
 ---
 
@@ -239,19 +239,19 @@ A responsive 2–4 column grid of `StatCard` atoms.
 
 **Sub-sections (top → bottom):**
 1. **Target HUD Block:**
-   - Label: `TARGET` in amber
-   - Value: Target IP/hostname in `JetBrains Mono`
-   - `hud-bracket` corners
+ - Label: `TARGET` in amber
+ - Value: Target IP/hostname in `JetBrains Mono`
+ - `hud-bracket` corners
 2. **Vulnerability List:**
-   - Label: `ANOMALIES ISOLATED`
-   - Empty state: `No threats detected.` in `--fg3`, italic
-   - Populated: Stack of `VulnCard` components, newest on top
-   - Max visible: 6 (scroll after)
+ - Label: `ANOMALIES ISOLATED`
+ - Empty state: `No threats detected.` in `--fg3`, italic
+ - Populated: Stack of `VulnCard` components, newest on top
+ - Max visible: 6 (scroll after)
 3. **Cherenkov Trace Block** (appears after audit):
-   - Label: `CHERENKOV TRACE`
-   - SHA-256 hash in `JetBrains Mono`, `--fs-micro`, truncated to 20 chars + `...`
-   - Click to copy full hash
-   - `Cryptographic Shred Receipt` link (opens Forensic Proof View)
+ - Label: `CHERENKOV TRACE`
+ - SHA-256 hash in `JetBrains Mono`, `--fs-micro`, truncated to 20 chars + `...`
+ - Click to copy full hash
+ - `Cryptographic Shred Receipt` link (opens Forensic Proof View)
 
 ---
 
@@ -274,20 +274,20 @@ Accepts `{ header, content, sidebar }` and assembles the full page DOM structure
 1. **Modal Header:** `CHERENKOV FORENSIC PROOF` title + `[ESC] CLOSE` ghost button
 2. **Anomaly Summary:** Title, severity badge, scanner name, CVE
 3. **PoC Execution Window:**
-   - Dark terminal-style box (`bg-elevated`, `border: 1px solid --border-hud`)
-   - Label: `TOKAMAK EXECUTION LOG`
-   - `JetBrains Mono` content, line-by-line with type-on animation
+ - Dark terminal-style box (`bg-elevated`, `border: 1px solid --border-hud`)
+ - Label: `TOKAMAK EXECUTION LOG`
+ - `JetBrains Mono` content, line-by-line with type-on animation
 4. **Redaction Block:**
-   - Any credential fields shown as: `API_KEY: [REDACTED BY ABLATION ██████]`
-   - Amber badge: `ABLATION PROTECTED`
+ - Any credential fields shown as: `API_KEY: [REDACTED BY ABLATION ██████]`
+ - Amber badge: `ABLATION PROTECTED`
 5. **Evidence Section:**
-   - `CHERENKOV TRACE ID:` full SHA-256 in mono
-   - `TIMESTAMP:` ISO 8601
-   - `SCANNER:` which module
-   - `EXECUTION MODE:` LOCAL-ONLY / HYBRID
+ - `CHERENKOV TRACE ID:` full SHA-256 in mono
+ - `TIMESTAMP:` ISO 8601
+ - `SCANNER:` which module
+ - `EXECUTION MODE:` LOCAL-ONLY / HYBRID
 6. **Action Footer:**
-   - `EXPORT TRACE` (downloads JSON)
-   - `INITIATE CRYPTOGRAPHIC SHRED` (danger button, requires confirm)
+ - `EXPORT TRACE` (downloads JSON)
+ - `INITIATE CRYPTOGRAPHIC SHRED` (danger button, requires confirm)
 
 ---
 
@@ -301,31 +301,31 @@ Accepts `{ header, content, sidebar }` and assembles the full page DOM structure
 1. Analyst enters target IP/hostname in the target input field in `ThreatIntelPanel`.
 2. Analyst clicks `▶ INITIATE SEQUENCE`.
 3. **UI Response:**
-   - Button disables, text changes to `EXECUTING...`
-   - MEISSNER status transitions to `MEISSNER: LOCKED` (green → confirmed)
-   - State Machine step 1 (`MONITORING`) activates with purple glow
-   - Operation Stream logs: `[+] Initializing CHERENKOV Operation...`
-   - State Machine advances: step 2 `MEISSNER LOCKDOWN` activates
-   - Log: `[+] MEISSNER perimeter sealed. Zero-egress enforced.`
+ - Button disables, text changes to `EXECUTING...`
+ - MEISSNER status transitions to `MEISSNER: LOCKED` (green → confirmed)
+ - State Machine step 1 (`MONITORING`) activates with purple glow
+ - Operation Stream logs: `[+] Initializing CHERENKOV Operation...`
+ - State Machine advances: step 2 `MEISSNER LOCKDOWN` activates
+ - Log: `[+] MEISSNER perimeter sealed. Zero-egress enforced.`
 4. If cloud (TENSOR) is needed:
-   - MEISSNER status transitions to `MEISSNER: PERMEABLE` (amber)
-   - ABLATION badge becomes `ABLATION ACTIVE` (pulsing amber)
-   - Log: `[+] ABLATION sweep in progress. Sanitizing breadcrumbs for TENSOR.`
-   - State Machine: step 3 `ABLATION SWEEP` activates
+ - MEISSNER status transitions to `MEISSNER: PERMEABLE` (amber)
+ - ABLATION badge becomes `ABLATION ACTIVE` (pulsing amber)
+ - Log: `[+] ABLATION sweep in progress. Sanitizing breadcrumbs for TENSOR.`
+ - State Machine: step 3 `ABLATION SWEEP` activates
 5. KINETIC engagement:
-   - State Machine: step 4 `KINETIC ENGAGEMENT` activates
-   - `NODES MAPPED` counter increments with each discovered node
-   - Log: `[!] Anomaly detected: SQL Injection on endpoint /api/auth` (red)
+ - State Machine: step 4 `KINETIC ENGAGEMENT` activates
+ - `NODES MAPPED` counter increments with each discovered node
+ - Log: `[!] Anomaly detected: SQL Injection on endpoint /api/auth` (red)
 6. TOKAMAK validation:
-   - State Machine: step 5 `TOKAMAK CONTAINMENT` activates
-   - `ANOMALIES ISOLATED` counter increments
-   - VulnCard appears in ThreatIntelPanel with `reveal-up` animation
+ - State Machine: step 5 `TOKAMAK CONTAINMENT` activates
+ - `ANOMALIES ISOLATED` counter increments
+ - VulnCard appears in ThreatIntelPanel with `reveal-up` animation
 7. Completion:
-   - State Machine: step 6 `TRACE SIGNED` activates (mint green, fully lit)
-   - `TRACES SIGNED` counter increments
-   - Cherenkov Trace block appears with SHA-256
-   - Button re-enables: `RE-ENGAGE`
-   - MEISSNER status returns to `MEISSNER: LOCKED`
+ - State Machine: step 6 `TRACE SIGNED` activates (mint green, fully lit)
+ - `TRACES SIGNED` counter increments
+ - Cherenkov Trace block appears with SHA-256
+ - Button re-enables: `RE-ENGAGE`
+ - MEISSNER status returns to `MEISSNER: LOCKED`
 
 **Success Criteria:** All 6 state machine steps complete. At least 1 VulnCard visible. Trace ID populated.
 
@@ -338,13 +338,13 @@ Accepts `{ header, content, sidebar }` and assembles the full page DOM structure
 **Flow:**
 1. Mid-audit, connection drops.
 2. **UI Response (within 2 seconds):**
-   - All `PulseDot` indicators flip to red, pulsing rapidly
-   - `TacticalOperationsPanel` entire border flashes `sev-critical` (red glow)
-   - Log: `[!] FAIL-CLOSED EVENT: Perimeter breach detected. Operation suspended.` (red, pulsing)
-   - MEISSNER badge: `MEISSNER: BREACH` in critical red
-   - State Machine current step turns red with glitch FX
-   - Background tint shifts to subtle red overlay
-   - `INITIATE SEQUENCE` button becomes `FAIL-CLOSED` (disabled, danger variant)
+ - All `PulseDot` indicators flip to red, pulsing rapidly
+ - `TacticalOperationsPanel` entire border flashes `sev-critical` (red glow)
+ - Log: `[!] FAIL-CLOSED EVENT: Perimeter breach detected. Operation suspended.` (red, pulsing)
+ - MEISSNER badge: `MEISSNER: BREACH` in critical red
+ - State Machine current step turns red with glitch FX
+ - Background tint shifts to subtle red overlay
+ - `INITIATE SEQUENCE` button becomes `FAIL-CLOSED` (disabled, danger variant)
 3. Recovery: Reconnect button appears: `↺ RESTORE PERIMETER`
 4. On reconnect: all indicators restore, log shows `[✓] MEISSNER perimeter restored.`
 
@@ -362,11 +362,11 @@ Accepts `{ header, content, sidebar }` and assembles the full page DOM structure
 3. `VIEW PROOF` ghost button appears.
 4. Analyst clicks `VIEW PROOF`.
 5. **UI Response:**
-   - Full-screen modal overlays dashboard with dark background
-   - Header: `CHERENKOV FORENSIC PROOF — CT-2026-001`
-   - TOKAMAK log animates line by line (type-on)
-   - Credential fields show `[REDACTED BY ABLATION]` with amber badge
-   - Full SHA-256 trace visible, click-to-copy
+ - Full-screen modal overlays dashboard with dark background
+ - Header: `CHERENKOV FORENSIC PROOF — CT-2026-001`
+ - TOKAMAK log animates line by line (type-on)
+ - Credential fields show `[REDACTED BY ABLATION]` with amber badge
+ - Full SHA-256 trace visible, click-to-copy
 6. Analyst clicks `EXPORT TRACE` → downloads `cherenkov-trace-CT-2026-001.json`
 7. Analyst closes modal with `[ESC] CLOSE` or Escape key.
 
@@ -396,10 +396,10 @@ Accepts `{ header, content, sidebar }` and assembles the full page DOM structure
 **Flow:**
 1. Loop detected on backend.
 2. **UI Response:**
-   - Log: `[!] [AEGIS] Cognitive loop detected on target: 192.168.1.104 — Terminating thread.` (red)
-   - State Machine `KINETIC ENGAGEMENT` step pulses amber (warning, not fail)
-   - New log: `[+] [AEGIS] Forcing new attack strategy via TENSOR.`
-   - State Machine reverts to step 3 `ABLATION SWEEP` to re-plan
+ - Log: `[!] [AEGIS] Cognitive loop detected on target: 192.168.1.104 — Terminating thread.` (red)
+ - State Machine `KINETIC ENGAGEMENT` step pulses amber (warning, not fail)
+ - New log: `[+] [AEGIS] Forcing new attack strategy via TENSOR.`
+ - State Machine reverts to step 3 `ABLATION SWEEP` to re-plan
 
 **Success Criteria:** Loop is surfaced to user clearly. Audit does not halt; it re-plans.
 

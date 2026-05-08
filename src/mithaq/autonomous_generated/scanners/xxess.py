@@ -6,7 +6,11 @@ Category: scanners
 
 #!/usr/bin/env python
 
-import xml.etree.ElementTree as ET
+import base64
+import xml.sax
+from xml.sax.handler import feature_external_ges, feature_external_pes
+import io
+import re
 
 
 class XXESS(object):
@@ -14,8 +18,7 @@ class XXESS(object):
     A class to scan XML documents for potential XXE (XML External Entity) vulnerabilities.
 
     Methods:
-        check_external_entity(self, xml_input): Check if the provided XML document contains any external entities using a simple heuristic test which is known to miss some edge cases, use with caution and consider applying strictness in production environments.
-
+        check_external_entity(self, xml_input): Check if the provided XML document contains any external entities.
     """
 
     def __init__(self, base64_decode=True):
@@ -23,116 +26,93 @@ class XXESS(object):
         Initialize the XXESS instance.
 
         Args:
-            base64_decode (bool): A flag indicating whether to base64 decode XML before checking for external entities. Default is True.
+            base64_decode (bool): A flag indicating whether to base64 decode XML before checking.
         """
         self.base64_decode = base64_decode
 
     def _decode_base64(self, xml_input):
-        import base64
+        if isinstance(xml_input, bytes):
+            try:
+                xml_input = xml_input.decode("utf-8")
+            except UnicodeDecodeError:
+                raise ValueError("XML Input must be a valid UTF-8 string.")
 
         if not isinstance(xml_input, str) or not xml_input.startswith("base64,"):
             raise ValueError("XML Input must be a valid base64 encoded string.")
 
         part = xml_input[7:]  # Remove 'base64,' prefix
-        decoded_data = base64.b64decode(part)
-        return decoded_data.decode("utf-8")
+        try:
+            decoded_data = base64.b64decode(part)
+            return decoded_data.decode("utf-8")
+        except Exception as e:
+            raise ValueError(f"Failed to decode base64: {e}")
 
     def check_external_entity(self, xml_input):
         """
-        Checks for XXE vulnerabilities based on a simple heuristic test.
+        Checks for XXE vulnerabilities using heuristic and SAX parsing.
 
         Args:
-            xml_input (str): The XML content to be scanned.
+            xml_input (str or bytes): The XML content to be scanned.
 
         Returns:
             bool: True if potential XXE vulnerability is detected, False otherwise.
-            Exception might include DecodingError or ValueError in case of malformed input.
-
-        Note:
-            This method is a heuristic based on practical experience and may miss complex or malicious cases.
-            It does not replace full XML parsing and validation as provided by xml.etree.ElementTree.
         """
-        if self.base64_decode:
-            xml_input = self._decode_base64(xml_input)
-
-        decoded_xml = None
         try:
-            decoded_xml = ET.fromstring(xml_input)
-        except (ValueError, TypeError):
-            # This exception covers invalid input scenarios like incorrect base64 or XML.
+            if self.base64_decode and (
+                isinstance(xml_input, str) and xml_input.startswith("base64,")
+            ):
+                xml_input = self._decode_base64(xml_input)
+            elif isinstance(xml_input, bytes):
+                xml_input = xml_input.decode("utf-8")
+
+            # Heuristic check for DOCTYPE or ENTITY
+            if re.search(r"<!DOCTYPE", xml_input, re.IGNORECASE) or re.search(
+                r"<!ENTITY", xml_input, re.IGNORECASE
+            ):
+                return True
+
+            # Secure parsing with SAX
+            parser = xml.sax.make_parser()
+            # Disable external entities
+            parser.setFeature(feature_external_ges, False)
+            parser.setFeature(feature_external_pes, False)
+
+            # We use a dummy handler as we only care if it parses without errors
+            # and our heuristic already covers most XXE attempts.
+            handler = xml.sax.ContentHandler()
+            parser.setContentHandler(handler)
+
+            input_source = xml.sax.xmlreader.InputSource()
+            input_source.setByteStream(io.BytesIO(xml_input.encode("utf-8")))
+            parser.parse(input_source)
+
+            return False
+        except (xml.sax.SAXParseException, ValueError, TypeError):
+            # If it's malformed XML or other issues, we treat it as potentially dangerous
+            # or simply not a valid safe XML.
             return True
-
-        if not isinstance(decoded_xml, ET.ElementTree):
-            return False  # Simple case where the parser does not recognize it as valid XML, might be a trick.
-
-        root = decoded_xml.getroot()
-
-        for elem in ET.iterparse(root.tag):
-            if not elem:
-                continue
-            self._recursive_check(elem)
-
-        return True
-
-    def _recursive_check(self, element):
-        """
-        Recursive inner function to recursively check external entity references within the XML.
-        If it detects any reference (e.g., 'http://example.com/'), a potential XXE vulnerability is detected.
-
-        Args:
-            element (ET.Element): The current Element in the XML tree.
-        """
-        # Check for XXE by looking at elements with specified attributes
-        if self._is_element_with_external_reference(element):
+        except Exception:
             return True
-
-    def _is_element_with_external_reference(self, element):
-        """Helper function to determine if an element is considered potentially dangerous due to external entity reference.
-        This includes checking the 'system', 'public' namespaces and other common attributes associated with potential XXE threats."""
-
-        from xml.sax import XMLReader as xsXMLReader
-
-        SAXParser = xsXMLReader()
-        parser_context = SAXParser.create_parser(ParserContext)
-        parser_context.setContentHandler(SAXParser)
-        parser_context.setErrorHandler(SAXParser)
-
-        return False  # Placeholder, in actual implementation, this method would check for attributes like 'system' or 'public'
 
     def test(self):
         """
-        A convenience method to run some tests with known inputs:
-            - Valid XML document
-            - Malicious base64 encoded input that looks like a valid XML
-            - XML with external entities referenced
-
-        Raises XXEScannerError if there is a problem executing the tests.
-        Example of usage:
-
-            scanner = XXESS()
-            for xml_input, expected_result in xxes_tests:
-                result = scanner.check_external_entity(xml_input)
-                assert result == expected_result
+        A convenience method to run some tests.
         """
-
-        # Placeholder test data, this should be populated with real use case and edge cases inputs to validate the functionality.
         # Test 1: Valid XML
         valid_xml = b'<?xml version="1.0" encoding="UTF-8"?><root>Valid content</root>'
         assert self.check_external_entity(valid_xml) is False
 
         # Test 2: Encoded malicious XML input that mimics a XXE
-        encoded_malicious_xml = (
-            "base64,<xml><system>http://malicious.example/external.xml</system></xml>,x03,"
-        )
+        # Using a proper base64 encoded XXE for the test
+        xxe_payload = '<?xml version="1.0"?><!DOCTYPE foo [<!ENTITY xxe SYSTEM "file:///etc/passwd">]><foo>&xxe;</foo>'
+        encoded_malicious_xml = "base64," + base64.b64encode(xxe_payload.encode()).decode()
         result = self.check_external_entity(encoded_malicious_xml)
-        assert (
-            isinstance(result, bool) and result is True
-        )  # This should fail the check because it's not a valid or decoded XML.
+        assert result is True
 
 
 xxes_tests = [
     (b'<?xml version="1.0" encoding="UTF-8"?><root>Valid content</root>', False),
-    ("base64,<xml><system>http://malicious.example/external.xml</system></xml>,x03,", True),
+    ("base64," + base64.b64encode(b'<!DOCTYPE foo [<!ENTITY xxe "bar">]><foo>&xxe;</foo>').decode(), True),
 ]
 
 XXEScannerError = type(
@@ -148,16 +128,12 @@ XXEScannerError = type(
 def test_scanner():
     scanner = XXESS()
     for xml_input, expected_result in xxes_tests:
-        try:
-            result = scanner.check_external_entity(xml_input)
-            assert result == expected_result
-        except ValueError:
-            # This handles the case where the XML input is not valid or cannot be base64 decoded.
-            pass
-        else:
+        result = scanner.check_external_entity(xml_input)
+        if result != expected_result:
             raise AssertionError(
-                f"Check for XXE in {xml_input} did not return False. Wrong Result: {result}"
+                f"Check for XXE in {xml_input} did not return {expected_result}. Result: {result}"
             )
+    print("Tests passed!")
 
 
 if __name__ == "__main__":

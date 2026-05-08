@@ -78,7 +78,7 @@ TEST_TEMPLATE = """
 # tests/unit/scanners/test_{module_name}.py
 # GENERATED — not validated.
 import pytest
-from unittest.mock import AsyncMock, patch
+from unittest.mock import AsyncMock, MagicMock, patch
 
 from mithaq.scanners.{module_name} import {class_name}
 from mithaq.core.base_scanner import Severity
@@ -87,9 +87,9 @@ from mithaq.core.base_scanner import Severity
 @pytest.mark.asyncio
 async def test_{module_name}_positive():
     \"\"\"Must fire when vulnerability present (mocked HTTP).\"\"\"
-    with patch("httpx.AsyncClient.get") as mock:
+    with patch("httpx.AsyncClient.get", new_callable=AsyncMock) as mock:
         # TODO: configure mock to return vulnerable response
-        mock.return_value = AsyncMock(
+        mock.return_value = MagicMock(
             headers={{}},
             status_code=200,
             text="TODO: vulnerable response body",
@@ -104,12 +104,12 @@ async def test_{module_name}_positive():
 @pytest.mark.asyncio
 async def test_{module_name}_negative():
     \"\"\"Must NOT fire when vulnerability absent (false-positive check).\"\"\"
-    with patch("httpx.AsyncClient.get") as mock:
-        # TODO: configure mock to return safe response
-        mock.return_value = AsyncMock(
+    with patch("httpx.AsyncClient.get", new_callable=AsyncMock) as mock:
+        # Safe response - no vulnerability detected
+        mock.return_value = MagicMock(
             headers={{}},
             status_code=200,
-            text="TODO: safe response body",
+            text="<html><body>Safe Content - No Vulnerability Found</body></html>",
         )
         result = await {class_name}("https://example.com").scan()
     assert result.findings == [], f"False positive: {{result.findings}}"

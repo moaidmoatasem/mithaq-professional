@@ -1,7 +1,7 @@
 """Unit tests for ArchitectAgent."""
 
-from mithaq.agents.architect_agent import ArchitectAgent, ArchitectAgentConfig
-from mithaq.schemas.cloud_instruction import CloudInstruction
+from cherenkov.agents.architect_agent import ArchitectAgent, ArchitectAgentConfig
+from cherenkov.schemas.cloud_instruction import CloudInstruction
 
 
 class TestArchitectAgent:
@@ -13,7 +13,7 @@ class TestArchitectAgent:
 
         assert agent.config.role == "Security Architect"
         assert "threat modeling" in agent.config.goal.lower()
-        assert agent.sanitizer is not None
+        assert agent.ablation is not None
 
     def test_custom_initialization(self):
         """Test architect agent with custom config."""

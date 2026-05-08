@@ -3,7 +3,7 @@
 import pytest
 from pydantic import ValidationError
 
-from mithaq.schemas.cloud_instruction import CloudInstruction
+from cherenkov.schemas.cloud_instruction import CloudInstruction
 
 
 def test_valid_instruction():

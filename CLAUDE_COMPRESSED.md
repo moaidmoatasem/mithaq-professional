@@ -1,30 +1,30 @@
-# CLAUDE.md — mithaq v4.1 (COMPRESSED)
+# CLAUDE.md — cherenkov v4.1 (COMPRESSED)
 # Rule: This file must stay under 120 lines. Prune ruthlessly on every update.
 # Claude Code reads this every session. Every token here costs money.
 
 ## STATE
 Phase: 1 (cleanup) | Version: v0.1.1 | Coverage: ~30%
-Canonical source: src/mithaq/ ONLY
+Canonical source: src/cherenkov/ ONLY
 
 ## BROKEN RIGHT NOW — FIX FIRST, IN ORDER
 1. git config core.autocrlf input && git rm --cached -r . && git reset --hard HEAD
-2. rm -rf src/mithaq/mithaq/ && git commit -m "fix: nested mithaq/mithaq/"
+2. rm -rf src/cherenkov/cherenkov/ && git commit -m "fix: nested cherenkov/cherenkov/"
 3. git log --oneline --all | grep -E "fd731b6|dd9a8be|93eee97" → cherry-pick all three
 4. api/main.py: allow_origins=["http://localhost:5000"] AND host=os.getenv("UVICORN_HOST","127.0.0.1")
-5. rm -f mithaq_DEVELOPMENT_PLAN.md STRATEGIC_ROADMAP.md src/mithaq_MASTER_PLAN.md docs/roadmap/PRODUCT_ROADMAP.md
+5. rm -f cherenkov_DEVELOPMENT_PLAN.md STRATEGIC_ROADMAP.md src/cherenkov_MASTER_PLAN.md docs/roadmap/PRODUCT_ROADMAP.md
 6. git tag -a v0.1.1-security -m "Phase 0 done" && git push origin main --tags
 
 ## INVARIANTS (never violate)
 - BaseScanner contract for every scanner
-- Siyaada: fail-closed, telemetry on every drop, alert if drop_rate > 20%
+- Ablation: fail-closed, telemetry on every drop, alert if drop_rate > 20%
 - Raw data (Tier 1): never leaves local hardware
-- Burhan: CONFIRMED/PROBABLE/UNVERIFIED/DISCARDED (not binary pass/fail)
-- Sandbox: STANDARD profile (web) or MOBILE profile (APK/Frida) — two profiles only
-- Watchdog: kill Burhan containers after 30s — prevents OOM
+- Tokamak: CONFIRMED/PROBABLE/UNVERIFIED/DISCARDED (not binary pass/fail)
+- TOKAMAK: STANDARD profile (web) or MOBILE profile (APK/Frida) — two profiles only
+- Watchdog: kill Tokamak containers after 30s — prevents OOM
 
 ## DATA TIERS (from GOV-01)
 Tier 1 (RAW): Terminal output, HTTP responses, decompiled code → local only, shred after 72h
-Tier 2 (SANITIZED): Post-Siyaada → cloud-safe, structural metadata only
+Tier 2 (SANITIZED): Post-Ablation → cloud-safe, structural metadata only
 Tier 3 (TRACE): SHA-256 signed SQLite ledger → 7yr retention, CBE-distributable
 
 ## VALIDATION GATE (5 steps, all required)
@@ -35,10 +35,10 @@ Tier 3 (TRACE): SHA-256 signed SQLite ledger → 7yr retention, CBE-distributabl
 5. bandit + CWE docstring + ruff
 
 ## NEW FILES (copy from project outputs to these paths)
-src/mithaq/ai/siyaada.py         (with SiyaadaTelemetry)
-src/mithaq/agents/burhan.py      (with PoC Confidence Score + watchdog)
-src/mithaq/core/sandbox.py       (STANDARD + MOBILE profiles)
-src/mithaq/dev_crew/scanner_generator.py  (qwen2.5-coder:7b, $0)
+src/cherenkov/ai/ablation.py         (with AblationTelemetry)
+src/cherenkov/agents/tokamak.py      (with PoC Confidence Score + watchdog)
+src/cherenkov/core/tokamak.py       (STANDARD + MOBILE profiles)
+src/cherenkov/dev_crew/scanner_generator.py  (qwen2.5-coder:7b, $0)
 
 ## DELEGATE TO LOCAL OLLAMA (do not use Claude tokens)
 - Scanner boilerplate from CWE → dev_crew/scanner_generator.py
@@ -48,14 +48,14 @@ src/mithaq/dev_crew/scanner_generator.py  (qwen2.5-coder:7b, $0)
 - Git operations → run directly
 
 ## TOKEN BUDGET
-muhandis_plan=2000 | triage_chunk=4000 | burhan_poc=1500 | max_output=1000
+muhandis_plan=2000 | triage_chunk=4000 | tokamak_poc=1500 | max_output=1000
 Target: $0.009/scan std | $0.003/scan cached | $0.00 local-only
 
 ## AUTONOMY CEILING (human must approve)
-CRITICAL finding approval | Siyaada PR merges | Release tags | New LLM backends
+CRITICAL finding approval | Ablation PR merges | Release tags | New LLM backends
 
 ## NEVER DO
 count candidates/ | update README before code | skip validation gate
-add aider-chat dep | bind 0.0.0.0 | log raw findings | binary Burhan pass/fail
+add aider-chat dep | bind 0.0.0.0 | log raw findings | binary Tokamak pass/fail
 community launch before Phase 3 (20+ validated scanners)
 

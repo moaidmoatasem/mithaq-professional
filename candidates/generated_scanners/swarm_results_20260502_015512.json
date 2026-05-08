@@ -33,7 +33,7 @@
     {
       "success": true,
       "result": {
-        "file": "mithaq-professional/tests/test_orchestration_api.py",
+        "file": "cherenkov-professional/tests/test_orchestration_api.py",
         "tests": 4,
         "status": "Comprehensive tests added"
       },

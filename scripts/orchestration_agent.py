@@ -7,7 +7,7 @@ Reads AGENT_MISSION_ORCHESTRATION.txt and works iteratively on orchestration imp
 import time
 from pathlib import Path
 from datetime import datetime
-from mithaq.core.memory_efficient_parallel import MemoryEfficientCrew
+from cherenkov.core.memory_efficient_parallel import MemoryEfficientCrew
 
 print("""
 ╔══════════════════════════════════════════════════════════════╗
@@ -16,8 +16,8 @@ print("""
 """)
 
 # Paths
-MISSION_FILE = Path("mithaq-professional/AGENT_MISSION_ORCHESTRATION.txt")
-NOTES_FILE = Path("mithaq-professional/AGENT_NOTES_ORCHESTRATION.md")
+MISSION_FILE = Path("cherenkov-professional/AGENT_MISSION_ORCHESTRATION.txt")
+NOTES_FILE = Path("cherenkov-professional/AGENT_NOTES_ORCHESTRATION.md")
 OUTPUT_DIR = Path("orchestration_iterations")
 OUTPUT_DIR.mkdir(exist_ok=True)
 
@@ -75,8 +75,8 @@ EXISTING NOTES (what we've done so far):
 
 YOUR TASK FOR THIS ITERATION:
 1. Check which orchestrator files exist in the codebase:
-   - Look for files in mithaq-professional/src/mithaq/
-   - Look for files in mithaq/core/
+   - Look for files in cherenkov-professional/src/cherenkov/
+   - Look for files in cherenkov/core/
    - Find test files related to orchestration
 2. Read ONE key file and understand its current structure
 3. Propose ONE small, concrete improvement or next step

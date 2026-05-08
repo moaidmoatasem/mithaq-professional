@@ -33,7 +33,7 @@ case "$1" in
         docker system prune -f
         ;;
     *)
-        echo "mithaq Docker Manager"
+        echo "cherenkov Docker Manager"
         echo ""
         echo "Usage: $0 {build|up|down|restart|logs|status|clean}"
         echo ""

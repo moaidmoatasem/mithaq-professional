@@ -1,4 +1,4 @@
-# mithaq Security Framework
+# cherenkov Security Framework
 
 **AI-powered security testing framework with multi-agent orchestration**
 
@@ -11,7 +11,7 @@
 
 ## 🎯 Project Vision
 
-mithaq is a comprehensive security testing framework that combines:
+cherenkov is a comprehensive security testing framework that combines:
 - **AI-powered analysis** using local LLMs (Ollama/DeepSeek)
 - **Multi-agent orchestration** with specialized security roles
 - **Zero-trust sanitization** preventing secrets leakage
@@ -27,7 +27,7 @@ mithaq is a comprehensive security testing framework that combines:
 Pydantic v2 schema for secure agent instructions with built-in validators.
 
 ```python
-from mithaq.schemas.cloud_instruction import CloudInstruction
+from cherenkov.schemas.cloud_instruction import CloudInstruction
 
 instruction = CloudInstruction(
     task_id="task-123",
@@ -48,7 +48,7 @@ instruction = CloudInstruction(
 Structured output for sanitization results.
 
 ```python
-from mithaq.schemas.sanitized_output import SanitizedOutput
+from cherenkov.schemas.sanitized_output import SanitizedOutput
 
 output = SanitizedOutput(
     original_text="Key: AKIAIOSFODNN7EXAMPLE",
@@ -62,10 +62,10 @@ output = SanitizedOutput(
 Real-time secret detection and redaction.
 
 ```python
-from mithaq.core.sanitizer import Sanitizer
+from cherenkov.core.ablation import Sanitizer
 
-sanitizer = Sanitizer()
-result = sanitizer.sanitize("My key is AKIAIOSFODNN7EXAMPLE")
+ablation = Sanitizer()
+result = ablation.sanitize("My key is AKIAIOSFODNN7EXAMPLE")
 
 print(result.sanitized_text)  # "My key is [REDACTED]"
 print(result.secrets_found)   # ["AWS_KEY:AKIAIOSFODNN7EXAMPLE"]
@@ -85,7 +85,7 @@ print(result.secrets_found)   # ["AWS_KEY:AKIAIOSFODNN7EXAMPLE"]
 pytest
 
 # With coverage report
-pytest --cov=mithaq --cov-report=html
+pytest --cov=cherenkov --cov-report=html
 
 # Integration tests only
 pytest tests/integration/ -v
@@ -105,7 +105,7 @@ pytest tests/integration/ -v
 ```bash
 # Clone repository
 git clone <repository-url>
-cd mithaq-security-framework
+cd cherenkov-security-framework
 
 # Create virtual environment
 python -m venv .venv
@@ -119,13 +119,13 @@ pip install -e ".[dev]"
 ### Basic Usage
 
 ```python
-from mithaq.core.sanitizer import Sanitizer
-from mithaq.schemas.cloud_instruction import CloudInstruction
+from cherenkov.core.ablation import Sanitizer
+from cherenkov.schemas.cloud_instruction import CloudInstruction
 
 # Step 1: Sanitize user input
-sanitizer = Sanitizer()
+ablation = Sanitizer()
 user_input = "Found AWS key AKIAIOSFODNN7EXAMPLE in config"
-sanitized = sanitizer.sanitize(user_input)
+sanitized = ablation.sanitize(user_input)
 
 # Step 2: Create secure instruction
 instruction = CloudInstruction(
@@ -199,10 +199,10 @@ print(f"Safe instruction: {instruction.reasoning}")
 
 ```bash
 # All tests with coverage
-pytest --cov=mithaq --cov-report=term-missing
+pytest --cov=cherenkov --cov-report=term-missing
 
 # Specific test file
-pytest tests/unit/test_sanitizer.py -v
+pytest tests/unit/test_ablation.py -v
 
 # Watch mode (with pytest-watch)
 ptw
@@ -216,10 +216,10 @@ ruff check .
 ruff format .
 
 # Security scan
-bandit -r mithaq/
+bandit -r cherenkov/
 
 # Type checking (future)
-mypy mithaq/
+mypy cherenkov/
 ```
 
 ### Pre-commit Hooks
@@ -234,7 +234,7 @@ Installed automatically on first commit:
 ## 📚 Documentation
 
 - **API Reference:** [Coming in Week 4]
-- **Architecture Guide:** [mithaq_MASTER_PLAN.md](mithaq_MASTER_PLAN.md)
+- **Architecture Guide:** [cherenkov_MASTER_PLAN.md](cherenkov_MASTER_PLAN.md)
 - **Agent Memory:** [AGENT_MEMORY.md](AGENT_MEMORY.md)
 
 ---

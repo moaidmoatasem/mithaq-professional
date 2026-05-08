@@ -1,4 +1,4 @@
-# mithaq — Final Refined Development Plan
+# cherenkov — Final Refined Development Plan
 > Version: 2.0 | Synthesized from: Deep code review + Gemini + Perplexity
 > Date: May 2026 | 26 weeks to v1.0
 
@@ -26,7 +26,7 @@
 
 ## 1. Executive Summary
 
-mithaq is a local-first, AI-assisted security testing framework. The vision is
+cherenkov is a local-first, AI-assisted security testing framework. The vision is
 legitimate: deterministic scanners + local LLM triage, zero cloud dependency,
 async plugin architecture. The gap between that vision and the current codebase
 is large but closeable.
@@ -74,7 +74,7 @@ arbitrary Python code execution via browser. Binding to 0.0.0.0 makes this
 reachable by anyone on the same network.
 
 ```python
-# mithaq_web.py — replace the __main__ block entirely
+# cherenkov_web.py — replace the __main__ block entirely
 if __name__ == '__main__':
     import os
     debug = os.getenv('FLASK_DEBUG', 'false').lower() == 'true'
@@ -107,7 +107,7 @@ html += '<h3>Scan Results for ' + escapeHtml(data.target) + '</h3>';
 ```
 
 ```python
-# mithaq_web.py — server-side URL validation
+# cherenkov_web.py — server-side URL validation
 from urllib.parse import urlparse
 
 @app.route('/api/scan', methods=['POST'])
@@ -213,13 +213,13 @@ does and doesn't do within 5 minutes.
 ### 4.1 Honest README Rewrite
 
 ```markdown
-# mithaq — Local AI Security Testing Framework
+# cherenkov — Local AI Security Testing Framework
 
 > **Status:** Alpha · v0.1.1 · Phase 1 of 5
 
 ## What works today
 - 3 validated HTTP scanners: security headers, HTTP methods, HTTPS detection
-- CLI: `mithaq scan https://example.com`
+- CLI: `cherenkov scan https://example.com`
 - Local web dashboard (localhost only)
 - Ollama integration scaffold (not yet wired to scanner pipeline)
 
@@ -242,7 +242,7 @@ does and doesn't do within 5 minutes.
 ```bash
 git rm TONIGHT_ACHIEVEMENTS.md SESSION_ACHIEVEMENTS.md AGENT_MEMORY.md
 git rm PROJECT_SUMMARY.md README.md.backup README_BADGES.txt
-git rm -f mithaq-nexus-web
+git rm -f cherenkov-nexus-web
 ```
 
 Move (not delete) the 132 generated candidates:
@@ -258,7 +258,7 @@ Create candidates/README.md:
 # Scanner Candidates
 
 AI-generated scanner drafts awaiting validation.
-A scanner graduates to src/mithaq/scanners/ only after:
+A scanner graduates to src/cherenkov/scanners/ only after:
 1. Passing unit tests (positive + negative)
 2. Finding a known vulnerability on DVWA/bWAPP
 3. NOT firing on OWASP WebGoat safe pages
@@ -284,7 +284,7 @@ requires = ["setuptools>=68.0"]
 build-backend = "setuptools.backends.legacy:build"
 
 [project]
-name = "mithaq"
+name = "cherenkov"
 version = "0.1.1"
 description = "Local-first AI security testing framework"
 requires-python = ">=3.10"
@@ -318,7 +318,7 @@ dev = [
 ]
 
 [project.scripts]
-mithaq = "mithaq.cli:app"
+cherenkov = "cherenkov.cli:app"
 
 [tool.setuptools.packages.find]
 where = ["src"]
@@ -390,7 +390,7 @@ The current web app is ~200 lines — migration is small.
 ### 5.2 BaseScanner Plugin Architecture
 
 ```python
-# src/mithaq/core/base_scanner.py
+# src/cherenkov/core/base_scanner.py
 from abc import ABC, abstractmethod
 from dataclasses import dataclass, field
 from enum import Enum
@@ -440,7 +440,7 @@ class BaseScanner(ABC):
 
 Auto-discovery registry — drop a file in scanners/ and it's registered:
 ```python
-# src/mithaq/core/registry.py
+# src/cherenkov/core/registry.py
 import importlib, pkgutil
 from pathlib import Path
 from .base_scanner import BaseScanner
@@ -450,7 +450,7 @@ _registry: dict[str, type[BaseScanner]] = {}
 def load_all_scanners() -> None:
     path = Path(__file__).parent.parent / "scanners"
     for _, name, _ in pkgutil.iter_modules([str(path)]):
-        module = importlib.import_module(f"mithaq.scanners.{name}")
+        module = importlib.import_module(f"cherenkov.scanners.{name}")
         for attr in dir(module):
             obj = getattr(module, attr)
             if (isinstance(obj, type) and issubclass(obj, BaseScanner)
@@ -464,7 +464,7 @@ Rate limiting is not optional. An async engine running 10+ concurrent scanners
 can trigger WAF blocks or accidentally overload fragile staging environments.
 
 ```python
-# src/mithaq/core/engine.py
+# src/cherenkov/core/engine.py
 import asyncio, time, logging
 from .registry import all_scanners, load_all_scanners
 from .base_scanner import ScanResult
@@ -521,17 +521,17 @@ class ScanEngine:
 ### 5.4 SQLite Persistence Layer
 
 The in-memory scan history list is replaced with SQLite. No external services
-required. Data persists at ~/.mithaq/results.db.
+required. Data persists at ~/.cherenkov/results.db.
 
 ```python
-# src/mithaq/storage/database.py
+# src/cherenkov/storage/database.py
 import sqlite3, json
 from pathlib import Path
 from datetime import datetime, timedelta
 from dataclasses import asdict
 from ..core.base_scanner import ScanResult
 
-DB_PATH = Path.home() / ".mithaq" / "results.db"
+DB_PATH = Path.home() / ".cherenkov" / "results.db"
 
 def init_db() -> None:
     DB_PATH.parent.mkdir(parents=True, exist_ok=True)
@@ -574,8 +574,8 @@ def prune_old_scans(days: int = 90) -> int:
 ### 5.5 Canonical Project Structure
 
 ```
-mithaq-professional/
-├── src/mithaq/
+cherenkov-professional/
+├── src/cherenkov/
 │   ├── cli.py
 │   ├── core/
 │   │   ├── base_scanner.py
@@ -611,14 +611,14 @@ mithaq-professional/
 ### 5.6 Typer CLI
 
 ```python
-# src/mithaq/cli.py
+# src/cherenkov/cli.py
 import typer, asyncio
 from rich.console import Console
 from rich.table import Table
 from .core.engine import ScanEngine
 from .storage.database import init_db, save_scan
 
-app     = typer.Typer(name="mithaq")
+app     = typer.Typer(name="cherenkov")
 console = Console()
 
 @app.command()
@@ -747,7 +747,7 @@ Findings are chunked before sending. 50 scanners on a large app can easily
 exceed a 3B–8B model's context window.
 
 ```python
-# src/mithaq/ai/triage.py
+# src/cherenkov/ai/triage.py
 import httpx, json, logging
 from ..core.base_scanner import ScanResult, Finding
 
@@ -839,10 +839,10 @@ not do triage. Every scanner it generates still must pass every gate step.
 ### 8.1 Output Formats
 
 ```bash
-mithaq scan https://example.com --output table   # default
-mithaq scan https://example.com --output json    # machine-readable
-mithaq scan https://example.com --output sarif   # CI/CD (GitHub Code Scanning)
-mithaq scan https://example.com --output html    # standalone report
+cherenkov scan https://example.com --output table   # default
+cherenkov scan https://example.com --output json    # machine-readable
+cherenkov scan https://example.com --output sarif   # CI/CD (GitHub Code Scanning)
+cherenkov scan https://example.com --output html    # standalone report
 ```
 
 SARIF v2.1 output enables direct GitHub Code Scanning and GitLab SAST
@@ -877,7 +877,7 @@ jobs:
       - run: ruff check .
       - run: bandit -r src/ -ll
       - run: pip-audit
-      - run: pytest --cov=mithaq --cov-fail-under=80
+      - run: pytest --cov=cherenkov --cov-fail-under=80
       - uses: codecov/codecov-action@v4
 ```
 
@@ -888,12 +888,12 @@ All boxes must be checked. No exceptions.
 - [ ] 50+ validated scanners (each with unit tests + DVWA proof)
 - [ ] 80% test coverage enforced in CI across Python 3.10/3.11/3.12
 - [ ] SARIF v2.1 output tested against GitHub Code Scanning
-- [ ] Zero known CVEs in mithaq itself
+- [ ] Zero known CVEs in cherenkov itself
 - [ ] AI triage end-to-end with qwen2.5-coder:7b, degrades without Ollama
 - [ ] SQLite persistence — scan history survives restart
 - [ ] Docker runs as non-root user, image <2GB, starts <30s
-- [ ] pip install mithaq works cleanly
-- [ ] mithaq scan, mithaq history, mithaq list-scanners all functional
+- [ ] pip install cherenkov works cleanly
+- [ ] cherenkov scan, cherenkov history, cherenkov list-scanners all functional
 - [ ] CONTRIBUTING.md with scanner development quickstart
 - [ ] One external user has successfully run it
 
@@ -909,7 +909,7 @@ docker run -d -p 8081:80 webpwnized/mutillidae
 
 pytest tests/unit/           # fast, no network
 pytest tests/integration/ -m requires_dvwa
-pytest --cov=mithaq --cov-report=html
+pytest --cov=cherenkov --cov-report=html
 ```
 
 ### 9.2 Scanner Test Template
@@ -918,8 +918,8 @@ pytest --cov=mithaq --cov-report=html
 # tests/unit/scanners/test_security_headers.py
 import pytest
 from unittest.mock import AsyncMock, patch
-from mithaq.scanners.security_headers import SecurityHeadersScanner
-from mithaq.core.base_scanner import Severity
+from cherenkov.scanners.security_headers import SecurityHeadersScanner
+from cherenkov.core.base_scanner import Severity
 
 @pytest.mark.asyncio
 async def test_missing_csp_flagged():
@@ -965,8 +965,8 @@ async def test_dvwa_integration():
 
 ## 10. Storage & Persistence Layer
 
-- SQLite by default at ~/.mithaq/results.db — zero external deps
-- mithaq_DB_URL env var accepts PostgreSQL connection string for teams
+- SQLite by default at ~/.cherenkov/results.db — zero external deps
+- cherenkov_DB_URL env var accepts PostgreSQL connection string for teams
 - 90-day auto-prune policy documented in README
 - Alembic for schema migrations — never drop/recreate the database
 
@@ -980,7 +980,7 @@ A security tool executing active payloads must never run as root in its containe
 
 ```dockerfile
 FROM python:3.12-slim AS base
-RUN useradd --create-home --shell /bin/bash mithaq
+RUN useradd --create-home --shell /bin/bash cherenkov
 WORKDIR /app
 
 FROM base AS builder
@@ -990,9 +990,9 @@ RUN pip install --no-cache-dir --prefix=/install .
 FROM base AS final
 COPY --from=builder /install /usr/local
 COPY src/ ./src/
-USER mithaq                           # ← non-root
+USER cherenkov                           # ← non-root
 EXPOSE 8000
-CMD ["uvicorn", "mithaq.api.main:app", "--host", "0.0.0.0", "--port", "8000"]
+CMD ["uvicorn", "cherenkov.api.main:app", "--host", "0.0.0.0", "--port", "8000"]
 ```
 
 ### 11.2 Keep Two Dockerfiles Only
@@ -1006,18 +1006,18 @@ Delete Dockerfile.agent, Dockerfile.optimized, Dockerfile.simple.
 
 ```yaml
 services:
-  mithaq:
+  cherenkov:
     build: .
     ports: ["127.0.0.1:8000:8000"]   # localhost only
-    volumes: ["mithaq-data:/home/mithaq/.mithaq"]
-    environment: [mithaq_OLLAMA_URL=http://ollama:11434]
+    volumes: ["cherenkov-data:/home/cherenkov/.cherenkov"]
+    environment: [cherenkov_OLLAMA_URL=http://ollama:11434]
     depends_on: [ollama]
   ollama:
     image: ollama/ollama:latest
     ports: ["127.0.0.1:11434:11434"]
     volumes: ["ollama-data:/root/.ollama"]
 volumes:
-  mithaq-data:
+  cherenkov-data:
   ollama-data:
 ```
 
@@ -1037,7 +1037,7 @@ Write docs when the code exists. Never before.
 | Security architecture | Phase 4 — when dual-brain is in code |
 | User guide | Phase 5 — when stable |
 
-Record an asciinema demo of mithaq scanning DVWA before any community promotion.
+Record an asciinema demo of cherenkov scanning DVWA before any community promotion.
 That single asset does more for adoption than every badge and feature list combined.
 
 ---

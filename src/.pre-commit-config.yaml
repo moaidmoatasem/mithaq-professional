@@ -10,7 +10,7 @@ repos:
     rev: 1.7.8
     hooks:
       - id: bandit
-        args: ["-c", "pyproject.toml", "-r", "mithaq/"]
+        args: ["-c", "pyproject.toml", "-r", "cherenkov/"]
         exclude: ^tests/
   
   - repo: local
@@ -19,7 +19,7 @@ repos:
         name: pytest with 80% coverage requirement
         entry: pytest
         language: system
-        args: ["--cov=mithaq", "--cov-fail-under=80", "-v", "--tb=short"]
+        args: ["--cov=cherenkov", "--cov-fail-under=80", "-v", "--tb=short"]
         pass_filenames: false
         always_run: true
 

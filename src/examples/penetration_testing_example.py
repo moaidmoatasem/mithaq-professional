@@ -1,11 +1,11 @@
 """Example: Penetration testing with TesterAgent."""
 
-from mithaq.agents.tester_agent import TesterAgent
+from cherenkov.agents.tester_agent import TesterAgent
 
 
 def main():
     """Demonstrate vulnerability validation."""
-    print("🎯 mithaq Security Framework - Penetration Testing Example\n")
+    print("🎯 cherenkov Security Framework - Penetration Testing Example\n")
 
     tester = TesterAgent()
 

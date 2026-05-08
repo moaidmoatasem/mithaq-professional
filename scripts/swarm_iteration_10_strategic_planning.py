@@ -8,8 +8,8 @@ import sys
 
 sys.path.insert(0, ".")
 
-from mithaq.agents.micro_swarm.micro_agent import MicroAgent, MicroAgentConfig
-from mithaq.agents.micro_swarm.swarm_orchestrator import MicroSwarm
+from cherenkov.agents.micro_swarm.micro_agent import MicroAgent, MicroAgentConfig
+from cherenkov.agents.micro_swarm.swarm_orchestrator import MicroSwarm
 from pathlib import Path
 import subprocess
 
@@ -72,7 +72,7 @@ def analyze_current_state(context: str):
     }
 
     # Save analysis
-    report = Path("mithaq-professional/STRATEGIC_ROADMAP.md")
+    report = Path("cherenkov-professional/STRATEGIC_ROADMAP.md")
 
     content = f"""# Strategic Roadmap - Iteration #10 Analysis
 
@@ -150,13 +150,13 @@ Deploy 12 agents (4 per feature) to maximize throughput.
 
 def create_rest_api_foundation(context: str):
     """Create FastAPI REST API server foundation"""
-    api_dir = Path("mithaq-professional/src/mithaq/api")
+    api_dir = Path("cherenkov-professional/src/cherenkov/api")
     api_dir.mkdir(exist_ok=True)
 
     # Main API file
     main_api = api_dir / "main.py"
     main_api.write_text('''"""
-mithaq REST API Server
+cherenkov REST API Server
 FastAPI-based API for remote workflow execution
 """
 from fastapi import FastAPI, HTTPException
@@ -166,12 +166,12 @@ from typing import Dict, Any, Optional
 import sys
 sys.path.insert(0, '../..')
 
-from mithaq.orchestration_api import orchestrate_workflow
-from mithaq.workflow_parser import load_workflow
-from mithaq.result_persistence import ResultStore
+from cherenkov.orchestration_api import orchestrate_workflow
+from cherenkov.workflow_parser import load_workflow
+from cherenkov.result_persistence import ResultStore
 
 app = FastAPI(
-    title="mithaq Autonomous Agent API",
+    title="cherenkov Autonomous Agent API",
     description="REST API for workflow orchestration and security testing",
     version="1.0.0"
 )
@@ -179,7 +179,7 @@ app = FastAPI(
 # Enable CORS
 import os as _os
 _allowed_origins = _os.getenv(
-    "mithaq_CORS_ORIGINS", "http://localhost:5000,http://127.0.0.1:5000"
+    "cherenkov_CORS_ORIGINS", "http://localhost:5000,http://127.0.0.1:5000"
 ).split(",")
 app.add_middleware(
     CORSMiddleware,
@@ -203,7 +203,7 @@ class WorkflowResponse(BaseModel):
 @app.get("/")
 async def root():
     return {
-        "message": "mithaq Autonomous Agent API",
+        "message": "cherenkov Autonomous Agent API",
         "version": "1.0.0",
         "endpoints": {
             "health": "/health",
@@ -270,25 +270,25 @@ if __name__ == "__main__":
 ''')
 
     # Requirements
-    requirements = Path("mithaq-professional/requirements-api.txt")
+    requirements = Path("cherenkov-professional/requirements-api.txt")
     requirements.write_text("""fastapi>=0.104.0
 uvicorn[standard]>=0.24.0
 pydantic>=2.5.0
 """)
 
     # Startup script
-    startup = Path("mithaq-professional/scripts/start_api_server.sh")
+    startup = Path("cherenkov-professional/scripts/start_api_server.sh")
     startup.write_text("""#!/bin/bash
-# Start mithaq REST API Server
+# Start cherenkov REST API Server
 
 cd "$(dirname "$0")/.."
 
-echo "🚀 Starting mithaq REST API Server..."
+echo "🚀 Starting cherenkov REST API Server..."
 echo "📡 API will be available at: http://localhost:8000"
 echo "📖 Documentation: http://localhost:8000/docs"
 echo ""
 
-PYTHONPATH=src:. uvicorn src.mithaq.api.main:app --reload --host 0.0.0.0 --port 8000
+PYTHONPATH=src:. uvicorn src.cherenkov.api.main:app --reload --host 0.0.0.0 --port 8000
 """)
     startup.chmod(0o755)
 
@@ -302,7 +302,7 @@ PYTHONPATH=src:. uvicorn src.mithaq.api.main:app --reload --host 0.0.0.0 --port 
 
 def create_analytics_system(context: str):
     """Create analytics and reporting system"""
-    analytics_file = Path("mithaq-professional/src/mithaq/analytics.py")
+    analytics_file = Path("cherenkov-professional/src/cherenkov/analytics.py")
 
     code = '''"""
 Analytics & Reporting System
@@ -420,13 +420,13 @@ def generate_analytics_report(output_file: str = "analytics_report.md"):
     analytics_file.write_text(code)
 
     # CLI for analytics
-    cli_analytics = Path("mithaq-professional/scripts/generate_analytics.py")
+    cli_analytics = Path("cherenkov-professional/scripts/generate_analytics.py")
     cli_analytics.write_text('''#!/usr/bin/env python3
 """Generate analytics report from workflow results"""
 import sys
 sys.path.insert(0, 'src')
 
-from mithaq.analytics import generate_analytics_report
+from cherenkov.analytics import generate_analytics_report
 
 if __name__ == "__main__":
     report = generate_analytics_report("analytics_report.md")
@@ -443,7 +443,7 @@ if __name__ == "__main__":
 
 def create_web_dashboard_foundation(context: str):
     """Create web dashboard foundation with HTML/CSS/JS"""
-    dashboard_dir = Path("mithaq-professional/src/mithaq/web")
+    dashboard_dir = Path("cherenkov-professional/src/cherenkov/web")
     dashboard_dir.mkdir(exist_ok=True)
 
     # Simple HTML dashboard
@@ -453,7 +453,7 @@ def create_web_dashboard_foundation(context: str):
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>mithaq Autonomous Agents Dashboard</title>
+    <title>cherenkov Autonomous Agents Dashboard</title>
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; }
         body {
@@ -543,7 +543,7 @@ def create_web_dashboard_foundation(context: str):
 <body>
     <div class="container">
         <div class="header">
-            <h1>🤖 mithaq Autonomous Agents</h1>
+            <h1>🤖 cherenkov Autonomous Agents</h1>
             <p>Real-time workflow orchestration dashboard</p>
         </div>
         
@@ -615,7 +615,7 @@ def create_web_dashboard_foundation(context: str):
         }
         
         // TODO: Load real data from API
-        console.log('🚀 mithaq Dashboard loaded!');
+        console.log('🚀 cherenkov Dashboard loaded!');
         console.log('Connect to REST API at http://localhost:8000');
     </script>
 </body>
@@ -623,13 +623,13 @@ def create_web_dashboard_foundation(context: str):
 """)
 
     # Server script
-    server_script = Path("mithaq-professional/scripts/start_dashboard.sh")
+    server_script = Path("cherenkov-professional/scripts/start_dashboard.sh")
     server_script.write_text("""#!/bin/bash
 # Start Web Dashboard
 
-cd "$(dirname "$0")/../src/mithaq/web"
+cd "$(dirname "$0")/../src/cherenkov/web"
 
-echo "🌐 Starting mithaq Web Dashboard..."
+echo "🌐 Starting cherenkov Web Dashboard..."
 echo "📡 Dashboard: http://localhost:8080"
 echo ""
 
@@ -724,8 +724,8 @@ except Exception as e:
     print(f"⚠️  Commit issue: {e}")
 
 print("\n🎉 Iteration #10 complete - THREE features built in parallel!")
-print("\n📊 See strategic roadmap: cat mithaq-professional/STRATEGIC_ROADMAP.md")
-print("\n🚀 Start REST API: ./mithaq-professional/scripts/start_api_server.sh")
-print("📊 Generate analytics: python mithaq-professional/scripts/generate_analytics.py")
-print("🌐 Start dashboard: ./mithaq-professional/scripts/start_dashboard.sh")
+print("\n📊 See strategic roadmap: cat cherenkov-professional/STRATEGIC_ROADMAP.md")
+print("\n🚀 Start REST API: ./cherenkov-professional/scripts/start_api_server.sh")
+print("📊 Generate analytics: python cherenkov-professional/scripts/generate_analytics.py")
+print("🌐 Start dashboard: ./cherenkov-professional/scripts/start_dashboard.sh")
 

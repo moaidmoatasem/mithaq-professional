@@ -8,8 +8,8 @@
       "result": {
         "examples_created": 2,
         "files": [
-          "mithaq-professional/examples/workflows/security_scan_workflow.yaml",
-          "mithaq-professional/examples/workflows/parallel_test_workflow.yaml"
+          "cherenkov-professional/examples/workflows/security_scan_workflow.yaml",
+          "cherenkov-professional/examples/workflows/parallel_test_workflow.yaml"
         ]
       },
       "duration": 0.05069446563720703,
@@ -18,7 +18,7 @@
     {
       "success": true,
       "result": {
-        "file": "mithaq-professional/src/mithaq/workflow_parser.py",
+        "file": "cherenkov-professional/src/cherenkov/workflow_parser.py",
         "classes": [
           "WorkflowParser"
         ],
@@ -32,7 +32,7 @@
     {
       "success": true,
       "result": {
-        "file": "mithaq-professional/scripts/mithaq_cli_orchestrate.py",
+        "file": "cherenkov-professional/scripts/cherenkov_cli_orchestrate.py",
         "updates": [
           "Added YAML workflow support",
           "Integrated workflow_parser",
@@ -45,7 +45,7 @@
     {
       "success": true,
       "result": {
-        "file": "mithaq-professional/tests/test_workflow_integration.py",
+        "file": "cherenkov-professional/tests/test_workflow_integration.py",
         "tests": 3,
         "coverage": "workflow_parser + orchestration_api"
       },

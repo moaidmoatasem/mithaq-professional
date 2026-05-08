@@ -1,2 +1,2 @@
-"""Integration tests for mithaq security framework."""
+"""Integration tests for cherenkov security framework."""
 

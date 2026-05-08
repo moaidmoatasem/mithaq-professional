@@ -1,5 +1,5 @@
 from unittest.mock import Mock, patch
-from mithaq.ai_workflows_orchestrator import orchestrate_ai_workflows
+from cherenkov.ai_workflows_orchestrator import orchestrate_ai_workflows
 
 
 def test_orchestrate_ai_workflows_returns_summary():

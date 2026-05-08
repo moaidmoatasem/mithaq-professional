@@ -8,8 +8,8 @@ import sys
 
 sys.path.insert(0, ".")
 
-from mithaq.agents.micro_swarm.micro_agent import MicroAgent, MicroAgentConfig
-from mithaq.agents.micro_swarm.swarm_orchestrator import MicroSwarm
+from cherenkov.agents.micro_swarm.micro_agent import MicroAgent, MicroAgentConfig
+from cherenkov.agents.micro_swarm.swarm_orchestrator import MicroSwarm
 from pathlib import Path
 import subprocess
 
@@ -50,18 +50,18 @@ jobs:
     
     - name: Install dependencies
       run: |
-        pip install -r mithaq-professional/requirements.txt
+        pip install -r cherenkov-professional/requirements.txt
         pip install pytest pytest-cov
     
     - name: Run tests
       run: |
-        cd mithaq-professional
-        PYTHONPATH=src:. pytest tests/ -v --cov=src/mithaq --cov-report=xml
+        cd cherenkov-professional
+        PYTHONPATH=src:. pytest tests/ -v --cov=src/cherenkov --cov-report=xml
     
     - name: Upload coverage
       uses: codecov/codecov-action@v3
       with:
-        file: ./mithaq-professional/coverage.xml
+        file: ./cherenkov-professional/coverage.xml
         fail_ci_if_error: false
 """
 
@@ -99,17 +99,17 @@ jobs:
     
     - name: Build Docker image
       run: |
-        cd mithaq-professional
-        docker build -t mithaq-autonomous:latest .
+        cd cherenkov-professional
+        docker build -t cherenkov-autonomous:latest .
     
     - name: Test Docker image
       run: |
-        docker run --rm mithaq-autonomous:latest python --version
+        docker run --rm cherenkov-autonomous:latest python --version
     
     - name: Tag image
       if: startsWith(github.ref, 'refs/tags/v')
       run: |
-        docker tag mithaq-autonomous:latest mithaq-autonomous:${{ github.ref_name }}
+        docker tag cherenkov-autonomous:latest cherenkov-autonomous:${{ github.ref_name }}
 """
 
     docker_workflow.write_text(content)
@@ -159,12 +159,12 @@ jobs:
     
     - name: Install dependencies
       run: |
-        pip install -r mithaq-professional/requirements.txt
+        pip install -r cherenkov-professional/requirements.txt
     
     - name: Determine next iteration
       id: next_iter
       run: |
-        LAST=$(ls mithaq-professional/scripts/swarm_iteration_*.py 2>/dev/null | tail -1)
+        LAST=$(ls cherenkov-professional/scripts/swarm_iteration_*.py 2>/dev/null | tail -1)
         if [[ $LAST =~ iteration_([0-9]+) ]]; then
           NEXT=$((${BASH_REMATCH[1]} + 1))
         else
@@ -178,7 +178,7 @@ jobs:
         echo "🤖 Running autonomous iteration #$ITERATION"
         
         # Create iteration script if needed
-        SCRIPT="mithaq-professional/scripts/swarm_iteration_${ITERATION}_${{ inputs.iteration_type }}.py"
+        SCRIPT="cherenkov-professional/scripts/swarm_iteration_${ITERATION}_${{ inputs.iteration_type }}.py"
         
         if [ -f "$SCRIPT" ]; then
           PYTHONPATH=. python "$SCRIPT"
@@ -217,8 +217,8 @@ def create_badges_readme(context: str):
         content = readme.read_text()
 
         badges = """
-[![Tests](https://github.com/moaidmoatasem/mithaq-professional/actions/workflows/test.yml/badge.svg)](https://github.com/moaidmoatasem/mithaq-professional/actions/workflows/test.yml)
-[![Docker Build](https://github.com/moaidmoatasem/mithaq-professional/actions/workflows/docker.yml/badge.svg)](https://github.com/moaidmoatasem/mithaq-professional/actions/workflows/docker.yml)
+[![Tests](https://github.com/moaidmoatasem/cherenkov-professional/actions/workflows/test.yml/badge.svg)](https://github.com/moaidmoatasem/cherenkov-professional/actions/workflows/test.yml)
+[![Docker Build](https://github.com/moaidmoatasem/cherenkov-professional/actions/workflows/docker.yml/badge.svg)](https://github.com/moaidmoatasem/cherenkov-professional/actions/workflows/docker.yml)
 
 """
 

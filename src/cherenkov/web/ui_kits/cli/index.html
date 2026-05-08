@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Cherenkov - Air-Gapped Terminal</title>
+  <link rel="stylesheet" href="../../stylesheets/tokens.css">
+  <link rel="stylesheet" href="../../stylesheets/main.css">
+  <link rel="stylesheet" href="../../stylesheets/meissner-fx.css">
+  <style>
+    body, html {
+      margin: 0;
+      padding: 0;
+      height: 100vh;
+      overflow: hidden;
+      background: var(--bg-canvas);
+      display: flex;
+      flex-direction: column;
+    }
+    
+    #terminal-container {
+      flex: 1;
+      padding: var(--sp-2xl);
+      overflow-y: auto;
+      font-family: var(--font-mono);
+      color: var(--hud-cyan);
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+      padding-bottom: 100px;
+    }
+
+    .terminal-line {
+      display: flex;
+      align-items: flex-start;
+      gap: 12px;
+    }
+
+    .prompt-symbol {
+      color: var(--cherenkov-accent);
+      font-weight: var(--fw-bold);
+      white-space: nowrap;
+    }
+
+    .input-line {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      margin-top: 8px;
+    }
+
+    #cmd-input {
+      background: transparent;
+      border: none;
+      color: var(--fg1);
+      font-family: var(--font-mono);
+      font-size: var(--fs-body);
+      flex: 1;
+      outline: none;
+      width: 100%;
+    }
+
+    .scan-module {
+      margin-top: 10px;
+      margin-bottom: 10px;
+      padding-left: 20px;
+      border-left: 2px solid var(--border-hud);
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+    
+    .fg1 { color: var(--fg1); }
+    .fg2 { color: var(--fg2); }
+  </style>
+</head>
+<body class="cyber-canvas fx-scanlines">
+  
+  <header style="padding: 16px 24px; border-bottom: 1px solid var(--border-hud); display: flex; justify-content: space-between; align-items: center; background: var(--bg-surface);">
+    <div class="brand-mark">Cherenkov Terminal <span class="badge safe">AIR-GAPPED</span></div>
+    <div class="pulse-dot"></div>
+  </header>
+
+  <div id="terminal-container">
+    <div class="terminal-line">
+      <span class="prompt-symbol">cherenkov@core:~$</span>
+      <span class="type-on">Initializing secure session...</span>
+    </div>
+    <div class="terminal-line">
+      <span class="prompt-symbol">cherenkov@core:~$</span>
+      <span class="type-on" style="animation-delay: 1.5s;">Type 'help' to view available commands.</span>
+    </div>
+    
+    <div id="output-history" style="display: flex; flex-direction: column; gap: 12px; margin-top: 12px;"></div>
+
+    <div class="input-line">
+      <span class="prompt-symbol">cherenkov@core:~$</span>
+      <div style="position: relative; flex: 1; display: flex; align-items: center;">
+        <input type="text" id="cmd-input" autocomplete="off" spellcheck="false" autofocus>
+      </div>
+    </div>
+  </div>
+
+  <script src="terminal.js"></script>
+</body>
+</html>

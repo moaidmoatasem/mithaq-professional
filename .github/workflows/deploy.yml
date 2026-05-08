@@ -31,7 +31,7 @@ jobs:
       uses: bervProject/railway-deploy@main
       with:
         railway_token: ${{ secrets.RAILWAY_TOKEN }}
-        service: mithaq-api
+        service: cherenkov-api
 
   deploy-fly:
     runs-on: ubuntu-latest

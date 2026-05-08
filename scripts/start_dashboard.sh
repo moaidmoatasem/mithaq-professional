@@ -1,9 +1,9 @@
 #!/bin/bash
 # Start Web Dashboard
 
-cd "$(dirname "$0")/../src/mithaq/web"
+cd "$(dirname "$0")/../src/cherenkov/web"
 
-echo "🌐 Starting mithaq Web Dashboard..."
+echo "🌐 Starting cherenkov Web Dashboard..."
 echo "📡 Dashboard: http://localhost:8080"
 echo ""
 

@@ -1,8 +1,8 @@
 """Unit tests for BaseAgent."""
 
-from mithaq.agents.base_agent import BaseAgent, BaseAgentConfig
-from mithaq.schemas.cloud_instruction import CloudInstruction
-from mithaq.schemas.sanitized_output import SanitizedOutput
+from cherenkov.agents.base_agent import BaseAgent, BaseAgentConfig
+from cherenkov.schemas.cloud_instruction import CloudInstruction
+from cherenkov.schemas.sanitized_output import SanitizedOutput
 
 
 class ConcreteTestAgent(BaseAgent):
@@ -27,7 +27,7 @@ class TestBaseAgent:
         agent = ConcreteTestAgent(config)
 
         assert agent.config.role == "Test Agent"
-        assert agent.sanitizer is not None
+        assert agent.ablation is not None
         assert agent.agent is not None
         assert agent.agent.role == "Test Agent"
 

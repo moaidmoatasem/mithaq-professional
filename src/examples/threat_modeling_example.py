@@ -1,11 +1,11 @@
 """Example: Threat modeling with ArchitectAgent."""
 
-from mithaq.agents.architect_agent import ArchitectAgent
+from cherenkov.agents.architect_agent import ArchitectAgent
 
 
 def main():
     """Demonstrate threat modeling for a mobile banking app."""
-    print("🔒 mithaq Security Framework - Threat Modeling Example\n")
+    print("🔒 cherenkov Security Framework - Threat Modeling Example\n")
 
     architect = ArchitectAgent()
 

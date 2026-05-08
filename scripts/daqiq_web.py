@@ -1,12 +1,12 @@
 #!/usr/bin/env python3
 """
-mithaq Web Dashboard
+cherenkov Web Dashboard
 Simple Flask UI for running scans
 """
 
 import os
 from flask import Flask, render_template, request, jsonify
-from mithaq.scanners.header_scanner import SimpleScanner
+from cherenkov.scanners.header_scanner import SimpleScanner
 from pathlib import Path
 from urllib.parse import urlparse
 import json
@@ -78,7 +78,7 @@ if __name__ == "__main__":
 <!DOCTYPE html>
 <html>
 <head>
-    <title>mithaq Security Scanner</title>
+    <title>cherenkov Security Scanner</title>
     <style>
         body { 
             font-family: Arial, sans-serif; 
@@ -134,7 +134,7 @@ if __name__ == "__main__":
     </style>
 </head>
 <body>
-    <h1>🔍 mithaq Security Scanner</h1>
+    <h1>🔍 cherenkov Security Scanner</h1>
     
     <div class="scan-form">
         <h2>Run Scan</h2>
@@ -207,7 +207,7 @@ if __name__ == "__main__":
         f.write(html_template)
 
     print("\n" + "=" * 70)
-    print("🚀 mithaq Web Dashboard Starting...")
+    print("🚀 cherenkov Web Dashboard Starting...")
     print("=" * 70)
     print("\n📱 Open in browser: http://localhost:5000")
     print("\n✅ Ready to scan!\n")

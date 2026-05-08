@@ -6,7 +6,7 @@
     {
       "success": true,
       "result": {
-        "analysis_file": "mithaq-professional/STRATEGIC_ROADMAP.md",
+        "analysis_file": "cherenkov-professional/STRATEGIC_ROADMAP.md",
         "features_complete": 10,
         "gaps_identified": 8,
         "recommended_builds": 3,
@@ -18,10 +18,10 @@
     {
       "success": true,
       "result": {
-        "api_file": "mithaq-professional/src/mithaq/api/main.py",
+        "api_file": "cherenkov-professional/src/cherenkov/api/main.py",
         "endpoints": 5,
-        "startup_script": "mithaq-professional/scripts/start_api_server.sh",
-        "requirements": "mithaq-professional/requirements-api.txt"
+        "startup_script": "cherenkov-professional/scripts/start_api_server.sh",
+        "requirements": "cherenkov-professional/requirements-api.txt"
       },
       "duration": 0.0051555633544921875,
       "agent": "APIFoundationBuilder"
@@ -29,8 +29,8 @@
     {
       "success": true,
       "result": {
-        "file": "mithaq-professional/src/mithaq/analytics.py",
-        "cli": "mithaq-professional/scripts/generate_analytics.py",
+        "file": "cherenkov-professional/src/cherenkov/analytics.py",
+        "cli": "cherenkov-professional/scripts/generate_analytics.py",
         "features": [
           "statistics",
           "performance_metrics",
@@ -43,8 +43,8 @@
     {
       "success": true,
       "result": {
-        "dashboard": "mithaq-professional/src/mithaq/web/index.html",
-        "server_script": "mithaq-professional/scripts/start_dashboard.sh",
+        "dashboard": "cherenkov-professional/src/cherenkov/web/index.html",
+        "server_script": "cherenkov-professional/scripts/start_dashboard.sh",
         "url": "http://localhost:8080"
       },
       "duration": 0.002058267593383789,

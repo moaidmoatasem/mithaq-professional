@@ -27,7 +27,7 @@
     {
       "success": true,
       "result": {
-        "file": "mithaq-professional/src/mithaq/result_persistence.py",
+        "file": "cherenkov-professional/src/cherenkov/result_persistence.py",
         "class": "ResultStore",
         "methods": [
           "save_result",
@@ -44,9 +44,9 @@
       "result": {
         "workflows_created": 3,
         "files": [
-          "mithaq-professional/examples/workflows/api_testing_workflow.yaml",
-          "mithaq-professional/examples/workflows/quick_scan_workflow.yaml",
-          "mithaq-professional/examples/workflows/full_audit_workflow.yaml"
+          "cherenkov-professional/examples/workflows/api_testing_workflow.yaml",
+          "cherenkov-professional/examples/workflows/quick_scan_workflow.yaml",
+          "cherenkov-professional/examples/workflows/full_audit_workflow.yaml"
         ]
       },
       "duration": 0.005254507064819336,
@@ -55,7 +55,7 @@
     {
       "success": true,
       "result": {
-        "file": "mithaq-professional/src/mithaq/orchestration_api.py",
+        "file": "cherenkov-professional/src/cherenkov/orchestration_api.py",
         "feature": "metrics_tracking",
         "method_added": "collect_metrics"
       },

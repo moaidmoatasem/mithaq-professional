@@ -14,10 +14,10 @@ services:
   crewai-hub:
     build: .
     ports: ["8000:8000"]
-    volumes: [./mithaq-v2:/app/mithaq-v2, ./agents:/app/agents]
-    working_dir: /app/mithaq-v2
+    volumes: [./cherenkov-v2:/app/cherenkov-v2, ./agents:/app/agents]
+    working_dir: /app/cherenkov-v2
     environment:
       - OLLAMA_URL=http://host.docker.internal:11434
-      - PYTHONPATH=/app/mithaq-v2
+      - PYTHONPATH=/app/cherenkov-v2
     depends_on: [ollama]
 

@@ -1,12 +1,12 @@
 version: '3.8'
 
 services:
-  # mithaq Scanner - Memory Optimized
-  mithaq:
+  # cherenkov Scanner - Memory Optimized
+  cherenkov:
     build:
       context: .
       dockerfile: Dockerfile.optimized
-    container_name: mithaq-scanner
+    container_name: cherenkov-scanner
     volumes:
       - ./output:/app/output
       - ./logs:/app/logs
@@ -15,7 +15,7 @@ services:
       - CREWAI_TELEMETRY_OPT_OUT=true
       - PYTHONUNBUFFERED=1
     networks:
-      - mithaq-network
+      - cherenkov-network
     depends_on:
       - ollama
     deploy:
@@ -30,7 +30,7 @@ services:
   # Ollama Service - Optimized for qwen2.5:3b
   ollama:
     image: ollama/ollama:latest
-    container_name: mithaq-ollama
+    container_name: cherenkov-ollama
     volumes:
       - ollama-data:/root/.ollama
     ports:
@@ -40,7 +40,7 @@ services:
       - OLLAMA_NUM_PARALLEL=1
       - OLLAMA_FLASH_ATTENTION=1
     networks:
-      - mithaq-network
+      - cherenkov-network
     deploy:
       resources:
         limits:
@@ -55,8 +55,8 @@ services:
     build:
       context: .
       dockerfile: Dockerfile.optimized
-    container_name: mithaq-dashboard
-    command: ["mithaq_web.py"]
+    container_name: cherenkov-dashboard
+    command: ["cherenkov_web.py"]
     ports:
       - "5000:5000"
     volumes:
@@ -65,9 +65,9 @@ services:
       - FLASK_ENV=production
       - PYTHONUNBUFFERED=1
     networks:
-      - mithaq-network
+      - cherenkov-network
     depends_on:
-      - mithaq
+      - cherenkov
       - ollama
     deploy:
       resources:
@@ -81,11 +81,11 @@ services:
   # Redis for caching scan results (optional)
   redis:
     image: redis:7-alpine
-    container_name: mithaq-cache
+    container_name: cherenkov-cache
     volumes:
       - redis-data:/data
     networks:
-      - mithaq-network
+      - cherenkov-network
     deploy:
       resources:
         limits:
@@ -93,7 +93,7 @@ services:
     restart: unless-stopped
 
 networks:
-  mithaq-network:
+  cherenkov-network:
     driver: bridge
 
 volumes:

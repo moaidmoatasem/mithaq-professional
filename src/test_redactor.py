@@ -1,4 +1,4 @@
-from mithaq.core.sanitization.redactor import DataRedactor, RedactionLevel
+from cherenkov.core.sanitization.redactor import DataRedactor, RedactionLevel
 
 # Test data with secrets
 test_data = {

@@ -2,7 +2,7 @@
 Tests for Orchestration API
 """
 import pytest
-from mithaq.orchestration_api import (
+from cherenkov.orchestration_api import (
     orchestrate_workflow, 
     register_agent, 
     execute_parallel,

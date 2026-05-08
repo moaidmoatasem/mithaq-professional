@@ -1,13 +1,13 @@
-# MITHAQ Sovereign Security | Master Blueprint & Technical Roadmap
+# CHERENKOV Sovereign Security | Master Blueprint & Technical Roadmap
 
 **Revision: 1.2 | Status: Phase 1 Finalized | Classification: Sovereign Strategic Asset**
 
 ---
 
 ## 1. Project Status Summary
-MITHAQ has transitioned from a legacy architecture into a **Sovereign Security Standard**. 
-- **Namespace Rebranded**: Global transition from DAQIQ to MITHAQ.
-- **Architectural Enforcement**: The "Trident of Truth" (DAREE3, SIYAADA, AL-BURHAN) is now hardcoded into the orchestrator logic.
+CHERENKOV has transitioned from a legacy architecture into a **Sovereign Security Standard**. 
+- **Namespace Rebranded**: Global transition from CHERENKOV to CHERENKOV.
+- **Architectural Enforcement**: The "Trident of Truth" (MEISSNER, ABLATION, TOKAMAK) is now hardcoded into the orchestrator logic.
 - **UI/UX Restoration**: High-fidelity dashboard restored using Atomic Design principles.
 - **CI/CD Stabilization**: GitHub security scans fixed with upgraded CodeQL v3 and strict permission models.
 
@@ -15,21 +15,21 @@ MITHAQ has transitioned from a legacy architecture into a **Sovereign Security S
 
 ## 2. System Architecture (The Trident of Truth)
 
-### **Layer 1: DAREE3 (The Shield)**
+### **Layer 1: MEISSNER (The Shield)**
 - **Type**: Network Enforcement Layer.
 - **Pattern**: Fail-Closed Circuit Breaker.
 - **Logic**: Nginx/Docker-level isolation that drops all unauthorized outbound traffic.
 - **Design Pattern**: **Proxy Pattern** for request interception and **Circuit Breaker** (AIMD) for agent communication resilience.
 
-### **Layer 2: SIYAADA (Sovereignty)**
+### **Layer 2: ABLATION (Sovereignty)**
 - **Type**: Data Sanitization & Redaction Engine.
 - **Pattern**: **Strategy Pattern** for redaction logic (Regex, NLP, Dictionary-based).
 - **Data Structure**: `RedactionMap` (A bidirectional hash map tracking original vs. redacted tokens for reconstruction in local-only nodes).
 
-### **Layer 3: AL-BURHAN (The Proof)**
-- **Type**: Forensic Validation & Sandboxing.
+### **Layer 3: TOKAMAK (The Proof)**
+- **Type**: Forensic Validation & TOKAMAKing.
 - **Pattern**: **Command Pattern** for executing security payloads.
-- **Data Structure**: `BurhanTrace` (A Pydantic model encapsulating proof execution details, logs, and a SHA-256 cryptographic signature).
+- **Data Structure**: `TokamakTrace` (A Pydantic model encapsulating proof execution details, logs, and a SHA-256 cryptographic signature).
 
 ---
 
@@ -66,9 +66,9 @@ class AgentState(BaseModel):
     circuit_breaker_status: str  # OPEN, HALF_OPEN, CLOSED
 ```
 
-### **BurhanTrace (Evidence Schema)**
+### **TokamakTrace (Evidence Schema)**
 ```python
-class BurhanTrace(BaseModel):
+class TokamakTrace(BaseModel):
     timestamp: datetime
     finding_id: str
     poc_binary: bytes  # Local-only
@@ -81,9 +81,9 @@ class BurhanTrace(BaseModel):
 ## 5. Development Roadmap & Phases
 
 ### ✅ **Phase 1: Foundation & Sovereignization (COMPLETED)**
-- [x] Global Namespace Rebrand (DAQIQ -> MITHAQ).
+- [x] Global Namespace Rebrand (CHERENKOV -> CHERENKOV).
 - [x] Trident Architecture Implementation.
-- [x] SIYAADA Redaction Engine Stabilization.
+- [x] ABLATION Redaction Engine Stabilization.
 - [x] High-Fidelity UI Restoration (Atomic Design).
 - [x] CI/CD Security Pipeline Fixes.
 
@@ -107,8 +107,8 @@ class BurhanTrace(BaseModel):
    - Implement hardware-aware slotting (CPU/NPU detection).
 
 2. **Mission: Scanner Formalization**
-   - Migrate all candidate scanners into `src/mithaq/scanners/` using the `BaseScanner` class.
-   - Enforce AL-BURHAN proof validation for each scanner type.
+   - Migrate all candidate scanners into `src/cherenkov/scanners/` using the `BaseScanner` class.
+   - Enforce TOKAMAK proof validation for each scanner type.
 
 3. **Mission: Documentation Deep-Dive**
    - Finalize `CONTRIBUTING.md` and `CODE_OF_CONDUCT.md` with "Sovereign-First" guidelines.
@@ -116,4 +116,4 @@ class BurhanTrace(BaseModel):
 
 ---
 
-**MITHAQ: Accuracy is the root of sovereignty.**
+**CHERENKOV: Accuracy is the root of sovereignty.**

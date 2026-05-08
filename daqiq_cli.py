@@ -1,12 +1,12 @@
 #!/usr/bin/env python3
 """
-mithaq - AI-Powered Security Testing Framework
+cherenkov - AI-Powered Security Testing Framework
 Main CLI
 """
 
 import sys
 import argparse
-from mithaq.scanners.header_scanner import SimpleScanner
+from cherenkov.scanners.header_scanner import SimpleScanner
 
 
 def scan_command(args):
@@ -17,7 +17,7 @@ def scan_command(args):
 
 def generate_command(args):
     """Generate new security tools using AI"""
-    from mithaq.crews.autonomous_dev_team import AutonomousDevTeam
+    from cherenkov.crews.autonomous_dev_team import AutonomousDevTeam
     
     team = AutonomousDevTeam()
     team.run_project(args.description)
@@ -25,13 +25,13 @@ def generate_command(args):
 
 def main():
     parser = argparse.ArgumentParser(
-        description='mithaq - AI-Powered Security Testing Framework',
+        description='cherenkov - AI-Powered Security Testing Framework',
         formatter_class=argparse.RawDescriptionHelpFormatter,
         epilog="""
 Examples:
-  mithaq scan https://example.com
-  mithaq generate "XSS vulnerability scanner"
-  mithaq scan --help
+  cherenkov scan https://example.com
+  cherenkov generate "XSS vulnerability scanner"
+  cherenkov scan --help
         """
     )
     

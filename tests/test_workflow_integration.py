@@ -3,12 +3,12 @@ Integration tests for workflow orchestration
 """
 import pytest
 from pathlib import Path
-from mithaq.workflow_parser import WorkflowParser, load_workflow
-from mithaq.orchestration_api import orchestrate_workflow
+from cherenkov.workflow_parser import WorkflowParser, load_workflow
+from cherenkov.orchestration_api import orchestrate_workflow
 
 def test_parse_security_workflow():
     """Test parsing a security scan workflow"""
-    workflow_file = "mithaq-professional/examples/workflows/security_scan_workflow.yaml"
+    workflow_file = "cherenkov-professional/examples/workflows/security_scan_workflow.yaml"
     
     if not Path(workflow_file).exists():
         pytest.skip("Example workflow not found")
@@ -22,7 +22,7 @@ def test_parse_security_workflow():
 
 def test_parse_parallel_workflow():
     """Test parsing a parallel workflow"""
-    workflow_file = "mithaq-professional/examples/workflows/parallel_test_workflow.yaml"
+    workflow_file = "cherenkov-professional/examples/workflows/parallel_test_workflow.yaml"
     
     if not Path(workflow_file).exists():
         pytest.skip("Example workflow not found")

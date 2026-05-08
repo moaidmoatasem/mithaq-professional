@@ -1,4 +1,4 @@
-from mithaq.crews.autonomous_developer_crew import AutonomousDeveloperCrew
+from cherenkov.crews.autonomous_developer_crew import AutonomousDeveloperCrew
 import os
 
 # Create output directory

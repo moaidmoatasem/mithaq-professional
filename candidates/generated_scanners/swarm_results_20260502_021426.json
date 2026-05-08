@@ -6,7 +6,7 @@
     {
       "success": true,
       "result": {
-        "file": "mithaq-professional/src/mithaq/agent_factory.py",
+        "file": "cherenkov-professional/src/cherenkov/agent_factory.py",
         "classes": [
           "AgentFactory"
         ],
@@ -21,7 +21,7 @@
     {
       "success": true,
       "result": {
-        "file": "mithaq-professional/src/mithaq/orchestration_api.py",
+        "file": "cherenkov-professional/src/cherenkov/orchestration_api.py",
         "class_added": "WorkflowExecutor",
         "methods": [
           "setup_agents",
@@ -35,7 +35,7 @@
     {
       "success": true,
       "result": {
-        "file": "mithaq-professional/src/mithaq/orchestration_api.py",
+        "file": "cherenkov-professional/src/cherenkov/orchestration_api.py",
         "function": "orchestrate_workflow",
         "status": "Updated to use WorkflowExecutor"
       },
@@ -45,7 +45,7 @@
     {
       "success": true,
       "result": {
-        "file": "mithaq-professional/scripts/demo_workflow_execution.py",
+        "file": "cherenkov-professional/scripts/demo_workflow_execution.py",
         "executable": true,
         "purpose": "End-to-end demo of workflow execution"
       },

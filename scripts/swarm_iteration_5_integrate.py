@@ -1,15 +1,15 @@
 #!/usr/bin/env python3
 """
 Swarm Iteration #5 - INTEGRATION
-Integrate the orchestration API into main mithaq workflow
+Integrate the orchestration API into main cherenkov workflow
 """
 
 import sys
 
 sys.path.insert(0, ".")
 
-from mithaq.agents.micro_swarm.micro_agent import MicroAgent, MicroAgentConfig
-from mithaq.agents.micro_swarm.swarm_orchestrator import MicroSwarm
+from cherenkov.agents.micro_swarm.micro_agent import MicroAgent, MicroAgentConfig
+from cherenkov.agents.micro_swarm.swarm_orchestrator import MicroSwarm
 from pathlib import Path
 import subprocess
 
@@ -22,14 +22,14 @@ print("""
 
 def create_workflow_yaml_example(context: str):
     """Create example workflow YAML files"""
-    examples_dir = Path("mithaq-professional/examples/workflows")
+    examples_dir = Path("cherenkov-professional/examples/workflows")
     examples_dir.mkdir(parents=True, exist_ok=True)
 
     # Example 1: Simple security scan
     simple_workflow = examples_dir / "security_scan_workflow.yaml"
     simple_workflow.write_text("""# Security Scan Workflow
 name: "Basic Security Scan"
-description: "Run a comprehensive security scan using mithaq agents"
+description: "Run a comprehensive security scan using cherenkov agents"
 
 agents:
   - role: "vulnerability_scanner"
@@ -80,7 +80,7 @@ execution:
   max_concurrent: 3
   timeout: 30
 
-burhan_standard:
+tokamak_standard:
   require_proof: true
   min_confidence: 0.95
 """)
@@ -93,7 +93,7 @@ burhan_standard:
 
 def create_yaml_parser(context: str):
     """Create YAML workflow parser"""
-    parser_file = Path("mithaq-professional/src/mithaq/workflow_parser.py")
+    parser_file = Path("cherenkov-professional/src/cherenkov/workflow_parser.py")
 
     parser_code = '''"""
 Workflow YAML Parser
@@ -177,7 +177,7 @@ def load_workflow(workflow_file: str) -> Dict[str, Any]:
 
 def integrate_with_cli(context: str):
     """Update CLI to support workflow files"""
-    cli_file = Path("mithaq-professional/scripts/mithaq_cli_orchestrate.py")
+    cli_file = Path("cherenkov-professional/scripts/cherenkov_cli_orchestrate.py")
     code = cli_file.read_text()
 
     # Add workflow file support to orchestrate command
@@ -189,8 +189,8 @@ def orchestrate(config, output):
     click.echo(f"🎯 Orchestrating workflow from {config}")
     
     try:
-        from mithaq.workflow_parser import load_workflow
-        from mithaq.orchestration_api import orchestrate_workflow
+        from cherenkov.workflow_parser import load_workflow
+        from cherenkov.orchestration_api import orchestrate_workflow
         
         # Load workflow YAML
         workflow_config = load_workflow(config)
@@ -233,19 +233,19 @@ def orchestrate(config):
 
 def create_integration_tests(context: str):
     """Create integration tests for the workflow system"""
-    test_file = Path("mithaq-professional/tests/test_workflow_integration.py")
+    test_file = Path("cherenkov-professional/tests/test_workflow_integration.py")
 
     test_code = '''"""
 Integration tests for workflow orchestration
 """
 import pytest
 from pathlib import Path
-from mithaq.workflow_parser import WorkflowParser, load_workflow
-from mithaq.orchestration_api import orchestrate_workflow
+from cherenkov.workflow_parser import WorkflowParser, load_workflow
+from cherenkov.orchestration_api import orchestrate_workflow
 
 def test_parse_security_workflow():
     """Test parsing a security scan workflow"""
-    workflow_file = "mithaq-professional/examples/workflows/security_scan_workflow.yaml"
+    workflow_file = "cherenkov-professional/examples/workflows/security_scan_workflow.yaml"
     
     if not Path(workflow_file).exists():
         pytest.skip("Example workflow not found")
@@ -259,7 +259,7 @@ def test_parse_security_workflow():
 
 def test_parse_parallel_workflow():
     """Test parsing a parallel workflow"""
-    workflow_file = "mithaq-professional/examples/workflows/parallel_test_workflow.yaml"
+    workflow_file = "cherenkov-professional/examples/workflows/parallel_test_workflow.yaml"
     
     if not Path(workflow_file).exists():
         pytest.skip("Example workflow not found")
@@ -369,6 +369,6 @@ except Exception as e:
 
 print("\n🎉 Iteration #5 complete! Workflow system integrated!")
 print("\nTry it:")
-print("  python mithaq-professional/scripts/mithaq_cli_orchestrate.py orchestrate \\")
-print("    --config mithaq-professional/examples/workflows/security_scan_workflow.yaml")
+print("  python cherenkov-professional/scripts/cherenkov_cli_orchestrate.py orchestrate \\")
+print("    --config cherenkov-professional/examples/workflows/security_scan_workflow.yaml")
 

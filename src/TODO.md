@@ -1,10 +1,10 @@
-# mithaq Development TODO
+# cherenkov Development TODO
 
 ## Phase 0: Foundation (Week 1) - IN PROGRESS
 - [x] Repository setup
 - [x] Agent rules configuration  
 - [ ] CloudInstruction Pydantic schema
-- [ ] SiyaadaSanitizer with HMAC
+- [ ] AblationSanitizer with HMAC
 - [ ] Test suite (6/6 tests passing)
 
 ## Phase 1: Multi-Provider Orchestration (Week 2-8)
@@ -20,7 +20,7 @@
 - [ ] Frida hook generator
 - [ ] Drozer PoC executor
 
-## Phase 3: Burhan Validation (Week 21-28)
+## Phase 3: Tokamak Validation (Week 21-28)
 - [ ] PoC runner (safe, non-destructive)
 - [ ] Evidence verification
 - [ ] False positive elimination

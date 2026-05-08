@@ -19,7 +19,7 @@ print("""
 """)
 
 # Fix the API file
-api_file = Path("mithaq-professional/src/mithaq/orchestration_api.py")
+api_file = Path("cherenkov-professional/src/cherenkov/orchestration_api.py")
 code = api_file.read_text()
 
 
@@ -118,7 +118,7 @@ print("   - Fixed register_agent implementation")
 print("   - Added proper imports")
 
 # Create final summary document
-summary = Path("mithaq-professional/AUTONOMOUS_DEVELOPMENT_SUMMARY.md")
+summary = Path("cherenkov-professional/AUTONOMOUS_DEVELOPMENT_SUMMARY.md")
 summary.write_text("""# Autonomous Development Session Summary
 
 **Date:** May 2, 2026 (1:41 AM - 2:00 AM EEST)  
@@ -157,10 +157,10 @@ An autonomous agent swarm that iteratively analyzed, designed, implemented, and 
 
 ## Files Created
 
-- `mithaq/agents/micro_swarm/` - MicroGPT swarm framework
-- `mithaq-professional/src/mithaq/orchestration_api.py` - Public API
-- `mithaq-professional/scripts/mithaq_cli_orchestrate.py` - CLI commands
-- `mithaq-professional/tests/test_orchestration_api.py` - Test suite
+- `cherenkov/agents/micro_swarm/` - MicroGPT swarm framework
+- `cherenkov-professional/src/cherenkov/orchestration_api.py` - Public API
+- `cherenkov-professional/scripts/cherenkov_cli_orchestrate.py` - CLI commands
+- `cherenkov-professional/tests/test_orchestration_api.py` - Test suite
 
 ## Key Achievements
 
@@ -181,7 +181,7 @@ MicroGPT swarm with:
 ## Next Steps
 
 1. Merge to main repository
-2. Integrate with existing mithaq workflows
+2. Integrate with existing cherenkov workflows
 3. Expand swarm capabilities
 4. Add more autonomous iterations
 """)

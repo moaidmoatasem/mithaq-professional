@@ -4,7 +4,7 @@ Auto-Improve Scanners Using AI Development Team
 Let the AI agents review and enhance their own work!
 """
 
-from mithaq.core.memory_efficient_parallel import MemoryEfficientCrew
+from cherenkov.core.memory_efficient_parallel import MemoryEfficientCrew
 from pathlib import Path
 
 print("""
@@ -15,7 +15,7 @@ print("""
 """)
 
 # Read the current scanner code
-scanner_dir = Path("mithaq/scanners/generated")
+scanner_dir = Path("cherenkov/scanners/generated")
 scanners_to_improve = []
 
 for scanner_file in scanner_dir.glob("*.py"):
@@ -123,7 +123,7 @@ try:
     results = crew.run_parallel_batches(agent_configs, task_configs)
     
     # Save improved versions
-    output_dir = Path("mithaq/scanners/ai_improved")
+    output_dir = Path("cherenkov/scanners/ai_improved")
     output_dir.mkdir(exist_ok=True)
     
     crew.save_results(results, output_dir=str(output_dir))

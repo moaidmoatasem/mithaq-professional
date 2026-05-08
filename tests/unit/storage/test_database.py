@@ -1,6 +1,6 @@
 import pytest
 from pathlib import Path
-from mithaq.storage.database import init_db, save_scan, get_scan, list_scans, prune_old_scans
+from cherenkov.storage.database import init_db, save_scan, get_scan, list_scans, prune_old_scans
 
 
 @pytest.fixture()

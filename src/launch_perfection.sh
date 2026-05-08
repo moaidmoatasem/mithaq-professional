@@ -1,7 +1,7 @@
 #!/bin/bash
 
 echo "╔══════════════════════════════════════════════════════════════╗"
-echo "║  🚀 mithaq PERFECTION LAUNCH SEQUENCE                        ║"
+echo "║  🚀 cherenkov PERFECTION LAUNCH SEQUENCE                        ║"
 echo "╚══════════════════════════════════════════════════════════════╝"
 echo ""
 
@@ -88,11 +88,11 @@ sleep 5
 success "Ollama service started"
 
 status "Pulling AI model (qwen2.5:3b)..."
-docker exec mithaq-ollama ollama pull qwen2.5:3b
+docker exec cherenkov-ollama ollama pull qwen2.5:3b
 success "AI model loaded"
 
-status "Starting mithaq scanner..."
-docker-compose -f docker-compose.optimized.yml up -d mithaq
+status "Starting cherenkov scanner..."
+docker-compose -f docker-compose.optimized.yml up -d cherenkov
 success "Scanner service started"
 
 status "Starting web dashboard..."
@@ -110,7 +110,7 @@ status "Waiting for services to be ready..."
 sleep 10
 
 # Check Ollama
-if docker exec mithaq-ollama ollama list &> /dev/null; then
+if docker exec cherenkov-ollama ollama list &> /dev/null; then
     success "Ollama is healthy"
 else
     warning "Ollama health check failed"
@@ -142,7 +142,7 @@ docker stats --no-stream --format "table {{.Name}}\t{{.CPUPerc}}\t{{.MemUsage}}\
 
 echo ""
 echo "╔══════════════════════════════════════════════════════════════╗"
-echo "║  ✅ mithaq PERFECTION - FULLY OPERATIONAL                    ║"
+echo "║  ✅ cherenkov PERFECTION - FULLY OPERATIONAL                    ║"
 echo "╚══════════════════════════════════════════════════════════════╝"
 echo ""
 echo "🌐 Web Dashboard: http://localhost:5000"
@@ -150,7 +150,7 @@ echo "🤖 Ollama API: http://localhost:11434"
 echo ""
 echo "Quick Commands:"
 echo "  • View logs: docker-compose -f docker-compose.optimized.yml logs -f"
-echo "  • Run scan: docker exec mithaq-scanner python mithaq_simple_scanner.py https://example.com"
+echo "  • Run scan: docker exec cherenkov-scanner python cherenkov_simple_scanner.py https://example.com"
 echo "  • Stop all: docker-compose -f docker-compose.optimized.yml down"
 echo "  • Monitor: watch -n 2 'docker stats --no-stream'"
 echo ""

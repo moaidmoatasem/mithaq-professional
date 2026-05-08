@@ -1,15 +1,15 @@
 #!/usr/bin/env python3
 # scripts/sync_context.py
 """
-Regenerates .mithaq_context from ACTUAL repo state before every Claude session.
+Regenerates .cherenkov_context from ACTUAL repo state before every Claude session.
 Never hardcodes anything. Truth only.
 
 Usage:
-    python scripts/sync_context.py          # update .mithaq_context
+    python scripts/sync_context.py          # update .cherenkov_context
     python scripts/sync_context.py --show   # print to stdout without writing
 
 Run this BEFORE starting any Claude Code or Claude.ai session.
-Tell Claude: "Read .mithaq_context only. Do not ls or glob the repo."
+Tell Claude: "Read .cherenkov_context only. Do not ls or glob the repo."
 """
 
 import os
@@ -33,7 +33,7 @@ def generate() -> str:
     lines = []
     w = lines.append
 
-    w(f"# mithaq CONTEXT — {datetime.now().strftime('%Y-%m-%d %H:%M')}")
+    w(f"# cherenkov CONTEXT — {datetime.now().strftime('%Y-%m-%d %H:%M')}")
     w("# Auto-generated. Do not edit manually.")
     w("")
 
@@ -55,18 +55,18 @@ def generate() -> str:
     debug = run(f"grep -r 'debug=True' . --include='*.py' | {_excl} | wc -l", "?")
     cors  = run(f"grep -r 'allow_origins=\\[\"\\*\"\\]' . --include='*.py' | {_excl} | wc -l", "?")
     bind  = run(f"grep -r 'host=.0\\.0\\.0\\.0.' . --include='*.py' | {_excl} | wc -l", "?")
-    nested = "EXISTS" if Path("src/mithaq/mithaq").exists() else "CLEAN"
+    nested = "EXISTS" if Path("src/cherenkov/cherenkov").exists() else "CLEAN"
     tag   = run("git tag | grep security || echo NONE")
     w(f"debug=True instances: {debug} (must be 0)")
     w(f"CORS wildcard instances: {cors} (must be 0)")
     w(f"0.0.0.0 bindings: {bind} (must be 0)")
-    w(f"Nested src/mithaq/mithaq/: {nested} (must be CLEAN)")
+    w(f"Nested src/cherenkov/cherenkov/: {nested} (must be CLEAN)")
     w(f"Security tag: {tag}")
 
     # ── Source structure ───────────────────────────────────────────────────
     w("")
     w("## SOURCE")
-    scanners_dir = Path("src/mithaq/scanners")
+    scanners_dir = Path("src/cherenkov/scanners")
     candidates_dir = Path("candidates/generated_scanners")
     validated = sorted(p.name for p in scanners_dir.glob("*.py")
                        if not p.name.startswith("__")) if scanners_dir.exists() else []
@@ -82,17 +82,17 @@ def generate() -> str:
     w("")
     w("## CORE FILES")
     files = {
-        "BaseScanner":    "src/mithaq/core/base_scanner.py",
-        "Registry":       "src/mithaq/core/registry.py",
-        "Engine":         "src/mithaq/core/engine.py",
-        "Siyaada":        "src/mithaq/ai/siyaada.py",
-        "Burhan":         "src/mithaq/agents/burhan.py",
-        "Sandbox":        "src/mithaq/core/sandbox.py",
-        "ModelRouter":    "src/mithaq/ai/model_router.py",
-        "CLI":            "src/mithaq/cli.py",
-        "FastAPI":        "src/mithaq/api/main.py",
-        "SQLite":         "src/mithaq/storage/database.py",
-        "ScannerGen":     "src/mithaq/dev_crew/scanner_generator.py",
+        "BaseScanner":    "src/cherenkov/core/base_scanner.py",
+        "Registry":       "src/cherenkov/core/registry.py",
+        "Engine":         "src/cherenkov/core/engine.py",
+        "Ablation":        "src/cherenkov/ai/ablation.py",
+        "Tokamak":         "src/cherenkov/agents/tokamak.py",
+        "TOKAMAK":        "src/cherenkov/core/tokamak.py",
+        "ModelRouter":    "src/cherenkov/ai/model_router.py",
+        "CLI":            "src/cherenkov/cli.py",
+        "FastAPI":        "src/cherenkov/api/main.py",
+        "SQLite":         "src/cherenkov/storage/database.py",
+        "ScannerGen":     "src/cherenkov/dev_crew/scanner_generator.py",
     }
     for name, path in files.items():
         exists = "✓" if Path(path).exists() else "✗ MISSING"
@@ -111,12 +111,12 @@ def generate() -> str:
     w("## PHASE STATUS")
     # Auto-detect phase from what exists
     phase = "0 (security fixes)"
-    if Path("src/mithaq/core/base_scanner.py").exists():
+    if Path("src/cherenkov/core/base_scanner.py").exists():
         phase = "2 (architecture)"
     if len(validated) >= 10:
         phase = "3 (scanner library)"
-    if Path("src/mithaq/agents/burhan.py").exists() and len(validated) >= 20:
-        phase = "4 (mobile + Burhan)"
+    if Path("src/cherenkov/agents/tokamak.py").exists() and len(validated) >= 20:
+        phase = "4 (mobile + Tokamak)"
     w(f"Detected phase: {phase}")
 
     # ── Active blockers ────────────────────────────────────────────────────
@@ -133,14 +133,14 @@ def generate() -> str:
     w("")
     w("## NEXT ACTION")
     if nested == "EXISTS":
-        w("→ Delete src/mithaq/mithaq/ (run: python tools/session_manager.py show fix_nested_dir)")
+        w("→ Delete src/cherenkov/cherenkov/ (run: python tools/session_manager.py show fix_nested_dir)")
     elif int(debug) > 0:
         w("→ Fix debug=True instances before anything else")
     elif int(cors) > 0:
         w("→ Fix CORS wildcard in api/main.py")
     elif tag == "NONE":
         w("→ Tag v0.1.1-security after all security fixes pass")
-    elif not Path("src/mithaq/core/base_scanner.py").exists():
+    elif not Path("src/cherenkov/core/base_scanner.py").exists():
         w("→ Create BaseScanner (run: python tools/session_manager.py show create_base_scanner)")
     elif len(validated) < 50:
         w(f"→ Graduate scanner candidates ({len(candidates)} pending, "
@@ -162,12 +162,12 @@ def main():
     if "--show" in sys.argv:
         print(content)
         return
-    output = Path(".mithaq_context")
+    output = Path(".cherenkov_context")
     output.write_text(content)
     lines = content.count("\n")
-    print(f"✅ .mithaq_context updated ({lines} lines)")
+    print(f"✅ .cherenkov_context updated ({lines} lines)")
     print(f"   Feed this to Claude before every session to save 60-80% tokens.")
-    print(f"   Tell Claude: 'Read .mithaq_context only.'")
+    print(f"   Tell Claude: 'Read .cherenkov_context only.'")
 
 
 if __name__ == "__main__":

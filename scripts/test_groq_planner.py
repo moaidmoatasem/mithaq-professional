@@ -1,4 +1,4 @@
-from mithaq.agents.cloud.strategic_planner import StrategicPlanner, ThreatAnalysisTask
+from cherenkov.agents.cloud.strategic_planner import StrategicPlanner, ThreatAnalysisTask
 from dotenv import load_dotenv
 
 load_dotenv()

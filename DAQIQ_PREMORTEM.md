@@ -1,9 +1,9 @@
-# mithaq — Pre-Mortem Report
+# cherenkov — Pre-Mortem Report
 # Date: November 2026 (6 months from now)
 # Classification: Honest
 # Method: Prospective hindsight — assume failure, identify causes
 
-"We launched in September 2026. By November it was clear mithaq had stalled.
+"We launched in September 2026. By November it was clear cherenkov had stalled.
 GitHub: 43 stars. Zero paying users. The code runs but nobody believes it.
 Here is exactly why it failed, and what we should have done."
 
@@ -14,7 +14,7 @@ Here is exactly why it failed, and what we should have done."
 **What happened:**
 We spent May–July 2026 producing eleven planning documents, five architecture
 diagrams, three consolidated plans, a premortem, and a governance policy.
-Claude Code ran 47 sessions. The siyaada.py file was rewritten four times.
+Claude Code ran 47 sessions. The ablation.py file was rewritten four times.
 At the end of Phase 1, the repository had 127 documentation files and 3
 working scanners — the same 3 scanners from April.
 
@@ -35,10 +35,10 @@ commits for every planning session.
 
 ---
 
-## FAILURE #2: Siyaada Drop Rate Destroyed Credibility
+## FAILURE #2: Ablation Drop Rate Destroyed Credibility
 
 **What happened:**
-At the Cairo pilot (September 2026), Siyaada's fail-closed logic dropped
+At the Cairo pilot (September 2026), Ablation's fail-closed logic dropped
 68% of findings from the first real-world scan. The senior CBE engineer
 looked at the report, saw 2 findings from what should have been a
 high-surface web application, and said "this tool is broken."
@@ -52,7 +52,7 @@ evidence were dropped wholesale.
 The customer saw a 30% finding rate and called it a false-negative machine.
 
 **What would have prevented it:**
-Siyaada telemetry in production from day one. If we had been watching
+Ablation telemetry in production from day one. If we had been watching
 drop_rate in staging against real-world-like payloads (not just DVWA),
 we would have seen 68% drop before the pilot. The governance documents
 defined this metric. We never wired it to an alert.
@@ -62,10 +62,10 @@ keep the structural evidence, rather than dropping the entire payload.
 
 ---
 
-## FAILURE #3: Burhan's 30-Second Timeout Was Too Short for Mobile
+## FAILURE #3: Tokamak's 30-Second Timeout Was Too Short for Mobile
 
 **What happened:**
-Every APK scan timed out the Burhan validation step. Android emulators
+Every APK scan timed out the Tokamak validation step. Android emulators
 in Docker take 45–90 seconds to boot. The watchdog (correctly) killed
 the container after 30 seconds every time. Every mobile finding came back
 as PROBABLE, routed to human review. The human review queue had 847 items
@@ -75,7 +75,7 @@ The 30-second limit was correct for web PoCs. It was wrong for mobile.
 
 **What would have prevented it:**
 Two timeout constants, not one: `WEB_POC_TIMEOUT = 30`, `MOBILE_POC_TIMEOUT = 120`.
-The sandbox profiles already knew which surface was running. The timeout
+The tokamak profiles already knew which surface was running. The timeout
 should have been profile-aware from the start.
 
 ---
@@ -97,7 +97,7 @@ We had 89 candidates and 3 validated scanners at the community launch.
 **What would have prevented it:**
 A GitHub Actions workflow that runs nightly:
 1. `docker-compose up dvwa webgoat -d`
-2. `mithaq-dev validate-all-candidates`
+2. `cherenkov-dev validate-all-candidates`
 3. Opens PRs for any candidate that passes all 5 steps
 4. Comments on failing candidates with specific step failures
 
@@ -125,7 +125,7 @@ deleting something. The compressed version we have now is right.
 
 Phase-specific sessions with hard scope limits:
 - Session A: "Only fix the 6 items in BROKEN RIGHT NOW. Nothing else."
-- Session B: "Only create src/mithaq/core/base_scanner.py and registry.py."
+- Session B: "Only create src/cherenkov/core/base_scanner.py and registry.py."
 Never compound phases in one session.
 
 ---
@@ -133,11 +133,11 @@ Never compound phases in one session.
 ## FAILURE #6: We Launched to HN Before Phase 3 Was Real
 
 **What happened:**
-On September 15, 2026, someone posted mithaq to Hacker News.
+On September 15, 2026, someone posted cherenkov to Hacker News.
 Not us — a community member who found it on GitHub.
 
 The top comment was:
-"I cloned this and ran `mithaq scan https://example.com`. It checks
+"I cloned this and ran `cherenkov scan https://example.com`. It checks
 3 headers and tells me if I have HTTPS. This README says 132 scanners.
 That's just not true."
 
@@ -201,7 +201,7 @@ exists, not before. GOV-01 should have been written during Phase 5
 (enterprise), not during Phase 1 planning.
 
 Exception: the data classification tiers (Tier 1/2/3) were genuinely
-useful early — they informed the Siyaada architecture. But the
+useful early — they informed the Ablation architecture. But the
 operational controls (cron jobs, LUKS, PAM) should wait until
 the infrastructure they describe exists.
 
@@ -210,13 +210,13 @@ the infrastructure they describe exists.
 ## FAILURE #9: The Dual-Brain Was Never Actually Dual
 
 **What happened:**
-In October 2026, a security researcher tested mithaq's "zero cloud
-exposure" claim. She ran mithaq with network monitoring. She found
+In October 2026, a security researcher tested cherenkov's "zero cloud
+exposure" claim. She ran cherenkov with network monitoring. She found
 that the FastAPI server, when responding to scan results, sometimes
 cached intermediate LLM outputs to a temp file that was accessible
 via a path traversal in the API itself.
 
-Not a Siyaada failure. A different failure: the API layer had no
+Not a Ablation failure. A different failure: the API layer had no
 output validation, and the "dual-brain" routing was conceptual —
 in the actual code, Al-Muhandis and Al-Munafeedh were not separate
 processes or containers. They were two functions calling the same
@@ -258,8 +258,8 @@ Every model router call must log which backend was used and why.
 | Failure | Probability | Impact | Preventable | Prevention |
 |---|---|---|---|---|
 | Planning trap | **HIGH** | Fatal | ✅ | 10:1 commit:plan ratio |
-| Siyaada drops | HIGH | Severe | ✅ | Telemetry + partial redaction fallback |
-| Burhan mobile timeout | MEDIUM | High | ✅ | Profile-aware timeouts |
+| Ablation drops | HIGH | Severe | ✅ | Telemetry + partial redaction fallback |
+| Tokamak mobile timeout | MEDIUM | High | ✅ | Profile-aware timeouts |
 | Dev crew no automation | HIGH | High | ✅ | Nightly CI validation gate |
 | Context collapse | HIGH | High | ✅ | CLAUDE.md < 120 lines, scoped sessions |
 | HN premature exposure | MEDIUM | Severe | ✅ | Private repo or honest README |
@@ -272,7 +272,7 @@ Every model router call must log which backend was used and why.
 
 ## THE ONE FAILURE THAT CANNOT BE PREVENTED
 
-**mithaq solves the wrong problem for the wrong customer at the wrong time.**
+**cherenkov solves the wrong problem for the wrong customer at the wrong time.**
 
 This is the existential risk no premortem item above addresses.
 
@@ -290,7 +290,7 @@ Ask: what tool do you use today? What would have to be true for you
 to switch? What would you pay?
 
 If the answer is "we use Burp Suite and we're happy with it" — the
-market insight is wrong and no amount of architecture makes mithaq viable.
+market insight is wrong and no amount of architecture makes cherenkov viable.
 
 If the answer is "we can't send our APKs to any cloud tool and we have
 no good local alternative" — you have found your first customer.
@@ -302,10 +302,10 @@ no good local alternative" — you have found your first customer.
 **Today:**
 1. Adopt CLAUDE_COMPRESSED.md — under 120 lines, never grow it
 2. One scoped Claude Code session per broken item — not all six at once
-3. Wire Siyaada telemetry to stderr output before any other work
+3. Wire Ablation telemetry to stderr output before any other work
 
 **This week:**
-4. Write a partial redaction fallback for Siyaada (preserve structure, redact identifier)
+4. Write a partial redaction fallback for Ablation (preserve structure, redact identifier)
 5. Profile-aware timeout: WEB_POC_TIMEOUT=30, MOBILE_POC_TIMEOUT=120
 6. Nightly GitHub Actions workflow: start DVWA + run validation gate + open PRs
 

@@ -13,25 +13,25 @@ AGENT_TASKS = {
     "orchestrator_refactor": {
         "role": "Orchestrator Refactoring Specialist",
         "goal": "Improve ai_workflows_orchestrator.py",
-        "file": "mithaq-professional/src/mithaq/ai_workflows_orchestrator.py",
+        "file": "cherenkov-professional/src/cherenkov/ai_workflows_orchestrator.py",
         "task": "Add exception handling and logging",
     },
     "test_enhancer": {
         "role": "Testing Expert",
         "goal": "Improve orchestration tests",
-        "file": "mithaq-professional/tests/test_ai_workflows_orchestrator.py",
+        "file": "cherenkov-professional/tests/test_ai_workflows_orchestrator.py",
         "task": "Add mocks to remove LLM dependencies",
     },
     "api_designer": {
         "role": "API Architect",
         "goal": "Design orchestration API",
-        "file": "mithaq-professional/docs/ORCHESTRATION_API.md",
+        "file": "cherenkov-professional/docs/ORCHESTRATION_API.md",
         "task": "Create API documentation",
     },
     "doc_writer": {
         "role": "Technical Writer",
         "goal": "Document architecture",
-        "file": "mithaq-professional/docs/ARCHITECTURE.md",
+        "file": "cherenkov-professional/docs/ARCHITECTURE.md",
         "task": "Write architecture docs",
     },
 }

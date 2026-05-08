@@ -8,8 +8,8 @@ import sys
 
 sys.path.insert(0, ".")
 
-from mithaq.agents.micro_swarm.micro_agent import MicroAgent, MicroAgentConfig
-from mithaq.agents.micro_swarm.swarm_orchestrator import MicroSwarm
+from cherenkov.agents.micro_swarm.micro_agent import MicroAgent, MicroAgentConfig
+from cherenkov.agents.micro_swarm.swarm_orchestrator import MicroSwarm
 from pathlib import Path
 import subprocess
 
@@ -92,7 +92,7 @@ def test_orchestrator_with_mock():
 
 def implement_api_functions(context: str):
     """Create the proposed API implementation"""
-    api_file = Path("mithaq-professional/src/mithaq/orchestration_api.py")
+    api_file = Path("cherenkov-professional/src/cherenkov/orchestration_api.py")
 
     api_code = '''"""
 Orchestration API - Public interface for running AI workflows
@@ -171,17 +171,17 @@ def execute_parallel(agents: List[Any], tasks: List[Any]) -> List[Any]:
 
 def create_cli(context: str):
     """Create CLI commands for orchestration"""
-    cli_file = Path("mithaq-professional/scripts/mithaq_cli_orchestrate.py")
+    cli_file = Path("cherenkov-professional/scripts/cherenkov_cli_orchestrate.py")
 
     cli_code = '''#!/usr/bin/env python3
 """
-mithaq CLI - Orchestration commands
+cherenkov CLI - Orchestration commands
 """
 import click
 
 @click.group()
 def cli():
-    """mithaq Orchestration CLI"""
+    """cherenkov Orchestration CLI"""
     pass
 
 @cli.command()
@@ -250,8 +250,8 @@ agents = [
 ]
 
 tasks = [
-    "mithaq-professional/src/mithaq/ai_workflows_orchestrator.py",
-    "mithaq-professional/tests/test_ai_workflows_orchestrator.py",
+    "cherenkov-professional/src/cherenkov/ai_workflows_orchestrator.py",
+    "cherenkov-professional/tests/test_ai_workflows_orchestrator.py",
     "Implement API based on iteration #1 design",
     "Create CLI commands",
 ]

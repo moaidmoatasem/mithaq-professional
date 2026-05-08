@@ -5,7 +5,7 @@
     "dockerfilePath": "deploy/Dockerfile"
   },
   "deploy": {
-    "startCommand": "python src/mithaq_web.py",
+    "startCommand": "python src/cherenkov_web.py",
     "healthcheckPath": "/health",
     "restartPolicyType": "ON_FAILURE"
   }

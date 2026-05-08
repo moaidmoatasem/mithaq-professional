@@ -21,3 +21,6 @@ src/mithaq/roadmap_execution_*.log
 # Swarm queue — content is managed at runtime, only .gitkeep is tracked
 manifests/cwe_queue.yaml
 
+
+# Secrets
+.env

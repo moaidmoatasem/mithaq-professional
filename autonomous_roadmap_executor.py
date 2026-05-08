@@ -7,7 +7,7 @@ Let AI agents work on the roadmap continuously
 import time
 from pathlib import Path
 from datetime import datetime
-from mithaq.core.memory_efficient_parallel import MemoryEfficientCrew
+from cherenkov.core.memory_efficient_parallel import MemoryEfficientCrew
 
 print("""
 ╔══════════════════════════════════════════════════════════════╗

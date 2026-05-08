@@ -1,5 +1,5 @@
 import pytest
-from mithaq.core.hybrid_orchestrator import HybridOrchestrator, ExecutionMode, CognitiveLoopException
+from cherenkov.core.hybrid_orchestrator import HybridOrchestrator, ExecutionMode, CognitiveLoopException
 
 def test_overseer_loop_detection():
     orchestrator = HybridOrchestrator()

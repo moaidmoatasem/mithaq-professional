@@ -8,8 +8,8 @@ import sys
 
 sys.path.insert(0, ".")
 
-from mithaq.agents.micro_swarm.micro_agent import MicroAgent, MicroAgentConfig
-from mithaq.agents.micro_swarm.swarm_orchestrator import MicroSwarm
+from cherenkov.agents.micro_swarm.micro_agent import MicroAgent, MicroAgentConfig
+from cherenkov.agents.micro_swarm.swarm_orchestrator import MicroSwarm
 from pathlib import Path
 import subprocess
 
@@ -23,9 +23,9 @@ print("""
 
 def create_comprehensive_readme(context: str):
     """Create comprehensive README for the autonomous system"""
-    readme = Path("mithaq-professional/AUTONOMOUS_SYSTEM_README.md")
+    readme = Path("cherenkov-professional/AUTONOMOUS_SYSTEM_README.md")
 
-    content = """# 🤖 mithaq Autonomous Agent System
+    content = """# 🤖 cherenkov Autonomous Agent System
 
 ## Overview
 
@@ -45,21 +45,21 @@ A fully autonomous development system built by AI agents in 7 iterations (38 min
 ### Run a Workflow
 
 ```bash
-cd ~/mithaq-dev-agents
-python mithaq-professional/scripts/demo_workflow_execution.py
+cd ~/cherenkov-dev-agents
+python cherenkov-professional/scripts/demo_workflow_execution.py
 ```
 
 ### Execute Custom Workflow
 
 ```bash
-python mithaq-professional/scripts/mithaq_cli_orchestrate.py orchestrate \\
-  --config mithaq-professional/examples/workflows/security_scan_workflow.yaml
+python cherenkov-professional/scripts/cherenkov_cli_orchestrate.py orchestrate \\
+  --config cherenkov-professional/examples/workflows/security_scan_workflow.yaml
 ```
 
 ### Run Next Autonomous Iteration
 
 ```bash
-PYTHONPATH=. python mithaq-professional/scripts/swarm_iteration_9_auto.py
+PYTHONPATH=. python cherenkov-professional/scripts/swarm_iteration_9_auto.py
 ```
 
 ## Architecture
@@ -120,8 +120,8 @@ execution:
 ## Running Tests
 
 ```bash
-cd ~/mithaq-dev-agents
-PYTHONPATH=mithaq-professional/src:. pytest mithaq-professional/tests/ -v
+cd ~/cherenkov-dev-agents
+PYTHONPATH=cherenkov-professional/src:. pytest cherenkov-professional/tests/ -v
 ```
 
 ## Next Features (Let Agents Build!)
@@ -142,7 +142,7 @@ No humans wrote code. Agents analyzed, designed, implemented, tested, and docume
 
 ## License
 
-Part of the mithaq security testing framework.
+Part of the cherenkov security testing framework.
 """
 
     readme.write_text(content)
@@ -152,11 +152,11 @@ Part of the mithaq security testing framework.
 
 def create_dockerfile(context: str):
     """Create Dockerfile for containerized deployment"""
-    dockerfile = Path("mithaq-professional/Dockerfile")
+    dockerfile = Path("cherenkov-professional/Dockerfile")
 
     content = """FROM python:3.12-slim
 
-LABEL maintainer="mithaq Autonomous Agents"
+LABEL maintainer="cherenkov Autonomous Agents"
 LABEL description="Autonomous agent swarm for security testing"
 
 # Set working directory
@@ -174,7 +174,7 @@ COPY requirements.txt .
 RUN pip install --no-cache-dir -r requirements.txt
 
 # Copy application code
-COPY mithaq/ ./mithaq/
+COPY cherenkov/ ./cherenkov/
 COPY src/ ./src/
 COPY scripts/ ./scripts/
 COPY examples/ ./examples/
@@ -192,7 +192,7 @@ CMD ["python", "scripts/demo_workflow_execution.py"]
     dockerfile.write_text(content)
 
     # Create .dockerignore
-    dockerignore = Path("mithaq-professional/.dockerignore")
+    dockerignore = Path("cherenkov-professional/.dockerignore")
     dockerignore.write_text("""__pycache__/
 *.pyc
 *.pyo
@@ -222,17 +222,17 @@ htmlcov/
 
 def create_usage_guide(context: str):
     """Create step-by-step usage guide"""
-    guide = Path("mithaq-professional/USAGE_GUIDE.md")
+    guide = Path("cherenkov-professional/USAGE_GUIDE.md")
 
-    content = """# 🚀 mithaq Autonomous Agents - Usage Guide
+    content = """# 🚀 cherenkov Autonomous Agents - Usage Guide
 
 ## For First-Time Users
 
 ### 1. Run the Demo
 
 ```bash
-cd ~/mithaq-dev-agents
-python mithaq-professional/scripts/demo_workflow_execution.py
+cd ~/cherenkov-dev-agents
+python cherenkov-professional/scripts/demo_workflow_execution.py
 ```
 
 Expected output:
@@ -240,7 +240,7 @@ Expected output:
 ### 2. Try a Different Workflow
 
 ```bash
-python mithaq-professional/scripts/mithaq_cli_orchestrate.py orchestrate \\
+python cherenkov-professional/scripts/cherenkov_cli_orchestrate.py orchestrate \\
   --config examples/workflows/quick_scan_workflow.yaml
 ```
 
@@ -259,7 +259,7 @@ tasks:
 
 Then run:
 ```bash
-python mithaq-professional/scripts/mithaq_cli_orchestrate.py orchestrate \\
+python cherenkov-professional/scripts/cherenkov_cli_orchestrate.py orchestrate \\
   --config my_workflow.yaml
 ```
 
@@ -270,16 +270,16 @@ python mithaq-professional/scripts/mithaq_cli_orchestrate.py orchestrate \\
 Let agents decide what to build next:
 
 ```bash
-cd ~/mithaq-dev-agents
-PYTHONPATH=. python mithaq-professional/scripts/swarm_iteration_9_auto.py
+cd ~/cherenkov-dev-agents
+PYTHONPATH=. python cherenkov-professional/scripts/swarm_iteration_9_auto.py
 ```
 
 ### Create Specific Feature
 
 ```python
 # swarm_iteration_9_myfeature.py
-from mithaq.agents.micro_swarm.micro_agent import MicroAgent, MicroAgentConfig
-from mithaq.agents.micro_swarm.swarm_orchestrator import MicroSwarm
+from cherenkov.agents.micro_swarm.micro_agent import MicroAgent, MicroAgentConfig
+from cherenkov.agents.micro_swarm.swarm_orchestrator import MicroSwarm
 
 def build_my_feature(context: str):
     # Implement your feature
@@ -305,21 +305,21 @@ PYTHONPATH=src:. pytest tests/ -v
 ### Build Image
 
 ```bash
-cd mithaq-professional
-docker build -t mithaq-autonomous .
+cd cherenkov-professional
+docker build -t cherenkov-autonomous .
 ```
 
 ### Run Demo
 
 ```bash
-docker run --rm mithaq-autonomous
+docker run --rm cherenkov-autonomous
 ```
 
 ### Run Custom Workflow
 
 ```bash
 docker run --rm -v $(pwd)/my_workflow.yaml:/app/workflow.yaml \\
-  mithaq-autonomous python scripts/mithaq_cli_orchestrate.py \\
+  cherenkov-autonomous python scripts/cherenkov_cli_orchestrate.py \\
   orchestrate --config /app/workflow.yaml
 ```
 
@@ -328,7 +328,7 @@ docker run --rm -v $(pwd)/my_workflow.yaml:/app/workflow.yaml \\
 ### Result Persistence
 
 ```python
-from mithaq.result_persistence import ResultStore
+from cherenkov.result_persistence import ResultStore
 
 store = ResultStore()
 
@@ -345,7 +345,7 @@ results = store.list_results("my_workflow")
 ### Agent Factory
 
 ```python
-from mithaq.agent_factory import AgentFactory
+from cherenkov.agent_factory import AgentFactory
 
 # Create agent from config
 agent = AgentFactory.create_agent('payload_tester', {
@@ -361,7 +361,7 @@ agents = AgentFactory.create_agents_from_workflow(workflow_config)
 ### Import Error
 ```bash
 # Make sure PYTHONPATH is set
-export PYTHONPATH=mithaq-professional/src:.
+export PYTHONPATH=cherenkov-professional/src:.
 ```
 
 ### Module Not Found
@@ -404,17 +404,17 @@ def update_main_readme(context: str):
 
 ## 🤖 Autonomous Agent System
 
-mithaq now includes a fully autonomous development system built by AI agents!
+cherenkov now includes a fully autonomous development system built by AI agents!
 
 ### Quick Start
 
 Run an autonomous security workflow:
 ```bash
-cd mithaq-dev-agents
-python mithaq-professional/scripts/demo_workflow_execution.py
+cd cherenkov-dev-agents
+python cherenkov-professional/scripts/demo_workflow_execution.py
 ```
 
-See [AUTONOMOUS_SYSTEM_README.md](mithaq-professional/AUTONOMOUS_SYSTEM_README.md) for full documentation.
+See [AUTONOMOUS_SYSTEM_README.md](cherenkov-professional/AUTONOMOUS_SYSTEM_README.md) for full documentation.
 
 ### Features
 
@@ -519,5 +519,5 @@ except Exception as e:
 
 print("\n🎉 Iteration #8 complete! System is production-ready!")
 print("\n🐳 Build Docker image:")
-print("   cd mithaq-professional && docker build -t mithaq-autonomous .")
+print("   cd cherenkov-professional && docker build -t cherenkov-autonomous .")
 

@@ -1,4 +1,4 @@
-from mithaq.siyaada.redactor import DataRedactor, RedactionLevel
+from cherenkov.ablation.redactor import DataRedactor, RedactionLevel
 
 # Test data with secrets
 test_data = {

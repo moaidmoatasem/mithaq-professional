@@ -3,7 +3,7 @@
 watch -n 2 '
 clear
 echo "╔══════════════════════════════════════════════════════════════╗"
-echo "║  📊 mithaq PERFECTION - LIVE MONITORING                      ║"
+echo "║  📊 cherenkov PERFECTION - LIVE MONITORING                      ║"
 echo "╚══════════════════════════════════════════════════════════════╝"
 echo ""
 echo "Container Status:"

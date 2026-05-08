@@ -4,7 +4,7 @@ Test memory-efficient batched parallel execution
 Generates 6 security scanners in 3 batches of 2
 """
 
-from mithaq.core.memory_efficient_parallel import MemoryEfficientCrew
+from cherenkov.core.memory_efficient_parallel import MemoryEfficientCrew
 import sys
 
 # Define 6 different security scanner agents

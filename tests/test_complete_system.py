@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-Complete mithaq System Test
+Complete cherenkov System Test
 Tests all major components
 """
 
@@ -32,17 +32,17 @@ def test(name, func):
 
 # Test 1: Import core modules
 def test_imports():
-    from mithaq.scanners.header_scanner import SimpleScanner
-    from mithaq.core.memory_efficient_parallel import MemoryEfficientCrew
+    from cherenkov.scanners.header_scanner import SimpleScanner
+    from cherenkov.core.memory_efficient_parallel import MemoryEfficientCrew
     print("✓ Core modules imported successfully")
 
 # Test 2: Check file structure
 def test_structure():
     required_dirs = [
-        'mithaq/agents',
-        'mithaq/core',
-        'mithaq/scanners',
-        'mithaq/crews',
+        'cherenkov/agents',
+        'cherenkov/core',
+        'cherenkov/scanners',
+        'cherenkov/crews',
     ]
     for dir_path in required_dirs:
         assert Path(dir_path).exists(), f"Missing: {dir_path}"
@@ -50,14 +50,14 @@ def test_structure():
 
 # Test 3: Scanner functionality
 def test_scanner():
-    from mithaq.scanners.header_scanner import SimpleScanner
+    from cherenkov.scanners.header_scanner import SimpleScanner
     scanner = SimpleScanner("https://example.com")
     assert scanner.target == "https://example.com"
     print("✓ Scanner initialized correctly")
 
 # Test 4: AI-generated scanners exist
 def test_generated_scanners():
-    scanner_dir = Path("mithaq/scanners/generated")
+    scanner_dir = Path("cherenkov/scanners/generated")
     python_files = list(scanner_dir.glob("*.py"))
     count = len([f for f in python_files if f.name != "__init__.py"])
     print(f"✓ Found {count} AI-generated scanners")
@@ -78,14 +78,14 @@ def test_scan_reports():
 
 # Test 6: Memory efficient parallel module
 def test_parallel():
-    from mithaq.core.memory_efficient_parallel import MemoryEfficientCrew
+    from cherenkov.core.memory_efficient_parallel import MemoryEfficientCrew
     crew = MemoryEfficientCrew(batch_size=2)
     assert crew.batch_size == 2
     print("✓ Memory-efficient parallel system initialized")
 
 # Test 7: CLI exists
 def test_cli():
-    cli_path = Path("mithaq_cli.py")
+    cli_path = Path("cherenkov_cli.py")
     assert cli_path.exists(), "CLI not found"
     with open(cli_path, 'r') as f:
         content = f.read()

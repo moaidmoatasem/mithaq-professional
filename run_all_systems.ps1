@@ -1,6 +1,6 @@
-# MITHAQ - Complete System Launcher (Windows Edition)
+# CHERENKOV - Complete System Launcher (Windows Edition)
 Write-Host "╔══════════════════════════════════════════════════════════════╗" -ForegroundColor Blue
-Write-Host "║  🚀 MITHAQ - Complete System Launcher                        ║" -ForegroundColor Blue
+Write-Host "║  🚀 CHERENKOV - Complete System Launcher                        ║" -ForegroundColor Blue
 Write-Host "╚══════════════════════════════════════════════════════════════╝" -ForegroundColor Blue
 Write-Host ""
 
@@ -40,13 +40,13 @@ switch ($choice) {
     "1" {
         Write-Host ""
         $url = Read-Host "Enter URL to scan"
-        python src/mithaq_cli.py $url
+        python src/cherenkov_cli.py $url
     }
     "2" {
         Write-Host ""
         Write-Host "🌐 Starting web dashboard..." -ForegroundColor Cyan
         Write-Host "📱 Open browser to: http://localhost:5000"
-        python src/mithaq_web.py
+        python src/cherenkov_web.py
     }
     "3" {
         Write-Host ""
@@ -62,7 +62,7 @@ switch ($choice) {
     "5" {
         Write-Host ""
         Write-Host "🐳 Starting Docker container..." -ForegroundColor Cyan
-        docker-compose up mithaq
+        docker-compose up cherenkov
     }
     "6" {
         Write-Host ""
@@ -73,7 +73,7 @@ switch ($choice) {
         Write-Host "🚀 Running full system demo..." -ForegroundColor Green
         Write-Host ""
         Write-Host "1️⃣ Testing Quick Scanner..."
-        python src/mithaq_cli.py https://example.com
+        python src/cherenkov_cli.py https://example.com
         
         Write-Host ""
         Write-Host "2️⃣ Analyzing AI-generated scanners..."
@@ -81,20 +81,20 @@ switch ($choice) {
         
         Write-Host ""
         Write-Host "3️⃣ System ready! Launch web dashboard with:"
-        Write-Host "   python src/mithaq_web.py"
+        Write-Host "   python src/cherenkov_web.py"
     }
     "8" {
         Write-Host ""
-        Write-Host "📊 MITHAQ System Status" -ForegroundColor Cyan
+        Write-Host "📊 CHERENKOV System Status" -ForegroundColor Cyan
         Write-Host "════════════════════════════════════════════════"
         Write-Host ""
         
         Write-Host "📁 Framework Structure:"
-        Get-ChildItem src/mithaq -Depth 1
+        Get-ChildItem src/cherenkov -Depth 1
         
         Write-Host ""
         Write-Host "🔍 Available Scanners:"
-        (Get-ChildItem src/mithaq/scanners/*.py -Recurse).Count
+        (Get-ChildItem src/cherenkov/scanners/*.py -Recurse).Count
         
         Write-Host ""
         Write-Host "✅ System Status: OPERATIONAL" -ForegroundColor Green

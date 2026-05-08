@@ -1,11 +1,11 @@
 """Example: Complete security audit with SecurityCrew."""
 
-from mithaq.crews.security_crew import SecurityCrew
+from cherenkov.crews.security_crew import SecurityCrew
 
 
 def main():
     """Demonstrate end-to-end security audit workflow."""
-    print("🔐 mithaq Security Framework - Full Security Audit\n")
+    print("🔐 cherenkov Security Framework - Full Security Audit\n")
 
     # Initialize security crew
     crew = SecurityCrew(verbose=True)

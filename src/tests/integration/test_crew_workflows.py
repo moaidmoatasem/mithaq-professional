@@ -2,16 +2,16 @@
 
 from unittest.mock import Mock, patch
 
-from mithaq.agents.architect_agent import ArchitectAgent
-from mithaq.agents.developer_agent import DeveloperAgent
-from mithaq.agents.tester_agent import TesterAgent
-from mithaq.crews.security_crew import SecurityCrew
+from cherenkov.agents.architect_agent import ArchitectAgent
+from cherenkov.agents.developer_agent import DeveloperAgent
+from cherenkov.agents.tester_agent import TesterAgent
+from cherenkov.crews.security_crew import SecurityCrew
 
 
 class TestCrewWorkflows:
     """Test end-to-end crew workflows."""
 
-    @patch("mithaq.crews.security_crew.Crew")
+    @patch("cherenkov.crews.security_crew.Crew")
     def test_full_security_audit_workflow(self, mock_crew_class):
         """Test complete security audit with all agents."""
         # Mock crew execution
@@ -35,7 +35,7 @@ class TestCrewWorkflows:
         assert "code_review" in result["scope"]
         assert "pentest" in result["scope"]
 
-    @patch("mithaq.crews.security_crew.Crew")
+    @patch("cherenkov.crews.security_crew.Crew")
     def test_mobile_app_analysis_workflow(self, mock_crew_class):
         """Test mobile app analysis end-to-end."""
         mock_crew_instance = Mock()
@@ -100,7 +100,7 @@ class TestCrewWorkflows:
             or "testing" in test_caps["goal"].lower()
         )
 
-    @patch("mithaq.crews.security_crew.Crew")
+    @patch("cherenkov.crews.security_crew.Crew")
     def test_crew_with_custom_agents(self, mock_crew_class):
         """Test crew with custom agent configurations."""
         mock_crew_instance = Mock()

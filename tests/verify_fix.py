@@ -24,7 +24,7 @@ mock_flask.request = mock_request
 # because that requires complex mocking of the decorator's dependencies.
 # Actually, let's just mock everything the decorator needs.
 
-import src.mithaq.autonomous_generated.scanners.authenticationerror as auth_module
+import src.cherenkov.autonomous_generated.scanners.authenticationerror as auth_module
 
 class TestFix(unittest.TestCase):
     def setUp(self):
@@ -33,15 +33,15 @@ class TestFix(unittest.TestCase):
         auth_module.MOCK_ACCESS_CONTROL["admin"] = ["scanner"]
 
     def test_fix_with_env_token(self):
-        from src.mithaq.autonomous_generated.scanners.authenticationerror import requires_authentication, AuthenticationError
+        from src.cherenkov.autonomous_generated.scanners.authenticationerror import requires_authentication, AuthenticationError
 
         @requires_authentication
         def dummy_f():
             return "success"
 
         # Set the expected token in environment
-        with patch.dict(os.environ, {"MITHAQ_AUTH_TOKEN": "secure_token_123"}):
-            with patch("src.mithaq.autonomous_generated.scanners.authenticationerror.request") as mock_req:
+        with patch.dict(os.environ, {"CHERENKOV_AUTH_TOKEN": "secure_token_123"}):
+            with patch("src.cherenkov.autonomous_generated.scanners.authenticationerror.request") as mock_req:
                 # Test success with correct token
                 mock_req.headers.get.return_value = "Bearer secure_token_123"
                 mock_req.identity = "admin"
@@ -64,7 +64,7 @@ class TestFix(unittest.TestCase):
                 print("Rejected 'wrong_token'")
 
     def test_failure_without_env_token(self):
-        from src.mithaq.autonomous_generated.scanners.authenticationerror import requires_authentication, AuthenticationError
+        from src.cherenkov.autonomous_generated.scanners.authenticationerror import requires_authentication, AuthenticationError
 
         @requires_authentication
         def dummy_f():
@@ -72,7 +72,7 @@ class TestFix(unittest.TestCase):
 
         # Ensure environment token is NOT set
         with patch.dict(os.environ, {}, clear=True):
-            with patch("src.mithaq.autonomous_generated.scanners.authenticationerror.request") as mock_req:
+            with patch("src.cherenkov.autonomous_generated.scanners.authenticationerror.request") as mock_req:
                 mock_req.headers.get.return_value = "Bearer any_token"
                 mock_req.identity = "admin"
                 mock_req.path = "/scan"
@@ -81,16 +81,16 @@ class TestFix(unittest.TestCase):
                 with self.assertRaises(AuthenticationError) as cm:
                     dummy_f()
                 self.assertIn("System not configured", str(cm.exception))
-                print("Authentication denied (fail-closed) when MITHAQ_AUTH_TOKEN is not set")
+                print("Authentication denied (fail-closed) when CHERENKOV_AUTH_TOKEN is not set")
 
     def test_invalid_header_format(self):
-        from src.mithaq.autonomous_generated.scanners.authenticationerror import requires_authentication, AuthenticationError
+        from src.cherenkov.autonomous_generated.scanners.authenticationerror import requires_authentication, AuthenticationError
 
         @requires_authentication
         def dummy_f():
             return "success"
 
-        with patch("src.mithaq.autonomous_generated.scanners.authenticationerror.request") as mock_req:
+        with patch("src.cherenkov.autonomous_generated.scanners.authenticationerror.request") as mock_req:
             mock_req.headers.get.return_value = "Basic dXNlcjpwYXNz" # Wrong type
             with self.assertRaises(AuthenticationError) as cm:
                 dummy_f()
@@ -106,8 +106,8 @@ class TestFix(unittest.TestCase):
     def test_handle_scan_no_nameerror(self):
         # Verify handle_scan doesn't raise NameError for mock_scan
         # We call the original function (undecorated if possible) or just mock what the decorator needs
-        with patch.dict(os.environ, {"MITHAQ_AUTH_TOKEN": "secure_token_123"}):
-            with patch("src.mithaq.autonomous_generated.scanners.authenticationerror.request") as mock_req:
+        with patch.dict(os.environ, {"CHERENKOV_AUTH_TOKEN": "secure_token_123"}):
+            with patch("src.cherenkov.autonomous_generated.scanners.authenticationerror.request") as mock_req:
                 mock_req.headers.get.return_value = "Bearer secure_token_123"
                 mock_req.identity = "admin"
                 mock_req.path = "/scan"

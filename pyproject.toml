@@ -1,7 +1,7 @@
 [project]
-name = "mithaq-core"
+name = "cherenkov-core"
 version = "0.1.1"
-description = "mithaq Security Framework - Precision in Sovereignty"
+description = "cherenkov Security Framework - Precision in Sovereignty"
 authors = [
     {name = "Moaid EL-Moatasem Bellah"}
 ]
@@ -16,7 +16,7 @@ dependencies = [
 where = ["src"]
 
 [tool.setuptools.package-data]
-mithaq = ["py.typed"]
+cherenkov = ["py.typed"]
 
 [project.optional-dependencies]
 dev = [
@@ -47,7 +47,7 @@ python_functions = ["test_*"]
 addopts = "-v --tb=short"
 
 [tool.coverage.run]
-source = ["mithaq"]
+source = ["cherenkov"]
 omit = ["tests/*", "venv/*", "candidates/*"]
 
 [tool.coverage.report]

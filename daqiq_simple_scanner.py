@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-mithaq - Simple Security Scanner
+cherenkov - Simple Security Scanner
 Minimal viable product - Actually works!
 """
 
@@ -122,7 +122,7 @@ class SimpleScanner:
     def run(self):
         """Run all scans"""
         print("="*70)
-        print("🔍 mithaq SECURITY SCANNER")
+        print("🔍 cherenkov SECURITY SCANNER")
         print("="*70)
         
         self.scan_security_headers()
@@ -132,7 +132,7 @@ class SimpleScanner:
 
 
 if __name__ == "__main__":
-    parser = argparse.ArgumentParser(description='mithaq - Simple Security Scanner')
+    parser = argparse.ArgumentParser(description='cherenkov - Simple Security Scanner')
     parser.add_argument('url', help='Target URL to scan (e.g., https://example.com)')
     
     args = parser.parse_args()

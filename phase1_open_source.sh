@@ -1,16 +1,16 @@
 #!/bin/bash
 # ============================================
-# mithaq PHASE 1: MIT LICENSE + OPEN SOURCE + CLEANUP
+# cherenkov PHASE 1: MIT LICENSE + OPEN SOURCE + CLEANUP
 # Hardware-Agnostic | Production-Ready | May 2026
 # ============================================
 
 set -e  # Exit on error
 
-echo "🚀 mithaq PHASE 1: OPEN SOURCE TRANSFORMATION"
+echo "🚀 cherenkov PHASE 1: OPEN SOURCE TRANSFORMATION"
 echo "=============================================="
 echo ""
 
-cd ~/mithaq-dev-agents
+cd ~/cherenkov-dev-agents
 
 # ============================================
 # STEP 1: CLEANUP - REMOVE SCAN REPORTS FROM ROOT
@@ -79,12 +79,12 @@ echo "  ✅ MIT License created"
 # STEP 3: CREATE COMPREHENSIVE ROADMAP
 # ============================================
 echo ""
-echo "📋 STEP 3: Creating mithaq NEXUS v4 Roadmap..."
+echo "📋 STEP 3: Creating cherenkov NEXUS v4 Roadmap..."
 
 mkdir -p docs/roadmap
 
-cat > docs/roadmap/mithaq_NEXUS_v4.md << 'ROADMAP_EOF'
-# 🚀 mithaq NEXUS v4 - MASTER ROADMAP
+cat > docs/roadmap/cherenkov_NEXUS_v4.md << 'ROADMAP_EOF'
+# 🚀 cherenkov NEXUS v4 - MASTER ROADMAP
 **Autonomous AI-Driven Security Testing Platform with Dual-Brain Architecture**
 
 *Last Updated: May 3, 2026 | License: MIT | Status: Phase 0 - Foundation*
@@ -93,20 +93,20 @@ cat > docs/roadmap/mithaq_NEXUS_v4.md << 'ROADMAP_EOF'
 
 ## 📊 EXECUTIVE SUMMARY
 
-mithaq is evolving from an autonomous scanner generator (mithaq Professional) into a full dual-brain security intelligence platform (mithaq NEXUS) with:
+cherenkov is evolving from an autonomous scanner generator (cherenkov Professional) into a full dual-brain security intelligence platform (cherenkov NEXUS) with:
 
 - **Cloud Architect Brain**: RAG-powered planning, compliance mapping, CVE intelligence
 - **Local Executor Brain**: CPU-optimized LLM + Professional scanners (132+ modules)
-- **Zero-Trust Bridge**: Sanitization, mithaq Trace, Burhan proof-of-concept
+- **Zero-Trust Bridge**: Sanitization, cherenkov Trace, Tokamak proof-of-concept
 - **Agentic Development**: Self-coding agents with approval gates
 
 ---
 
 ## 🏗️ THREE-LAYER ARCHITECTURE
 
-### Layer 1: Execution (DONE - mithaq Professional)
+### Layer 1: Execution (DONE - cherenkov Professional)
 - ✅ 132 autonomous security scanners (87% success rate)
-- ✅ Docker production container (mithaq-prod)
+- ✅ Docker production container (cherenkov-prod)
 - ✅ CI/CD workflows (GitHub Actions)
 - ✅ XSS, CSRF, SQLi, path traversal, XXE, file upload, API scanners
 - ✅ 28 autonomous agents, 900+ lines generated
@@ -115,9 +115,9 @@ mithaq is evolving from an autonomous scanner generator (mithaq Professional) in
 ### Layer 2: Intelligence & Orchestration (IN PROGRESS - NEXUS Core)
 - 🔄 Dual-brain architecture (Architect + Executor)
 - 🔄 Sanitization Bridge (fail-closed, 91.78% coverage)
-- 🔄 mithaq Trace (cognitive forensics)
+- 🔄 cherenkov Trace (cognitive forensics)
 - 🔄 RAG knowledge base (CVEs, compliance, OWASP)
-- 🔄 Burhan proof system
+- 🔄 Tokamak proof system
 
 ### Layer 3: Experience & Governance (PLANNED - NEXUS Platform)
 - 📅 PyQt Desktop forensic UI
@@ -199,11 +199,11 @@ See full roadmap in repository for complete details.
 ## 🚀 IMMEDIATE NEXT STEPS (This Week)
 
 1. ✅ Add MIT License
-2. ✅ Create mithaq NEXUS v4 roadmap
+2. ✅ Create cherenkov NEXUS v4 roadmap
 3. ✅ Clean up scan reports from repository
-4. [ ] Create GitHub Project "mithaq NEXUS - Phase 0-1"
+4. [ ] Create GitHub Project "cherenkov NEXUS - Phase 0-1"
 5. [ ] Create 10 foundational issues
-6. [ ] Implement \`setup_mithaq_env.sh\`
+6. [ ] Implement \`setup_cherenkov_env.sh\`
 
 ---
 
@@ -211,7 +211,7 @@ See full roadmap in repository for complete details.
 *Hardware: Agnostic (x86_64, ARM64, Cloud)*
 ROADMAP_EOF
 
-echo "  ✅ Roadmap created: docs/roadmap/mithaq_NEXUS_v4.md"
+echo "  ✅ Roadmap created: docs/roadmap/cherenkov_NEXUS_v4.md"
 
 # ============================================
 # STEP 4: CREATE ARCHITECTURE OVERVIEW
@@ -222,7 +222,7 @@ echo "🏗️ STEP 4: Creating Architecture Overview..."
 mkdir -p docs/architecture
 
 cat > docs/architecture/overview.md << 'ARCH_EOF'
-# 🏗️ mithaq NEXUS - ARCHITECTURE OVERVIEW
+# 🏗️ cherenkov NEXUS - ARCHITECTURE OVERVIEW
 
 ## Core Components
 
@@ -252,14 +252,14 @@ echo ""
 echo "📝 STEP 5: Updating README with roadmap links..."
 
 # Add roadmap section after existing content (append only if not exists)
-if ! grep -q "mithaq NEXUS v4 Roadmap" README.md; then
+if ! grep -q "cherenkov NEXUS v4 Roadmap" README.md; then
 cat >> README.md << 'README_APPEND'
 
 ---
 
 ## 📚 Documentation & Roadmap
 
-- **[mithaq NEXUS v4 Roadmap](./docs/roadmap/mithaq_NEXUS_v4.md)** - Strategic plan, Phases 0-6
+- **[cherenkov NEXUS v4 Roadmap](./docs/roadmap/cherenkov_NEXUS_v4.md)** - Strategic plan, Phases 0-6
 - **[Architecture Overview](./docs/architecture/overview.md)** - Dual-brain system design
 
 ---
@@ -286,9 +286,9 @@ echo ""
 echo "🤝 STEP 6: Creating CONTRIBUTING.md..."
 
 cat > CONTRIBUTING.md << 'CONTRIB_EOF'
-# Contributing to mithaq
+# Contributing to cherenkov
 
-Thank you for your interest in contributing to mithaq! 🚀
+Thank you for your interest in contributing to cherenkov! 🚀
 
 ## Development Workflow
 
@@ -296,7 +296,7 @@ Thank you for your interest in contributing to mithaq! 🚀
 
 \`\`\`bash
 git checkout -b feature/your-feature-name
-pytest --cov=mithaq
+pytest --cov=cherenkov
 git commit -m "feat: Add your feature"
 \`\`\`
 
@@ -325,7 +325,7 @@ git rm --cached scan_report_*.json 2>/dev/null || true
 git rm --cached unified_scan_*.json 2>/dev/null || true
 
 # Commit
-git commit -m "feat: Open source with MIT License + mithaq NEXUS v4 roadmap
+git commit -m "feat: Open source with MIT License + cherenkov NEXUS v4 roadmap
 
 ✨ Features:
 - MIT License for open source

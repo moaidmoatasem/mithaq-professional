@@ -34,7 +34,7 @@
         "vulnerable": false,
         "status_code": 404,
         "evidence": null,
-        "burhan_proof": "SAFE"
+        "tokamak_proof": "SAFE"
       },
       "duration": 0.5328989028930664,
       "agent": "PayloadTester1"
@@ -47,7 +47,7 @@
         "vulnerable": false,
         "status_code": 404,
         "evidence": null,
-        "burhan_proof": "SAFE"
+        "tokamak_proof": "SAFE"
       },
       "duration": 0.5322294235229492,
       "agent": "PayloadTester2"
@@ -60,7 +60,7 @@
         "vulnerable": false,
         "status_code": 404,
         "evidence": null,
-        "burhan_proof": "SAFE"
+        "tokamak_proof": "SAFE"
       },
       "duration": 0.5324299335479736,
       "agent": "PayloadTester3"

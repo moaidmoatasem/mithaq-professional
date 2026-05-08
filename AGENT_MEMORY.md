@@ -5,7 +5,7 @@
 ### Setup Complete ✅
 - **Tools installed:** uv, Ollama (downloading models), Aider, pre-commit, pytest, ruff, bandit
 - **AI Models:** llama3.2:3b-instruct-q4_K_M, qwen2.5-coder:7b-instruct-q4_K_M (downloading)
-- **Repository:** Initialized at ~/mithaq-dev
+- **Repository:** Initialized at ~/cherenkov-dev
 - **Agent rules:** Configured (.clinerules)
 - **Pre-commit hooks:** Ready to install
 
@@ -37,7 +37,7 @@
 - [ ] Install Python dev tools (pytest, ruff, bandit, aider)
 - [ ] Install pre-commit hooks
 - [ ] Generate CloudInstruction Pydantic schema
-- [ ] Generate SiyaadaSanitizer with HMAC
+- [ ] Generate AblationSanitizer with HMAC
 - [ ] Achieve >80% code coverage
 
 ### Agent-Specific Notes
@@ -68,7 +68,7 @@
 **Agent:** Human-driven with AI assistance planning
 
 ### Completed
-- ✅ CloudInstruction Pydantic schema (`mithaq/schemas/cloud_instruction.py`)
+- ✅ CloudInstruction Pydantic schema (`cherenkov/schemas/cloud_instruction.py`)
 - ✅ 6 comprehensive unit tests (`tests/unit/test_cloud_instruction.py`)
 - ✅ Security validators: AWS keys, JWT tokens, prompt injection
 - ✅ Type safety: Literal actions, confidence bounds

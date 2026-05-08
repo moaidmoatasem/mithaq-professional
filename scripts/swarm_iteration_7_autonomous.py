@@ -8,8 +8,8 @@ import sys
 
 sys.path.insert(0, ".")
 
-from mithaq.agents.micro_swarm.micro_agent import MicroAgent, MicroAgentConfig
-from mithaq.agents.micro_swarm.swarm_orchestrator import MicroSwarm
+from cherenkov.agents.micro_swarm.micro_agent import MicroAgent, MicroAgentConfig
+from cherenkov.agents.micro_swarm.swarm_orchestrator import MicroSwarm
 from pathlib import Path
 import subprocess
 
@@ -40,7 +40,7 @@ def analyze_gaps(context: str):
         ],
     }
 
-    notes = Path("mithaq-professional/ITERATION_7_ANALYSIS.md")
+    notes = Path("cherenkov-professional/ITERATION_7_ANALYSIS.md")
     notes.write_text(f"""# Iteration #7 Analysis - Autonomous Planning
 
 ## Current System Status
@@ -69,7 +69,7 @@ The swarm recommends implementing result persistence first, as it enables:
 
 def create_result_persistence(context: str):
     """Add result persistence to workflow execution"""
-    persistence_file = Path("mithaq-professional/src/mithaq/result_persistence.py")
+    persistence_file = Path("cherenkov-professional/src/cherenkov/result_persistence.py")
 
     code = '''"""
 Result Persistence - Save and load workflow execution results
@@ -160,7 +160,7 @@ class ResultStore:
 
 def create_more_workflows(context: str):
     """Create additional workflow examples"""
-    examples_dir = Path("mithaq-professional/examples/workflows")
+    examples_dir = Path("cherenkov-professional/examples/workflows")
 
     # Example 3: API Testing Workflow
     api_test = examples_dir / "api_testing_workflow.yaml"
@@ -283,7 +283,7 @@ output:
   file: "full_audit_results.json"
   save_to_store: true
 
-burhan_standard:
+tokamak_standard:
   require_proof: true
   min_confidence: 0.95
   manual_verification: true
@@ -297,7 +297,7 @@ burhan_standard:
 
 def add_metrics_tracking(context: str):
     """Add performance metrics to workflow execution"""
-    api_file = Path("mithaq-professional/src/mithaq/orchestration_api.py")
+    api_file = Path("cherenkov-professional/src/cherenkov/orchestration_api.py")
     code = api_file.read_text()
 
     # Add metrics tracking to WorkflowExecutor
@@ -409,5 +409,5 @@ except Exception as e:
     print(f"⚠️  Commit issue: {e}")
 
 print("\n🎉 Iteration #7 complete! Agents decided and built autonomously!")
-print("\n📊 See what they chose: cat mithaq-professional/ITERATION_7_ANALYSIS.md")
+print("\n📊 See what they chose: cat cherenkov-professional/ITERATION_7_ANALYSIS.md")
 

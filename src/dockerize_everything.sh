@@ -26,7 +26,7 @@ RUN pip install --user --no-cache-dir --compile -r requirements.txt
 FROM python:3.11-slim
 
 LABEL maintainer="Moaid EL-Moatasem Bellah"
-LABEL description="mithaq - AI-Powered Security Framework"
+LABEL description="cherenkov - AI-Powered Security Framework"
 LABEL version="1.0.0"
 
 WORKDIR /app
@@ -42,7 +42,7 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     && apt-get clean
 
 # Copy application
-COPY mithaq/ ./mithaq/
+COPY cherenkov/ ./cherenkov/
 COPY *.py ./
 
 # Create necessary directories
@@ -61,7 +61,7 @@ HEALTHCHECK --interval=30s --timeout=10s --start-period=5s --retries=3 \
     CMD python -c "import sys; sys.exit(0)" || exit 1
 
 # Default command
-CMD ["python", "mithaq_simple_scanner.py", "--help"]
+CMD ["python", "cherenkov_simple_scanner.py", "--help"]
 DOCKER
 
 echo "✅ Dockerfile created"
@@ -74,7 +74,7 @@ services:
   # Ollama AI Service
   ollama:
     image: ollama/ollama:latest
-    container_name: mithaq-ollama
+    container_name: cherenkov-ollama
     volumes:
       - ollama-data:/root/.ollama
     ports:
@@ -83,7 +83,7 @@ services:
       - OLLAMA_MAX_LOADED_MODELS=2
       - OLLAMA_NUM_PARALLEL=2
     networks:
-      - mithaq-net
+      - cherenkov-net
     deploy:
       resources:
         limits:
@@ -98,12 +98,12 @@ services:
       timeout: 10s
       retries: 3
 
-  # mithaq Scanner Service
+  # cherenkov Scanner Service
   scanner:
     build:
       context: .
       dockerfile: Dockerfile
-    container_name: mithaq-scanner
+    container_name: cherenkov-scanner
     depends_on:
       - ollama
     volumes:
@@ -113,7 +113,7 @@ services:
       - OLLAMA_BASE_URL=http://ollama:11434
       - CREWAI_TELEMETRY_OPT_OUT=true
     networks:
-      - mithaq-net
+      - cherenkov-net
     deploy:
       resources:
         limits:
@@ -129,7 +129,7 @@ services:
     build:
       context: .
       dockerfile: Dockerfile
-    container_name: mithaq-dashboard
+    container_name: cherenkov-dashboard
     depends_on:
       - scanner
       - ollama
@@ -141,23 +141,23 @@ services:
       - FLASK_ENV=production
       - OLLAMA_BASE_URL=http://ollama:11434
     networks:
-      - mithaq-net
+      - cherenkov-net
     deploy:
       resources:
         limits:
           cpus: '1'
           memory: 512M
     restart: unless-stopped
-    command: python mithaq_web.py
+    command: python cherenkov_web.py
 
   # Redis Cache (for scan results)
   redis:
     image: redis:7-alpine
-    container_name: mithaq-redis
+    container_name: cherenkov-redis
     volumes:
       - redis-data:/data
     networks:
-      - mithaq-net
+      - cherenkov-net
     deploy:
       resources:
         limits:
@@ -168,7 +168,7 @@ services:
   # Nginx Reverse Proxy
   nginx:
     image: nginx:alpine
-    container_name: mithaq-nginx
+    container_name: cherenkov-nginx
     depends_on:
       - dashboard
     ports:
@@ -176,11 +176,11 @@ services:
     volumes:
       - ./nginx.conf:/etc/nginx/nginx.conf:ro
     networks:
-      - mithaq-net
+      - cherenkov-net
     restart: unless-stopped
 
 networks:
-  mithaq-net:
+  cherenkov-net:
     driver: bridge
     ipam:
       config:
@@ -295,7 +295,7 @@ case "$1" in
         docker system prune -f
         ;;
     *)
-        echo "mithaq Docker Manager"
+        echo "cherenkov Docker Manager"
         echo ""
         echo "Usage: $0 {build|up|down|restart|logs|status|clean}"
         echo ""

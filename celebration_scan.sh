@@ -1,7 +1,7 @@
 #!/bin/bash
 
 echo "╔══════════════════════════════════════════════════════════════╗"
-echo "║  🎉 CELEBRATION SCAN - mithaq FRAMEWORK SHOWCASE             ║"
+echo "║  🎉 CELEBRATION SCAN - cherenkov FRAMEWORK SHOWCASE             ║"
 echo "╚══════════════════════════════════════════════════════════════╝"
 echo ""
 
@@ -18,7 +18,7 @@ for target in "${TARGETS[@]}"; do
     echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
     echo "🔍 Scanning: $target"
     echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
-    python mithaq_simple_scanner.py "$target"
+    python cherenkov_simple_scanner.py "$target"
     echo ""
     sleep 2
 done

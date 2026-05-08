@@ -6,7 +6,7 @@ Analyze and test AI-generated scanner code
 import os
 from pathlib import Path
 
-scanner_dir = Path("mithaq/scanners/generated")
+scanner_dir = Path("cherenkov/scanners/generated")
 
 print("=" * 70)
 print("🔍 ANALYZING AI-GENERATED SCANNERS")

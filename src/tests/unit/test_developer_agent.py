@@ -1,7 +1,7 @@
 """Unit tests for DeveloperAgent."""
 
-from mithaq.agents.developer_agent import DeveloperAgent, DeveloperAgentConfig
-from mithaq.schemas.cloud_instruction import CloudInstruction
+from cherenkov.agents.developer_agent import DeveloperAgent, DeveloperAgentConfig
+from cherenkov.schemas.cloud_instruction import CloudInstruction
 
 
 class TestDeveloperAgent:
@@ -14,7 +14,7 @@ class TestDeveloperAgent:
         assert agent.config.role == "Security Developer"
         assert "exploit" in agent.config.goal.lower()
         assert agent.config.max_iterations == 7
-        assert agent.sanitizer is not None
+        assert agent.ablation is not None
 
     def test_custom_initialization(self):
         """Test developer agent with custom config."""

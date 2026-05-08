@@ -1,16 +1,16 @@
 # Changelog
 
-## v1.0.0 — MITHAQ Sovereign Security Standard (May 2026)
+## v1.0.0 — CHERENKOV Sovereign Security Standard (May 2026)
 
 ### Added
-- **Trident of Truth Architecture**: Implemented DAREE3 (Shield), SIYAADA (Sovereignty), and AL-BURHAN (Proof) boundaries.
+- **Trident of Truth Architecture**: Implemented MEISSNER (Shield), ABLATION (Sovereignty), and TOKAMAK (Proof) boundaries.
 - **Atomic Design Portal**: Fully restructured high-fidelity web dashboard using Atomic Design principles.
-- **Forensic MITHAQ Trace**: Implemented cryptographic signing (SHA-256) for all security findings.
+- **Forensic CHERENKOV Trace**: Implemented cryptographic signing (SHA-256) for all security findings.
 - **Master Sovereign Blueprint**: Comprehensive architectural and roadmap documentation.
 - **Code of Conduct & Contributing Guidelines**: Established formal sovereign development standards.
 
 ### Changed
-- **Global Rebranding**: Full migration from legacy DAQIQ namespace to MITHAQ.
+- **Global Rebranding**: Full migration from legacy CHERENKOV namespace to CHERENKOV.
 - **CI/CD Stabilization**: Upgraded GitHub actions to CodeQL v3 and enforced strict permission models.
 - **Core Orchestration**: Refactored `HybridOrchestrator` to enforce modular security boundaries.
 
@@ -31,5 +31,5 @@
 - HTTP methods scanner (PUT, DELETE, TRACE, CONNECT detection)
 - HTTPS/HTTP detection
 - Flask web dashboard (localhost only from v0.1.1)
-- Basic CLI (`mithaq_cli.py`)
+- Basic CLI (`cherenkov_cli.py`)
 

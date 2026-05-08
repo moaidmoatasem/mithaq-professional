@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 # tools/session_manager.py
 """
-mithaq Claude Code session templates.
+cherenkov Claude Code session templates.
 
 Problem: Claude Code sessions keep hitting context limits mid-execution.
 Cause:   Sessions are too broad (multiple phases in one run).
@@ -37,13 +37,13 @@ SESSIONS = {
         SCOPE: Delete nested duplicate. ONLY this.
 
         Run:
-          ls src/mithaq/mithaq/
-          rm -rf src/mithaq/mithaq/
+          ls src/cherenkov/cherenkov/
+          rm -rf src/cherenkov/cherenkov/
           git add -A
-          git commit -m "fix: remove nested src/mithaq/mithaq/ duplicate"
+          git commit -m "fix: remove nested src/cherenkov/cherenkov/ duplicate"
           git push origin main
 
-        Expected: src/mithaq/mithaq/ no longer exists. Report commit hash.
+        Expected: src/cherenkov/cherenkov/ no longer exists. Report commit hash.
     """).strip(),
 
     "recover_phase2": dedent("""
@@ -74,9 +74,9 @@ SESSIONS = {
         SCOPE: Delete 4 dead planning files. ONLY this.
 
         Files to delete (if they exist):
-          mithaq_DEVELOPMENT_PLAN.md  (0 bytes placeholder)
+          cherenkov_DEVELOPMENT_PLAN.md  (0 bytes placeholder)
           STRATEGIC_ROADMAP.md       (pre-Phase 0 stale)
-          src/mithaq_MASTER_PLAN.md   (25 lines, outdated)
+          src/cherenkov_MASTER_PLAN.md   (25 lines, outdated)
           docs/roadmap/PRODUCT_ROADMAP.md  (claims "$1M ARR ✅" — false)
 
         Do NOT delete docs/plan/development_plan.md (that is the real plan).
@@ -90,7 +90,7 @@ SESSIONS = {
         Prerequisites (verify before tagging):
           grep -r "debug=True" . --include="*.py"  → must return nothing
           grep -r "host='0.0.0.0'" . --include="*.py"  → must return nothing
-          ls src/mithaq/mithaq/ 2>/dev/null && echo EXISTS || echo CLEAN
+          ls src/cherenkov/cherenkov/ 2>/dev/null && echo EXISTS || echo CLEAN
 
         If prerequisites pass:
           git tag -a v0.1.1-security -m "Phase 0 security fixes complete"
@@ -104,9 +104,9 @@ SESSIONS = {
     # ── Phase 2 — one component per session ─────────────────────────────────
 
     "create_base_scanner": dedent("""
-        SCOPE: Create src/mithaq/core/base_scanner.py only.
+        SCOPE: Create src/cherenkov/core/base_scanner.py only.
 
-        Read: the BaseScanner spec in CLAUDE.md and mithaq_FINAL_PLAN_V4.md section 2.2.
+        Read: the BaseScanner spec in CLAUDE.md and cherenkov_FINAL_PLAN_V4.md section 2.2.
         Create the file with: Severity enum, Finding dataclass, ScanResult dataclass, BaseScanner ABC.
         Write tests: tests/unit/core/test_base_scanner.py (basic instantiation tests).
         Run: pytest tests/unit/core/ -v
@@ -115,9 +115,9 @@ SESSIONS = {
     """).strip(),
 
     "create_registry": dedent("""
-        SCOPE: Create src/mithaq/core/registry.py only.
+        SCOPE: Create src/cherenkov/core/registry.py only.
 
-        Prerequisite: src/mithaq/core/base_scanner.py must exist.
+        Prerequisite: src/cherenkov/core/base_scanner.py must exist.
         Read: registry auto-discovery spec in CLAUDE.md.
         Implement: load_all_scanners(), get_scanner(), all_scanners().
         Write tests: tests/unit/core/test_registry.py.
@@ -126,17 +126,17 @@ SESSIONS = {
         Push.
     """).strip(),
 
-    "create_siyaada": dedent("""
-        SCOPE: Copy siyaada.py to src/mithaq/ai/siyaada.py and wire it.
+    "create_ablation": dedent("""
+        SCOPE: Copy ablation.py to src/cherenkov/ai/ablation.py and wire it.
 
         Source file is in the project outputs. Copy it verbatim — do not rewrite.
-        Run: python -c "from mithaq.ai.siyaada import SiyaadaBridge; print('OK')"
-        Write: tests/unit/ai/test_siyaada.py with at least 3 tests:
+        Run: python -c "from cherenkov.ai.ablation import AblationBridge; print('OK')"
+        Write: tests/unit/ai/test_ablation.py with at least 3 tests:
           - sanitize() returns SanitizationResult for safe payload
           - sanitize() raises SanitizationError for AWS key in payload
           - telemetry records both successes and drops
-        Run: pytest tests/unit/ai/test_siyaada.py -v
-        Commit: "feat(ai): Siyaada sanitization bridge with telemetry"
+        Run: pytest tests/unit/ai/test_ablation.py -v
+        Commit: "feat(ai): Ablation sanitization bridge with telemetry"
         Push.
     """).strip(),
 
@@ -153,7 +153,7 @@ SESSIONS = {
           5. pytest tests/integration/ -k SCANNER_NAME -m webgoat -v         (step 4)
           6. bandit -r candidates/generated_scanners/SCANNER_NAME.py -ll      (step 5)
           7. If ALL pass:
-             mv candidates/generated_scanners/SCANNER_NAME.py src/mithaq/scanners/
+             mv candidates/generated_scanners/SCANNER_NAME.py src/cherenkov/scanners/
              git add -A && git commit -m "feat(scanner): graduate SCANNER_NAME from candidates"
              gh issue close <issue-number> --comment "Validated — DVWA + WebGoat + bandit passed"
 
@@ -165,12 +165,12 @@ SESSIONS = {
     "update_readme": dedent("""
         SCOPE: Update README.md to match current reality. ONLY this.
 
-        Count validated scanners: ls src/mithaq/scanners/ | wc -l
+        Count validated scanners: ls src/cherenkov/scanners/ | wc -l
         Get coverage: pytest --co -q 2>/dev/null | tail -1
         Get version: grep 'version' pyproject.toml | head -1
 
         Update README sections:
-          - "What works today" → list ONLY src/mithaq/scanners/ contents
+          - "What works today" → list ONLY src/cherenkov/scanners/ contents
           - Metrics table → use actual numbers from above commands
           - Remove any claim not backed by working code
 
@@ -183,9 +183,9 @@ SESSIONS = {
         SCOPE: Run the autonomous nightly validation pass. This is what CI should do.
 
         1. docker-compose up dvwa webgoat -d 2>/dev/null || true
-        2. python src/mithaq/dev_crew/scanner_generator.py --from-cve-feed --limit 3
+        2. python src/cherenkov/dev_crew/scanner_generator.py --from-cve-feed --limit 3
         3. for candidate in candidates/generated_scanners/*.py; do
-             mithaq-dev validate "$candidate"
+             cherenkov-dev validate "$candidate"
            done
         4. Open PRs for any candidate that passed all 5 steps
         5. Comment on failing candidates with which step failed and why
@@ -230,8 +230,8 @@ def main():
             result = subprocess.run(
                 ["git", "status", "--short"], capture_output=True, text=True
             )
-            if "mithaq/mithaq" in subprocess.run(
-                ["find", "src/mithaq", "-name", "mithaq", "-type", "d"],
+            if "cherenkov/cherenkov" in subprocess.run(
+                ["find", "src/cherenkov", "-name", "cherenkov", "-type", "d"],
                 capture_output=True, text=True
             ).stdout:
                 print("Next: python tools/session_manager.py show fix_nested_dir")

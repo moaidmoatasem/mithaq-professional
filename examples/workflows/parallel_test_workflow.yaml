@@ -17,6 +17,6 @@ execution:
   max_concurrent: 3
   timeout: 30
 
-burhan_standard:
+tokamak_standard:
   require_proof: true
   min_confidence: 0.95

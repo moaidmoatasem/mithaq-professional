@@ -6,7 +6,7 @@
     {
       "success": true,
       "result": {
-        "file": "mithaq-professional/AUTONOMOUS_SYSTEM_README.md",
+        "file": "cherenkov-professional/AUTONOMOUS_SYSTEM_README.md",
         "sections": 12,
         "size": 2885
       },
@@ -16,8 +16,8 @@
     {
       "success": true,
       "result": {
-        "dockerfile": "mithaq-professional/Dockerfile",
-        "dockerignore": "mithaq-professional/.dockerignore",
+        "dockerfile": "cherenkov-professional/Dockerfile",
+        "dockerignore": "cherenkov-professional/.dockerignore",
         "base_image": "python:3.12-slim"
       },
       "duration": 0.007919549942016602,
@@ -26,7 +26,7 @@
     {
       "success": true,
       "result": {
-        "file": "mithaq-professional/USAGE_GUIDE.md",
+        "file": "cherenkov-professional/USAGE_GUIDE.md",
         "sections": 8,
         "examples": 15
       },

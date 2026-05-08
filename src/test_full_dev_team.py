@@ -3,7 +3,7 @@
 Test the complete autonomous development team
 """
 
-from mithaq.crews.autonomous_dev_team import AutonomousDevTeam
+from cherenkov.crews.autonomous_dev_team import AutonomousDevTeam
 
 # Define your project
 PROJECT_DESCRIPTION = """

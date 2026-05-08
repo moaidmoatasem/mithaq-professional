@@ -1,5 +1,5 @@
-from mithaq.agents.local.ollama_client import OllamaClient
-from mithaq.agents.local.code_analyzer import CodeAnalyzer
+from cherenkov.agents.local.ollama_client import OllamaClient
+from cherenkov.agents.local.code_analyzer import CodeAnalyzer
 
 print("=" * 70)
 print("🧪 TESTING LOCAL OLLAMA AGENT")

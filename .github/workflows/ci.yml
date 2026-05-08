@@ -32,7 +32,7 @@ jobs:
 
     - name: Run Pylint
       run: |
-        pylint src/mithaq --fail-under=7.5 || echo "Pylint score below 7.5 (non-blocking)"
+        pylint src/cherenkov --fail-under=7.5 || echo "Pylint score below 7.5 (non-blocking)"
 
     - name: Run unit tests only
       run: |

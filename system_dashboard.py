@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-mithaq System Dashboard
+cherenkov System Dashboard
 Real-time system status and metrics
 """
 
@@ -10,7 +10,7 @@ from datetime import datetime
 
 print("""
 ╔══════════════════════════════════════════════════════════════╗
-║  📊 mithaq FRAMEWORK - SYSTEM DASHBOARD                      ║
+║  📊 cherenkov FRAMEWORK - SYSTEM DASHBOARD                      ║
 ╚══════════════════════════════════════════════════════════════╝
 """)
 
@@ -18,9 +18,9 @@ print("""
 metrics = {}
 
 # Count files
-metrics['total_files'] = sum(1 for _ in Path('mithaq').rglob('*.py'))
-metrics['scanner_files'] = len(list(Path('mithaq/scanners').glob('*.py')))
-metrics['agent_files'] = sum(1 for _ in Path('mithaq/agents').rglob('*.py'))
+metrics['total_files'] = sum(1 for _ in Path('cherenkov').rglob('*.py'))
+metrics['scanner_files'] = len(list(Path('cherenkov/scanners').glob('*.py')))
+metrics['agent_files'] = sum(1 for _ in Path('cherenkov/agents').rglob('*.py'))
 metrics['test_files'] = len(list(Path('.').glob('test_*.py')))
 
 # Count reports
@@ -42,7 +42,7 @@ metrics['total_vulnerabilities_found'] = total_vulns
 
 # Count lines of code
 total_lines = 0
-for py_file in Path('mithaq').rglob('*.py'):
+for py_file in Path('cherenkov').rglob('*.py'):
     try:
         with open(py_file) as f:
             total_lines += len(f.readlines())
@@ -80,12 +80,12 @@ print("🎯 AVAILABLE SYSTEMS")
 print("="*70)
 
 systems = {
-    'Quick Scanner': Path('mithaq_simple_scanner.py').exists(),
-    'Web Dashboard': Path('mithaq_web.py').exists(),
+    'Quick Scanner': Path('cherenkov_simple_scanner.py').exists(),
+    'Web Dashboard': Path('cherenkov_web.py').exists(),
     'AI Dev Team': Path('test_full_dev_team.py').exists(),
     'Batched Parallel': Path('test_batched_parallel.py').exists(),
     'Docker Setup': Path('Dockerfile').exists(),
-    'Refined Scanners': Path('mithaq/scanners/refined').exists(),
+    'Refined Scanners': Path('cherenkov/scanners/refined').exists(),
 }
 
 for system, available in systems.items():
@@ -97,12 +97,12 @@ print("📁 DIRECTORY STRUCTURE")
 print("="*70)
 
 key_dirs = [
-    'mithaq/agents',
-    'mithaq/core',
-    'mithaq/scanners',
-    'mithaq/scanners/generated',
-    'mithaq/scanners/refined',
-    'mithaq/crews',
+    'cherenkov/agents',
+    'cherenkov/core',
+    'cherenkov/scanners',
+    'cherenkov/scanners/generated',
+    'cherenkov/scanners/refined',
+    'cherenkov/crews',
 ]
 
 for dir_path in key_dirs:
@@ -118,10 +118,10 @@ print("🚀 QUICK COMMANDS")
 print("="*70)
 print("""
 Scan a website:
-  python mithaq_simple_scanner.py https://example.com
+  python cherenkov_simple_scanner.py https://example.com
 
 Start web dashboard:
-  python mithaq_web.py
+  python cherenkov_web.py
 
 Generate new tools:
   python test_batched_parallel.py

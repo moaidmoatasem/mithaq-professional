@@ -6,7 +6,7 @@ Creates production-ready versions
 
 from pathlib import Path
 
-output_dir = Path("mithaq/scanners/refined")
+output_dir = Path("cherenkov/scanners/refined")
 output_dir.mkdir(exist_ok=True)
 
 print("🔧 Refining AI-generated scanners...\n")

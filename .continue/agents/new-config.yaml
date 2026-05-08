@@ -1,7 +1,7 @@
-# mithaq Security Framework - Continue.dev Configuration
+# cherenkov Security Framework - Continue.dev Configuration
 # Local Ollama setup with qwen3.5
 
-name: mithaq Local Development
+name: cherenkov Local Development
 version: 1.0.0
 schema: v1
 

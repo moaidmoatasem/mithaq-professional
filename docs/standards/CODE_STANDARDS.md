@@ -1,4 +1,4 @@
-# 💻 mithaq Code Standards
+# 💻 cherenkov Code Standards
 
 ## Python Style Guide
 

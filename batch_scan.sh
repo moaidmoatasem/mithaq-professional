@@ -14,7 +14,7 @@ echo ""
 
 for url in "${TARGETS[@]}"; do
     echo "Scanning: $url"
-    python mithaq_simple_scanner.py "$url"
+    python cherenkov_simple_scanner.py "$url"
     echo ""
     sleep 2  # Be nice to servers
 done

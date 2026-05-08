@@ -1,9 +1,9 @@
 
-# [DAREE3_SHIELD] - Network Enforcement & Egress Control
+# [MEISSNER_SHIELD] - Network Enforcement & Egress Control
 version: '3.8'
 
 services:
-  mithaq:
+  cherenkov:
     build:
       context: .
       dockerfile: Dockerfile

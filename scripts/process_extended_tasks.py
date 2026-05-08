@@ -26,7 +26,7 @@ def generate_scanner(task_name, task_info):
 
     # Create a simple prompt for the AI
     prompt = f"""
-Create a Python security scanner for mithaq framework:
+Create a Python security scanner for cherenkov framework:
 
 Name: {task_name}
 Type: {task_info.get('type')}
@@ -34,11 +34,11 @@ Description: {task_info.get('description')}
 Features: {task_info.get('features', [])}
 
 Requirements:
-1. Create file: src/mithaq/scanners/{task_name.lower().replace(' ', '_').replace('-', '_')}_scanner.py
+1. Create file: src/cherenkov/scanners/{task_name.lower().replace(' ', '_').replace('-', '_')}_scanner.py
 2. Include comprehensive docstrings
 3. Add error handling
 4. Make it production-ready
-5. Follow mithaq framework patterns
+5. Follow cherenkov framework patterns
 
 Generate the complete implementation now.
 """

@@ -1,7 +1,7 @@
 """Unit tests for TesterAgent."""
 
-from mithaq.agents.tester_agent import TesterAgent, TesterAgentConfig
-from mithaq.schemas.cloud_instruction import CloudInstruction
+from cherenkov.agents.tester_agent import TesterAgent, TesterAgentConfig
+from cherenkov.schemas.cloud_instruction import CloudInstruction
 
 
 class TestTesterAgent:
@@ -14,7 +14,7 @@ class TestTesterAgent:
         assert agent.config.role == "Security Tester"
         assert "penetration testing" in agent.config.goal.lower()
         assert agent.config.max_iterations == 8
-        assert agent.sanitizer is not None
+        assert agent.ablation is not None
 
     def test_custom_initialization(self):
         """Test tester agent with custom config."""

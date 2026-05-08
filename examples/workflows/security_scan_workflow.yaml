@@ -1,6 +1,6 @@
 # Security Scan Workflow
 name: "Basic Security Scan"
-description: "Run a comprehensive security scan using mithaq agents"
+description: "Run a comprehensive security scan using cherenkov agents"
 
 agents:
   - role: "vulnerability_scanner"

@@ -1,16 +1,16 @@
 #!/usr/bin/env python3
 """
-Launch MicroGPT Swarm - Parallel micro agents for mithaq
+Launch MicroGPT Swarm - Parallel micro agents for cherenkov
 """
 
 import sys
 
 sys.path.insert(0, ".")
 
-from mithaq.agents.micro_swarm.micro_agent import MicroAgent, MicroAgentConfig
-from mithaq.agents.micro_swarm.swarm_orchestrator import MicroSwarm
-from mithaq.agents.micro_swarm.sanitization_agent import scrub_secrets
-from mithaq.agents.micro_swarm.payload_tester import test_sql_injection
+from cherenkov.agents.micro_swarm.micro_agent import MicroAgent, MicroAgentConfig
+from cherenkov.agents.micro_swarm.swarm_orchestrator import MicroSwarm
+from cherenkov.agents.micro_swarm.sanitization_agent import scrub_secrets
+from cherenkov.agents.micro_swarm.payload_tester import test_sql_injection
 
 print("""
 ╔══════════════════════════════════════════════════════════════╗

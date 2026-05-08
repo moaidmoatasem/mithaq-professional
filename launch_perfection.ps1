@@ -1,6 +1,6 @@
-# MITHAQ PERFECTION LAUNCH SEQUENCE (Windows Edition)
+# CHERENKOV PERFECTION LAUNCH SEQUENCE (Windows Edition)
 Write-Host "╔══════════════════════════════════════════════════════════════╗" -ForegroundColor Blue
-Write-Host "║  🚀 MITHAQ PERFECTION LAUNCH SEQUENCE                        ║" -ForegroundColor Blue
+Write-Host "║  🚀 CHERENKOV PERFECTION LAUNCH SEQUENCE                        ║" -ForegroundColor Blue
 Write-Host "╚══════════════════════════════════════════════════════════════╝" -ForegroundColor Blue
 Write-Host ""
 
@@ -81,11 +81,11 @@ Start-Sleep -Seconds 5
 Show-Success "Ollama service started"
 
 Show-Status "Pulling AI model (qwen2.5:3b)..."
-docker exec mithaq-ollama ollama pull qwen2.5:3b
+docker exec cherenkov-ollama ollama pull qwen2.5:3b
 Show-Success "AI model loaded"
 
-Show-Status "Starting MITHAQ scanner..."
-docker-compose -f docker-compose.optimized.yml up -d mithaq
+Show-Status "Starting CHERENKOV scanner..."
+docker-compose -f docker-compose.optimized.yml up -d cherenkov
 Show-Success "Scanner service started"
 
 Show-Status "Starting web dashboard..."
@@ -103,7 +103,7 @@ Show-Status "Waiting for services to be ready..."
 Start-Sleep -Seconds 10
 
 # Check Ollama
-if (docker exec mithaq-ollama ollama list) {
+if (docker exec cherenkov-ollama ollama list) {
     Show-Success "Ollama is healthy"
 } else {
     Show-Warning "Ollama health check failed"
@@ -120,7 +120,7 @@ docker-compose -f docker-compose.optimized.yml ps
 
 Write-Host ""
 Write-Host "╔══════════════════════════════════════════════════════════════╗"
-Write-Host "║  ✅ MITHAQ PERFECTION - FULLY OPERATIONAL                    ║" -ForegroundColor Green
+Write-Host "║  ✅ CHERENKOV PERFECTION - FULLY OPERATIONAL                    ║" -ForegroundColor Green
 Write-Host "╚══════════════════════════════════════════════════════════════╝" -ForegroundColor Green
 Write-Host ""
 Write-Host "🌐 Web Dashboard: http://localhost:5000"
@@ -128,7 +128,7 @@ Write-Host "🤖 Ollama API: http://localhost:11434"
 Write-Host ""
 Write-Host "Quick Commands:"
 Write-Host "  • View logs: docker-compose -f docker-compose.optimized.yml logs -f"
-Write-Host "  • Run scan: docker exec mithaq-scanner python mithaq_simple_scanner.py https://example.com"
+Write-Host "  • Run scan: docker exec cherenkov-scanner python cherenkov_simple_scanner.py https://example.com"
 Write-Host "  • Stop all: docker-compose -f docker-compose.optimized.yml down"
 Write-Host ""
 Write-Host "🚀 System is ready for sovereign security testing!"

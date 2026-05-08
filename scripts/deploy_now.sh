@@ -1,7 +1,7 @@
 #!/bin/bash
 
 echo "╔══════════════════════════════════════════════════════════════╗"
-echo "║  🚀 mithaq FINAL DEPLOYMENT - LET'S GO LIVE!                 ║"
+echo "║  🚀 cherenkov FINAL DEPLOYMENT - LET'S GO LIVE!                 ║"
 echo "╚══════════════════════════════════════════════════════════════╝"
 echo ""
 
@@ -26,10 +26,10 @@ echo "  QUICK COMMANDS - YOUR FRAMEWORK IS READY!"
 echo "═══════════════════════════════════════════════════════════════"
 echo ""
 echo "1️⃣  Run a quick security scan:"
-echo "   python mithaq_simple_scanner.py https://example.com"
+echo "   python cherenkov_simple_scanner.py https://example.com"
 echo ""
 echo "2️⃣  Launch web dashboard:"
-echo "   python mithaq_web.py"
+echo "   python cherenkov_web.py"
 echo "   Then open: http://localhost:5000"
 echo ""
 echo "3️⃣  Generate new scanners with AI:"
@@ -47,7 +47,7 @@ echo ""
 # Demo scan
 echo "🎯 Running demo scan to verify everything works..."
 echo ""
-python mithaq_simple_scanner.py https://example.com | head -30
+python cherenkov_simple_scanner.py https://example.com | head -30
 
 echo ""
 echo "╔══════════════════════════════════════════════════════════════╗"
@@ -55,7 +55,7 @@ echo "║  ✅ FRAMEWORK VERIFIED AND OPERATIONAL!                     ║"
 echo "╚══════════════════════════════════════════════════════════════╝"
 echo ""
 echo "Choose your next action:"
-echo "  A) Launch web dashboard (python mithaq_web.py)"
+echo "  A) Launch web dashboard (python cherenkov_web.py)"
 echo "  B) Run comprehensive test (python test_batched_parallel.py)"
 echo "  C) Commit final version to git"
 echo ""

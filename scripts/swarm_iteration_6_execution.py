@@ -8,8 +8,8 @@ import sys
 
 sys.path.insert(0, ".")
 
-from mithaq.agents.micro_swarm.micro_agent import MicroAgent, MicroAgentConfig
-from mithaq.agents.micro_swarm.swarm_orchestrator import MicroSwarm
+from cherenkov.agents.micro_swarm.micro_agent import MicroAgent, MicroAgentConfig
+from cherenkov.agents.micro_swarm.swarm_orchestrator import MicroSwarm
 from pathlib import Path
 import subprocess
 
@@ -22,15 +22,15 @@ print("""
 
 def create_agent_factory(context: str):
     """Create factory to instantiate agents from workflow config"""
-    factory_file = Path("mithaq-professional/src/mithaq/agent_factory.py")
+    factory_file = Path("cherenkov-professional/src/cherenkov/agent_factory.py")
 
     code = '''"""
 Agent Factory - Creates agent instances from workflow configurations
 """
 from typing import Dict, Any, Optional
-from mithaq.agents.micro_swarm.micro_agent import MicroAgent, MicroAgentConfig
-from mithaq.agents.micro_swarm.sanitization_agent import SanitizationAgent
-from mithaq.agents.micro_swarm.payload_tester import PayloadTester
+from cherenkov.agents.micro_swarm.micro_agent import MicroAgent, MicroAgentConfig
+from cherenkov.agents.micro_swarm.sanitization_agent import SanitizationAgent
+from cherenkov.agents.micro_swarm.payload_tester import PayloadTester
 
 class AgentFactory:
     """Factory for creating agents from workflow definitions"""
@@ -121,7 +121,7 @@ class AgentFactory:
 
 def implement_workflow_executor(context: str):
     """Implement the actual workflow execution engine"""
-    api_file = Path("mithaq-professional/src/mithaq/orchestration_api.py")
+    api_file = Path("cherenkov-professional/src/cherenkov/orchestration_api.py")
     code = api_file.read_text()
 
     # Add WorkflowExecutor class
@@ -137,7 +137,7 @@ class WorkflowExecutor:
     
     def setup_agents(self):
         """Initialize agents from workflow config"""
-        from mithaq.agent_factory import AgentFactory
+        from cherenkov.agent_factory import AgentFactory
         self.agents = AgentFactory.create_agents_from_workflow(self.config)
         return len(self.agents)
     
@@ -194,7 +194,7 @@ class WorkflowExecutor:
 
 def update_orchestrate_workflow(context: str):
     """Update orchestrate_workflow to use WorkflowExecutor"""
-    api_file = Path("mithaq-professional/src/mithaq/orchestration_api.py")
+    api_file = Path("cherenkov-professional/src/cherenkov/orchestration_api.py")
     code = api_file.read_text()
 
     # Find and replace orchestrate_workflow implementation
@@ -258,7 +258,7 @@ def update_orchestrate_workflow(context: str):
 
 def create_demo_runner(context: str):
     """Create a demo script that runs a workflow end-to-end"""
-    demo_file = Path("mithaq-professional/scripts/demo_workflow_execution.py")
+    demo_file = Path("cherenkov-professional/scripts/demo_workflow_execution.py")
 
     demo_code = '''#!/usr/bin/env python3
 """
@@ -266,20 +266,20 @@ Demo: End-to-End Workflow Execution
 Shows the complete autonomous workflow system in action
 """
 import sys
-sys.path.insert(0, 'mithaq-professional/src')
+sys.path.insert(0, 'cherenkov-professional/src')
 
-from mithaq.workflow_parser import load_workflow
-from mithaq.orchestration_api import orchestrate_workflow
+from cherenkov.workflow_parser import load_workflow
+from cherenkov.orchestration_api import orchestrate_workflow
 import json
 
 print("""
 ╔══════════════════════════════════════════════════════════════╗
-║  🎯 mithaq AUTONOMOUS WORKFLOW DEMO                          ║
+║  🎯 cherenkov AUTONOMOUS WORKFLOW DEMO                          ║
 ╚══════════════════════════════════════════════════════════════╝
 """)
 
 # Load the security scan workflow
-workflow_file = 'mithaq-professional/examples/workflows/security_scan_workflow.yaml'
+workflow_file = 'cherenkov-professional/examples/workflows/security_scan_workflow.yaml'
 print(f"📄 Loading workflow: {workflow_file}")
 
 config = load_workflow(workflow_file)
@@ -395,6 +395,6 @@ except Exception as e:
 
 print("\n🎉 Iteration #6 complete! Workflows can now execute!")
 print("\n🎯 RUN THE DEMO:")
-print("   cd ~/mithaq-dev-agents")
-print("   python mithaq-professional/scripts/demo_workflow_execution.py")
+print("   cd ~/cherenkov-dev-agents")
+print("   python cherenkov-professional/scripts/demo_workflow_execution.py")
 

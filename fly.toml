@@ -1,4 +1,4 @@
-app = "mithaq-security"
+app = "cherenkov-security"
 
 [build]
   dockerfile = "deploy/Dockerfile"
@@ -32,6 +32,6 @@ app = "mithaq-security"
     timeout = "2s"
 
 [mounts]
-  source = "mithaq_data"
+  source = "cherenkov_data"
   destination = "/data"
 

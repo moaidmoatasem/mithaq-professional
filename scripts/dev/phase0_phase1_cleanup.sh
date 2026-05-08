@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 # scripts/dev/phase0_phase1_cleanup.sh
-# Run this from the root of mithaq-professional/
+# Run this from the root of cherenkov-professional/
 # It executes Phase 0 security fixes + Phase 1 cleanup automatically.
 # Review each section before running. Never run blindly.
 
@@ -8,7 +8,7 @@ set -euo pipefail
 ROOT="$(git rev-parse --show-toplevel)"
 cd "$ROOT"
 
-echo "=== mithaq Phase 0 + Phase 1 Cleanup ==="
+echo "=== cherenkov Phase 0 + Phase 1 Cleanup ==="
 echo "Working directory: $ROOT"
 echo ""
 
@@ -17,13 +17,13 @@ echo ""
 # ─────────────────────────────────────────
 
 echo "→ Phase 0: Patching Flask debug mode..."
-# Replace the __main__ block in mithaq_web.py
+# Replace the __main__ block in cherenkov_web.py
 python3 - << 'PYEOF'
 import re, pathlib
 
-path = pathlib.Path("mithaq_web.py")
+path = pathlib.Path("cherenkov_web.py")
 if not path.exists():
-    print("  mithaq_web.py not found — skipping")
+    print("  cherenkov_web.py not found — skipping")
     exit(0)
 
 src = path.read_text()
@@ -59,9 +59,9 @@ cat > .env.example << 'ENV'
 FLASK_DEBUG=false
 FLASK_HOST=127.0.0.1
 FLASK_PORT=5000
-mithaq_OLLAMA_URL=http://localhost:11434
-mithaq_OLLAMA_MODEL=qwen2.5-coder:7b
-mithaq_DB_URL=               # Leave blank for SQLite default
+cherenkov_OLLAMA_URL=http://localhost:11434
+cherenkov_OLLAMA_MODEL=qwen2.5-coder:7b
+cherenkov_DB_URL=               # Leave blank for SQLite default
 ENV
 echo "  .env.example created."
 
@@ -80,11 +80,11 @@ for f in TONIGHT_ACHIEVEMENTS.md SESSION_ACHIEVEMENTS.md AGENT_MEMORY.md \
     fi
 done
 
-# Remove orphaned mithaq-nexus-web file (not a directory)
-if [ -f "mithaq-nexus-web" ]; then
-    git rm --cached "mithaq-nexus-web" 2>/dev/null || true
-    rm -f "mithaq-nexus-web"
-    echo "  Removed: mithaq-nexus-web"
+# Remove orphaned cherenkov-nexus-web file (not a directory)
+if [ -f "cherenkov-nexus-web" ]; then
+    git rm --cached "cherenkov-nexus-web" 2>/dev/null || true
+    rm -f "cherenkov-nexus-web"
+    echo "  Removed: cherenkov-nexus-web"
 fi
 
 echo "→ Phase 1: Moving scanner candidates to candidates/..."
@@ -103,7 +103,7 @@ cat > candidates/README.md << 'CAND'
 # Scanner Candidates
 
 AI-generated scanner drafts awaiting validation.
-A scanner graduates to src/mithaq/scanners/ only after passing ALL of:
+A scanner graduates to src/cherenkov/scanners/ only after passing ALL of:
 
 1. Unit test: positive case (finds vuln with mocked HTTP)
 2. Unit test: negative case (no false positive when vuln absent)
@@ -215,5 +215,5 @@ echo "Next steps:"
 echo "  1. Fix any bare except: handlers flagged above (manual)"
 echo "  2. Update README.md to honest state (3 scanners, alpha)"
 echo "  3. Add first real entry to CHANGELOG.md"
-echo "  4. Start Phase 2: create src/mithaq/core/base_scanner.py"
+echo "  4. Start Phase 2: create src/cherenkov/core/base_scanner.py"
 

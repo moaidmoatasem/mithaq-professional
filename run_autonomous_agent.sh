@@ -2,12 +2,12 @@
 # Master Script - Run Agents Autonomously
 
 echo "╔════════════════════════════════════════════════════════════╗"
-echo "║  🤖 mithaq AUTONOMOUS AGENT SYSTEM                         ║"
+echo "║  🤖 cherenkov AUTONOMOUS AGENT SYSTEM                         ║"
 echo "╚════════════════════════════════════════════════════════════╝"
 echo
 
 # Check what iteration to run next
-LAST_ITERATION=$(ls mithaq-professional/scripts/swarm_iteration_*.py 2>/dev/null | tail -1)
+LAST_ITERATION=$(ls cherenkov-professional/scripts/swarm_iteration_*.py 2>/dev/null | tail -1)
 if [[ $LAST_ITERATION =~ iteration_([0-9]+) ]]; then
     NEXT=$((${BASH_REMATCH[1]} + 1))
 else
@@ -19,7 +19,7 @@ echo "🚀 Next iteration: $NEXT"
 echo
 
 # Check if iteration script exists
-ITERATION_SCRIPT="mithaq-professional/scripts/swarm_iteration_${NEXT}_*.py"
+ITERATION_SCRIPT="cherenkov-professional/scripts/swarm_iteration_${NEXT}_*.py"
 
 if ls $ITERATION_SCRIPT 1> /dev/null 2>&1; then
     echo "✅ Found iteration script"
@@ -28,7 +28,7 @@ else
     echo "📝 No iteration $NEXT script found. Creating autonomous iteration..."
     
     # Create a generic autonomous iteration
-    cat > "mithaq-professional/scripts/swarm_iteration_${NEXT}_auto.py" << 'PYTHON'
+    cat > "cherenkov-professional/scripts/swarm_iteration_${NEXT}_auto.py" << 'PYTHON'
 #!/usr/bin/env python3
 """Auto-generated autonomous iteration"""
 import sys

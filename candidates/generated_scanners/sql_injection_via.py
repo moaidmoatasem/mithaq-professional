@@ -1,6 +1,6 @@
 import httpx
 
-from mithaq.core.base_scanner import BaseScanner, Finding, ScanResult, Severity
+from cherenkov.core.base_scanner import BaseScanner, Finding, ScanResult, Severity
 
 
 class SQLInjectionScanner(BaseScanner):

@@ -6,7 +6,7 @@
     {
       "success": true,
       "result": {
-        "file": "mithaq-professional/src/mithaq/ai_workflows_orchestrator.py",
+        "file": "cherenkov-professional/src/cherenkov/ai_workflows_orchestrator.py",
         "improvements": [
           "Added logging import",
           "Added logger initialization"
@@ -19,7 +19,7 @@
     {
       "success": true,
       "result": {
-        "file": "mithaq-professional/tests/test_ai_workflows_orchestrator.py",
+        "file": "cherenkov-professional/tests/test_ai_workflows_orchestrator.py",
         "tests_added": 1,
         "status": "Added mocked test"
       },
@@ -29,7 +29,7 @@
     {
       "success": true,
       "result": {
-        "file": "mithaq-professional/src/mithaq/orchestration_api.py",
+        "file": "cherenkov-professional/src/cherenkov/orchestration_api.py",
         "functions_implemented": 3,
         "status": "API skeleton created"
       },
@@ -39,7 +39,7 @@
     {
       "success": true,
       "result": {
-        "file": "mithaq-professional/scripts/mithaq_cli_orchestrate.py",
+        "file": "cherenkov-professional/scripts/cherenkov_cli_orchestrate.py",
         "commands_created": 3,
         "status": "CLI commands created"
       },

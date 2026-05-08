@@ -1,7 +1,7 @@
 #!/bin/bash
-# mithaq NEXUS - Quick Setup Script
+# cherenkov NEXUS - Quick Setup Script
 
-echo "🚀 mithaq NEXUS - AI Security Orchestrator Setup"
+echo "🚀 cherenkov NEXUS - AI Security Orchestrator Setup"
 echo "================================================================"
 echo ""
 
@@ -28,7 +28,7 @@ echo ""
 mkdir -p results
 
 # Start all services
-echo "🐳 Starting all mithaq NEXUS services..."
+echo "🐳 Starting all cherenkov NEXUS services..."
 docker-compose up -d
 
 echo ""
@@ -39,14 +39,14 @@ sleep 30
 echo ""
 echo "📥 Downloading AI models (this may take 5-10 minutes)..."
 echo "   Model 1: DeepSeek-R1 1.5B (fast, efficient)..."
-docker exec mithaq-ollama ollama pull deepseek-r1:1.5b
+docker exec cherenkov-ollama ollama pull deepseek-r1:1.5b
 
 echo "   Model 2: Qwen 2.5 3B (better reasoning)..."
-docker exec mithaq-ollama ollama pull qwen2.5:3b
+docker exec cherenkov-ollama ollama pull qwen2.5:3b
 
 echo ""
 echo "================================================================"
-echo "✅ mithaq NEXUS IS READY!"
+echo "✅ cherenkov NEXUS IS READY!"
 echo "================================================================"
 echo ""
 echo "Services running:"

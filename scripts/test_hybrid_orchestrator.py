@@ -1,4 +1,4 @@
-from mithaq.core.hybrid_orchestrator import HybridOrchestrator, ExecutionMode
+from cherenkov.core.hybrid_orchestrator import HybridOrchestrator, ExecutionMode
 from dotenv import load_dotenv
 
 load_dotenv()

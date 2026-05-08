@@ -1,4 +1,4 @@
-# mithaq Framework - Current Status
+# cherenkov Framework - Current Status
 
 ## 🚀 OPERATIONAL
 

@@ -8,8 +8,8 @@ import sys
 
 sys.path.insert(0, ".")
 
-from mithaq.agents.micro_swarm.micro_agent import MicroAgent, MicroAgentConfig
-from mithaq.agents.micro_swarm.swarm_orchestrator import MicroSwarm
+from cherenkov.agents.micro_swarm.micro_agent import MicroAgent, MicroAgentConfig
+from cherenkov.agents.micro_swarm.swarm_orchestrator import MicroSwarm
 from pathlib import Path
 import subprocess
 
@@ -22,7 +22,7 @@ print("""
 
 def implement_orchestrate_workflow(context: str):
     """Implement the orchestrate_workflow function"""
-    api_file = Path("mithaq-professional/src/mithaq/orchestration_api.py")
+    api_file = Path("cherenkov-professional/src/cherenkov/orchestration_api.py")
     code = api_file.read_text()
 
     # Replace the TODO in orchestrate_workflow
@@ -75,7 +75,7 @@ def implement_orchestrate_workflow(context: str):
 
 def implement_register_agent(context: str):
     """Implement the register_agent function"""
-    api_file = Path("mithaq-professional/src/mithaq/orchestration_api.py")
+    api_file = Path("cherenkov-professional/src/cherenkov/orchestration_api.py")
     code = api_file.read_text()
 
     # Add agent registry
@@ -121,7 +121,7 @@ def implement_register_agent(context: str):
 
 def implement_execute_parallel(context: str):
     """Implement the execute_parallel function"""
-    api_file = Path("mithaq-professional/src/mithaq/orchestration_api.py")
+    api_file = Path("cherenkov-professional/src/cherenkov/orchestration_api.py")
     code = api_file.read_text()
 
     implementation = '''    """
@@ -171,13 +171,13 @@ def implement_execute_parallel(context: str):
 
 def add_comprehensive_tests(context: str):
     """Add tests for all API functions"""
-    test_file = Path("mithaq-professional/tests/test_orchestration_api.py")
+    test_file = Path("cherenkov-professional/tests/test_orchestration_api.py")
 
     test_code = '''"""
 Tests for Orchestration API
 """
 import pytest
-from mithaq.orchestration_api import (
+from cherenkov.orchestration_api import (
     orchestrate_workflow, 
     register_agent, 
     execute_parallel,

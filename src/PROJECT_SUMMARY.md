@@ -1,4 +1,4 @@
-# 🔒 mithaq Security Framework - Project Complete!
+# 🔒 cherenkov Security Framework - Project Complete!
 
 ## ✅ What We Built
 
@@ -28,7 +28,7 @@
 
 ```bash
 # Activate virtual environment
-cd ~/mithaq-dev
+cd ~/cherenkov-dev
 source .venv/bin/activate
 
 # Run individual examples
@@ -45,7 +45,7 @@ python examples/full_security_audit.py
 Current model: **ollama/qwen2.5:3b** (1.9 GB RAM)
 
 To use bigger models (requires more RAM):
-- Edit `mithaq/config/llm_config.py`
+- Edit `cherenkov/config/llm_config.py`
 - Change `DEFAULT_LLM_MODEL` to:
   - `ollama/qwen2.5-coder:7b` (4.3 GB RAM)
   - `ollama/deepseek-coder-v2:16b` (8+ GB RAM)

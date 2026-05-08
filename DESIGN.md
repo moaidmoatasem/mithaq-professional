@@ -1,4 +1,4 @@
-# DESIGN.md | MITHAQ Sovereign Security Design System
+# DESIGN.md | CHERENKOV Sovereign Security Design System
 
 > **Source of Truth for Google Stitch & AI Agents**
 > Identity: Sovereign, Precise, Air-Gapped, Forensic.
@@ -7,7 +7,7 @@
 ---
 
 ## 1. MISSION & VIBE
-MITHAQ is a "Fail-Closed" security intelligence platform. The design must reflect **uncompromising authority** and **forensic clarity**. It is not a "friendly" SaaS; it is a tactical command interface for national-scale security infrastructure.
+CHERENKOV is a "Fail-Closed" security intelligence platform. The design must reflect **uncompromising authority** and **forensic clarity**. It is not a "friendly" SaaS; it is a tactical command interface for national-scale security infrastructure.
 
 **Vibe Keywords**: Tactical, Precise, Obsidian, High-Contrast, Glitch-Resistant, Mathematical.
 
@@ -21,7 +21,7 @@ MITHAQ is a "Fail-Closed" security intelligence platform. The design must reflec
 - **Background (Obsidian)**: `#0A0A0A` | The deep-canvas base. Use for all main surfaces.
 - **Surface (Elevated)**: `#1A1D26` | Use for panels and cards.
 - **Critical (Alert)**: `#FF4444` | Use only for verified vulnerabilities and fail-closed events.
-- **Safe (Verity)**: `#00FF88` | Use for verified cryptographic proofs and "Al-Burhan" signatures.
+- **Safe (Verity)**: `#00FF88` | Use for verified cryptographic proofs and "Tokamak" signatures.
 
 ### 🔡 Typography (The IBM/JetBrains Stack)
 - **Headings**: `IBM Plex Sans` | Bold, tracking -0.01em.
@@ -48,7 +48,7 @@ MITHAQ is a "Fail-Closed" security intelligence platform. The design must reflec
 
 ### 🦠 Organisms
 - **TacticalPanel**: Elevated surface with `fx-grid` background, chamfered header, and integrated log stream.
-- **ForensicHeader**: Global navigation with Brand Mark, Siyaada Sync status, and active mission timer.
+- **ForensicHeader**: Global navigation with Brand Mark, Ablation Sync status, and active mission timer.
 
 ---
 
@@ -68,10 +68,10 @@ MITHAQ is a "Fail-Closed" security intelligence platform. The design must reflec
 ## 5. GOOGLE STITCH COMMANDS (Prompts)
 
 ### COMMAND 01: The Core Dashboard
-> "Stitch a high-fidelity 'Tactical Operations' dashboard for MITHAQ. Use the DESIGN.md rules. Background must be Obsidian (#0A0A0A). Feature a 3:1 grid. Left: A large 'Operation Stream' panel with JetBrains Mono logs. Right: A 'Threat Intelligence' sidebar with severity-coded cards. Include a header with a Bismuth Purple logo and a 'SIYAADA SAFE' pulse badge."
+> "Stitch a high-fidelity 'Tactical Operations' dashboard for CHERENKOV. Use the DESIGN.md rules. Background must be Obsidian (#0A0A0A). Feature a 3:1 grid. Left: A large 'Operation Stream' panel with JetBrains Mono logs. Right: A 'Threat Intelligence' sidebar with severity-coded cards. Include a header with a Bismuth Purple logo and a 'ABLATION SAFE' pulse badge."
 
 ### COMMAND 02: The Forensic Proof View
-> "Stitch a detail view for a specific vulnerability finding. Follow MITHAQ Atomic patterns. Show a 'Proof of Concept' execution window with a command-line interface. Include a 'MITHAQ Trace' section showing a cryptographic SHA-256 signature and a 'Redacted by SIYAADA' label for all credential fields."
+> "Stitch a detail view for a specific vulnerability finding. Follow CHERENKOV Atomic patterns. Show a 'Proof of Concept' execution window with a command-line interface. Include a 'CHERENKOV Trace' section showing a cryptographic SHA-256 signature and a 'Redacted by ABLATION' label for all credential fields."
 
-### COMMAND 03: The Network Shield (DAREE3)
-> "Stitch a network visualization component. Show a local subnet vs. the global internet. The boundary must be labeled '[DAREE3_SHIELD]'. Use Cobalt Steel for authorized nodes and Bismuth Purple for the MITHAQ monitoring agent. Visualize egress-control as a glowing barrier."
+### COMMAND 03: The Network Shield (MEISSNER)
+> "Stitch a network visualization component. Show a local subnet vs. the global internet. The boundary must be labeled '[MEISSNER]'. Use Cobalt Steel for authorized nodes and Bismuth Purple for the CHERENKOV monitoring agent. Visualize egress-control as a glowing barrier."

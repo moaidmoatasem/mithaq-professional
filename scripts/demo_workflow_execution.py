@@ -6,20 +6,20 @@ Shows the complete autonomous workflow system in action
 
 import sys
 
-sys.path.insert(0, "mithaq-professional/src")
+sys.path.insert(0, "cherenkov-professional/src")
 
-from mithaq.workflow_parser import load_workflow
-from mithaq.orchestration_api import orchestrate_workflow
+from cherenkov.workflow_parser import load_workflow
+from cherenkov.orchestration_api import orchestrate_workflow
 import json
 
 print("""
 ╔══════════════════════════════════════════════════════════════╗
-║  🎯 mithaq AUTONOMOUS WORKFLOW DEMO                          ║
+║  🎯 cherenkov AUTONOMOUS WORKFLOW DEMO                          ║
 ╚══════════════════════════════════════════════════════════════╝
 """)
 
 # Load the security scan workflow
-workflow_file = "mithaq-professional/examples/workflows/security_scan_workflow.yaml"
+workflow_file = "cherenkov-professional/examples/workflows/security_scan_workflow.yaml"
 print(f"📄 Loading workflow: {workflow_file}")
 
 config = load_workflow(workflow_file)

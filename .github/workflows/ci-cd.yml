@@ -32,7 +32,7 @@ jobs:
 
     - name: Run Pylint
       run: |
-        pylint src/mithaq --fail-under=7.5 || echo "Pylint score below 7.5 (non-blocking)"
+        pylint src/cherenkov --fail-under=7.5 || echo "Pylint score below 7.5 (non-blocking)"
 
     - name: Run unit tests only
       run: |
@@ -56,11 +56,11 @@ jobs:
 
     - name: Build Docker image
       run: |
-        docker build -t mithaq:latest .
+        docker build -t cherenkov:latest .
 
     - name: Test Docker image
       run: |
-        docker run --rm mithaq:latest python --version
+        docker run --rm cherenkov:latest python --version
 
   security-scan:
     runs-on: ubuntu-latest
@@ -75,12 +75,7 @@ jobs:
     - name: Run Bandit (security linter)
       run: |
         pip install bandit
-        bandit -r src/mithaq -f json -o bandit-results.json || true
-
-    - name: Convert Bandit JSON to SARIF
-      run: |
-        pip install bandit-sarif-formatter
-        bandit-sarif-formatter -i bandit-results.json -o bandit-results.sarif
+        bandit -r src/cherenkov -f sarif -o bandit-results.sarif || echo "Bandit found issues"
 
     - name: Run Safety (dependency check)
       run: |

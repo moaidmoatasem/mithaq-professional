@@ -43,7 +43,7 @@ output:
   file: "full_audit_results.json"
   save_to_store: true
 
-burhan_standard:
+tokamak_standard:
   require_proof: true
   min_confidence: 0.95
   manual_verification: true

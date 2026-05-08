@@ -1,7 +1,7 @@
 #!/bin/bash
 
 echo "╔══════════════════════════════════════════════════════════════╗"
-echo "║  🚀 mithaq - Complete System Launcher                        ║"
+echo "║  🚀 cherenkov - Complete System Launcher                        ║"
 echo "╚══════════════════════════════════════════════════════════════╝"
 echo ""
 
@@ -51,13 +51,13 @@ case $choice in
     1)
         echo ""
         read -p "Enter URL to scan: " url
-        python mithaq_simple_scanner.py "$url"
+        python cherenkov_simple_scanner.py "$url"
         ;;
     2)
         echo ""
         echo "🌐 Starting web dashboard..."
         echo "📱 Open browser to: http://localhost:5000"
-        python mithaq_web.py
+        python cherenkov_web.py
         ;;
     3)
         echo ""
@@ -71,7 +71,7 @@ case $choice in
     5)
         echo ""
         echo "🐳 Starting Docker container..."
-        docker-compose up mithaq
+        docker-compose up cherenkov
         ;;
     6)
         echo ""
@@ -83,7 +83,7 @@ case $choice in
         # Quick scan
         echo ""
         echo "1️⃣ Testing Quick Scanner..."
-        python mithaq_simple_scanner.py https://example.com
+        python cherenkov_simple_scanner.py https://example.com
         
         echo ""
         echo "2️⃣ Analyzing AI-generated scanners..."
@@ -91,20 +91,20 @@ case $choice in
         
         echo ""
         echo "3️⃣ System ready! Launch web dashboard with:"
-        echo "   python mithaq_web.py"
+        echo "   python cherenkov_web.py"
         ;;
     8)
         echo ""
-        echo "📊 mithaq System Status"
+        echo "📊 cherenkov System Status"
         echo "════════════════════════════════════════════════"
         echo ""
         
         echo "📁 Framework Structure:"
-        tree mithaq/ -L 2 -I __pycache__ 2>/dev/null || ls -R mithaq/
+        tree cherenkov/ -L 2 -I __pycache__ 2>/dev/null || ls -R cherenkov/
         
         echo ""
         echo "🔍 Available Scanners:"
-        ls -1 mithaq/scanners/*.py mithaq/scanners/generated/*.py 2>/dev/null | wc -l
+        ls -1 cherenkov/scanners/*.py cherenkov/scanners/generated/*.py 2>/dev/null | wc -l
         
         echo ""
         echo "📄 Scan Reports:"
@@ -112,7 +112,7 @@ case $choice in
         
         echo ""
         echo "🤖 AI Agents:"
-        find mithaq/agents -name "*.py" | wc -l
+        find cherenkov/agents -name "*.py" | wc -l
         
         echo ""
         echo "✅ System Status: OPERATIONAL"

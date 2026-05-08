@@ -1,6 +1,6 @@
-# mithaq Security Framework - Examples
+# cherenkov Security Framework - Examples
 
-This directory contains practical examples demonstrating the mithaq multi-agent security framework.
+This directory contains practical examples demonstrating the cherenkov multi-agent security framework.
 
 ## Examples
 
@@ -47,7 +47,7 @@ python examples/full_security_audit.py
 ## Requirements
 
 - Python 3.12+
-- mithaq framework installed
+- cherenkov framework installed
 - LLM model running (Ollama with deepseek-r1:14b)
 
 ## Notes

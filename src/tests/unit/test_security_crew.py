@@ -4,10 +4,10 @@ from unittest.mock import Mock, patch
 
 from crewai import Process
 
-from mithaq.agents.architect_agent import ArchitectAgent
-from mithaq.agents.developer_agent import DeveloperAgent
-from mithaq.agents.tester_agent import TesterAgent
-from mithaq.crews.security_crew import SecurityCrew
+from cherenkov.agents.architect_agent import ArchitectAgent
+from cherenkov.agents.developer_agent import DeveloperAgent
+from cherenkov.agents.tester_agent import TesterAgent
+from cherenkov.crews.security_crew import SecurityCrew
 
 
 class TestSecurityCrew:
@@ -80,7 +80,7 @@ class TestSecurityCrew:
         assert len(crew.agents) == 3  # All three agents
         assert len(crew.tasks) == 2
 
-    @patch("mithaq.crews.security_crew.Crew")
+    @patch("cherenkov.crews.security_crew.Crew")
     def test_perform_security_audit_threat_model(self, mock_crew_class):
         """Test security audit with threat modeling scope."""
         # Mock crew instance and kickoff result
@@ -100,7 +100,7 @@ class TestSecurityCrew:
         assert result["agents_used"] == 1
         mock_crew_instance.kickoff.assert_called_once()
 
-    @patch("mithaq.crews.security_crew.Crew")
+    @patch("cherenkov.crews.security_crew.Crew")
     def test_perform_security_audit_full_scope(self, mock_crew_class):
         """Test security audit with full scope."""
         # Mock crew instance and kickoff result
@@ -120,7 +120,7 @@ class TestSecurityCrew:
         assert result["agents_used"] == 3
         mock_crew_instance.kickoff.assert_called_once()
 
-    @patch("mithaq.crews.security_crew.Crew")
+    @patch("cherenkov.crews.security_crew.Crew")
     def test_analyze_mobile_app(self, mock_crew_class):
         """Test mobile app analysis workflow."""
         # Mock crew instance and kickoff result

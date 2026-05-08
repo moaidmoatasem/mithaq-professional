@@ -8,8 +8,8 @@ import sys
 
 sys.path.insert(0, ".")
 
-from mithaq.agents.micro_swarm.micro_agent import MicroAgent, MicroAgentConfig
-from mithaq.agents.micro_swarm.swarm_orchestrator import MicroSwarm
+from cherenkov.agents.micro_swarm.micro_agent import MicroAgent, MicroAgentConfig
+from cherenkov.agents.micro_swarm.swarm_orchestrator import MicroSwarm
 from pathlib import Path
 import subprocess
 
@@ -80,9 +80,9 @@ def propose_api_design(context: str):
                 "execute_parallel(agents: List[Agent], tasks: List[Task]) -> Results",
             ],
             "cli_commands": [
-                "mithaq orchestrate --config workflow.yaml",
-                "mithaq agent register --role researcher",
-                "mithaq workflow status --id abc123",
+                "cherenkov orchestrate --config workflow.yaml",
+                "cherenkov agent register --role researcher",
+                "cherenkov workflow status --id abc123",
             ],
         },
         "rationale": "Simple, intuitive API for running AI workflows",
@@ -91,7 +91,7 @@ def propose_api_design(context: str):
 
 def update_notes(improvements: str):
     """Update AGENT_NOTES_ORCHESTRATION.md"""
-    notes_file = Path("mithaq-professional/AGENT_NOTES_ORCHESTRATION.md")
+    notes_file = Path("cherenkov-professional/AGENT_NOTES_ORCHESTRATION.md")
 
     with open(notes_file, "a") as f:
         from datetime import datetime
@@ -138,8 +138,8 @@ agents = [
 
 # Define tasks
 tasks = [
-    "mithaq-professional/src/mithaq/ai_workflows_orchestrator.py",
-    "mithaq-professional/tests/test_ai_workflows_orchestrator.py",
+    "cherenkov-professional/src/cherenkov/ai_workflows_orchestrator.py",
+    "cherenkov-professional/tests/test_ai_workflows_orchestrator.py",
     "Design public API for orchestration",
     "MicroSwarm completed analysis. Recommended: Add logging, improve tests, design clean API.",
 ]
@@ -167,7 +167,7 @@ try:
         [
             "git",
             "add",
-            "mithaq-professional/AGENT_NOTES_ORCHESTRATION.md",
+            "cherenkov-professional/AGENT_NOTES_ORCHESTRATION.md",
             "swarm_outputs/",
         ],
         check=True,

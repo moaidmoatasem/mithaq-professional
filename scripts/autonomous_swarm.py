@@ -8,7 +8,7 @@ import os
 import subprocess
 from pathlib import Path
 from datetime import datetime
-from mithaq.core.memory_efficient_parallel import MemoryEfficientCrew
+from cherenkov.core.memory_efficient_parallel import MemoryEfficientCrew
 
 print("""
 ╔══════════════════════════════════════════════════════════════╗
@@ -18,10 +18,10 @@ print("""
 
 # Configuration
 REAL_FILES = [
-    "mithaq-professional/src/mithaq/ai_workflows_orchestrator.py",
-    "mithaq/core/hybrid_orchestrator.py",
-    "mithaq-professional/tests/test_ai_workflows_orchestrator.py",
-    "mithaq-professional/tests/test_hybrid_orchestrator.py",
+    "cherenkov-professional/src/cherenkov/ai_workflows_orchestrator.py",
+    "cherenkov/core/hybrid_orchestrator.py",
+    "cherenkov-professional/tests/test_ai_workflows_orchestrator.py",
+    "cherenkov-professional/tests/test_hybrid_orchestrator.py",
 ]
 
 # Agent swarm tasks (run in parallel)
@@ -30,28 +30,28 @@ SWARM_TASKS = [
         "name": "Orchestrator Refactorer",
         "role": "Code Refactoring Specialist",
         "goal": "Improve ai_workflows_orchestrator.py with better error handling and logging",
-        "file": "mithaq-professional/src/mithaq/ai_workflows_orchestrator.py",
+        "file": "cherenkov-professional/src/cherenkov/ai_workflows_orchestrator.py",
         "task": "Add comprehensive exception handling and structured logging to ai_workflows_orchestrator.py. Make small, safe improvements.",
     },
     {
         "name": "Test Enhancer",
         "role": "Testing Expert",
         "goal": "Improve orchestration tests to avoid external LLM dependencies",
-        "file": "mithaq-professional/tests/test_ai_workflows_orchestrator.py",
+        "file": "cherenkov-professional/tests/test_ai_workflows_orchestrator.py",
         "task": "Refactor tests to use mocks instead of real LLM calls. Add unit tests for error cases.",
     },
     {
         "name": "API Designer",
         "role": "API Architect",
         "goal": "Design clean public API for orchestration",
-        "file": "mithaq-professional/docs/ORCHESTRATION_API.md",
+        "file": "cherenkov-professional/docs/ORCHESTRATION_API.md",
         "task": "Design and document a simple public API for running AI workflows. Define CLI commands and Python functions.",
     },
     {
         "name": "Documentation Writer",
         "role": "Technical Writer",
         "goal": "Document the orchestration system architecture",
-        "file": "mithaq-professional/docs/ARCHITECTURE.md",
+        "file": "cherenkov-professional/docs/ARCHITECTURE.md",
         "task": "Document how the orchestration layer works, its components, and how to use it.",
     },
 ]

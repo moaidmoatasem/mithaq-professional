@@ -1,0 +1,5 @@
+site_name: CHERENKOV Architecture
+theme:
+  name: material
+  palette:
+    scheme: slate

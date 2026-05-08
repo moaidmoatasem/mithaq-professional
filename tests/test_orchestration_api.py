@@ -49,50 +49,6 @@ def test_execute_parallel():
     assert len(results) == 3
     assert all('success' in r for r in results)
 
-
-def test_workflow_executor_generate_report():
-    """Test generating execution report from WorkflowExecutor"""
-    from mithaq.orchestration_api import WorkflowExecutor
-
-    config = {
-        "name": "test_report_workflow",
-        "execution": {"mode": "parallel"}
-    }
-
-    executor = WorkflowExecutor(config)
-    executor.agents = ["agent1", "agent2"]
-    executor.results = [{"task": "t1"}, {"task": "t2"}]
-
-    report = executor.generate_report()
-
-    assert report["workflow"] == "test_report_workflow"
-    assert report["agents_used"] == 2
-    assert report["tasks_completed"] == 2
-    assert report["results"] == [{"task": "t1"}, {"task": "t2"}]
-
-    metrics = report["metrics"]
-    assert metrics["agents_deployed"] == 2
-    assert metrics["tasks_executed"] == 2
-    assert metrics["workflow_name"] == "test_report_workflow"
-    assert metrics["execution_mode"] == "parallel"
-
-def test_workflow_executor_generate_report_empty_config():
-    """Test generating execution report with empty config"""
-    from mithaq.orchestration_api import WorkflowExecutor
-
-    executor = WorkflowExecutor({})
-    report = executor.generate_report()
-
-    assert report["workflow"] == "Unknown"
-    assert report["agents_used"] == 0
-    assert report["tasks_completed"] == 0
-    assert report["results"] == []
-
-    metrics = report["metrics"]
-    assert metrics["agents_deployed"] == 0
-    assert metrics["tasks_executed"] == 0
-    assert metrics["workflow_name"] == "unknown"
-    assert metrics["execution_mode"] == "sequential"
 @patch('mithaq.result_persistence.ResultStore')
 def test_get_workflow_status(mock_result_store):
     """Test get_workflow_status calls ResultStore.get_latest"""

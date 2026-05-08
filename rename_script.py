@@ -1,0 +1,29 @@
+import os
+
+replacements = {
+    "MITHAQ": "CHERENKOV",
+    "mithaq": "cherenkov",
+    "DAQIQ": "CHERENKOV",
+    "daqiq": "cherenkov",
+    "DAREE3_SHIELD": "MEISSNER",
+    "DAREE3": "MEISSNER",
+    "daree3": "meissner",
+    "DAREE": "MEISSNER",
+    "daree": "meissner",
+    "UrlGuard": "MEISSNER",
+    "urlguard": "meissner",
+    "SIYAADA": "ABLATION",
+    "siyaada": "ablation",
+    "SIYADA": "ABLATION",
+    "siyada": "ablation",
+    "AL-BURHAN": "TOKAMAK",
+    "Al-Burhan": "Tokamak",
+    "al-burhan": "tokamak",
+    "BURHAN": "TOKAMAK",
+    "Burhan": "Tokamak",
+    "burhan": "tokamak",
+    "Sandbox": "Tokamak",
+    "sandbox": "tokamak"
+}
+
+print("Running script")

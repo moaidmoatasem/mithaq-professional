@@ -15,7 +15,16 @@
 - **Core Orchestration**: Refactored `HybridOrchestrator` to enforce modular security boundaries.
 
 
-## v0.1.1 — Security Patch (May 2026)
+## [0.1.2] - 2026-05-08
+### Fixed
+- Critical `eval()` injection vulnerability in `VulnerabilitySeverityScore` scanner.
+- Cross-platform test failure for vulnerability scanners.
+
+### Added
+- Cloudflare Workers configuration (`wrangler.jsonc`) for deployment.
+
+## [0.1.1] - 2026-05-08
+Security Patch (May 2026)
 
 ### Fixed
 - CRITICAL: Flask debug mode disabled; server binds to localhost by default (env-configurable)

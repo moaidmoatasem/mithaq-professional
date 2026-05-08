@@ -16,6 +16,9 @@
 
 ## Phase 2: Tool Integration (Week 9-20)
 - [ ] APKTool wrapper
+- [x] Fix eval() injection vulnerability in `vulnerabilityseverityscore.py`
+- [x] Merge Cloudflare configuration (PR #66)
+- [ ] Merge/Sync Dependabot updates (#60-#65)
 - [ ] Androguard integration
 - [ ] Frida hook generator
 - [ ] Drozer PoC executor
@@ -42,4 +45,3 @@
 **Assigned to:** Roo Code (Builder - Gemini 2.5 Flash)  
 **Branch:** feature/pydantic-gates  
 **Target completion:** Today, 6:00 PM EEST
-

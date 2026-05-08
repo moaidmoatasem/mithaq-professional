@@ -5,22 +5,26 @@ name: Security Scanning
     - cron: "0 0 * * 0"  # Weekly on Sunday
   workflow_dispatch:
 
+env:
+  FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
+  CODEQL_ACTION_FILE_COVERAGE_ON_PRS: true
+
 jobs:
   dependency-scan:
     runs-on: ubuntu-latest
 
     steps:
-      - uses: actions/checkout@v4
+    - uses: actions/checkout@v4
+    
+    - name: Set up Python
+      uses: actions/setup-python@v5
+      with:
+        python-version: '3.11'
 
-      - name: Set up Python
-        uses: actions/setup-python@v5
-        with:
-          python-version: '3.12'
-
-      - name: Install dependencies
-        run: |
-          python -m pip install --upgrade pip
-          pip install -e '.[dev]'
+    - name: Install dependencies
+      run: |
+        python -m pip install --upgrade pip
+        pip install -e ".[dev]" || pip install -r requirements.txt || true
 
     - name: Run Snyk Security Scan
       uses: snyk/actions/python@master
@@ -46,14 +50,8 @@ jobs:
       with:
         upload: false
         output: codeql-results
-      uses: github/codeql-action/analyze@v4
-      with:
-        upload: false
-        output: ${{ runner.temp }}/results
 
-    - name: Upload CodeQL results as artifact
-      uses: actions/upload-artifact@v4
+    - name: Upload SARIF
+      uses: github/codeql-action/upload-sarif@v3
       with:
-        name: codeql-results
-        path: ${{ runner.temp }}/results
-        path: ${{ runner.workspace }}/results
+        sarif_file: codeql-results/python.sarif

@@ -5,6 +5,9 @@ on:
     - cron: '0 2 * * *'
   workflow_dispatch:
 
+env:
+  FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
+
 jobs:
   validate:
     runs-on: ubuntu-latest
@@ -55,8 +58,7 @@ jobs:
           python src/mithaq/dev_crew/scanner_generator.py \
             --from-cve-feed \
             --limit 3
-        env:
-          mithaq_OLLAMA_URL: ${{ vars.mithaq_OLLAMA_URL || 'http://localhost:11434' }}
+            mithaq_OLLAMA_URL: ${{ vars.mithaq_OLLAMA_URL || 'http://localhost:11434' }}
           mithaq_OLLAMA_MODEL: ${{ vars.mithaq_OLLAMA_MODEL || 'qwen2.5-coder:7b' }}
 
       - name: Validate candidates
@@ -131,8 +133,7 @@ jobs:
           echo "failed=$failed" >> "$GITHUB_OUTPUT"
           # Serialize as space-separated list; PR step iterates over it
           echo "passed_files=${passed_files[*]}" >> "$GITHUB_OUTPUT"
-        env:
-          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+            GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Graduate passing candidates and open PRs
         if: steps.validate.outputs.passed != '0'
@@ -189,8 +190,7 @@ EOF
           done
 
           echo "PRs opened: $prs_opened"
-        env:
-          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+            GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Report summary
         if: always()

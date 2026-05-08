@@ -9,6 +9,9 @@ permissions:
   contents: write
   pull-requests: read
 
+env:
+  FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
+
 jobs:
   update_release_draft:
     runs-on: ubuntu-latest
@@ -17,5 +20,4 @@ jobs:
         with:
           config-name: release-drafter.yml
           commitish: main
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+            GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

@@ -74,6 +74,7 @@ def orchestrate_workflow(config: Dict) -> WorkflowResult:
         WorkflowResult with execution details
     """
     import time
+    from cherenkov.result_persistence import ResultStore
 
     start = time.time()
 
@@ -88,8 +89,14 @@ def orchestrate_workflow(config: Dict) -> WorkflowResult:
         # Placeholder workflow execution
         outputs = {"status": "executed", "config": config}
 
+        duration = time.time() - start
+
+        # Save results directly via API layer
+        store = ResultStore()
+        store.save_result(config.get("name", "Unnamed"), outputs)
+
         return WorkflowResult(
-            success=True, outputs=outputs, duration=time.time() - start, errors=None
+            success=True, outputs=outputs, duration=duration, errors=None
         )
     except Exception as e:
         return WorkflowResult(

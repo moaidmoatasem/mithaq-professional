@@ -1,9 +1,11 @@
 #!/usr/bin/env python3
 """
 cherenkov CLI - Orchestration commands
+Refactored for Clean Architecture: No direct DB access, routes through API.
 """
 
 import click
+import json
 
 
 @click.group()
@@ -27,18 +29,18 @@ def orchestrate(config, output):
         workflow_config = load_workflow(config)
         click.echo(f"   Loaded: {workflow_config.get('name', 'Unnamed')}")
 
-        # Execute workflow
+        # Execute workflow - API layer handles ALL persistence!
         result = orchestrate_workflow(workflow_config)
 
         if result.success:
-            # Save results
-            from cherenkov.result_persistence import ResultStore
-
-            store = ResultStore()
-            store.save_result(workflow_config.get("name", "Unnamed"), result.outputs)
-
             click.echo(f"✅ Workflow completed in {result.duration:.2f}s")
-            click.echo(f"   Results saved to {output} and result store")
+            click.echo("   Results processed by API.")
+
+            # Save the result output specifically to the requested file
+            with open(output, "w") as f:
+                json.dump(result.outputs, f, indent=2)
+
+            click.echo(f"   Outputs saved locally to {output}")
         else:
             click.echo(f"❌ Workflow failed: {result.errors}")
 
@@ -78,8 +80,6 @@ def status(id):
 
         if result:
             click.echo(f"✅ Latest result found for {id}:")
-            import json
-
             click.echo(json.dumps(result, indent=2))
         else:
             click.echo(f"❓ No results found for workflow: {id}")
@@ -89,4 +89,3 @@ def status(id):
 
 if __name__ == "__main__":
     cli()
-

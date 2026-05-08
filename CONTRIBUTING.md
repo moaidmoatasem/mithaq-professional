@@ -1,6 +1,6 @@
-# Contributing to CHERENKOV
+# Contributing to CHERENKOV / MITHAQ
 
-Thank you for your interest in contributing to CHERENKOV! We welcome contributions that align with our **Sovereign Security Standard**.
+Thank you for your interest in contributing! We welcome contributions that align with our **Sovereign Security Standard** and strictly follow our designated flows, roles, rules, and best practices.
 
 ## 🛡️ Sovereign Contribution Guidelines
 
@@ -10,48 +10,43 @@ All new features, agents, or scanners must operate under the "Zero-Egress" princ
 - Routed through the **ABLATION** redaction layer.
 - Controllable via the **MEISSNER** network shield.
 
-### 2. Forensic Proof (Tokamak)
-Every security scanner must implement the `validate()` method to provide a non-destructive Proof of Concept (PoC). We do not accept scanners that only perform static analysis without a validation path.
+### 2. Clean Architecture
+Strictly separate concerns:
+- **CLI/Web:** Should only interact with `orchestration_api.py`.
+- **API:** Handles business logic and agent routing.
+- **Persistence (`ResultStore`):** Only accessed by the API layer.
+- **Scanners:** Must inherit from `BaseScanner` to ensure auto-discovery via `ScannerRegistry`.
 
 ### 3. Namespace Integrity
-Always use the `cherenkov` namespace. Legacy `cherenkov` references are prohibited in new PRs.
+Always use the correct `cherenkov` namespace.
 
-## 🛠️ Development Workflow
+## 🛠️ Development Workflow & Branching Strategy
 
 ### 1. Environment Setup
-We recommend developing on a native Windows environment with WSL2 for containerized testing.
-
-```powershell
+```bash
 # Initialize development environment
-pip install -e .
-pytest tests/
+pip install -e ".[dev]"
+pytest tests/unit/
 ```
 
-### 2. GitHub Workflow & Project Management
-All contributors (human and AI) must follow our strict GitHub workflow:
-- **Issues & Milestones**: Ensure your work is tracked by an active GitHub Issue and linked to a Milestone or Project board. Use the provided Issue Templates (`bug_report.md`, `feature_request.md`, `task.md`).
-- **Branching Strategy**: NEVER commit directly to `main`. Create feature branches following the format `<type>/<issue-number>-<description>` (e.g., `feature/42-new-scanner`).
-- **Commits**: Use Conventional Commits and reference the issue number in the message.
-- **Pull Requests**: Create a PR against the `main` branch. Use the provided PR Template. Link the PR to the issue (`Closes #42`). Wait for CI checks and reviewer approval before merging. DO NOT merge your own PRs.
-- **Documentation**: Keep `CHANGELOG.md`, `TODO.md`, and other state-tracking markdown files updated with your changes. Use GitHub Wikis for larger architectural guides.
+### 2. GitHub Project Management & Branching Process
+All contributors must follow our strict GitHub Flow:
+- **Issues & Milestones:** Ensure your work is tracked by an active GitHub Issue and linked to a project board.
+- **Branching Strategy:**
+  - NEVER commit directly to `main` or `develop`.
+  - Create feature branches following the format: `feature/<issue-number>-<description>`, `bugfix/<issue-number>-<description>`, or `docs/<issue-number>-<description>`.
+- **Commits:** Use Conventional Commits (e.g., `feat:`, `fix:`, `docs:`).
 
-### 3. Atomic Design (UI)
-If contributing to the web portal, follow the **Atomic Design** pattern in `src/cherenkov/web/components/`. 
-- **Atoms**: Pure UI elements.
-- **Molecules**: Simple groups of atoms.
-- **Organisms**: Functional business units.
+### 3. Pull Request & Review Process
+- **Create PR:** Open a Pull Request against `develop` (or `main` if hotfix). Use the provided PR Template.
+- **Documentation:** Provide clear documentation for the done work within the PR description.
+- **CI/CD Checks:** All automated checks must pass before a review is requested. This includes:
+  - Unit Tests (`pytest`)
+  - Code Formatting (`black`, `flake8`)
+  - Security Scans (`bandit`, `CodeQL`, `Trivy`)
+- **Review:** Wait for Human-in-the-Loop (HITL) PR reviewer approval before merging.
+- **Do Not Merge Your Own PRs.**
 
-### 4. Testing Requirements
-- All new features must include `pytest` unit tests.
-- High-impact logic must pass the `test_production_ready.py` quality gate.
-- Ensure all CI/CD scans pass (CodeQL, Dependency Check).
-
-## 📝 Pull Request Process
-
-1. Fork the repository and create your branch from `main`.
-2. Ensure your code follows the **CHERENKOV Code of Conduct**.
-3. Update the `CHANGELOG.md` with your changes.
-4. Submit your PR with a detailed description of the security implications.
-
----
-*CHERENKOV: Accuracy is the root of sovereignty.*
+### 4. Code Quality & Best Practices
+- **Test-Driven Development (TDD):** New features must have corresponding tests.
+- **Documentation:** All functions and classes must have clear docstrings (Google Style).

@@ -6,13 +6,15 @@ Main CLI
 
 import sys
 import argparse
-from cherenkov.scanners.header_scanner import SimpleScanner
+import asyncio
+from cherenkov.scanners.header_scanner import HeaderScanner
 
 
 def scan_command(args):
     """Run security scan"""
-    scanner = SimpleScanner(args.url)
-    scanner.run()
+    scanner = HeaderScanner()
+    result = asyncio.run(scanner.scan(args.url))
+    print(result.model_dump_json(indent=2))
 
 
 def generate_command(args):
@@ -59,4 +61,3 @@ Examples:
 
 if __name__ == "__main__":
     main()
-

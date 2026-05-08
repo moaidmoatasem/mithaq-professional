@@ -1,6 +1,4 @@
-"""cherenkov Scanners Module"""
+"""Scanner modules."""
+from .header_scanner import HeaderScanner
 
-from .header_scanner import SimpleScanner
-
-__all__ = ["SimpleScanner"]
-
+__all__ = ["HeaderScanner"]

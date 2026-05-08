@@ -1,5 +1,26 @@
-import unittest
+import sys
 from unittest.mock import patch, MagicMock
+
+# 1. Mock dependencies BEFORE importing mithaq modules
+class MockBaseModel:
+    def __init__(self, **data):
+        for key, value in data.items():
+            setattr(self, key, value)
+    def model_dump(self):
+        return self.__dict__
+    @classmethod
+    def model_validate(cls, obj):
+        return cls(**obj)
+
+mock_pydantic = MagicMock()
+mock_pydantic.BaseModel = MockBaseModel
+sys.modules['pydantic'] = mock_pydantic
+
+mock_httpx = MagicMock()
+sys.modules['httpx'] = mock_httpx
+
+# 2. Now imports will work even if pydantic/httpx are missing in the environment
+import unittest
 from mithaq.core.registry import ScannerRegistry
 from mithaq.core.base_scanner import BaseScanner, ScanResult
 

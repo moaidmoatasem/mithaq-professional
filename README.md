@@ -1,9 +1,41 @@
-# CHERENKOV | The Sovereign Security Standard
+<p align="center">
+  <img src="assets/cherenkov-logo.svg" width="420" alt="CHERENKOV — The Forensic Reveal">
+</p>
+
+<p align="center">
+  <a href="https://cherenkov-security.com"><strong>cherenkov-security.com</strong></a> ·
+  <a href="mailto:support@cherenkov-security.com">support@cherenkov-security.com</a>
+</p>
+
+<p align="center">
+  <img src="https://img.shields.io/badge/license-MIT_/_Apache_2.0-00E0FF?style=for-the-badge&labelColor=0A0E1A" alt="License">
+  <img src="https://img.shields.io/badge/python-3.11%2B-00E0FF?style=for-the-badge&labelColor=0A0E1A" alt="Python">
+  <img src="https://img.shields.io/badge/status-alpha-9D00FF?style=for-the-badge&labelColor=0A0E1A" alt="Status">
+  <img src="https://img.shields.io/badge/architecture-air--gapped-00E0FF?style=for-the-badge&labelColor=0A0E1A" alt="Air-Gapped">
+  <img src="https://img.shields.io/badge/security-sovereign-9D00FF?style=for-the-badge&labelColor=0A0E1A" alt="Sovereign">
+</p>
+
+---
+
+# CHERENKOV · The Sovereign Security Standard
 **Precision in Sovereignty**
 
 CHERENKOV is an air-gapped, sovereign AI security and quality intelligence platform. Designed explicitly for highly regulated infrastructures (EGY-FIN CSF, SAMA CSF, DORA), it tests traditional software, mobile applications, and embedded AI systems entirely on local hardware.
 
 CHERENKOV operates on a mathematically provable "Trident of Truth": it finds vulnerabilities, proves them with non-destructive local execution, and cryptographically signs the evidence—without your source code, credentials, or customer data ever leaving your hardware.
+
+---
+
+## 🎯 At a Glance
+
+| | |
+|---|---|
+| **Tagline** | The Forensic Reveal |
+| **Architecture** | MEISSNER (Shield) · ABLATION (Sovereignty) · TOKAMAK (Proof) |
+| **Governance** | SHA-256 signed WAL/WORM · Shred Receipts · Zero-Egress |
+| **AI Stack** | Ollama-powered multi-agent swarm · LLM-driven scanner generation |
+| **Compliance** | EGY-FIN CSF · SAMA CSF · DORA · ISO 27001-aligned |
+| **Design System** | See [`DESIGN_SYSTEM.md`](DESIGN_SYSTEM.md) for brand guidelines |
 
 ---
 
@@ -45,5 +77,21 @@ bash launch_perfection.sh
 We refuse to utilize the "SSO Wall of Shame." Core security features (SSO, RBAC, audit logging, local scanning) are provided under **MIT/Apache**. The proprietary multi-agent orchestrator and advanced Arabic RTL/OCR modules are dual-licensed (**AGPLv3/BSL**) to protect localized intelligence from hyperscaler cannibalization.
 
 ---
-*Official Website: [cherenkov-security.com](https://cherenkov-security.com/#roadmap)*
-*Internal Ref: MTH-9941-R | Status: Phase 1 Enforced*
+
+<p align="center">
+  <sub>Built with discipline. Released with purpose.</sub><br>
+  <a href="https://cherenkov-security.com"><strong>cherenkov-security.com</strong></a> ·
+  <a href="mailto:support@cherenkov-security.com">support@cherenkov-security.com</a>
+</p>
+
+<p align="center">
+  <a href="DESIGN_SYSTEM.md">🎨 Design System</a> ·
+  <a href="docs/">📚 Documentation</a> ·
+  <a href="ARCHITECTURE.md">🏗️ Architecture</a> ·
+  <a href="CONTRIBUTING.md">🤝 Contributing</a>
+</p>
+
+---
+<p align="center">
+  <sub>CHERENKOV v1.0 · Phase 1 Enforced · MTH-9941-R</sub>
+</p>

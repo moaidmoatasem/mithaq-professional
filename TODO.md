@@ -3,8 +3,8 @@
 ## Phase 0: Foundation (Week 1) - IN PROGRESS
 - [x] Repository setup
 - [x] Agent rules configuration  
-- [ ] CloudInstruction Pydantic schema
-- [ ] AblationSanitizer with HMAC
+- [x] CloudInstruction Pydantic schema
+- [x] AblationSanitizer with HMAC
 - [ ] Test suite (6/6 tests passing)
 
 ## Phase 1: Multi-Provider Orchestration (Week 2-8)
@@ -38,7 +38,7 @@
 
 ## Current Sprint (Week 1 - Today: Apr 26, 2026)
 **Focus:** Phase 0 foundation  
-**Next task:** CloudInstruction Pydantic schema  
+**Next task:** Test suite (6/6 tests passing)
 **Assigned to:** Roo Code (Builder - Gemini 2.5 Flash)  
 **Branch:** feature/pydantic-gates  
 **Target completion:** Today, 6:00 PM EEST

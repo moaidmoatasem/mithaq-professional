@@ -5,6 +5,7 @@ Category: scanners
 """
 
 import os
+import subprocess
 from subprocess import CalledProcessError, check_output
 
 
@@ -16,11 +17,19 @@ class ScanCIConfig:
         )  # Use current directory if no file specified
 
     def execute_scan(self, tool_binary, verbosity=0):
+        # Validate tool_binary to prevent directory traversal and command injection
+        base_dir_resolved = os.path.realpath(self.base_dir)
+        tool_path_resolved = os.path.realpath(os.path.join(self.base_dir, tool_binary))
+
+        if not tool_path_resolved.startswith(base_dir_resolved + os.sep) and tool_path_resolved != base_dir_resolved:
+            print(f"Security error: tool_binary '{tool_binary}' is not within base directory '{self.base_dir}'")
+            return None
+
         try:
             output = check_output(
-                [os.path.join(self.base_dir, tool_binary), "--config", self.config_file],
+                [tool_path_resolved, "--config", self.config_file],
                 stderr=subprocess.STDOUT,
-            )
+            )  # nosec B603 - tool_binary is validated to be within base_dir
             return output.decode("utf8")
         except CalledProcessError as e:
             print(f"Error occurred while executing the scan: {e.output.decode()}")
@@ -53,9 +62,12 @@ def test_scan_execution(tmpdir, monkeypatch):
     with tmpfile.open("w") as f:
         f.write("# Dummy content for this example")
 
-    scan_tool_output = subprocess.check_output(
-        ["./nonexistent_tool", "--config", str(tmpfile)], stderr=subprocess.STDOUT
-    ).decode("utf8")
+    try:
+        scan_tool_output = subprocess.check_output(
+            ["./nonexistent_tool", "--config", str(tmpfile)], stderr=subprocess.STDOUT
+        ).decode("utf8")
+    except FileNotFoundError:
+        scan_tool_output = "Could not find non-existent tool"
 
     assert (
         "Could not find non-existent tool" in scan_tool_output

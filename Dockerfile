@@ -1,6 +1,6 @@
 FROM python:3.12-slim
 
-LABEL maintainer="mithaq Autonomous Agents"
+LABEL maintainer="cherenkov Autonomous Agents"
 LABEL description="Autonomous agent swarm for security testing"
 
 # Set working directory
@@ -17,7 +17,7 @@ COPY requirements.txt .
 # Install Python dependencies
 RUN pip install --no-cache-dir -r requirements.txt
 
-# Copy application code (fix: remove non-existent mithaq/ directory)
+# Copy application code (fix: remove non-existent cherenkov/ directory)
 COPY src/ ./src/
 COPY scripts/ ./scripts/ 
 COPY examples/ ./examples/
@@ -29,5 +29,5 @@ ENV PYTHONPATH=/app/src:/app
 RUN mkdir -p /app/workflow_results
 
 # Default command
-CMD ["python", "-m", "mithaq.cli"]
+CMD ["python", "-m", "cherenkov.cli"]
 

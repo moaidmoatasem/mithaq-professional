@@ -1,4 +1,4 @@
-# MITHAQ Releases Strategy
+# CHERENKOV Releases Strategy
 
 This document maps the internal roadmap to public GitHub releases.
 
@@ -8,7 +8,7 @@ This document maps the internal roadmap to public GitHub releases.
     *   DAREE3 Network Proxy enabled.
     *   SIYAADA Redaction engine stabilized.
     *   AL-BURHAN proof validation concept introduced.
-    *   Transitioned namespace from DAQIQ to MITHAQ.
+    *   Transitioned namespace from DAQIQ to CHERENKOV.
 *   **Target Audience:** Early adopters testing air-gapped environments.
 
 ## v1.1.0: Swarm Concurrency
@@ -32,4 +32,4 @@ This document maps the internal roadmap to public GitHub releases.
 *   **Features:**
     *   Full Android/iOS static and dynamic analysis.
     *   APKTool, Androguard, and Frida integration.
-*   **Notes:** Expands MITHAQ from web/network scanning to deep mobile forensics.
+*   **Notes:** Expands CHERENKOV from web/network scanning to deep mobile forensics.

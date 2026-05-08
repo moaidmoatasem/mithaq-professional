@@ -49,7 +49,7 @@ def test_execute_parallel():
     assert len(results) == 3
     assert all('success' in r for r in results)
 
-@patch('mithaq.result_persistence.ResultStore')
+@patch('cherenkov.result_persistence.ResultStore')
 def test_get_workflow_status(mock_result_store):
     """Test get_workflow_status calls ResultStore.get_latest"""
     # Configure mock
@@ -64,7 +64,7 @@ def test_get_workflow_status(mock_result_store):
     mock_store_instance.get_latest.assert_called_once_with('test_workflow_123')
     assert result == {'status': 'completed', 'result': 'success'}
 
-@patch('mithaq.result_persistence.ResultStore')
+@patch('cherenkov.result_persistence.ResultStore')
 def test_get_workflow_status_not_found(mock_result_store):
     """Test get_workflow_status handles missing workflows"""
     # Configure mock to return None

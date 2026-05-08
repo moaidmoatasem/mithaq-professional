@@ -1,11 +1,11 @@
-# MITHAQ GitHub Wiki Index
+# CHERENKOV GitHub Wiki Index
 
-Welcome to the MITHAQ documentation wiki. This wiki serves as the primary resource for both human developers and AI agents operating within the repository.
+Welcome to the CHERENKOV documentation wiki. This wiki serves as the primary resource for both human developers and AI agents operating within the repository.
 
 ## 1. Getting Started
 *   [Quick Start & Local Deployment](docs/README.md)
 *   [The Trident of Truth Architecture](docs/architecture/SYSTEM_ARCHITECTURE.md)
-*   [MITHAQ vs Traditional Scanners](#)
+*   [CHERENKOV vs Traditional Scanners](#)
 
 ## 2. Technical Product Management (TPM)
 *   [Product Roadmap](docs/pm/ROADMAP.md)

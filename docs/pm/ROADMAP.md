@@ -1,6 +1,6 @@
-# MITHAQ Sovereign Security | Product Roadmap
+# CHERENKOV Sovereign Security | Product Roadmap
 
-This document outlines the strategic roadmap for MITHAQ, ensuring alignment with sovereign security standards, autonomous agent execution, and strict human-in-the-loop (HITL) requirements for critical operations.
+This document outlines the strategic roadmap for CHERENKOV, ensuring alignment with sovereign security standards, autonomous agent execution, and strict human-in-the-loop (HITL) requirements for critical operations.
 
 ## Phase 1: Foundation & Sovereignization (Current State)
 * **Goal**: Establish the "Trident of Truth" architecture.
@@ -21,7 +21,7 @@ This document outlines the strategic roadmap for MITHAQ, ensuring alignment with
 * **Milestone**: Version 1.1.0
 
 ## Phase 3: Production Hardening, Compliance & HITL Enforcement (Months 3-6)
-* **Goal**: Cement MITHAQ as an enterprise-grade sovereign security tool with legally binding evidence generation.
+* **Goal**: Cement CHERENKOV as an enterprise-grade sovereign security tool with legally binding evidence generation.
 * **Deliverables**:
     * Automated Compliance-as-Code (mapping to SAMA CSF, EGY-FIN CSF, DORA).
     * WORM (Write Once Read Many) SQLite audit vault.

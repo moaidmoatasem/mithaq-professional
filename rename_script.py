@@ -1,8 +1,8 @@
 import os
 
 replacements = {
-    "MITHAQ": "CHERENKOV",
-    "mithaq": "cherenkov",
+    "CHERENKOV": "CHERENKOV",
+    "cherenkov": "cherenkov",
     "DAQIQ": "CHERENKOV",
     "daqiq": "cherenkov",
     "DAREE3_SHIELD": "MEISSNER",

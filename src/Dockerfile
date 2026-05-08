@@ -17,7 +17,7 @@ RUN pip install --user --no-cache-dir --compile -r requirements.txt
 FROM python:3.11-slim
 
 LABEL maintainer="Moaid EL-Moatasem Bellah"
-LABEL description="mithaq - AI-Powered Security Framework"
+LABEL description="cherenkov - AI-Powered Security Framework"
 LABEL version="1.0.0"
 
 WORKDIR /app
@@ -33,7 +33,7 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     && apt-get clean
 
 # Copy application
-COPY mithaq/ ./mithaq/
+COPY cherenkov/ ./cherenkov/
 COPY *.py ./
 
 # Create necessary directories
@@ -52,5 +52,5 @@ HEALTHCHECK --interval=30s --timeout=10s --start-period=5s --retries=3 \
     CMD python -c "import sys; sys.exit(0)" || exit 1
 
 # Default command
-CMD ["python", "mithaq_simple_scanner.py", "--help"]
+CMD ["python", "cherenkov_simple_scanner.py", "--help"]
 

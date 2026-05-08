@@ -6,7 +6,7 @@ from unittest.mock import patch, MagicMock
 # Add src to Python path
 sys.path.insert(0, os.path.abspath('src'))
 
-from mithaq.autonomous_generated.api.slackdiscordconnector import SlackDiscordConnector
+from cherenkov.autonomous_generated.api.slackdiscordconnector import SlackDiscordConnector
 
 class TestSlackDiscordConnector:
     def test_parse_integrations(self):

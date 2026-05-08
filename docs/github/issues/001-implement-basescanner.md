@@ -1,7 +1,7 @@
 ---
 name: "TASK: Implement BaseScanner Interface"
 about: "Formalize the base class for all security scanners."
-title: "[TASK] Implement BaseScanner Interface in src/mithaq/scanners/base.py"
+title: "[TASK] Implement BaseScanner Interface in src/cherenkov/scanners/base.py"
 labels: ["enhancement", "sprint-1", "agent-autonomous"]
 assignees: "AI-Agent-Developer"
 ---
@@ -10,7 +10,7 @@ assignees: "AI-Agent-Developer"
 We need to unify all 132 candidate scanners under a single, rigorous interface to ensure data consistency and allow the `HybridOrchestrator` to execute them reliably.
 
 ## Tasks
-- [ ] Create `src/mithaq/scanners/base.py`.
+- [ ] Create `src/cherenkov/scanners/base.py`.
 - [ ] Define the `BaseScanner` abstract class with a mandatory `scan(target_url: str) -> dict` method.
 - [ ] Refactor `daqiq_simple_scanner.py` to inherit from `BaseScanner`.
 - [ ] Write pytest unit tests validating the interface constraints.

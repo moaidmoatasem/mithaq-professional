@@ -32,7 +32,7 @@ mock_requests.request = mock_request
 mock_requests.get = mock_get
 sys.modules["requests"] = mock_requests
 
-from mithaq.scanners.header_scanner import SimpleScanner
+from cherenkov.scanners.header_scanner import SimpleScanner
 
 def test_performance():
     scanner = SimpleScanner("https://example.com")

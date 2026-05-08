@@ -1,6 +1,6 @@
-# MITHAQ Design Patterns & Best Practices
+# CHERENKOV Design Patterns & Best Practices
 
-To maintain code quality, security, and scalability, all contributions to MITHAQ must adhere to the following design patterns and best practices.
+To maintain code quality, security, and scalability, all contributions to CHERENKOV must adhere to the following design patterns and best practices.
 
 ## 1. Architectural Patterns
 

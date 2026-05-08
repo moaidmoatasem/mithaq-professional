@@ -1,11 +1,11 @@
-# MITHAQ System Design & Architecture
+# CHERENKOV System Design & Architecture
 
-This document provides both the High Level Design (HLD) and Low Level Design (LLD) for the MITHAQ Sovereign Security platform.
+This document provides both the High Level Design (HLD) and Low Level Design (LLD) for the CHERENKOV Sovereign Security platform.
 
 ## 1. High Level Design (HLD)
 
 ### 1.1 The Trident Architecture
-MITHAQ operates on a mathematically provable framework designed to prevent data egress and guarantee finding validity.
+CHERENKOV operates on a mathematically provable framework designed to prevent data egress and guarantee finding validity.
 
 *   **DAREE3 (The Shield):** A fail-closed network perimeter. It sits at the Docker/Nginx layer, proxying requests and strictly dropping outbound connections not whitelisted for local telemetry.
 *   **SIYAADA (Sovereignty):** The data redaction engine. In hybrid configurations (where some processing occurs off-node), SIYAADA strips all PII, API keys, and proprietary code before leaving the node. It uses a bidirectional mapping (`RedactionMap`) for safe re-hydration.

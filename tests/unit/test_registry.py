@@ -1,7 +1,7 @@
 import sys
 from unittest.mock import patch, MagicMock
 
-# 1. Mock dependencies BEFORE importing mithaq modules
+# 1. Mock dependencies BEFORE importing cherenkov modules
 class MockBaseModel:
     def __init__(self, **data):
         for key, value in data.items():
@@ -21,8 +21,8 @@ sys.modules['httpx'] = mock_httpx
 
 # 2. Now imports will work even if pydantic/httpx are missing in the environment
 import unittest
-from mithaq.core.registry import ScannerRegistry
-from mithaq.core.base_scanner import BaseScanner, ScanResult
+from cherenkov.core.registry import ScannerRegistry
+from cherenkov.core.base_scanner import BaseScanner, ScanResult
 
 class MockScanner(BaseScanner):
     async def scan(self, target: str, timeout: float = 10.0) -> ScanResult:

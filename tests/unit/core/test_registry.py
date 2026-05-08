@@ -1,7 +1,7 @@
 import unittest
 from unittest.mock import patch, MagicMock
-from mithaq.core.registry import ScannerRegistry
-from mithaq.core.base_scanner import BaseScanner, ScanResult
+from cherenkov.core.registry import ScannerRegistry
+from cherenkov.core.base_scanner import BaseScanner, ScanResult
 
 class MockScanner(BaseScanner):
     async def scan(self, target: str, timeout: float = 10.0) -> ScanResult:

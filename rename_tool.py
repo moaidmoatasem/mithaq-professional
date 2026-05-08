@@ -3,9 +3,9 @@ import re
 
 replacements = {
     # File content replacements
-    r'\bMITHAQ\b': 'CHERENKOV',
-    r'\bmithaq\b': 'cherenkov',
-    r'\bMithaq\b': 'Cherenkov',
+    r'\bCHERENKOV\b': 'CHERENKOV',
+    r'\bcherenkov\b': 'cherenkov',
+    r'\bCherenkov\b': 'Cherenkov',
     r'\bDAQIQ\b': 'CHERENKOV',
     r'\bdaqiq\b': 'cherenkov',
     r'\bDaqiq\b': 'Cherenkov',

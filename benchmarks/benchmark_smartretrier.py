@@ -19,7 +19,7 @@ sys.modules["requests"] = mock_requests
 sys.modules["httpx"] = mock_httpx
 
 # Import SmartRetrier after mocking
-from src.mithaq.autonomous_generated.misc.smartretrier import SmartRetrier
+from src.cherenkov.autonomous_generated.misc.smartretrier import SmartRetrier
 
 async def run_benchmark(implementation_type="requests", num_requests=200, latency=0.1):
     print(f"Running benchmark for {implementation_type} with {num_requests} requests and {latency}s latency...")

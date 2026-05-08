@@ -134,7 +134,8 @@ jobs:
           echo "failed=$failed" >> "$GITHUB_OUTPUT"
           # Serialize as space-separated list; PR step iterates over it
           echo "passed_files=${passed_files[*]}" >> "$GITHUB_OUTPUT"
-            GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Graduate passing candidates and open PRs
         if: steps.validate.outputs.passed != '0'
@@ -191,7 +192,8 @@ EOF
           done
 
           echo "PRs opened: $prs_opened"
-            GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Report summary
         if: always()

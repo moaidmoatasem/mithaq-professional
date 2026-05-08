@@ -15,8 +15,11 @@ jobs:
     
     steps:
     - uses: actions/checkout@v4
+      with:
+        fetch-depth: 0
     
     - name: Deploy to Render
+      env:
         RENDER_API_KEY: ${{ secrets.RENDER_API_KEY }}
       run: |
         curl -X POST https://api.render.com/deploy/srv-xxx?key=$RENDER_API_KEY
@@ -26,6 +29,8 @@ jobs:
     
     steps:
     - uses: actions/checkout@v4
+      with:
+        fetch-depth: 0
     
     - name: Deploy to Railway
       uses: bervProject/railway-deploy@main
@@ -38,10 +43,13 @@ jobs:
     
     steps:
     - uses: actions/checkout@v4
+      with:
+        fetch-depth: 0
     
     - uses: superfly/flyctl-actions/setup-flyctl@master
     
     - name: Deploy to Fly.io
+      env:
         FLY_API_TOKEN: ${{ secrets.FLY_API_TOKEN }}
       run: flyctl deploy --remote-only
 

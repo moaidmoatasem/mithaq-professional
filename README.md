@@ -81,7 +81,7 @@ We refuse to utilize the "SSO Wall of Shame." Core security features (SSO, RBAC,
 <p align="center">
   <sub>Built with discipline. Released with purpose.</sub><br>
   <a href="https://cherenkov-security.com"><strong>cherenkov-security.com</strong></a> ·
-  <a href="mailto:support@cherenkov-security.com">support@cherenkov-security.com</a>
+  <a href="mailto:info@cherenkov-security.com">support@cherenkov-security.com</a>
 </p>
 
 <p align="center">

@@ -80,7 +80,7 @@ jobs:
     - name: Run Bandit (security linter)
       run: |
         pip install "bandit[sarif]"
-        bandit -r src/mithaq -f sarif -o bandit-results.sarif || true
+        bandit -r src/cherenkov -f sarif -o bandit-results.sarif || true
 
     - name: Run Safety (dependency check)
       run: |

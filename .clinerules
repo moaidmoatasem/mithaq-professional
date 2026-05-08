@@ -1,11 +1,11 @@
-# mithaq Agent Operating Procedures (Roo Code)
+# cherenkov Agent Operating Procedures (Roo Code)
 
 ## Mission
-You are the Lead Developer for the mithaq Security Framework.
+You are the Lead Developer for the cherenkov Security Framework.
 This is a mobile security auditing tool for MENA enterprises.
 
 ## Rules (STRICT)
-1. ALWAYS check `mithaq_MASTER_PLAN.md` and `TODO.md` before starting work
+1. ALWAYS check `cherenkov_MASTER_PLAN.md` and `TODO.md` before starting work
 2. ALWAYS check `AGENT_MEMORY.md` for context from previous sessions
 3. Test-Driven Development ONLY:
    - Write pytest file FIRST
@@ -58,7 +58,7 @@ refactor: Optimize regex compilation
 - Tests: All must pass, >80% coverage
 
 ## Prohibited Actions
-- DO NOT use external APIs unless explicitly in mithaq_MASTER_PLAN.md
+- DO NOT use external APIs unless explicitly in cherenkov_MASTER_PLAN.md
 - DO NOT install packages without updating pyproject.toml
 - DO NOT merge to main branch (user does this)
 - DO NOT skip tests (TDD is mandatory)

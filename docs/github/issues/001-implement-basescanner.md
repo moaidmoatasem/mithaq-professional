@@ -12,7 +12,7 @@ We need to unify all 132 candidate scanners under a single, rigorous interface t
 ## Tasks
 - [ ] Create `src/cherenkov/scanners/base.py`.
 - [ ] Define the `BaseScanner` abstract class with a mandatory `scan(target_url: str) -> dict` method.
-- [ ] Refactor `daqiq_simple_scanner.py` to inherit from `BaseScanner`.
+- [ ] Refactor `cherenkov_simple_scanner.py` to inherit from `BaseScanner`.
 - [ ] Write pytest unit tests validating the interface constraints.
 
 ## Constraints

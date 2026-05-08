@@ -218,12 +218,12 @@ via a path traversal in the API itself.
 
 Not a Ablation failure. A different failure: the API layer had no
 output validation, and the "dual-brain" routing was conceptual —
-in the actual code, Al-Muhandis and Al-Munafeedh were not separate
+in the actual code, TENSOR and KINETIC were not separate
 processes or containers. They were two functions calling the same
 Ollama endpoint in the same process. There was no enforced separation.
 
 **What would have prevented it:**
-Al-Muhandis and Al-Munafeedh must be separate processes, not
+TENSOR and KINETIC must be separate processes, not
 separate functions. The separation must be enforced at the OS level
 (separate containers, separate users, explicit IPC), not just at
 the code level.

@@ -11,7 +11,7 @@ RUN pip install --no-cache-dir \
     python-dotenv
 
 # Copy application
-COPY mithaq/ ./mithaq/
+COPY cherenkov/ ./cherenkov/
 COPY *.py ./
 
 # Create directories

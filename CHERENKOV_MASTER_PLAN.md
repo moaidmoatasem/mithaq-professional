@@ -9,8 +9,8 @@
 ## Architecture Summary
 
 ### The Four Components
-1. **Al-Muhandis** (المهندس) - Cloud Strategist (Groq/Gemini)
-2. **Al-Munafeedh** (المنفذ) - Local Executor (Ollama)
+1. **TENSOR** (المهندس) - Cloud Strategist (Groq/Gemini)
+2. **KINETIC** (المنفذ) - Local Executor (Ollama)
 3. **Al-Markaz** (المركز) - Orchestrator (Python)
 4. **Tokamak** (البرهان) - Proof Generator (PoC validation)
 

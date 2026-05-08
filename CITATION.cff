@@ -1,12 +1,12 @@
 cff-version: 1.2.0
-message: "If you use mithaq in your research, please cite it as below."
+message: "If you use cherenkov in your research, please cite it as below."
 authors:
   - family-names: "EL-Moatasem Bellah"
     given-names: "Moaid"
-title: "mithaq: Autonomous AI-Powered Security Testing Framework"
+title: "cherenkov: Autonomous AI-Powered Security Testing Framework"
 version: 0.1.0
 date-released: 2026-05-03
-url: "https://github.com/moaidmoatasem/mithaq-professional"
+url: "https://github.com/moaidmoatasem/cherenkov-professional"
 license: MIT
 keywords:
   - security testing

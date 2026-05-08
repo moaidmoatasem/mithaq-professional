@@ -3,7 +3,7 @@
 ## 📊 CURRENT DEPLOYMENT STATUS: PHASE 1 (LOCKED)
 **Status:** ARCHITECTURE SOVEREIGNIZED | VERSION 1.0.0-RC1
 
-We have successfully decommissioned the legacy DAQIQ framework and established the **CHERENKOV Sovereign Standard**. The "Trident of Truth" is now the operational baseline for all security telemetry.
+We have successfully decommissioned the legacy CHERENKOV framework and established the **CHERENKOV Sovereign Standard**. The "Trident of Truth" is now the operational baseline for all security telemetry.
 
 ### ✅ What is Operational Now:
 * **The Trident Topology (Infrastructure):**

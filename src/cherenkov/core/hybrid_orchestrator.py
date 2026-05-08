@@ -4,14 +4,16 @@ Implements ReAct (Reasoning + Acting) loop with dual-brain architecture.
 """
 
 import time
-from typing import Dict, List, Any, Optional
 from enum import Enum
+from typing import Any, Dict, List, Optional
+
 from pydantic import BaseModel, Field
-from cherenkov.agents.cloud.strategic_planner import StrategicPlanner, ThreatAnalysisTask
+
 from cherenkov.ablation.redactor import DataRedactor, RedactionLevel
+from cherenkov.agents.cloud.strategic_planner import StrategicPlanner, ThreatAnalysisTask
 
 
-class CognitiveLoopException(Exception):
+class CognitiveLoopError(Exception):
     """Exception raised when an agent enters an infinite logic loop."""
 
     pass
@@ -63,8 +65,8 @@ class HybridOrchestrator:
         self.cloud_planner = StrategicPlanner(api_key=groq_api_key)
         self.redactor = DataRedactor(level=RedactionLevel.MODERATE)
         self.execution_history: List[TaskResult] = []
-        
-        # Al-Hakam Overseer State
+
+        # AEGIS Overseer State
         self.concurrency_limit = 4
         self.consecutive_successes = 0
         self.task_tracker = TaskExecutionTracker()
@@ -89,7 +91,7 @@ class HybridOrchestrator:
             Audit results with findings
         """
 
-        print(f"\n🚀 Starting Hybrid Security Audit")
+        print("\n🚀 Starting Hybrid Security Audit")
         print(f"   Target: {target_type}")
         print(f"   Mode: {mode.value}")
         print(f"   Scope: {', '.join(analysis_scope)}\n")
@@ -137,19 +139,19 @@ class HybridOrchestrator:
 
         if mode in [ExecutionMode.LOCAL_ONLY, ExecutionMode.HYBRID]:
             print("\n🔧 Step 3: Executing privileged local analysis...")
-            
+
             # --- Overseer: Loop Detection ---
             # Simulated target/payload for detection
             target_id = f"{target_type}_instance"
             simulated_payload = analysis_scope[0] if analysis_scope else "default_recon"
-            
+
             if self.task_tracker.check_loop(target_id, simulated_payload):
-                print(f"[MEISSNER] [Al-Hakam] Cognitive loop detected for {target_id} with payload {simulated_payload}.")
-                raise CognitiveLoopException(f"Infinite logic loop detected for {target_id}")
+                print(f"[MEISSNER] [AEGIS] Cognitive loop detected for {target_id} with payload {simulated_payload}.")
+                raise CognitiveLoopError(f"Infinite logic loop detected for {target_id}")
 
             # --- Overseer: AIMD Capacity Check ---
-            print(f"   [Al-Hakam] Current Concurrency Capacity: {self.concurrency_limit}")
-            
+            print(f"   [AEGIS] Current Concurrency Capacity: {self.concurrency_limit}")
+
             # Simulate local analysis
             local_findings = {
                 "vulnerabilities_found": 3,
@@ -159,19 +161,19 @@ class HybridOrchestrator:
                 "execution_time": "2.3s",
                 "attack_chain": "Exposed RDP -> Weak Credentials -> RCE"
             }
-            
+
             # --- Overseer: Adversarial Review ---
             is_valid = self.verify_finding_logic(target_id, local_findings)
-            
+
             if not is_valid:
-                print(f"[MEISSNER] [Al-Hakam] Dropping finding due to adversarial failure.")
+                print("[MEISSNER] [AEGIS] Dropping finding due to adversarial failure.")
                 local_findings = {"vulnerabilities_found": 0} # Strip invalid findings
 
             # --- Overseer: AIMD Feedback ---
             # For simulation, we assume success unless a specific error occurs
             self.handle_inference_result(success=True)
 
-            print(f"   ✅ Local analysis complete")
+            print("   ✅ Local analysis complete")
 
         # Step 4: Combine results
         print("\n📊 Step 4: Combining results...")
@@ -204,7 +206,7 @@ class HybridOrchestrator:
 
         self.execution_history.append(result)
 
-        print(f"\n✅ Audit complete!")
+        print("\n✅ Audit complete!")
         print(f"   Mode: {mode.value}")
         print(f"   Tokens used: {tokens_used}")
         print(f"   Redacted fields: {len(redaction_result.redacted_fields)}")
@@ -234,22 +236,22 @@ class HybridOrchestrator:
         Adversarial Review: Asks a local model to find logical flaws in the attack chain.
         """
         print(f"\n🕵️  Adversarial Review: Verifying finding for {target}...")
-        
+
         # Simulating local model call with skeptical prompt
         # In production: This would be an Ollama call
         # Prompt: "Act as a Skeptical Auditor. Identify one logical flaw in this attack chain. If no flaw exists, output 'VALID'."
-        
-        attack_chain = finding.get("attack_chain", "N/A")
-        
+
+        # attack_chain = finding.get("attack_chain", "N/A")
+
         # Simulated "Skeptical Auditor" response
         # We'll assume it's VALID for now but implement the logic structure
-        audit_response = "VALID" 
-        
+        audit_response = "VALID"
+
         if audit_response == "VALID":
-            print(f"   ✅ [Al-Hakam] Finding verified. Proceeding to TOKAMAK.")
+            print("   ✅ [AEGIS] Finding verified. Proceeding to TOKAMAK.")
             return True
         else:
-            print(f"   ⚠️  [MEISSNER] [Al-Hakam] Adversarial review failed: {audit_response}")
+            print(f"   ⚠️  [MEISSNER] [AEGIS] Adversarial review failed: {audit_response}")
             return False
 
     def get_execution_summary(self) -> Dict[str, Any]:

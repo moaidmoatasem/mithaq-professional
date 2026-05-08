@@ -36,7 +36,7 @@ CHERENKOV has transitioned from a legacy architecture into a **Sovereign Securit
 ## 3. Design Patterns & Engineering Excellence
 
 ### **Cognitive Patterns**
-- **Multi-Agent Orchestration (Swarm Architecture)**: Decoupling strategy (Al-Muhandis) from execution (Al-Munafeedh) to prevent context poisoning.
+- **Multi-Agent Orchestration (Swarm Architecture)**: Decoupling strategy (TENSOR) from execution (KINETIC) to prevent context poisoning.
 - **AIMD Circuit Breaker**: Prevents agent cascades during high latency or API failures.
 - **Memory RAG**: Local Qdrant instance for dialect-aware retrieval and CVE mapping.
 

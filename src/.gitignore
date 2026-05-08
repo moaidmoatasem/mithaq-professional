@@ -31,7 +31,7 @@ htmlcov/
 .DS_Store
 Thumbs.db
 
-# mithaq specific
+# cherenkov specific
 *.apk
 *.ipa
 output/

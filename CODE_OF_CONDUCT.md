@@ -22,7 +22,7 @@ This Code of Conduct applies both within project spaces and in public spaces whe
 ## 5. Agent and Human Interactions
 CHERENKOV relies heavily on AI agents. The following rules govern interactions:
 - **Agent Autonomy:** Agents are permitted to operate autonomously within predefined bounds (e.g., executing established scanners, writing standard code).
-- **Human-in-the-Loop (HITL):** Critical security changes (e.g., modifications to DAREE3, SIYAADA, AL-BURHAN, or core orchestration) **REQUIRE** explicit human review and cryptographic approval. Agents must halt and wait for this approval.
+- **Human-in-the-Loop (HITL):** Critical security changes (e.g., modifications to TOKAMAK, ABLATION, TOKAMAK, or core orchestration) **REQUIRE** explicit human review and cryptographic approval. Agents must halt and wait for this approval.
 - **Agent Handoffs:** Agents must communicate clearly defined state and context during handoffs, adhering to the `AgentState` schema to prevent context pollution.
 
 ## 6. Enforcement

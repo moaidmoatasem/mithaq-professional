@@ -8,7 +8,7 @@ This document maps the internal roadmap to public GitHub releases.
  * MEISSNER Network Proxy enabled.
  * ABLATION Redaction engine stabilized.
  * TOKAMAK proof validation concept introduced.
- * Transitioned namespace from DAQIQ to CHERENKOV.
+ * Transitioned namespace from CHERENKOV to CHERENKOV.
 * **Target Audience:** Early adopters testing air-gapped environments.
 
 ## v1.1.0: Swarm Concurrency

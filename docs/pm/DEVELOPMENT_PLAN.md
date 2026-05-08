@@ -8,7 +8,7 @@ This document breaks down the development phases into actionable sprints for AI 
 ## Sprint 1: Formalize Scanners (Current)
 **Goal:** Migrate candidate scanners to a uniform interface.
 1. **Task:** Define `BaseScanner` abstract class in `src/cherenkov/scanners/base.py`.
-2. **Task:** Refactor `daqiq_simple_scanner.py` to inherit from `BaseScanner`.
+2. **Task:** Refactor `cherenkov_simple_scanner.py` to inherit from `BaseScanner`.
 3. **Task:** Implement unit tests for the base interface ensuring strict input/output validation.
 4. **Autonomy Level:** Fully autonomous.
 

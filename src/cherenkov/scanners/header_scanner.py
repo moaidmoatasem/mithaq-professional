@@ -122,7 +122,7 @@ class HeaderScanner(BaseScanner):
 
         async def check_method(method):
             try:
-                async with httpx.AsyncClient(timeout=5, verify=False) as client:
+                async with httpx.AsyncClient(timeout=5, verify=True) as client:
                     response = await client.request(method, self.target)
                     return method, response, None
             except Exception as e:

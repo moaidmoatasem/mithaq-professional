@@ -1,6 +1,0 @@
-[submodule "cherenkov-frontend"]
-	path = cherenkov-frontend
-	url = https://github.com/moaidmoatasem/cherenkov-frontend.git
-[submodule "cherenkov-portal"]
-	path = cherenkov-portal
-	url = https://github.com/moaidmoatasem/cherenkov-portal.git

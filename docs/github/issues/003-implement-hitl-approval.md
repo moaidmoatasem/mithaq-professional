@@ -1,13 +1,13 @@
 ---
 name: "TASK: Implement HITL Cryptographic Approval"
 about: "Require human cryptographic approval for critical workflow execution."
-title: "[SECURITY] Implement Human-in-the-Loop (HITL) for AL-BURHAN Sandboxing"
+title: "[SECURITY] Implement Human-in-the-Loop (HITL) for TOKAMAK Sandboxing"
 labels: ["security", "sprint-4", "human-review-required"]
 assignees: "AI-Agent-Architect"
 ---
 
 ## Description
-To ensure sovereign safety, AI agents cannot autonomously execute CRITICAL or HIGH severity PoCs in the AL-BURHAN sandbox without explicit human consent.
+To ensure sovereign safety, AI agents cannot autonomously execute CRITICAL or HIGH severity PoCs in the TOKAMAK sandbox without explicit human consent.
 
 ## Tasks
 - [ ] Implement an API endpoint `/api/v1/orchestrator/pause` that halts the active mission.

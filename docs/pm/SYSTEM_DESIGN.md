@@ -7,16 +7,16 @@ This document provides both the High Level Design (HLD) and Low Level Design (LL
 ### 1.1 The Trident Architecture
 CHERENKOV operates on a mathematically provable framework designed to prevent data egress and guarantee finding validity.
 
-*   **DAREE3 (The Shield):** A fail-closed network perimeter. It sits at the Docker/Nginx layer, proxying requests and strictly dropping outbound connections not whitelisted for local telemetry.
-*   **SIYAADA (Sovereignty):** The data redaction engine. In hybrid configurations (where some processing occurs off-node), SIYAADA strips all PII, API keys, and proprietary code before leaving the node. It uses a bidirectional mapping (`RedactionMap`) for safe re-hydration.
-*   **AL-BURHAN (The Proof):** The validation sandbox. Security findings are only escalated if AL-BURHAN can successfully execute a non-destructive Proof of Concept (PoC) against the local target. It outputs cryptographic signatures (Shred Receipts) of the execution.
+*   **MEISSNER (The Shield):** A fail-closed network perimeter. It sits at the Docker/Nginx layer, proxying requests and strictly dropping outbound connections not whitelisted for local telemetry.
+*   **ABLATION (Sovereignty):** The data redaction engine. In hybrid configurations (where some processing occurs off-node), ABLATION strips all PII, API keys, and proprietary code before leaving the node. It uses a bidirectional mapping (`RedactionMap`) for safe re-hydration.
+*   **TOKAMAK (The Proof):** The validation sandbox. Security findings are only escalated if TOKAMAK can successfully execute a non-destructive Proof of Concept (PoC) against the local target. It outputs cryptographic signatures (Shred Receipts) of the execution.
 
 ### 1.2 Multi-Agent Swarm
 The system uses multiple AI agents to perform complex reasoning, orchestrated to prevent context poisoning:
-*   **Al-Muhandis (Strategist):** High-level attack planning.
-*   **Al-Munafeedh (Executor):** Runs local security scripts and scanners.
-*   **Al-Hakam (Arbiter):** Oversees agent interaction and enforces AIMD circuit breakers.
-*   **Al-Hafiz (Memory):** Qdrant-backed RAG system for CVEs and Arabic dialect processing.
+*   **TENSOR (Strategist):** High-level attack planning.
+*   **KINETIC (Executor):** Runs local security scripts and scanners.
+*   **AEGIS (Arbiter):** Oversees agent interaction and enforces AIMD circuit breakers.
+*   **LATTICE (Memory):** Qdrant-backed RAG system for CVEs and Arabic dialect processing.
 
 ## 2. Low Level Design (LLD)
 
@@ -34,10 +34,10 @@ class AgentState(BaseModel):
 ### 2.2 Orchestration Flow
 The `HybridOrchestrator` handles the handover between agents.
 1.  **Input:** User provides target (URL/APK).
-2.  **Strategy:** *Al-Muhandis* generates an attack chain schema.
+2.  **Strategy:** *TENSOR* generates an attack chain schema.
 3.  **Sanitization:** The schema is validated; inputs sanitized.
-4.  **Execution:** *Al-Munafeedh* executes the tools based on the schema.
-5.  **Validation:** Findings are sent to *Al-Burhan* for execution in an isolated container.
+4.  **Execution:** *KINETIC* executes the tools based on the schema.
+5.  **Validation:** Findings are sent to *TOKAMAK* for execution in an isolated container.
 6.  **Human-in-the-Loop:** If the finding is CRITICAL, execution pauses and requires a cryptographically signed approval from a human operator.
 7.  **Finalization:** A `BurhanTrace` is generated, WORM logged, and presented to the UI.
 

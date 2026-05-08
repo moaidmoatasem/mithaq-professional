@@ -7,7 +7,7 @@ assignees: "AI-Agent-Developer"
 ---
 
 ## Description
-The current orchestration is sequential, which drastically slows down swarm execution. We need to implement `asyncio` to allow multiple AI agents (e.g., Al-Munafeedh instances) to run security scans in parallel.
+The current orchestration is sequential, which drastically slows down swarm execution. We need to implement `asyncio` to allow multiple AI agents (e.g., KINETIC instances) to run security scans in parallel.
 
 ## Tasks
 - [ ] Refactor `src/cherenkov/ai_workflows_orchestrator.py` to use `async/await`.

@@ -41,7 +41,7 @@ We are currently scaling the cognitive swarm and hardening the technical interfa
 *   **HITL Enforcement:** Cryptographic signature gates requiring human operator approval for high-risk engagement.
 
 ### 📱 Phase 4: Advanced Triage (Months 6-12)
-*   **Mobile Kinetic Proofs:** Support for Android/iOS application security auditing via AL-BURHAN (TOKAMAK) integration.
+*   **Mobile Kinetic Proofs:** Support for Android/iOS application security auditing via TOKAMAK (TOKAMAK) integration.
 *   **Frida Hook Swarms:** Automated runtime instrumentation for complex binary analysis.
 
 ### 🌐 Phase 5: Sovereign Ecosystem (2027+)

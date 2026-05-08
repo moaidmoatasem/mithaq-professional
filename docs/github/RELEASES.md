@@ -5,9 +5,9 @@ This document maps the internal roadmap to public GitHub releases.
 ## v1.0.0-rc1: Sovereign Foundation (Completed)
 *   **Tag:** `v1.0.0-rc1`
 *   **Features:**
-    *   DAREE3 Network Proxy enabled.
-    *   SIYAADA Redaction engine stabilized.
-    *   AL-BURHAN proof validation concept introduced.
+    *   MEISSNER Network Proxy enabled.
+    *   ABLATION Redaction engine stabilized.
+    *   TOKAMAK proof validation concept introduced.
     *   Transitioned namespace from DAQIQ to CHERENKOV.
 *   **Target Audience:** Early adopters testing air-gapped environments.
 

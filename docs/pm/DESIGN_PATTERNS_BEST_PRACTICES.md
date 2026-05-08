@@ -12,11 +12,11 @@ To maintain code quality, security, and scalability, all contributions to CHEREN
 *   **Description:** Additive Increase, Multiplicative Decrease. When an agent API fails, halve the allowed request rate immediately. When requests succeed, slowly increase the allowed rate linearly.
 *   **Why:** Local LLM inference (e.g., Ollama) can easily be overwhelmed. This ensures stability under load.
 
-### 1.3 Proxy Pattern (DAREE3)
+### 1.3 Proxy Pattern (MEISSNER)
 *   **Description:** All outbound network traffic must flow through a proxy that validates the destination against a strict whitelist.
 *   **Why:** Enforces zero-egress for sensitive data.
 
-### 1.4 Command Pattern (AL-BURHAN)
+### 1.4 Command Pattern (TOKAMAK)
 *   **Description:** Security payloads (PoCs) are encapsulated as command objects before being sent to the sandbox.
 *   **Why:** Allows for uniform execution, logging, and cryptographic signing of evidence.
 

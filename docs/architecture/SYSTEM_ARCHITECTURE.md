@@ -5,11 +5,11 @@ CHERENKOV utilizes the `AgentGovernor` pattern to prevent context pollution and 
 
 | Agent Name | Arabic Translation | Underlying Engine | Role | Data Access Level |
 | :--- | :--- | :--- | :--- | :--- |
-| **Al-Muhandis** | المهندس (The Strategist) | Groq Llama 3.1 8B | Cloud strategic planning & attack chain schema | Sanitized breadcrumbs only via ABLATION |
-| **Al-Munafeedh**| المنفذ (The Executor) | Local Ollama (Llama 3.2 3B) | Local execution and issue triage | Full raw data access (behind MEISSNER) |
+| **TENSOR** | المهندس (The Strategist) | Groq Llama 3.1 8B | Cloud strategic planning & attack chain schema | Sanitized breadcrumbs only via ABLATION |
+| **KINETIC**| المنفذ (The Executor) | Local Ollama (Llama 3.2 3B) | Local execution and issue triage | Full raw data access (behind MEISSNER) |
 | **Tokamak** | البرهان (The Validator)| Python TOKAMAKed Engine| Proof validation and execution | Local tokamaked environment |
-| **Al-Hakam** | الحكم (The Arbiter) | Local Llama 3.1 8B | Inter-agent arbiter & AIMD Circuit Breaker | Sanitized context |
-| **Al-Hafiz** | الحافظ (The Memory) | Qdrant + Embeddings | Memory, dialect-RAG, and CVE knowledge base| Local CVE vectors |
+| **AEGIS** | الحكم (The Arbiter) | Local Llama 3.1 8B | Inter-agent arbiter & AIMD Circuit Breaker | Sanitized context |
+| **LATTICE** | الحافظ (The Memory) | Qdrant + Embeddings | Memory, dialect-RAG, and CVE knowledge base| Local CVE vectors |
 
 ## 2. Arabic AI Capabilities
 Standard LLMs fail in the MENA region due to diglossia and right-to-left (RTL) formatting. CHERENKOV bridges this gap natively:

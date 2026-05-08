@@ -19,9 +19,9 @@ This document breaks down the development phases into actionable sprints for AI 
 3.  **Task:** Write integration tests proving parallel execution finishes faster than sequential execution without errors.
 4.  **Autonomy Level:** Fully autonomous.
 
-## Sprint 3: The Validation Sandbox (AL-BURHAN)
+## Sprint 3: The Validation Sandbox (TOKAMAK)
 **Goal:** Implement the isolated execution environment for PoCs.
-1.  **Task:** Create Docker definitions for the Al-Burhan sandbox (minimal, no network).
+1.  **Task:** Create Docker definitions for the TOKAMAK sandbox (minimal, no network).
 2.  **Task:** Implement the `Command` pattern for sending payloads to the sandbox.
 3.  **Task:** Implement cryptographic signing of the execution results (BurhanTrace).
 4.  **Autonomy Level:** Human Review Required (Security Architecture).

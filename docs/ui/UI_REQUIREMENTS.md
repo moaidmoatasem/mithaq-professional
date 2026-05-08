@@ -390,7 +390,7 @@ Accepts `{ header, content, sidebar }` and assembles the full page DOM structure
 ---
 
 ### Scenario 5: AEGIS Cognitive Loop Intercept
-**Trigger:** KINETIC attempts same exploit 3 times (Al-Hakam 3-strike rule)
+**Trigger:** KINETIC attempts same exploit 3 times (AEGIS 3-strike rule)
 **Entry State:** Audit in `KINETIC ENGAGEMENT` state
 
 **Flow:**

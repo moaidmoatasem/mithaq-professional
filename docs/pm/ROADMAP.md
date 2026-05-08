@@ -5,9 +5,9 @@ This document outlines the strategic roadmap for CHERENKOV, ensuring alignment w
 ## Phase 1: Foundation & Sovereignization (Current State)
 * **Goal**: Establish the "Trident of Truth" architecture.
 * **Deliverables**:
-    * Core network enforcement layer (DAREE3).
-    * Data redaction engine (SIYAADA) using bidirectional hashing.
-    * Initial forensic validation sandbox (AL-BURHAN).
+    * Core network enforcement layer (MEISSNER).
+    * Data redaction engine (ABLATION) using bidirectional hashing.
+    * Initial forensic validation sandbox (TOKAMAK).
     * Restoration of high-fidelity UI.
 * **Milestone**: Version 1.0.0-rc1
 
@@ -34,7 +34,7 @@ This document outlines the strategic roadmap for CHERENKOV, ensuring alignment w
 * **Deliverables**:
     * Full integration of Mobile Scanners (APKTool, Androguard wrappers).
     * Frida hook generation.
-    * Drozer PoC Executor under AL-BURHAN sandbox.
+    * Drozer PoC Executor under TOKAMAK sandbox.
 * **Milestone**: Version 2.0.0
 
 ## Phase 5: Ecosystem Integration (Future)

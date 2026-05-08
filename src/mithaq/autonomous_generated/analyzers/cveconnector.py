@@ -27,7 +27,9 @@ class CVEConnector:
         if severity:
             params["severity"] = severity
 
-        response = requests.get(urljoin(self.base_url, "vulnerabilities/search"), params=params)
+        response = requests.get(
+            urljoin(self.base_url, "vulnerabilities/search"), params=params
+        )
         return json.loads(response.text)
 
 
@@ -69,31 +71,48 @@ class VulnerabilityCorrelationEngine:
         """
         correlated_vulnerabilities = {}
 
+        # Group vulnerabilities by CVE or name
+        vuln_groups = {}
+        for host, vulnerabilities in host_results.items():
+            for v in vulnerabilities:
+                key = v.get("cve") or v.get("name")
+                if key:
+                    if key not in vuln_groups:
+                        vuln_groups[key] = []
+                    vuln_groups[key].append((host, v))
+
         for host_1, vulnerabilities_1 in host_results.items():
             for vulnerability_1 in vulnerabilities_1:
-                if "source" not in vulnerability_1 or vulnerability_1["source"] == "self":
+                if (
+                    "source" not in vulnerability_1
+                    or vulnerability_1["source"] == "self"
+                ):
                     source_host, source_url = None, None
                     related_finding_flagged_by_host = False
 
-                for host_2, vulnerabilities_2 in host_results.items():
+                key_1 = vulnerability_1.get("cve") or vulnerability_1.get("name")
+                candidates = vuln_groups.get(key_1, []) if key_1 else []
+
+                for host_2, vulnerability_2 in candidates:
                     if (host_1, host_2) in correlated_vulnerabilities:
                         continue
 
-                    for vulnerability_2 in vulnerabilities_2:
-                        # Logic to determine if a finding from source host has been flagged by any target host. A finding can be considered newly discovered if it is not referenced in the previous iteration and does not have 'source' set to target_host.
-                        if related_finding_flagged_by_host:
-                            continue
+                    # Logic to determine if a finding from source host has been flagged by any target host. A finding can be considered newly discovered if it is not referenced in the previous iteration and does not have 'source' set to target_host.
+                    if related_finding_flagged_by_host:
+                        continue
 
-                        found, associated_vulnerabilities = self._check_related_vulnerabilities(
+                    found, associated_vulnerabilities = (
+                        self._check_related_vulnerabilities(
                             vulnerability_1, vulnerability_2
                         )
+                    )
 
-                        # Collecting both the discovering host (from host 1) and finding host data for new findings
-                        if found:
-                            correlated_vulnerabilities[(host_1, host_2)] = (
-                                associated_vulnerabilities
-                            )
-                            related_finding_flagged_by_host = True
+                    # Collecting both the discovering host (from host 1) and finding host data for new findings
+                    if found:
+                        correlated_vulnerabilities[(host_1, host_2)] = (
+                            associated_vulnerabilities
+                        )
+                        related_finding_flagged_by_host = True
 
         return correlated_vulnerabilities
 
@@ -140,7 +159,9 @@ class VulnerabilityCorrelationExampleUsage:
         for host_url, vulnerabilities in host_results.items():
             print(f"{host_url}: {vulnerabilities}")
 
-        correlated_findings = self.correlation_engine.correlate_vulnerabilities(host_results)
+        correlated_findings = self.correlation_engine.correlate_vulnerabilities(
+            host_results
+        )
 
         if not len(correlated_findings):
             print("\nNo Vulnerabilities are related across the hosts.")

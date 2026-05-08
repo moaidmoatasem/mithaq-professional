@@ -4,9 +4,9 @@ cherenkov System Dashboard
 Real-time system status and metrics
 """
 
-from pathlib import Path
 import json
 from datetime import datetime
+from pathlib import Path
 
 print("""
 ╔══════════════════════════════════════════════════════════════╗
@@ -34,7 +34,7 @@ if scan_reports:
         try:
             with open(report) as f:
                 data = json.load(f)
-                total_vulns += len(data.get('vulnerabilities', []))
+                total_vulns += len(data.get("vulnerabilities", []))
         except (json.JSONDecodeError, OSError):
             pass
 
@@ -136,4 +136,3 @@ System tests:
 print("=" * 70)
 print(f"📅 Generated: {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}")
 print("=" * 70)
-

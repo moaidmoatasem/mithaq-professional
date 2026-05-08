@@ -39,4 +39,3 @@ result = team.run_project(PROJECT_DESCRIPTION)
 
 print("\n✅ Development cycle complete!")
 print("📂 Check output/autonomous_project/ for all deliverables")
-

@@ -6,7 +6,6 @@ Tests all systems before going live
 
 import subprocess
 import sys
-import time
 from pathlib import Path
 
 print("""
@@ -53,9 +52,7 @@ def test_ollama():
 # Test 2: AI Model Loaded
 def test_model():
     result = subprocess.run(["ollama", "list"], capture_output=True, text=True)
-    assert (
-        "qwen2.5:3b" in result.stdout or "deepseek" in result.stdout
-    ), "No AI model loaded"
+    assert "qwen2.5:3b" in result.stdout or "deepseek" in result.stdout, "No AI model loaded"
     print("✓ AI model available")
 
 
@@ -105,8 +102,8 @@ def test_structure():
 def test_dependencies():
     try:
         import crewai
-        import requests
         import ollama
+        import requests
 
         print("✓ All Python dependencies installed")
     except ImportError as e:
@@ -142,4 +139,3 @@ else:
     print(f"\n⚠️  {tests_failed} test(s) failed")
     print("Fix issues before production deployment")
     sys.exit(1)
-

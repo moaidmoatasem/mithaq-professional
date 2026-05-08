@@ -3,17 +3,72 @@ Result Persistence - Save and load workflow execution results
 """
 
 import json
-from pathlib import Path
+from abc import ABC, abstractmethod
 from datetime import datetime
-from typing import Dict, Any, Optional
+from pathlib import Path
+from typing import Any, Dict, List, Optional
+
+
+class BaseStorageBackend(ABC):
+    """Abstract base class for storage backends"""
+
+    @abstractmethod
+    def save(self, workflow_name: str, result_with_meta: Dict[str, Any]) -> str:
+        pass
+
+    @abstractmethod
+    def load(self, identifier: str) -> Optional[Dict[str, Any]]:
+        pass
+
+    @abstractmethod
+    def list(self, workflow_name: Optional[str] = None) -> List[str]:
+        pass
+
+
+class FileStorageBackend(BaseStorageBackend):
+    """File-based JSON storage implementation"""
+
+    def __init__(self, storage_dir: str = "workflow_results"):
+        self.storage_dir = Path(storage_dir)
+        self.storage_dir.mkdir(parents=True, exist_ok=True)
+
+    def save(self, workflow_name: str, result_with_meta: Dict[str, Any]) -> str:
+        timestamp = result_with_meta.get("timestamp", datetime.now().strftime("%Y%m%d_%H%M%S"))
+        filename = f"{workflow_name}_{timestamp}.json"
+        filepath = self.storage_dir / filename
+
+        with open(filepath, "w") as f:
+            json.dump(result_with_meta, f, indent=2)
+
+        return str(filepath)
+
+    def load(self, identifier: str) -> Optional[Dict[str, Any]]:
+        # identifier can be filename or filepath
+        filepath = Path(identifier)
+        if not filepath.is_absolute():
+            filepath = self.storage_dir / filepath
+
+        if not filepath.exists():
+            return None
+
+        with open(filepath, "r") as f:
+            return json.load(f)
+
+    def list(self, workflow_name: Optional[str] = None) -> List[str]:
+        pattern = f"{workflow_name}_*.json" if workflow_name else "*.json"
+        return [f.name for f in self.storage_dir.glob(pattern)]
 
 
 class ResultStore:
     """Store and retrieve workflow execution results"""
 
-    def __init__(self, storage_dir: str = "workflow_results"):
-        self.storage_dir = Path(storage_dir)
-        self.storage_dir.mkdir(exist_ok=True)
+    def __init__(
+        self, storage_dir: str = "workflow_results", backend: Optional[BaseStorageBackend] = None
+    ):
+        if backend is None:
+            self.backend = FileStorageBackend(storage_dir)
+        else:
+            self.backend = backend
 
     def save_result(self, workflow_name: str, result: Dict[str, Any]) -> str:
         """
@@ -24,11 +79,9 @@ class ResultStore:
             result: Execution result dictionary
 
         Returns:
-            Path to saved result file
+            Identifier (e.g., path) to saved result
         """
         timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
-        filename = f"{workflow_name}_{timestamp}.json"
-        filepath = self.storage_dir / filename
 
         # Add metadata
         result_with_meta = {
@@ -38,20 +91,11 @@ class ResultStore:
             "result": result,
         }
 
-        with open(filepath, "w") as f:
-            json.dump(result_with_meta, f, indent=2)
+        return self.backend.save(workflow_name, result_with_meta)
 
-        return str(filepath)
-
-    def load_result(self, filename: str) -> Optional[Dict[str, Any]]:
+    def load_result(self, identifier: str) -> Optional[Dict[str, Any]]:
         """Load a specific result file"""
-        filepath = self.storage_dir / filename
-
-        if not filepath.exists():
-            return None
-
-        with open(filepath, "r") as f:
-            return json.load(f)
+        return self.backend.load(identifier)
 
     def list_results(self, workflow_name: Optional[str] = None) -> list:
         """
@@ -61,10 +105,9 @@ class ResultStore:
             workflow_name: Optional filter by workflow name
 
         Returns:
-            List of result filenames
+            List of result identifiers
         """
-        pattern = f"{workflow_name}_*.json" if workflow_name else "*.json"
-        return [f.name for f in self.storage_dir.glob(pattern)]
+        return self.backend.list(workflow_name)
 
     def get_latest(self, workflow_name: str) -> Optional[Dict[str, Any]]:
         """Get the most recent result for a workflow"""

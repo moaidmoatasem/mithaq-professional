@@ -5,12 +5,13 @@ Simple Flask UI for running scans
 """
 
 import os
-from flask import Flask, render_template, request, jsonify
-from cherenkov.scanners.header_scanner import SimpleScanner
+from datetime import datetime
 from pathlib import Path
 from urllib.parse import urlparse
-import json
-from datetime import datetime
+
+from flask import Flask, jsonify, render_template, request
+
+from cherenkov.scanners.header_scanner import SimpleScanner
 
 app = Flask(__name__)
 
@@ -29,19 +30,19 @@ def run_scan():
     """Run security scan"""
     data = request.json
     if not data:
-        return jsonify({'error': 'Request body is required'}), 400
-    target_url = data.get('url', '').strip()
+        return jsonify({"error": "Request body is required"}), 400
+    target_url = data.get("url", "").strip()
 
     if not target_url:
-        return jsonify({'error': 'URL is required'}), 400
+        return jsonify({"error": "URL is required"}), 400
     try:
         parsed = urlparse(target_url)
-        if parsed.scheme not in ('http', 'https'):
-            return jsonify({'error': 'Only http/https URLs are supported'}), 400
+        if parsed.scheme not in ("http", "https"):
+            return jsonify({"error": "Only http/https URLs are supported"}), 400
         if not parsed.netloc:
-            return jsonify({'error': 'Invalid URL: missing hostname'}), 400
+            return jsonify({"error": "Invalid URL: missing hostname"}), 400
     except Exception:
-        return jsonify({'error': 'Invalid URL format'}), 400
+        return jsonify({"error": "Invalid URL format"}), 400
 
     # Run scan
     scanner = SimpleScanner(target_url)
@@ -211,9 +212,8 @@ if __name__ == "__main__":
     print("=" * 70)
     print("\n📱 Open in browser: http://localhost:5000")
     print("\n✅ Ready to scan!\n")
-    
-    debug = os.getenv('FLASK_DEBUG', 'false').lower() == 'true'
-    host  = os.getenv('FLASK_HOST', '127.0.0.1')
-    port  = int(os.getenv('FLASK_PORT', '5000'))
-    app.run(debug=debug, host=host, port=port)
 
+    debug = os.getenv("FLASK_DEBUG", "false").lower() == "true"
+    host = os.getenv("FLASK_HOST", "127.0.0.1")
+    port = int(os.getenv("FLASK_PORT", "5000"))
+    app.run(debug=debug, host=host, port=port)

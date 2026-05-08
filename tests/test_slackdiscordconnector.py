@@ -1,12 +1,12 @@
 import os
 import sys
-import pytest
-from unittest.mock import patch, MagicMock
+from unittest.mock import MagicMock, patch
 
 # Add src to Python path
-sys.path.insert(0, os.path.abspath('src'))
+sys.path.insert(0, os.path.abspath("src"))
 
 from cherenkov.autonomous_generated.api.slackdiscordconnector import SlackDiscordConnector
+
 
 class TestSlackDiscordConnector:
     def test_parse_integrations(self):
@@ -23,7 +23,9 @@ class TestSlackDiscordConnector:
         mock_client = mock_slack_sdk.WebClient.return_value
         mock_client.test_api_call.return_value = {"ok": True}
 
-        with patch.dict('sys.modules', {'slack_sdk': mock_slack_sdk, 'discord_webhook': mock_discord_webhook}):
+        with patch.dict(
+            "sys.modules", {"slack_sdk": mock_slack_sdk, "discord_webhook": mock_discord_webhook}
+        ):
             connector = SlackDiscordConnector()
             connector.SLACK_API_TOKEN = "actual_valid_token"
             connector.check_status()
@@ -39,7 +41,9 @@ class TestSlackDiscordConnector:
         mock_client = mock_slack_sdk.WebClient.return_value
         mock_client.test_api_call.return_value = {"ok": True}
 
-        with patch.dict('sys.modules', {'slack_sdk': mock_slack_sdk, 'discord_webhook': mock_discord_webhook}):
+        with patch.dict(
+            "sys.modules", {"slack_sdk": mock_slack_sdk, "discord_webhook": mock_discord_webhook}
+        ):
             with patch.dict(os.environ, {"SLACK_API_TOKEN": "env_token"}):
                 connector = SlackDiscordConnector()
                 connector.check_status()

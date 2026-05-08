@@ -9,7 +9,8 @@ TODO:
 - Implement logging & metrics hooks for long-running workflows
 """
 
-from typing import Callable, Dict, Any, List
+from typing import Any, Callable, Dict, List
+
 from cherenkov.ai_workflows_orchestrator import orchestrate_ai_workflows
 
 logger = logging.getLogger(__name__)
@@ -103,9 +104,7 @@ def orchestrate_ai_workflows(context: Dict[str, Any]) -> Dict[str, Any]:
         agent_name = step.get("agent")
         agent_input = step.get("input", {})
 
-        print(
-            f"[cherenkov-ai] Executing step {idx}: {step_name} using agent '{agent_name}'"
-        )
+        print(f"[cherenkov-ai] Executing step {idx}: {step_name} using agent '{agent_name}'")
 
         result_record: Dict[str, Any] = {
             "index": idx,
@@ -155,4 +154,3 @@ def orchestrate_ai_workflows(context: Dict[str, Any]) -> Dict[str, Any]:
         "total_steps": len(roadmap),
         "steps": step_results,
     }
-

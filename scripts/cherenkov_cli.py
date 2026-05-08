@@ -4,8 +4,8 @@ cherenkov - AI-Powered Security Testing Framework
 Main CLI
 """
 
-import sys
 import argparse
+
 from cherenkov.scanners.header_scanner import SimpleScanner
 
 
@@ -43,9 +43,7 @@ Examples:
     scan_parser.set_defaults(func=scan_command)
 
     # Generate command
-    gen_parser = subparsers.add_parser(
-        "generate", help="Generate security tools with AI"
-    )
+    gen_parser = subparsers.add_parser("generate", help="Generate security tools with AI")
     gen_parser.add_argument("description", help="Description of tool to generate")
     gen_parser.set_defaults(func=generate_command)
 
@@ -59,4 +57,3 @@ Examples:
 
 if __name__ == "__main__":
     main()
-

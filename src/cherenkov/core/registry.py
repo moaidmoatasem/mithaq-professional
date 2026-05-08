@@ -1,9 +1,12 @@
 """Scanner Registry - Auto-discovery"""
+
 import importlib
-import pkgutil
 import inspect
-from typing import List, Dict, Type
+import pkgutil
+from typing import Dict, List, Type
+
 from .base_scanner import BaseScanner
+
 
 class ScannerRegistry:
     """Auto-discovers all scanners in scanners/ directory"""
@@ -22,9 +25,11 @@ class ScannerRegistry:
                     module = importlib.import_module(name)
                     for attr_name in dir(module):
                         attr = getattr(module, attr_name)
-                        if (inspect.isclass(attr) and
-                            issubclass(attr, BaseScanner) and
-                            attr != BaseScanner):
+                        if (
+                            inspect.isclass(attr)
+                            and issubclass(attr, BaseScanner)
+                            and attr != BaseScanner
+                        ):
                             scanner_name = attr.__name__.replace("Scanner", "").lower()
                             self._registry[scanner_name] = attr
                 except ImportError:
@@ -44,4 +49,3 @@ class ScannerRegistry:
         """Instantiate scanner"""
         scanner_class = self.get_scanner(name)
         return scanner_class(scanner_class.__name__, "Auto-discovered scanner")
-

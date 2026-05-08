@@ -17,9 +17,7 @@ import sys
 from textwrap import dedent
 
 SESSIONS = {
-
     # ── Phase 1 cleanup — one task per session ──────────────────────────────
-
     "fix_line_endings": dedent("""
         SCOPE: Fix line-ending noise. ONLY this. Nothing else.
 
@@ -32,7 +30,6 @@ SESSIONS = {
         Expected: working tree is clean. If not, report what's still modified.
         Do NOT touch any other file.
     """).strip(),
-
     "fix_nested_dir": dedent("""
         SCOPE: Delete nested duplicate. ONLY this.
 
@@ -45,7 +42,6 @@ SESSIONS = {
 
         Expected: src/cherenkov/cherenkov/ no longer exists. Report commit hash.
     """).strip(),
-
     "recover_phase2": dedent("""
         SCOPE: Recover lost Phase 2 commits. ONLY this.
 
@@ -55,7 +51,6 @@ SESSIONS = {
         Cherry-pick them onto main. Push. Report which commits were recovered.
         Do NOT modify any other code.
     """).strip(),
-
     "fix_api_security": dedent("""
         SCOPE: Fix two security issues in api/main.py. ONLY these two.
 
@@ -69,7 +64,6 @@ SESSIONS = {
         Commit: "fix(security): restrict CORS origins and bind API to localhost"
         Push. Report the exact lines changed.
     """).strip(),
-
     "delete_dead_files": dedent("""
         SCOPE: Delete 4 dead planning files. ONLY this.
 
@@ -83,7 +77,6 @@ SESSIONS = {
         Commit: "chore: remove empty and stale planning files"
         Push. Report which files were deleted.
     """).strip(),
-
     "tag_release": dedent("""
         SCOPE: Tag v0.1.1-security. ONLY this.
 
@@ -100,9 +93,7 @@ SESSIONS = {
 
         Report: release URL.
     """).strip(),
-
     # ── Phase 2 — one component per session ─────────────────────────────────
-
     "create_base_scanner": dedent("""
         SCOPE: Create src/cherenkov/core/base_scanner.py only.
 
@@ -113,7 +104,6 @@ SESSIONS = {
         Commit: "feat(core): BaseScanner abstract contract"
         Push. Report coverage delta.
     """).strip(),
-
     "create_registry": dedent("""
         SCOPE: Create src/cherenkov/core/registry.py only.
 
@@ -125,7 +115,6 @@ SESSIONS = {
         Commit: "feat(core): scanner auto-discovery registry"
         Push.
     """).strip(),
-
     "create_ablation": dedent("""
         SCOPE: Copy ablation.py to src/cherenkov/ai/ablation.py and wire it.
 
@@ -139,7 +128,6 @@ SESSIONS = {
         Commit: "feat(ai): Ablation sanitization bridge with telemetry"
         Push.
     """).strip(),
-
     "validate_candidate": dedent("""
         SCOPE: Run the 5-step validation gate on ONE scanner candidate.
 
@@ -159,9 +147,7 @@ SESSIONS = {
 
         Do NOT graduate if any step fails. Comment on the issue with what failed.
     """).strip(),
-
     # ── Ongoing maintenance ──────────────────────────────────────────────────
-
     "update_readme": dedent("""
         SCOPE: Update README.md to match current reality. ONLY this.
 
@@ -178,7 +164,6 @@ SESSIONS = {
         Commit: "docs: update README to reflect current state"
         Push.
     """).strip(),
-
     "daily_validation": dedent("""
         SCOPE: Run the autonomous nightly validation pass. This is what CI should do.
 
@@ -226,14 +211,17 @@ def main():
     elif cmd == "next":
         # Simple heuristic based on git status
         import subprocess
+
         try:
-            result = subprocess.run(
-                ["git", "status", "--short"], capture_output=True, text=True
-            )
-            if "cherenkov/cherenkov" in subprocess.run(
-                ["find", "src/cherenkov", "-name", "cherenkov", "-type", "d"],
-                capture_output=True, text=True
-            ).stdout:
+            result = subprocess.run(["git", "status", "--short"], capture_output=True, text=True)
+            if (
+                "cherenkov/cherenkov"
+                in subprocess.run(
+                    ["find", "src/cherenkov", "-name", "cherenkov", "-type", "d"],
+                    capture_output=True,
+                    text=True,
+                ).stdout
+            ):
                 print("Next: python tools/session_manager.py show fix_nested_dir")
             elif len(result.stdout.strip().splitlines()) > 50:
                 print("Next: python tools/session_manager.py show fix_line_endings")
@@ -249,4 +237,3 @@ def main():
 
 if __name__ == "__main__":
     main()
-

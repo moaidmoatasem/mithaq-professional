@@ -3,9 +3,10 @@ CSRF Scanner - Refined Version
 Detects Cross-Site Request Forgery vulnerabilities
 """
 
-import requests
-from typing import Dict, List
 import re
+from typing import Dict, List
+
+import requests
 
 
 class CSRFScanner:
@@ -70,7 +71,7 @@ class CSRFScanner:
 
     def scan_samesite_cookies(self) -> List[Dict]:
         """Check for SameSite cookie attribute"""
-        print(f"[*] Checking SameSite cookie protection")
+        print("[*] Checking SameSite cookie protection")
 
         try:
             response = requests.get(self.target, timeout=10)
@@ -85,11 +86,11 @@ class CSRFScanner:
                         "description": "Cookies missing SameSite attribute (CSRF protection)",
                     }
                     self.vulnerabilities.append(vuln)
-                    print(f"  [!] Cookies missing SameSite attribute")
+                    print("  [!] Cookies missing SameSite attribute")
                 else:
-                    print(f"  [✓] SameSite cookie protection enabled")
+                    print("  [✓] SameSite cookie protection enabled")
             else:
-                print(f"  [*] No cookies set")
+                print("  [*] No cookies set")
 
         except Exception as e:
             print(f"  [!] Error: {e}")

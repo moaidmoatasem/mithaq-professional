@@ -3,8 +3,9 @@ Autonomous Developer Crew
 Agents that write, execute, and save code autonomously.
 """
 
-from crewai import Agent, Task, Crew, Process, LLM
 import os
+
+from crewai import LLM, Agent, Crew, Process, Task
 
 # Configure local Ollama LLM
 local_llm = LLM(
@@ -108,7 +109,7 @@ class AutonomousDeveloperCrew:
             6. References and resources
             
             Make it professional and detailed.""",
-            expected_output=f"Comprehensive markdown security report",
+            expected_output="Comprehensive markdown security report",
             agent=report_gen,
             context=[scanner_task, exploit_task],
         )
@@ -129,7 +130,7 @@ class AutonomousDeveloperCrew:
             verbose=True,
         )
 
-        print(f"\n🚀 Autonomous Developer Crew starting...")
+        print("\n🚀 Autonomous Developer Crew starting...")
         print(f"   Target: Writing tools for {vulnerability_type}\n")
 
         result = crew.kickoff()
@@ -141,9 +142,7 @@ class AutonomousDeveloperCrew:
     def _save_outputs(self, result, vuln_type: str):
         """Save crew outputs to files"""
         try:
-            output_file = (
-                f"output/{vuln_type.replace(' ', '_').lower()}_complete_output.txt"
-            )
+            output_file = f"output/{vuln_type.replace(' ', '_').lower()}_complete_output.txt"
             with open(output_file, "w") as f:
                 f.write(str(result))
             print(f"\n✅ Output saved to {output_file}")

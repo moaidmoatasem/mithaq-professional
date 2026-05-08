@@ -1,9 +1,12 @@
 """Async Scan Engine - Runs scanners concurrently"""
+
 import asyncio
 import time
-from typing import List, Dict
-from .base_scanner import ScanResult, BaseScanner
+from typing import Dict, List
+
+from .base_scanner import ScanResult
 from .registry import ScannerRegistry
+
 
 class ScanEngine:
     """Async scan engine for concurrent scanner execution"""
@@ -12,7 +15,9 @@ class ScanEngine:
         self.registry = registry
         self.concurrency_limit = 10
 
-    async def scan_single(self, scanner_name: str, target: str, timeout: float = 10.0) -> ScanResult:
+    async def scan_single(
+        self, scanner_name: str, target: str, timeout: float = 10.0
+    ) -> ScanResult:
         """Run single scanner"""
         scanner_class = self.registry.get_scanner(scanner_name)
         scanner = scanner_class(scanner_class.__name__, "")
@@ -23,8 +28,13 @@ class ScanEngine:
 
         return result
 
-    async def scan_all(self, target: str, scanners: List[str] = None, timeout: float = 10.0,
-                      max_concurrent: int = 10) -> Dict[str, ScanResult]:
+    async def scan_all(
+        self,
+        target: str,
+        scanners: List[str] = None,
+        timeout: float = 10.0,
+        max_concurrent: int = 10,
+    ) -> Dict[str, ScanResult]:
         """Run all scanners concurrently"""
         if scanners is None:
             scanners = self.registry.list_scanners()
@@ -39,10 +49,12 @@ class ScanEngine:
         results = await asyncio.gather(*tasks, return_exceptions=True)
 
         scan_results = {}
-        for scanner_name, result in zip(scanners, results):
+        for scanner_name, result in zip(scanners, results, strict=False):
             if isinstance(result, Exception):
                 scan_results[scanner_name] = ScanResult(
-                    target=target, scanner_name=scanner_name, status="failed",
+                    target=target,
+                    scanner_name=scanner_name,
+                    status="failed",
                     findings=[],
                 )
             else:

@@ -1,6 +1,6 @@
 import pytest
-from pathlib import Path
-from cherenkov.storage.database import init_db, save_scan, get_scan, list_scans, prune_old_scans
+
+from cherenkov.storage.database import get_scan, init_db, list_scans, prune_old_scans, save_scan
 
 
 @pytest.fixture()
@@ -11,8 +11,13 @@ def db(tmp_path):
 
 
 def test_save_and_get_scan(db):
-    save_scan("scan-001", "http://example.com", [{"cwe": "CWE-79", "severity": "HIGH"}],
-              meta={"scanner": "header_scanner"}, path=db)
+    save_scan(
+        "scan-001",
+        "http://example.com",
+        [{"cwe": "CWE-79", "severity": "HIGH"}],
+        meta={"scanner": "header_scanner"},
+        path=db,
+    )
     result = get_scan("scan-001", path=db)
     assert result is not None
     assert result["target"] == "http://example.com"
@@ -40,4 +45,3 @@ def test_prune_old_scans_removes_stale_rows(db):
     assert deleted == 1
     assert get_scan("old-scan", path=db) is None
     assert get_scan("new-scan", path=db) is not None
-

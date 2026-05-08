@@ -148,4 +148,3 @@ class TestDeveloperAgent:
         assert capabilities["role"] == "Security Developer"
         assert capabilities["sanitization_enabled"] is True
         assert capabilities["max_iterations"] == 7
-

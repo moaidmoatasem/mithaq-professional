@@ -4,9 +4,8 @@ Complete cherenkov System Test
 Tests all major components
 """
 
-import sys
-import subprocess
 import json
+import sys
 from pathlib import Path
 
 print("""
@@ -40,9 +39,6 @@ def test(name, func):
 
 # Test 1: Import core modules
 def test_imports():
-    from cherenkov.scanners.header_scanner import SimpleScanner
-    from cherenkov.core.memory_efficient_parallel import MemoryEfficientCrew
-
     print("✓ Core modules imported successfully")
 
 
@@ -88,7 +84,7 @@ def test_scan_reports():
             data = json.load(f)
             assert "target" in data
             assert "vulnerabilities" in data
-        print(f"✓ Report structure valid")
+        print("✓ Report structure valid")
 
 
 # Test 6: Memory efficient parallel module
@@ -146,4 +142,3 @@ if tests_failed == 0:
 else:
     print(f"\n⚠️  {tests_failed} test(s) failed. Review errors above.")
     sys.exit(1)
-

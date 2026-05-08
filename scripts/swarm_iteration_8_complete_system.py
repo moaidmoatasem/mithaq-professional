@@ -8,10 +8,11 @@ import sys
 
 sys.path.insert(0, ".")
 
+import subprocess
+from pathlib import Path
+
 from cherenkov.agents.micro_swarm.micro_agent import MicroAgent, MicroAgentConfig
 from cherenkov.agents.micro_swarm.swarm_orchestrator import MicroSwarm
-from pathlib import Path
-import subprocess
 
 print("""
 ╔══════════════════════════════════════════════════════════════╗
@@ -520,4 +521,3 @@ except Exception as e:
 print("\n🎉 Iteration #8 complete! System is production-ready!")
 print("\n🐳 Build Docker image:")
 print("   cd cherenkov-professional && docker build -t cherenkov-autonomous .")
-

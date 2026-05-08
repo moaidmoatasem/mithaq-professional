@@ -22,14 +22,12 @@ This file runs 24/7 on WSL2. Cost: $0.
 from __future__ import annotations
 
 import asyncio
-import json
 import logging
 import os
 import shutil
 import subprocess
 import tempfile
-import time
-from dataclasses import dataclass, field
+from dataclasses import dataclass
 from enum import Enum
 from pathlib import Path
 
@@ -39,40 +37,40 @@ import yaml
 logging.basicConfig(level=logging.INFO, format="%(asctime)s [%(levelname)s] %(message)s")
 logger = logging.getLogger("cherenkov.swarm")
 
-OLLAMA_URL   = "http://localhost:11434"
+OLLAMA_URL = "http://localhost:11434"
 OLLAMA_MODEL = os.getenv("cherenkov_OLLAMA_MODEL", "qwen2.5-coder:3b")
-MAX_RETRIES  = 3
-CANDIDATES   = Path("candidates/generated_scanners")
-MANIFESTS    = Path("manifests/cwe_queue.yaml")
-DARK_ROOM    = Path(tempfile.gettempdir()) / "swarm_build"
+MAX_RETRIES = 3
+CANDIDATES = Path("candidates/generated_scanners")
+MANIFESTS = Path("manifests/cwe_queue.yaml")
+DARK_ROOM = Path(tempfile.gettempdir()) / "swarm_build"
 
 
 class CWEStatus(str, Enum):
-    PENDING   = "pending"
-    BUILDING  = "building"
-    CANDIDATE = "candidate"   # passed CI, PR opened
-    FAILED    = "failed"      # exhausted retries
-    VALIDATED = "validated"   # graduated to src/cherenkov/scanners/
+    PENDING = "pending"
+    BUILDING = "building"
+    CANDIDATE = "candidate"  # passed CI, PR opened
+    FAILED = "failed"  # exhausted retries
+    VALIDATED = "validated"  # graduated to src/cherenkov/scanners/
 
 
 @dataclass
 class CWESpec:
-    cwe_id:      str
+    cwe_id: str
     description: str
-    tier:        int = 1
-    status:      CWEStatus = CWEStatus.PENDING
-    attempts:    int = 0
+    tier: int = 1
+    status: CWEStatus = CWEStatus.PENDING
+    attempts: int = 0
     fail_reason: str = ""
 
 
 @dataclass
 class SwarmResult:
-    cwe_id:      str
-    success:     bool
+    cwe_id: str
+    success: bool
     module_name: str = ""
-    pr_url:      str = ""
+    pr_url: str = ""
     fail_reason: str = ""
-    attempts:    int = 0
+    attempts: int = 0
 
 
 class SwarmOrchestrator:
@@ -98,11 +96,9 @@ class SwarmOrchestrator:
                 await asyncio.sleep(60)
                 continue
 
-            results = await asyncio.gather(
-                *[self._process_cwe(spec) for spec in specs]
-            )
+            results = await asyncio.gather(*[self._process_cwe(spec) for spec in specs])
             self._report(results)
-            await asyncio.sleep(5)   # brief pause between batches
+            await asyncio.sleep(5)  # brief pause between batches
 
     async def run_once(self, cwe_id: str, description: str) -> SwarmResult:
         """Process a single CWE. Used by CI and manual runs."""
@@ -164,9 +160,7 @@ class SwarmOrchestrator:
 
     # ── Ollama interaction ──────────────────────────────────────────────────
 
-    async def _generate_code(
-        self, spec: CWESpec, last_error: str, attempt: int
-    ) -> str:
+    async def _generate_code(self, spec: CWESpec, last_error: str, attempt: int) -> str:
         """
         Attempt 1: generate from scratch.
         Attempts 2+: read your own error and patch.
@@ -238,9 +232,7 @@ Produce the complete fixed file. Python code only. No explanation. No markdown f
 
     # ── Judge (CI gate) ─────────────────────────────────────────────────────
 
-    def _run_judge(
-        self, scanner_file: Path, work_dir: Path
-    ) -> tuple[bool, str]:
+    def _run_judge(self, scanner_file: Path, work_dir: Path) -> tuple[bool, str]:
         """
         Hard pass/fail. No LLM involved.
         Returns (passed, error_output).
@@ -249,8 +241,7 @@ Produce the complete fixed file. Python code only. No explanation. No markdown f
 
         # Syntax check
         syn = subprocess.run(
-            ["python3", "-m", "py_compile", str(scanner_file)],
-            capture_output=True, text=True
+            ["python3", "-m", "py_compile", str(scanner_file)], capture_output=True, text=True
         )
         if syn.returncode != 0:
             errors.append(f"SYNTAX ERROR:\n{syn.stderr}")
@@ -258,7 +249,8 @@ Produce the complete fixed file. Python code only. No explanation. No markdown f
         # Bandit security scan — skip B501 (verify=False is intentional in TLS scanners)
         ban = subprocess.run(
             ["bandit", "--severity-level", "medium", "--skip", "B501", str(scanner_file)],
-            capture_output=True, text=True
+            capture_output=True,
+            text=True,
         )
         if ban.returncode != 0:
             errors.append(f"BANDIT:\n{ban.stdout}")
@@ -271,15 +263,13 @@ Produce the complete fixed file. Python code only. No explanation. No markdown f
         subprocess.run(["ruff", "format", str(scanner_file)], capture_output=True)
 
         # Ruff lint
-        ruff = subprocess.run(
-            ["ruff", "check", str(scanner_file)],
-            capture_output=True, text=True
-        )
+        ruff = subprocess.run(["ruff", "check", str(scanner_file)], capture_output=True, text=True)
         if ruff.returncode != 0:
             errors.append(f"RUFF:\n{ruff.stdout}")
 
         # CWE reference check — accept "CWE-295", "CWE_ID = 295", or "cwe: 295"
         import re as _re
+
         content = scanner_file.read_text()
         if not _re.search(r"CWE[-_\s:]+\d+", content, _re.IGNORECASE):
             errors.append("DOCSTRING: Missing CWE ID in file (need CWE-NNN, CWE_ID=NNN, etc.)")
@@ -297,18 +287,18 @@ Produce the complete fixed file. Python code only. No explanation. No markdown f
         specs = []
         for item in data.get("queue", []):
             if item.get("status", "pending") == "pending":
-                specs.append(CWESpec(
-                    cwe_id=item["cwe_id"],
-                    description=item["description"],
-                    tier=item.get("tier", 1),
-                ))
+                specs.append(
+                    CWESpec(
+                        cwe_id=item["cwe_id"],
+                        description=item["description"],
+                        tier=item.get("tier", 1),
+                    )
+                )
                 if len(specs) >= limit:
                     break
         return specs
 
-    def _update_queue(
-        self, cwe_id: str, status: CWEStatus, reason: str = ""
-    ) -> None:
+    def _update_queue(self, cwe_id: str, status: CWEStatus, reason: str = "") -> None:
         if not MANIFESTS.exists():
             return
         data = yaml.safe_load(MANIFESTS.read_text()) or {}
@@ -336,6 +326,7 @@ Produce the complete fixed file. Python code only. No explanation. No markdown f
 
     def _module_name(self, cwe_id: str, description: str) -> str:
         import re
+
         words = re.findall(r"[a-zA-Z]+", description.lower())[:3]
         num = re.sub(r"\D", "", cwe_id)
         return "_".join(words) or f"cwe_{num}"
@@ -343,6 +334,7 @@ Produce the complete fixed file. Python code only. No explanation. No markdown f
     def _extract_python(self, raw: str) -> str:
         """Strip markdown fences if present."""
         import re
+
         match = re.search(r"```python\n(.*?)```", raw, re.DOTALL)
         if match:
             return match.group(1)
@@ -376,7 +368,9 @@ class Stub{spec.cwe_id.replace("-", "")}Scanner(BaseScanner):
         failed = len(results) - passed
         logger.info(
             "Batch complete: %d passed, %d failed | Total candidates: %d",
-            passed, failed, len(list(CANDIDATES.glob("*.py")))
+            passed,
+            failed,
+            len(list(CANDIDATES.glob("*.py"))),
         )
 
 
@@ -468,4 +462,3 @@ if __name__ == "__main__":
             await orch.run_forever(batch_size=3)
 
     asyncio.run(main())
-

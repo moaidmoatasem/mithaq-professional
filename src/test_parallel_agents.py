@@ -1,5 +1,6 @@
-from crewai import Agent, Task, Crew, Process, LLM
 import os
+
+from crewai import LLM, Agent, Crew, Process, Task
 from dotenv import load_dotenv
 
 load_dotenv()
@@ -75,5 +76,5 @@ with open("output/parallel_test/scanners.txt", "w") as f:
 print("\n" + "=" * 70)
 print("✅ ALL AGENTS COMPLETED!")
 print("=" * 70)
-print(f"\nResults saved to: output/parallel_test/scanners.txt")
+print("\nResults saved to: output/parallel_test/scanners.txt")
 print(f"\nFinal output:\n{result}")

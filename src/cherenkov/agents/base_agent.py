@@ -4,9 +4,9 @@ from abc import ABC, abstractmethod
 from typing import Any
 
 from crewai import Agent
-from cherenkov.config import DEFAULT_LLM_MODEL
 from pydantic import BaseModel, Field
 
+from cherenkov.config import DEFAULT_LLM_MODEL
 from cherenkov.core.ablation import Sanitizer
 from cherenkov.schemas.cloud_instruction import CloudInstruction
 from cherenkov.schemas.sanitized_output import SanitizedOutput
@@ -124,4 +124,3 @@ class BaseAgent(ABC):
             "max_iterations": self.config.max_iterations,
             "sanitization_enabled": True,
         }
-

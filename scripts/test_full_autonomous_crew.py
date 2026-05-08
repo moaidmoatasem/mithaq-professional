@@ -3,8 +3,9 @@
 Full 3-Agent Autonomous Developer Crew
 """
 
-from crewai import Agent, Task, Crew, Process, LLM
 import os
+
+from crewai import LLM, Agent, Crew, Process, Task
 from dotenv import load_dotenv
 
 load_dotenv()
@@ -84,5 +85,5 @@ with open("output/autonomous_crew_output.txt", "w") as f:
 print("\n" + "=" * 70)
 print("✅ CREW COMPLETED!")
 print("=" * 70)
-print(f"\nOutput saved to: output/autonomous_crew_output.txt")
+print("\nOutput saved to: output/autonomous_crew_output.txt")
 print(f"\nFinal Result:\n{result}")

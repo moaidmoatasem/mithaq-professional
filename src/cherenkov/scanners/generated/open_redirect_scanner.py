@@ -19,7 +19,7 @@ def is_xml_safe(xml_content):
         # Parse the XML string against our parser (safeguard)
         sub_parser.parse(xml_content.encode("utf-8"))
         parsed_xml = xml.etree.cElementTree.tostring(elem, encoding="unicode")
-    except Exception as e:
+    except Exception:
         return False
 
     # Additional checks to detect if potentially unsafe payloads were executed
@@ -49,9 +49,10 @@ def xml_XXE_tester(xml_string):
 
 
 # Example XML string
-example_xml = """<root> <?xml version="1.0" encoding="UTF-8"?><test>This should be safe</test></root>"""
+example_xml = (
+    """<root> <?xml version="1.0" encoding="UTF-8"?><test>This should be safe</test></root>"""
+)
 
 # Run the test and print result
 result = xml_XXE_tester(example_xml)
 print("XML is secure:", "safe" if result else "vulnerable")
-

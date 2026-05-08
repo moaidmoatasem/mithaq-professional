@@ -14,6 +14,7 @@ PoC Confidence levels:
 CHANGE FROM V3: Watchdog timer kills stalled PoC containers.
 (Accepted: Arch review — hanging exploits freeze worker nodes)
 """
+
 from __future__ import annotations
 
 import asyncio
@@ -30,16 +31,16 @@ if TYPE_CHECKING:
 logger = logging.getLogger("cherenkov.tokamak")
 
 # Hard limits
-POC_TIMEOUT_SECONDS       = 30    # Kill stalled PoC containers
-POC_MAX_RETRIES           = 2     # Retry on env mismatch before PROBABLE
-WATCHDOG_CHECK_INTERVAL   = 0.5   # Poll interval for watchdog
+POC_TIMEOUT_SECONDS = 30  # Kill stalled PoC containers
+POC_MAX_RETRIES = 2  # Retry on env mismatch before PROBABLE
+WATCHDOG_CHECK_INTERVAL = 0.5  # Poll interval for watchdog
 
 
 class TokamakVerdict(str, Enum):
-    CONFIRMED  = "confirmed"   # PoC succeeded → Tokamak stamp
-    PROBABLE   = "probable"    # Env mismatch or partial → human review
+    CONFIRMED = "confirmed"  # PoC succeeded → Tokamak stamp
+    PROBABLE = "probable"  # Env mismatch or partial → human review
     UNVERIFIED = "unverified"  # Cannot attempt PoC on this surface
-    DISCARDED  = "discarded"   # PoC failed definitively
+    DISCARDED = "discarded"  # PoC failed definitively
 
 
 @dataclass
@@ -48,16 +49,17 @@ class TokamakTrace:
     The CHERENKOV Trace artifact. SHA-256 signed forensic log.
     Every CONFIRMED or PROBABLE finding generates one.
     """
-    finding_title:     str
-    verdict:           TokamakVerdict
-    poc_technique:     str
-    evidence_summary:  str                     # Sanitized — safe to transmit
-    sha256_evidence:   str                     # Hash of raw evidence — local only
+
+    finding_title: str
+    verdict: TokamakVerdict
+    poc_technique: str
+    evidence_summary: str  # Sanitized — safe to transmit
+    sha256_evidence: str  # Hash of raw evidence — local only
     agent_attribution: str = "Tokamak"
-    timestamp:         float = field(default_factory=time.time)
-    duration_ms:       float = 0.0
+    timestamp: float = field(default_factory=time.time)
+    duration_ms: float = 0.0
     human_review_required: bool = False
-    confidence_notes:  str = ""
+    confidence_notes: str = ""
 
     def sign(self) -> str:
         """Produce a SHA-256 signature over the trace content."""
@@ -72,43 +74,45 @@ class TokamakTrace:
 @dataclass
 class TokamakResult:
     finding_title: str
-    verdict:       TokamakVerdict
-    trace:         TokamakTrace | None
-    signature:     str | None = None
+    verdict: TokamakVerdict
+    trace: TokamakTrace | None
+    signature: str | None = None
 
 
 # ──────────────────────────────────────────────
 # PoC Primitive library (Phase 2 deliverable)
 # ──────────────────────────────────────────────
 
+
 class PoCPrimitive:
     """
     Safe, non-destructive PoC techniques.
     Every technique must be read-only or leave no persistent side effect.
     """
+
     PRIMITIVES: dict[str, str] = {
         # SQL injection: read-only probe
-        "sql_injection":      "SELECT 1 FROM dual WHERE 1=1",
+        "sql_injection": "SELECT 1 FROM dual WHERE 1=1",
         # XSS: non-executing sentinel
-        "xss_reflected":      "<cherenkov-probe-xss>",
+        "xss_reflected": "<cherenkov-probe-xss>",
         # SSRF: probe internal DNS, not fetch content
-        "ssrf_basic":         "http://metadata.probe.cherenkov.internal/",
+        "ssrf_basic": "http://metadata.probe.cherenkov.internal/",
         # Auth bypass: empty credential probe
-        "auth_bypass":        "' OR '1'='1' --",
+        "auth_bypass": "' OR '1'='1' --",
         # JWT: alg=none probe (read-only)
-        "jwt_none_alg":       '{"alg":"none","typ":"JWT"}',
+        "jwt_none_alg": '{"alg":"none","typ":"JWT"}',
         # Path traversal: read /etc/hostname only
-        "path_traversal":     "../../../../etc/hostname",
+        "path_traversal": "../../../../etc/hostname",
         # Header injection: CRLF probe
-        "header_injection":   "%0d%0aX-cherenkov-Probe: 1",
+        "header_injection": "%0d%0aX-cherenkov-Probe: 1",
         # Command injection: echo only
-        "command_injection":  ";echo cherenkov-tokamak-probe",
+        "command_injection": ";echo cherenkov-tokamak-probe",
         # XXE: external entity to controlled host
-        "xxe_basic":          '<!DOCTYPE foo [<!ENTITY ext SYSTEM "http://probe.cherenkov.internal">]>',
+        "xxe_basic": '<!DOCTYPE foo [<!ENTITY ext SYSTEM "http://probe.cherenkov.internal">]>',
         # IDOR: increment resource ID by 1
-        "idor_basic":         "resource_id + 1",
+        "idor_basic": "resource_id + 1",
         # Open redirect: redirect to controlled domain
-        "open_redirect":      "https://probe.cherenkov.internal/callback",
+        "open_redirect": "https://probe.cherenkov.internal/callback",
     }
 
     @classmethod
@@ -125,6 +129,7 @@ class PoCPrimitive:
 # The validation agent
 # ──────────────────────────────────────────────
 
+
 class TokamakAgent:
     """
     Validates every HIGH/CRITICAL finding before it reaches the report.
@@ -138,7 +143,7 @@ class TokamakAgent:
 
     def __init__(
         self,
-        tokamak_executor=None,           # injected in production
+        tokamak_executor=None,  # injected in production
         timeout: int = POC_TIMEOUT_SECONDS,
     ) -> None:
         self.tokamak = tokamak_executor
@@ -157,8 +162,11 @@ class TokamakAgent:
                 finding_title=finding.title,
                 verdict=TokamakVerdict.UNVERIFIED,
                 trace=self._make_trace(
-                    finding, TokamakVerdict.UNVERIFIED, technique, t0,
-                    confidence_notes=f"No safe PoC primitive for scanner '{technique}'"
+                    finding,
+                    TokamakVerdict.UNVERIFIED,
+                    technique,
+                    t0,
+                    confidence_notes=f"No safe PoC primitive for scanner '{technique}'",
                 ),
             )
 
@@ -174,13 +182,18 @@ class TokamakAgent:
 
                 if result["exploitable"]:
                     trace = self._make_trace(
-                        finding, TokamakVerdict.CONFIRMED, technique, t0,
+                        finding,
+                        TokamakVerdict.CONFIRMED,
+                        technique,
+                        t0,
                         evidence=result.get("evidence", ""),
-                        confidence_notes="PoC executed successfully"
+                        confidence_notes="PoC executed successfully",
                     )
                     signature = trace.sign()
                     print(f"[CHERENKOV] Trace Signed: {signature[:16]}...")
-                    logger.info("CHERENKOV Trace generated and signed for finding: %s", finding.title)
+                    logger.info(
+                        "CHERENKOV Trace generated and signed for finding: %s", finding.title
+                    )
                     return TokamakResult(
                         finding_title=finding.title,
                         verdict=TokamakVerdict.CONFIRMED,
@@ -190,8 +203,11 @@ class TokamakAgent:
 
                 # Not exploitable — discard
                 trace = self._make_trace(
-                    finding, TokamakVerdict.DISCARDED, technique, t0,
-                    confidence_notes="PoC executed but finding not reproducible"
+                    finding,
+                    TokamakVerdict.DISCARDED,
+                    technique,
+                    t0,
+                    confidence_notes="PoC executed but finding not reproducible",
                 )
                 return TokamakResult(
                     finding_title=finding.title,
@@ -204,7 +220,10 @@ class TokamakAgent:
                 logger.warning(
                     "Tokamak PoC timed out for '%s' on '%s' (attempt %d/%d). "
                     "Watchdog killed stalled container.",
-                    technique, target, retries, POC_MAX_RETRIES + 1
+                    technique,
+                    target,
+                    retries,
+                    POC_MAX_RETRIES + 1,
                 )
                 await self._kill_stalled_container()
 
@@ -215,7 +234,10 @@ class TokamakAgent:
 
         # Exceeded retries — PROBABLE (env issue, not definitively safe)
         trace = self._make_trace(
-            finding, TokamakVerdict.PROBABLE, technique, t0,
+            finding,
+            TokamakVerdict.PROBABLE,
+            technique,
+            t0,
             confidence_notes=(
                 f"PoC failed {POC_MAX_RETRIES + 1}x due to timeouts or "
                 "environment mismatch. Human review required."
@@ -228,9 +250,7 @@ class TokamakAgent:
             trace=trace,
         )
 
-    async def _execute_poc(
-        self, target: str, technique: str, payload: str
-    ) -> dict:
+    async def _execute_poc(self, target: str, technique: str, payload: str) -> dict:
         """
         Execute PoC in ephemeral tokamak container.
         In production: delegates to ScanTOKAMAK.
@@ -262,9 +282,7 @@ class TokamakAgent:
         evidence: str = "",
         confidence_notes: str = "",
     ) -> TokamakTrace:
-        raw_evidence = (
-            f"{finding.title}|{technique}|{evidence}"
-        )
+        raw_evidence = f"{finding.title}|{technique}|{evidence}"
         sha256 = hashlib.sha256(raw_evidence.encode()).hexdigest()
         return TokamakTrace(
             finding_title=finding.title,
@@ -276,4 +294,3 @@ class TokamakAgent:
             human_review_required=(verdict == TokamakVerdict.PROBABLE),
             confidence_notes=confidence_notes,
         )
-

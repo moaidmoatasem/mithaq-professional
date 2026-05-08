@@ -65,9 +65,7 @@ class DeveloperAgent(BaseAgent):
             "sanitization_applied": sanitized.sanitization_applied,
         }
 
-    def analyze_smali(
-        self, apk_path: str, target_classes: list[str]
-    ) -> CloudInstruction:
+    def analyze_smali(self, apk_path: str, target_classes: list[str]) -> CloudInstruction:
         """Analyze Smali bytecode from APK.
 
         Args:
@@ -164,4 +162,3 @@ class DeveloperAgent(BaseAgent):
             confidence=0.90,
             reasoning=reasoning,
         )
-

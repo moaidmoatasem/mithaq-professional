@@ -3,9 +3,10 @@ Workflow YAML Parser
 Converts YAML workflow definitions into executable agent configurations
 """
 
-import yaml
-from typing import Dict, List, Any
 from pathlib import Path
+from typing import Any, Dict, List
+
+import yaml
 
 
 class WorkflowParser:

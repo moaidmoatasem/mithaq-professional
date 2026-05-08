@@ -1,13 +1,13 @@
 import sys
-import asyncio
 import unittest
-from unittest.mock import MagicMock, AsyncMock
+from unittest.mock import AsyncMock, MagicMock
 
 # Mock httpx to avoid ModuleNotFoundError
 mock_httpx = MagicMock()
 sys.modules["httpx"] = mock_httpx
 
 from src.cherenkov.autonomous_generated.misc.smartretrier import SmartRetrier
+
 
 class TestSmartRetrier(unittest.IsolatedAsyncioTestCase):
     async def asyncSetUp(self):
@@ -54,6 +54,7 @@ class TestSmartRetrier(unittest.IsolatedAsyncioTestCase):
                 await self.retrier.fetch_data("/test")
 
         self.assertEqual(self.mock_client.get.call_count, 2)
+
 
 if __name__ == "__main__":
     unittest.main()

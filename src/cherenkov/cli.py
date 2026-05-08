@@ -21,6 +21,7 @@ def _get_registry():
     # Lazy import — registry pulls pydantic which may not be installed in minimal envs.
     try:
         from cherenkov.core.registry import ScannerRegistry
+
         return ScannerRegistry
     except ImportError as exc:
         console.print(f"[red]Registry unavailable:[/red] {exc}")
@@ -97,4 +98,3 @@ def list_scanners() -> None:
 
 if __name__ == "__main__":
     app()
-

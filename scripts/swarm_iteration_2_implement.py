@@ -8,10 +8,11 @@ import sys
 
 sys.path.insert(0, ".")
 
+import subprocess
+from pathlib import Path
+
 from cherenkov.agents.micro_swarm.micro_agent import MicroAgent, MicroAgentConfig
 from cherenkov.agents.micro_swarm.swarm_orchestrator import MicroSwarm
-from pathlib import Path
-import subprocess
 
 print("""
 ╔══════════════════════════════════════════════════════════════╗
@@ -243,9 +244,7 @@ agents = [
         )
     ),
     MicroAgent(
-        MicroAgentConfig(
-            role="CLIBuilder", purpose="Create CLI commands", tool_function=create_cli
-        )
+        MicroAgentConfig(role="CLIBuilder", purpose="Create CLI commands", tool_function=create_cli)
     ),
 ]
 
@@ -291,4 +290,3 @@ except Exception as e:
     print(f"⚠️  Commit issue: {e}")
 
 print("\n🎉 Iteration #2 complete! Agents built real code!")
-

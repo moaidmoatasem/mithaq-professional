@@ -3,7 +3,6 @@
 Analyze and test AI-generated scanner code
 """
 
-import os
 from pathlib import Path
 
 scanner_dir = Path("cherenkov/scanners/generated")
@@ -43,7 +42,7 @@ for scanner in python_files:
         print(f"✓ Error Handling: {has_error_handling}")
 
         # Show first 30 lines
-        print(f"\n📖 Preview (first 30 lines):")
+        print("\n📖 Preview (first 30 lines):")
         print("-" * 70)
         lines_list = content.split("\n")[:30]
         for i, line in enumerate(lines_list, 1):
@@ -62,4 +61,3 @@ for batch in sorted(batch_files):
 print("\n" + "=" * 70)
 print("✅ Analysis complete!")
 print("=" * 70)
-

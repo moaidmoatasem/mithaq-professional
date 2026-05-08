@@ -4,10 +4,10 @@ Autonomous Agent Swarm - Parallel Development with Auto-commit
 Agents work independently, make changes, and commit to repo
 """
 
-import os
 import subprocess
-from pathlib import Path
 from datetime import datetime
+from pathlib import Path
+
 from cherenkov.core.memory_efficient_parallel import MemoryEfficientCrew
 
 print("""
@@ -129,9 +129,7 @@ print("=" * 70)
 # Execute swarm
 print("\n🎯 Deploying autonomous agents...")
 start_time = datetime.now()
-results = crew.run_parallel_batches(
-    agent_configs=agent_configs, task_configs=task_configs
-)
+results = crew.run_parallel_batches(agent_configs=agent_configs, task_configs=task_configs)
 duration = (datetime.now() - start_time).total_seconds()
 
 print("\n" + "=" * 70)
@@ -147,8 +145,7 @@ timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
 
 for i, result in enumerate(results):
     output_file = (
-        output_dir
-        / f"agent_{i+1}_{SWARM_TASKS[i]['name'].replace(' ', '_')}_{timestamp}.txt"
+        output_dir / f"agent_{i+1}_{SWARM_TASKS[i]['name'].replace(' ', '_')}_{timestamp}.txt"
     )
     output_file.write_text(str(result["result"]))
     print(f"📄 Saved: {output_file}")
@@ -158,9 +155,7 @@ print("\n" + "=" * 70)
 print("GIT OPERATIONS")
 print("=" * 70)
 
-commit_message = (
-    f"[Autonomous Swarm] {len(SWARM_TASKS)} agents completed tasks at {timestamp}"
-)
+commit_message = f"[Autonomous Swarm] {len(SWARM_TASKS)} agents completed tasks at {timestamp}"
 if git_commit_changes(commit_message):
     print("\n🚀 Pushing to remote...")
     git_push()
@@ -176,4 +171,3 @@ print("4. ✅ Committed changes to git")
 print("5. ✅ Pushed to remote repo")
 print("\nCheck swarm_outputs/ for detailed results")
 print("=" * 70)
-

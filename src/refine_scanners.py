@@ -104,10 +104,10 @@ class XSSScanner:
             
             # Look for dangerous JavaScript patterns
             dangerous_patterns = [
-                r'document\.write\(',
-                r'innerHTML\s*=',
-                r'eval\(',
-                r'\.location\s*=',
+                r'document\\.write\\(',
+                r'innerHTML\\s*=',
+                r'eval\\(',
+                r'\\.location\\s*=',
             ]
             
             for pattern in dangerous_patterns:
@@ -421,4 +421,3 @@ print(f"📁 Location: {output_dir}/")
 print("\nTest them:")
 for filename in scanners.keys():
     print(f"  python {output_dir}/{filename} https://example.com")
-

@@ -1,5 +1,6 @@
-from cherenkov.agents.cloud.strategic_planner import StrategicPlanner, ThreatAnalysisTask
 from dotenv import load_dotenv
+
+from cherenkov.agents.cloud.strategic_planner import StrategicPlanner, ThreatAnalysisTask
 
 load_dotenv()
 
@@ -26,4 +27,3 @@ print(result["plan"])
 print("=" * 60)
 print(f"\n✅ Model: {result['model']}")
 print(f"📊 Tokens used: {result['tokens_used']}")
-

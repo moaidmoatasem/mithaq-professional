@@ -58,9 +58,7 @@ class Sanitizer:
         injection_matches = self.PROMPT_INJECTION_PATTERN.findall(text)
         for match in injection_matches:
             secrets_found.append(f"PROMPT_INJECTION:{match}")
-            sanitized_text = self.PROMPT_INJECTION_PATTERN.sub(
-                "[REDACTED]", sanitized_text
-            )
+            sanitized_text = self.PROMPT_INJECTION_PATTERN.sub("[REDACTED]", sanitized_text)
 
         sanitization_applied = len(secrets_found) > 0
 
@@ -70,4 +68,3 @@ class Sanitizer:
             secrets_found=secrets_found,
             sanitization_applied=sanitization_applied,
         )
-

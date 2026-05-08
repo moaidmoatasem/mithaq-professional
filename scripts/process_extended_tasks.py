@@ -3,11 +3,11 @@
 Process extended overnight tasks continuously
 """
 
-import yaml
 import subprocess
 import time
-from pathlib import Path
 from datetime import datetime
+
+import yaml
 
 
 def load_tasks():
@@ -72,9 +72,7 @@ def main():
             total_tasks += len(task_list)
 
     print(f"📊 Total tasks to process: {total_tasks}")
-    print(
-        f"⏰ Estimated time: {total_tasks * 3} minutes (~{total_tasks * 3 / 60:.1f} hours)"
-    )
+    print(f"⏰ Estimated time: {total_tasks * 3} minutes (~{total_tasks * 3 / 60:.1f} hours)")
     print("")
 
     # Process each batch
@@ -104,7 +102,7 @@ def main():
                 continue
 
     print(f"\n{'='*70}")
-    print(f"🎉 EXTENDED DEVELOPMENT COMPLETE!")
+    print("🎉 EXTENDED DEVELOPMENT COMPLETE!")
     print(f"✅ Completed: {completed}/{total_tasks}")
     print(f"⏰ Finished: {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}")
     print(f"{'='*70}\n")
@@ -112,4 +110,3 @@ def main():
 
 if __name__ == "__main__":
     main()
-

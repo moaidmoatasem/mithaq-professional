@@ -12,18 +12,15 @@ Run this BEFORE starting any Claude Code or Claude.ai session.
 Tell Claude: "Read .cherenkov_context only. Do not ls or glob the repo."
 """
 
-import os
 import subprocess
 import sys
-from pathlib import Path
 from datetime import datetime
+from pathlib import Path
 
 
 def run(cmd: str, fallback: str = "") -> str:
     try:
-        result = subprocess.run(
-            cmd, shell=True, capture_output=True, text=True, timeout=15
-        )
+        result = subprocess.run(cmd, shell=True, capture_output=True, text=True, timeout=15)
         return result.stdout.strip() or fallback
     except Exception:
         return fallback
@@ -53,10 +50,10 @@ def generate() -> str:
     # Exclude tool/template files that contain these strings as text, not live code
     _excl = "grep -v '#' | grep -v 'session_manager' | grep -v 'sync_context' | grep -v 'swarm_orchestrator'"
     debug = run(f"grep -r 'debug=True' . --include='*.py' | {_excl} | wc -l", "?")
-    cors  = run(f"grep -r 'allow_origins=\\[\"\\*\"\\]' . --include='*.py' | {_excl} | wc -l", "?")
-    bind  = run(f"grep -r 'host=.0\\.0\\.0\\.0.' . --include='*.py' | {_excl} | wc -l", "?")
+    cors = run(f"grep -r 'allow_origins=\\[\"\\*\"\\]' . --include='*.py' | {_excl} | wc -l", "?")
+    bind = run(f"grep -r 'host=.0\\.0\\.0\\.0.' . --include='*.py' | {_excl} | wc -l", "?")
     nested = "EXISTS" if Path("src/cherenkov/cherenkov").exists() else "CLEAN"
-    tag   = run("git tag | grep security || echo NONE")
+    tag = run("git tag | grep security || echo NONE")
     w(f"debug=True instances: {debug} (must be 0)")
     w(f"CORS wildcard instances: {cors} (must be 0)")
     w(f"0.0.0.0 bindings: {bind} (must be 0)")
@@ -68,8 +65,11 @@ def generate() -> str:
     w("## SOURCE")
     scanners_dir = Path("src/cherenkov/scanners")
     candidates_dir = Path("candidates/generated_scanners")
-    validated = sorted(p.name for p in scanners_dir.glob("*.py")
-                       if not p.name.startswith("__")) if scanners_dir.exists() else []
+    validated = (
+        sorted(p.name for p in scanners_dir.glob("*.py") if not p.name.startswith("__"))
+        if scanners_dir.exists()
+        else []
+    )
     candidates = list(candidates_dir.glob("*.py")) if candidates_dir.exists() else []
     w(f"Validated scanners: {len(validated)}")
     for s in validated[:10]:
@@ -82,17 +82,17 @@ def generate() -> str:
     w("")
     w("## CORE FILES")
     files = {
-        "BaseScanner":    "src/cherenkov/core/base_scanner.py",
-        "Registry":       "src/cherenkov/core/registry.py",
-        "Engine":         "src/cherenkov/core/engine.py",
-        "Ablation":        "src/cherenkov/ai/ablation.py",
-        "Tokamak":         "src/cherenkov/agents/tokamak.py",
-        "TOKAMAK":        "src/cherenkov/core/tokamak.py",
-        "ModelRouter":    "src/cherenkov/ai/model_router.py",
-        "CLI":            "src/cherenkov/cli.py",
-        "FastAPI":        "src/cherenkov/api/main.py",
-        "SQLite":         "src/cherenkov/storage/database.py",
-        "ScannerGen":     "src/cherenkov/dev_crew/scanner_generator.py",
+        "BaseScanner": "src/cherenkov/core/base_scanner.py",
+        "Registry": "src/cherenkov/core/registry.py",
+        "Engine": "src/cherenkov/core/engine.py",
+        "Ablation": "src/cherenkov/ai/ablation.py",
+        "Tokamak": "src/cherenkov/agents/tokamak.py",
+        "TOKAMAK": "src/cherenkov/core/tokamak.py",
+        "ModelRouter": "src/cherenkov/ai/model_router.py",
+        "CLI": "src/cherenkov/cli.py",
+        "FastAPI": "src/cherenkov/api/main.py",
+        "SQLite": "src/cherenkov/storage/database.py",
+        "ScannerGen": "src/cherenkov/dev_crew/scanner_generator.py",
     }
     for name, path in files.items():
         exists = "✓" if Path(path).exists() else "✗ MISSING"
@@ -102,7 +102,7 @@ def generate() -> str:
     w("")
     w("## TESTS")
     test_count = run("pytest tests/ --co -q 2>/dev/null | grep 'test session' | head -1", "unknown")
-    coverage   = run("coverage report --include='src/*' 2>/dev/null | tail -1", "no data")
+    coverage = run("coverage report --include='src/*' 2>/dev/null | tail -1", "no data")
     w(f"Test count: {test_count}")
     w(f"Coverage:   {coverage}")
 
@@ -133,7 +133,9 @@ def generate() -> str:
     w("")
     w("## NEXT ACTION")
     if nested == "EXISTS":
-        w("→ Delete src/cherenkov/cherenkov/ (run: python tools/session_manager.py show fix_nested_dir)")
+        w(
+            "→ Delete src/cherenkov/cherenkov/ (run: python tools/session_manager.py show fix_nested_dir)"
+        )
     elif int(debug) > 0:
         w("→ Fix debug=True instances before anything else")
     elif int(cors) > 0:
@@ -143,8 +145,10 @@ def generate() -> str:
     elif not Path("src/cherenkov/core/base_scanner.py").exists():
         w("→ Create BaseScanner (run: python tools/session_manager.py show create_base_scanner)")
     elif len(validated) < 50:
-        w(f"→ Graduate scanner candidates ({len(candidates)} pending, "
-          f"run: python tools/session_manager.py show validate_candidate)")
+        w(
+            f"→ Graduate scanner candidates ({len(candidates)} pending, "
+            f"run: python tools/session_manager.py show validate_candidate)"
+        )
     else:
         w("→ Phase 3 complete. Start Phase 4 (mobile surface).")
 
@@ -166,10 +170,9 @@ def main():
     output.write_text(content)
     lines = content.count("\n")
     print(f"✅ .cherenkov_context updated ({lines} lines)")
-    print(f"   Feed this to Claude before every session to save 60-80% tokens.")
-    print(f"   Tell Claude: 'Read .cherenkov_context only.'")
+    print("   Feed this to Claude before every session to save 60-80% tokens.")
+    print("   Tell Claude: 'Read .cherenkov_context only.'")
 
 
 if __name__ == "__main__":
     main()
-

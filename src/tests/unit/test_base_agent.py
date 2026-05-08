@@ -116,4 +116,3 @@ class TestBaseAgent:
         assert agent.agent.llm is not None
         assert hasattr(agent.agent.llm, "model")
         assert agent.agent.llm.model == "deepseek-r1:7b"
-

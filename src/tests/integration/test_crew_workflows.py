@@ -95,10 +95,7 @@ class TestCrewWorkflows:
         assert "code" in dev_caps["goal"].lower()
 
         assert test_caps["role"] == "Security Tester"
-        assert (
-            "penetration" in test_caps["goal"].lower()
-            or "testing" in test_caps["goal"].lower()
-        )
+        assert "penetration" in test_caps["goal"].lower() or "testing" in test_caps["goal"].lower()
 
     @patch("cherenkov.crews.security_crew.Crew")
     def test_crew_with_custom_agents(self, mock_crew_class):
@@ -167,4 +164,3 @@ class TestCrewWorkflows:
 
         assert crew.process == Process.hierarchical
         assert len(crew.get_crew_info()["agents"]) == 3
-

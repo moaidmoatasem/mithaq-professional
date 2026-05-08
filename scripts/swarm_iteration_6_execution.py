@@ -8,10 +8,11 @@ import sys
 
 sys.path.insert(0, ".")
 
+import subprocess
+from pathlib import Path
+
 from cherenkov.agents.micro_swarm.micro_agent import MicroAgent, MicroAgentConfig
 from cherenkov.agents.micro_swarm.swarm_orchestrator import MicroSwarm
-from pathlib import Path
-import subprocess
 
 print("""
 ╔══════════════════════════════════════════════════════════════╗
@@ -179,9 +180,7 @@ class WorkflowExecutor:
 '''
 
     # Insert before the last function
-    code = code.replace(
-        "def execute_parallel(", executor_class + "\n\ndef execute_parallel("
-    )
+    code = code.replace("def execute_parallel(", executor_class + "\n\ndef execute_parallel(")
 
     api_file.write_text(code)
 
@@ -244,7 +243,9 @@ def update_orchestrate_workflow(context: str):
     # Replace the function
     import re
 
-    pattern = r"def orchestrate_workflow\(config: Dict\) -> WorkflowResult:.*?(?=\ndef |\nclass |\Z)"
+    pattern = (
+        r"def orchestrate_workflow\(config: Dict\) -> WorkflowResult:.*?(?=\ndef |\nclass |\Z)"
+    )
     code = re.sub(pattern, new_impl + "\n", code, flags=re.DOTALL)
 
     api_file.write_text(code)
@@ -397,4 +398,3 @@ print("\n🎉 Iteration #6 complete! Workflows can now execute!")
 print("\n🎯 RUN THE DEMO:")
 print("   cd ~/cherenkov-dev-agents")
 print("   python cherenkov-professional/scripts/demo_workflow_execution.py")
-

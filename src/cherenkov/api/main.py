@@ -4,17 +4,18 @@ FastAPI-based API for remote workflow execution
 """
 
 import os
+import sys
+from typing import Any, Dict, Optional
+
 from fastapi import FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
-from typing import Dict, Any, Optional
-import sys
 
 sys.path.insert(0, "../..")
 
 from cherenkov.orchestration_api import orchestrate_workflow
-from cherenkov.workflow_parser import load_workflow
 from cherenkov.result_persistence import ResultStore
+from cherenkov.workflow_parser import load_workflow
 
 app = FastAPI(
     title="cherenkov Autonomous Agent API",
@@ -23,8 +24,7 @@ app = FastAPI(
 )
 
 _ALLOWED_ORIGINS = os.getenv(
-    "cherenkov_CORS_ORIGINS",
-    "http://localhost:5000,http://127.0.0.1:5000"
+    "cherenkov_CORS_ORIGINS", "http://localhost:5000,http://127.0.0.1:5000"
 ).split(",")
 
 app.add_middleware(
@@ -125,4 +125,3 @@ if __name__ == "__main__":
     host = os.getenv("cherenkov_API_HOST", "127.0.0.1")
     port = int(os.getenv("cherenkov_API_PORT", "8000"))
     uvicorn.run(app, host=host, port=port)
-

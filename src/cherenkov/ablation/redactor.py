@@ -3,11 +3,12 @@ Data Redaction Layer - Fail-Closed Sanitization
 Ensures sensitive data never reaches cloud agents.
 """
 
-import re
 import hashlib
-from typing import Dict, Any, Optional, List, Tuple
-from pydantic import BaseModel, Field
+import re
 from enum import Enum
+from typing import Any, Dict, List, Tuple
+
+from pydantic import BaseModel, Field
 
 
 class RedactionLevel(Enum):
@@ -37,9 +38,7 @@ class DataRedactor:
         "api_key": re.compile(
             r'(?i)(api[_-]?key|apikey|token)\s*[:=]\s*["\']?([a-zA-Z0-9_\-]{20,})["\']?'
         ),
-        "password": re.compile(
-            r'(?i)(password|passwd|pwd)\s*[:=]\s*["\']?([^\s"\']+)["\']?'
-        ),
+        "password": re.compile(r'(?i)(password|passwd|pwd)\s*[:=]\s*["\']?([^\s"\']+)["\']?'),
         "secret": re.compile(
             r'(?i)(secret|private[_-]?key)\s*[:=]\s*["\']?([a-zA-Z0-9_\-+/=]{20,})["\']?'
         ),
@@ -123,8 +122,7 @@ class DataRedactor:
 
             elif isinstance(value, list):
                 sanitized[key] = [
-                    self.redact_text(item)[0] if isinstance(item, str) else item
-                    for item in value
+                    self.redact_text(item)[0] if isinstance(item, str) else item for item in value
                 ]
 
             else:

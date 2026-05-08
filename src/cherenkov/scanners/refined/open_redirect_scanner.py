@@ -3,9 +3,10 @@ Open Redirect Scanner - New Implementation
 Detects open redirect vulnerabilities
 """
 
-import requests
-from urllib.parse import urlparse, parse_qs, urlencode, urlunparse
 from typing import Dict, List
+from urllib.parse import parse_qs, urlencode, urlparse, urlunparse
+
+import requests
 
 
 class OpenRedirectScanner:
@@ -55,14 +56,10 @@ class OpenRedirectScanner:
             # Test each redirect parameter
             for param in found_params:
                 for redirect_target in self.REDIRECT_TARGETS:
-                    test_url = self._inject_redirect(
-                        self.target, param, redirect_target
-                    )
+                    test_url = self._inject_redirect(self.target, param, redirect_target)
 
                     try:
-                        response = requests.get(
-                            test_url, timeout=10, allow_redirects=False
-                        )
+                        response = requests.get(test_url, timeout=10, allow_redirects=False)
 
                         # Check if redirect occurs
                         if response.status_code in [301, 302, 303, 307, 308]:
@@ -127,6 +124,4 @@ if __name__ == "__main__":
 
     if len(sys.argv) > 1:
         result = scan_open_redirect(sys.argv[1])
-        print(
-            f"\n✅ Scan complete. Found {result['count']} open redirect vulnerabilities"
-        )
+        print(f"\n✅ Scan complete. Found {result['count']} open redirect vulnerabilities")

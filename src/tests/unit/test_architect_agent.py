@@ -109,4 +109,3 @@ class TestArchitectAgent:
 
         assert capabilities["role"] == "Security Architect"
         assert capabilities["sanitization_enabled"] is True
-

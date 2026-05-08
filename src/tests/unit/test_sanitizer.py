@@ -98,4 +98,3 @@ class TestSanitizer:
         assert result.original_text == text
         assert isinstance(result.secrets_found, list)
         assert isinstance(result.sanitization_applied, bool)
-

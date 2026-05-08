@@ -3,8 +3,9 @@
 Simple autonomous coding agent test with smaller model
 """
 
-from crewai import Agent, Task, Crew, Process, LLM
 import os
+
+from crewai import LLM, Agent, Crew, Process, Task
 from dotenv import load_dotenv
 
 load_dotenv()

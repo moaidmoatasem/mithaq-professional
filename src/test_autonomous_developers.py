@@ -1,5 +1,6 @@
-from cherenkov.crews.autonomous_developer_crew import AutonomousDeveloperCrew
 import os
+
+from cherenkov.crews.autonomous_developer_crew import AutonomousDeveloperCrew
 
 # Create output directory
 os.makedirs("output", exist_ok=True)
@@ -25,4 +26,3 @@ if os.path.exists("output"):
         file_path = os.path.join("output", file)
         size = os.path.getsize(file_path)
         print(f"   ✅ {file} ({size} bytes)")
-

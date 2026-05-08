@@ -47,9 +47,7 @@ def requires_authentication(f):
 
         # Use app.scanner_permissions if it exists
         scanner_permissions = getattr(app, "scanner_permissions", [])
-        authorized_scanners = [
-            sec for sec in scanner_permissions for _ in user
-        ]
+        authorized_scanners = [sec for sec in scanner_permissions for _ in user]
 
         if request.path in authorized_scanners or not authorized_scanners:
             return f(*args, **kwargs)
@@ -130,9 +128,7 @@ def create_app():
             scanner_permissions = getattr(app, "scanner_permissions", set())
             user_permissions = MOCK_ACCESS_CONTROL.get(user, [])
 
-            authorized_scanners = [
-                sec for sec in scanner_permissions for _ in user_permissions
-            ]
+            authorized_scanners = [sec for sec in scanner_permissions for _ in user_permissions]
 
             if request.path in authorized_scanners:
                 if isinstance(scanner_permissions, set):
@@ -175,7 +171,7 @@ if __name__ == "__main__":
         endpoint = getattr(route, "endpoint", str(route))
         app.add_url_rule(
             endpoint,
-            methods=["POST"], # Default to POST as per most routes here
+            methods=["POST"],  # Default to POST as per most routes here
             view_func=requires_authentication(route),
             endpoint=endpoint + "_auth",
         )

@@ -8,9 +8,9 @@ import sys
 sys.path.insert(0, ".")
 
 from cherenkov.agents.micro_swarm.micro_agent import MicroAgent, MicroAgentConfig
-from cherenkov.agents.micro_swarm.swarm_orchestrator import MicroSwarm
-from cherenkov.agents.micro_swarm.sanitization_agent import scrub_secrets
 from cherenkov.agents.micro_swarm.payload_tester import test_sql_injection
+from cherenkov.agents.micro_swarm.sanitization_agent import scrub_secrets
+from cherenkov.agents.micro_swarm.swarm_orchestrator import MicroSwarm
 
 print("""
 ╔══════════════════════════════════════════════════════════════╗
@@ -73,4 +73,3 @@ for i, result in enumerate(results, 1):
         print(f"   Result: {str(result['result'])[:100]}...")
 
 print("\n🎉 Micro swarm complete!")
-

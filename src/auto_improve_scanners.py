@@ -4,8 +4,9 @@ Auto-Improve Scanners Using AI Development Team
 Let the AI agents review and enhance their own work!
 """
 
-from cherenkov.core.memory_efficient_parallel import MemoryEfficientCrew
 from pathlib import Path
+
+from cherenkov.core.memory_efficient_parallel import MemoryEfficientCrew
 
 print("""
 ╔══════════════════════════════════════════════════════════════╗
@@ -24,9 +25,7 @@ for scanner_file in scanner_dir.glob("*.py"):
 
     with open(scanner_file, "r") as f:
         code = f.read()
-        scanners_to_improve.append(
-            {"name": scanner_file.name, "code": code, "path": scanner_file}
-        )
+        scanners_to_improve.append({"name": scanner_file.name, "code": code, "path": scanner_file})
 
 print(f"📦 Found {len(scanners_to_improve)} scanners to improve\n")
 
@@ -140,4 +139,3 @@ except Exception as e:
     print("💡 Continuing with existing scanners...")
 
 print("\n✅ Ready for Phase 2: Docker Optimization!")
-

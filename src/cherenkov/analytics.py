@@ -4,10 +4,10 @@ Generate insights from workflow execution history
 """
 
 import json
-from pathlib import Path
-from datetime import datetime
-from typing import Dict, List, Any
 from collections import defaultdict
+from datetime import datetime
+from pathlib import Path
+from typing import Any, Dict, List
 
 
 class WorkflowAnalytics:

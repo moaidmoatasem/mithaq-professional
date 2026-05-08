@@ -1,5 +1,5 @@
-from cherenkov.agents.local.ollama_client import OllamaClient
 from cherenkov.agents.local.code_analyzer import CodeAnalyzer
+from cherenkov.agents.local.ollama_client import OllamaClient
 
 print("=" * 70)
 print("🧪 TESTING LOCAL OLLAMA AGENT")
@@ -48,4 +48,3 @@ print(result)
 print("=" * 70)
 
 print("\n✅ Local agent test complete!")
-

@@ -4,9 +4,10 @@ Uses Groq Llama 3.1 70B for high-level threat modeling and task decomposition.
 Never receives raw sensitive data - only abstract breadcrumbs.
 """
 
-from typing import Dict, List, Optional
-from groq import Groq
 import os
+from typing import Dict, List, Optional
+
+from groq import Groq
 from pydantic import BaseModel, Field
 
 

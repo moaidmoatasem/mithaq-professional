@@ -8,10 +8,11 @@ import sys
 
 sys.path.insert(0, ".")
 
+import subprocess
+from pathlib import Path
+
 from cherenkov.agents.micro_swarm.micro_agent import MicroAgent, MicroAgentConfig
 from cherenkov.agents.micro_swarm.swarm_orchestrator import MicroSwarm
-from pathlib import Path
-import subprocess
 
 print("""
 ╔══════════════════════════════════════════════════════════════╗
@@ -371,4 +372,3 @@ print("\n🎉 Iteration #5 complete! Workflow system integrated!")
 print("\nTry it:")
 print("  python cherenkov-professional/scripts/cherenkov_cli_orchestrate.py orchestrate \\")
 print("    --config cherenkov-professional/examples/workflows/security_scan_workflow.yaml")
-

@@ -4,8 +4,9 @@ Test memory-efficient batched parallel execution
 Generates 6 security scanners in 3 batches of 2
 """
 
-from cherenkov.core.memory_efficient_parallel import MemoryEfficientCrew
 import sys
+
+from cherenkov.core.memory_efficient_parallel import MemoryEfficientCrew
 
 # Define 6 different security scanner agents
 agent_configs = [
@@ -81,15 +82,16 @@ print("""
 
 # Create memory-efficient crew with batch size of 2
 crew = MemoryEfficientCrew(
-    model="ollama/qwen2.5:3b", batch_size=2  # 2 agents at a time
+    model="ollama/qwen2.5:3b",
+    batch_size=2,  # 2 agents at a time
 )
 
 print("\n📋 Configuration:")
-print(f"   Model: qwen2.5:3b")
+print("   Model: qwen2.5:3b")
 print(f"   Total scanners to generate: {len(task_configs)}")
-print(f"   Batch size: 2 (RAM-optimized)")
-print(f"   Expected batches: 3")
-print(f"\n⏳ This will take approximately 15-20 minutes...")
+print("   Batch size: 2 (RAM-optimized)")
+print("   Expected batches: 3")
+print("\n⏳ This will take approximately 15-20 minutes...")
 
 try:
     # Run batched execution
@@ -102,7 +104,7 @@ try:
     print("🎉 SUCCESS!")
     print("=" * 70)
     print(f"✅ Generated {len(results)} scanner modules")
-    print(f"📁 Saved to: output/scanner_modules/")
+    print("📁 Saved to: output/scanner_modules/")
     print("\nGenerated scanners:")
     for i, agent in enumerate(agent_configs, 1):
         print(f"  {i}. {agent['role']}")
@@ -113,4 +115,3 @@ except KeyboardInterrupt:
 except Exception as e:
     print(f"\n\n❌ Error: {e}")
     sys.exit(1)
-

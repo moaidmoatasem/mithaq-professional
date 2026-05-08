@@ -3,4 +3,3 @@
 from cherenkov.crews.security_crew import SecurityCrew
 
 __all__ = ["SecurityCrew"]
-

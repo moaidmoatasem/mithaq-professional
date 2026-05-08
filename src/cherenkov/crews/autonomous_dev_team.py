@@ -3,12 +3,13 @@ Autonomous Software Development Team
 A complete AI-powered development team with proper workflow
 """
 
-from crewai import Agent, Task, Crew, Process, LLM
-from typing import List, Dict
-import os
-from dotenv import load_dotenv
 import json
+import os
 from datetime import datetime
+from typing import Dict
+
+from crewai import LLM, Agent, Crew, Process, Task
+from dotenv import load_dotenv
 
 load_dotenv()
 
@@ -368,7 +369,7 @@ class AutonomousDevTeam:
 
         # Save complete output
         with open(f"{project_folder}/complete_project.md", "w") as f:
-            f.write(f"# Autonomous Development Project\n\n")
+            f.write("# Autonomous Development Project\n\n")
             f.write(f"**Project:** {project_desc}\n")
             f.write(f"**Duration:** {duration:.2f} seconds\n")
             f.write(f"**Timestamp:** {timestamp}\n\n")
@@ -399,8 +400,8 @@ class AutonomousDevTeam:
         print("=" * 80)
         print(f"📁 Output saved to: {project_folder}/")
         print(f"⏱️  Duration: {duration:.2f} seconds")
-        print(f"👥 Team members: 9")
-        print(f"📋 Tasks completed: 10")
+        print("👥 Team members: 9")
+        print("📋 Tasks completed: 10")
 
 
 if __name__ == "__main__":

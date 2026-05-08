@@ -4,17 +4,15 @@ cherenkov - AI-Powered Security Testing Framework
 Main CLI
 """
 
-import sys
 import argparse
-import asyncio
-from cherenkov.scanners.header_scanner import HeaderScanner
+
+from cherenkov.scanners.header_scanner import SimpleScanner
 
 
 def scan_command(args):
     """Run security scan"""
-    scanner = HeaderScanner()
-    result = asyncio.run(scanner.scan(args.url))
-    print(result.model_dump_json(indent=2))
+    scanner = SimpleScanner(args.url)
+    scanner.run()
 
 
 def generate_command(args):
@@ -45,9 +43,7 @@ Examples:
     scan_parser.set_defaults(func=scan_command)
 
     # Generate command
-    gen_parser = subparsers.add_parser(
-        "generate", help="Generate security tools with AI"
-    )
+    gen_parser = subparsers.add_parser("generate", help="Generate security tools with AI")
     gen_parser.add_argument("description", help="Description of tool to generate")
     gen_parser.set_defaults(func=generate_command)
 

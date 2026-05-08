@@ -3,10 +3,11 @@ XSS Scanner - Refined Version
 Detects Cross-Site Scripting vulnerabilities
 """
 
-import requests
 import re
-from urllib.parse import urlparse, parse_qs, urlencode, urlunparse
-from typing import List, Dict
+from typing import Dict, List
+from urllib.parse import parse_qs, urlencode, urlparse, urlunparse
+
+import requests
 
 
 class XSSScanner:
@@ -82,7 +83,7 @@ class XSSScanner:
 
     def scan_dom_xss(self) -> List[Dict]:
         """Check for DOM-based XSS indicators"""
-        print(f"[*] Checking for DOM XSS indicators")
+        print("[*] Checking for DOM XSS indicators")
 
         try:
             response = requests.get(self.target, timeout=10)
@@ -139,6 +140,4 @@ if __name__ == "__main__":
 
     if len(sys.argv) > 1:
         result = scan_xss(sys.argv[1])
-        print(
-            f"\n✅ Scan complete. Found {result['count']} potential XSS vulnerabilities"
-        )
+        print(f"\n✅ Scan complete. Found {result['count']} potential XSS vulnerabilities")

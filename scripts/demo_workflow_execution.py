@@ -8,9 +8,10 @@ import sys
 
 sys.path.insert(0, "cherenkov-professional/src")
 
-from cherenkov.workflow_parser import load_workflow
-from cherenkov.orchestration_api import orchestrate_workflow
 import json
+
+from cherenkov.orchestration_api import orchestrate_workflow
+from cherenkov.workflow_parser import load_workflow
 
 print("""
 ╔══════════════════════════════════════════════════════════════╗
@@ -37,15 +38,14 @@ print("EXECUTION RESULTS")
 print("=" * 70)
 
 if result.success:
-    print(f"✅ Status: SUCCESS")
+    print("✅ Status: SUCCESS")
     print(f"⏱️  Duration: {result.duration:.3f} seconds")
-    print(f"\n📊 Report:")
+    print("\n📊 Report:")
     print(json.dumps(result.outputs, indent=2))
 else:
-    print(f"❌ Status: FAILED")
+    print("❌ Status: FAILED")
     print(f"Errors: {result.errors}")
 
 print("\n" + "=" * 70)
 print("🎉 Demo complete! Your autonomous agents work!")
 print("=" * 70)
-

@@ -1,8 +1,7 @@
-import asyncio
 import logging
 import os
 import time
-from dataclasses import dataclass, field
+from dataclasses import dataclass
 from pathlib import Path
 from typing import Optional
 
@@ -11,8 +10,8 @@ logger = logging.getLogger(__name__)
 # Approximate cost per 1k tokens (input+output blended), USD
 _COST_PER_1K: dict[str, float] = {
     "ollama": 0.0,
-    "gemini": 0.000075,   # gemini-1.5-flash
-    "groq": 0.000080,     # llama-3-8b-8192
+    "gemini": 0.000075,  # gemini-1.5-flash
+    "groq": 0.000080,  # llama-3-8b-8192
 }
 
 
@@ -32,6 +31,7 @@ def _load_mode() -> str:
         return "local"
     try:
         import yaml  # optional dep — graceful fallback
+
         with config_path.open() as fh:
             data = yaml.safe_load(fh) or {}
         return str(data.get("mode", "local")).lower()
@@ -97,7 +97,9 @@ class ModelRouter:
                 )
                 return text
             except Exception as exc:  # noqa: BLE001
-                logger.warning("model_router backend=%s failed: %s — trying next", backend.name, exc)
+                logger.warning(
+                    "model_router backend=%s failed: %s — trying next", backend.name, exc
+                )
 
         logger.error("model_router all backends exhausted, returning empty string")
         return ""
@@ -117,12 +119,18 @@ class ModelRouter:
 
     async def _call_ollama(self, cfg: BackendConfig, prompt: str, max_tokens: int) -> str:
         import aiohttp
-        payload = {"model": cfg.model, "prompt": prompt, "stream": False,
-                   "options": {"num_predict": max_tokens}}
+
+        payload = {
+            "model": cfg.model,
+            "prompt": prompt,
+            "stream": False,
+            "options": {"num_predict": max_tokens},
+        }
         async with aiohttp.ClientSession() as session:
             async with session.post(
-                f"{cfg.url}/api/generate", json=payload,
-                timeout=aiohttp.ClientTimeout(total=cfg.timeout)
+                f"{cfg.url}/api/generate",
+                json=payload,
+                timeout=aiohttp.ClientTimeout(total=cfg.timeout),
             ) as resp:
                 resp.raise_for_status()
                 data = await resp.json()
@@ -130,6 +138,7 @@ class ModelRouter:
 
     async def _call_gemini(self, cfg: BackendConfig, prompt: str, max_tokens: int) -> str:
         import aiohttp
+
         if not cfg.api_key:
             raise ValueError("GEMINI_API_KEY not set")
         url = f"{cfg.url}/{cfg.model}:generateContent?key={cfg.api_key}"
@@ -139,8 +148,7 @@ class ModelRouter:
         }
         async with aiohttp.ClientSession() as session:
             async with session.post(
-                url, json=payload,
-                timeout=aiohttp.ClientTimeout(total=cfg.timeout)
+                url, json=payload, timeout=aiohttp.ClientTimeout(total=cfg.timeout)
             ) as resp:
                 resp.raise_for_status()
                 data = await resp.json()
@@ -148,6 +156,7 @@ class ModelRouter:
 
     async def _call_groq(self, cfg: BackendConfig, prompt: str, max_tokens: int) -> str:
         import aiohttp
+
         if not cfg.api_key:
             raise ValueError("GROQ_API_KEY not set")
         headers = {"Authorization": f"Bearer {cfg.api_key}", "Content-Type": "application/json"}
@@ -158,8 +167,10 @@ class ModelRouter:
         }
         async with aiohttp.ClientSession() as session:
             async with session.post(
-                cfg.url, headers=headers, json=payload,
-                timeout=aiohttp.ClientTimeout(total=cfg.timeout)
+                cfg.url,
+                headers=headers,
+                json=payload,
+                timeout=aiohttp.ClientTimeout(total=cfg.timeout),
             ) as resp:
                 resp.raise_for_status()
                 data = await resp.json()
@@ -170,6 +181,7 @@ class ModelRouter:
 # Helpers
 # ------------------------------------------------------------------
 
+
 def _rough_tokens(text: str) -> int:
     return max(1, len(text) // 4)
 
@@ -177,4 +189,3 @@ def _rough_tokens(text: str) -> int:
 def _estimate_cost(backend_name: str, prompt: str, response: str) -> float:
     tokens = _rough_tokens(prompt + response)
     return (tokens / 1000) * _COST_PER_1K.get(backend_name, 0.0)
-

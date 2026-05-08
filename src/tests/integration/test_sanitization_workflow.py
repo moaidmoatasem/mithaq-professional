@@ -147,4 +147,3 @@ class TestSanitizationWorkflow:
         # Third had JWT → redacted
         assert "[REDACTED]" in instructions[2].reasoning
         assert "eyJhbGciOiJIUzI1NiJ9" not in instructions[2].reasoning
-

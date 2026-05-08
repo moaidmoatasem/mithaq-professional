@@ -3,9 +3,10 @@ Ollama Local LLM Client
 Handles communication with local Ollama models for privileged operations.
 """
 
-import requests
 import json
-from typing import Dict, List, Optional, Any
+from typing import Any, Dict, List, Optional
+
+import requests
 from pydantic import BaseModel, Field
 
 

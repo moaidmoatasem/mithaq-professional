@@ -41,9 +41,7 @@ def main():
     print("\n🔍 Analyzing Mobile Application...")
     print("=" * 60)
 
-    mobile_result = crew.analyze_mobile_app(
-        apk_path="/home/user/samples/banking-app.apk"
-    )
+    mobile_result = crew.analyze_mobile_app(apk_path="/home/user/samples/banking-app.apk")
 
     print("\n✅ Mobile Analysis Results:")
     print(f"  APK: {mobile_result['apk_path']}")
@@ -55,4 +53,3 @@ def main():
 
 if __name__ == "__main__":
     main()
-

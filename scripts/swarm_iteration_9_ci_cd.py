@@ -8,10 +8,11 @@ import sys
 
 sys.path.insert(0, ".")
 
+import subprocess
+from pathlib import Path
+
 from cherenkov.agents.micro_swarm.micro_agent import MicroAgent, MicroAgentConfig
 from cherenkov.agents.micro_swarm.swarm_orchestrator import MicroSwarm
-from pathlib import Path
-import subprocess
 
 print("""
 ╔══════════════════════════════════════════════════════════════╗
@@ -313,4 +314,3 @@ print("\n🚀 GitHub Actions workflows created:")
 print("   • .github/workflows/test.yml")
 print("   • .github/workflows/docker.yml")
 print("   • .github/workflows/autonomous_iteration.yml")
-

@@ -38,4 +38,3 @@ print("\n" + "=" * 60 + "\n")
 print("📍 Cloud Breadcrumb (Metadata Only):")
 breadcrumb = redactor.create_breadcrumb(test_data, metadata_only=True)
 print(breadcrumb)
-

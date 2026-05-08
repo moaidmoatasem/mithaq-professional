@@ -1,9 +1,9 @@
-from cherenkov.agents.local.ollama_client import OllamaClient
 from cherenkov.agents.local.code_analyzer import CodeAnalyzer
+from cherenkov.agents.local.ollama_client import OllamaClient
 
-print("="*70)
+print("=" * 70)
 print("🧪 TESTING LOCAL OLLAMA AGENT")
-print("="*70)
+print("=" * 70)
 
 # Test 1: Check Ollama availability
 print("\n📡 Test 1: Checking Ollama availability...")
@@ -21,7 +21,7 @@ else:
 # Test 2: Simple code analysis
 print("\n🔍 Test 2: Analyzing vulnerable code snippet...")
 
-vulnerable_code = '''
+vulnerable_code = """
 import sqlite3
 
 def get_user(username):
@@ -37,15 +37,14 @@ def get_user(username):
 # Hardcoded credentials
 API_KEY = "sk_live_1234567890abcdefghij"
 DB_PASSWORD = "admin123"
-'''
+"""
 
 analyzer = CodeAnalyzer()
 result = analyzer.quick_scan(vulnerable_code, language="python")
 
 print("\n📋 Security Findings:")
-print("="*70)
+print("=" * 70)
 print(result)
-print("="*70)
+print("=" * 70)
 
 print("\n✅ Local agent test complete!")
-

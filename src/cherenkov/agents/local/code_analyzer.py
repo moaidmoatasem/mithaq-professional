@@ -3,9 +3,11 @@ Local Code Analyzer Agent
 Performs security-focused code analysis using local Ollama.
 """
 
-from typing import Dict, List, Any, Optional
 from pathlib import Path
-from pydantic import BaseModel, Field
+from typing import Any, Dict, List, Optional
+
+from pydantic import BaseModel
+
 from cherenkov.agents.local.ollama_client import OllamaClient, OllamaConfig
 
 
@@ -79,9 +81,7 @@ class CodeAnalyzer:
 
         # Analyze code
         print(f"   🔍 Analyzing {path.name} ({language})...")
-        result = self.client.analyze_code(
-            code=content, language=language, focus="security"
-        )
+        result = self.client.analyze_code(code=content, language=language, focus="security")
 
         return {
             "file": str(path),
@@ -150,9 +150,6 @@ class CodeAnalyzer:
             Security findings as string
         """
 
-        result = self.client.analyze_code(
-            code=code_snippet, language=language, focus="security"
-        )
+        result = self.client.analyze_code(code=code_snippet, language=language, focus="security")
 
         return result["findings"]
-

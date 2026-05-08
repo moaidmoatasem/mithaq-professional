@@ -157,4 +157,3 @@ class SecurityCrew:
             "process": str(self.process),
             "verbose": self.verbose,
         }
-

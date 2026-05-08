@@ -124,4 +124,3 @@ def test_new_actions_supported():
         reasoning="Zero-trust architecture design for enterprise network",
     )
     assert instruction.action == "design_architecture"
-

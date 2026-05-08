@@ -2,10 +2,11 @@
 Agent Factory - Creates agent instances from workflow configurations
 """
 
-from typing import Dict, Any, Optional
+from typing import Any, Dict
+
 from cherenkov.agents.micro_swarm.micro_agent import MicroAgent, MicroAgentConfig
-from cherenkov.agents.micro_swarm.sanitization_agent import SanitizationAgent
 from cherenkov.agents.micro_swarm.payload_tester import PayloadTester
+from cherenkov.agents.micro_swarm.sanitization_agent import SanitizationAgent
 
 
 class AgentFactory:
@@ -85,4 +86,3 @@ class AgentFactory:
             agents.append(agent)
 
         return agents
-

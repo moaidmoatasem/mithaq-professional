@@ -5,8 +5,9 @@ Reads AGENT_MISSION_ORCHESTRATION.txt and works iteratively on orchestration imp
 """
 
 import time
-from pathlib import Path
 from datetime import datetime
+from pathlib import Path
+
 from cherenkov.core.memory_efficient_parallel import MemoryEfficientCrew
 
 print("""
@@ -118,9 +119,7 @@ task_configs = [
 ]
 
 start_time = time.time()
-results = crew.run_parallel_batches(
-    agent_configs=agent_configs, task_configs=task_configs
-)
+results = crew.run_parallel_batches(agent_configs=agent_configs, task_configs=task_configs)
 duration = time.time() - start_time
 
 # Extract result text
@@ -145,4 +144,3 @@ log("1. Review the output file")
 log("2. Review updated AGENT_NOTES_ORCHESTRATION.md")
 log("3. Run this script again for the next iteration")
 log("=" * 70)
-

@@ -8,10 +8,11 @@ import sys
 
 sys.path.insert(0, ".")
 
+import subprocess
+from pathlib import Path
+
 from cherenkov.agents.micro_swarm.micro_agent import MicroAgent, MicroAgentConfig
 from cherenkov.agents.micro_swarm.swarm_orchestrator import MicroSwarm
-from pathlib import Path
-import subprocess
 
 print("""
 ╔══════════════════════════════════════════════════════════════╗
@@ -410,4 +411,3 @@ except Exception as e:
 
 print("\n🎉 Iteration #7 complete! Agents decided and built autonomously!")
 print("\n📊 See what they chose: cat cherenkov-professional/ITERATION_7_ANALYSIS.md")
-

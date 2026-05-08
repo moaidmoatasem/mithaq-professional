@@ -1,10 +1,12 @@
 """BaseScanner - Plugin Architecture Foundation"""
+
 from abc import ABC, abstractmethod
-from typing import List, Dict, Any, Optional
 from enum import Enum
-from pydantic import BaseModel
+from typing import List
+
 import httpx
-from datetime import datetime
+from pydantic import BaseModel
+
 
 class Severity(str, Enum):
     CRITICAL = "CRITICAL"
@@ -13,6 +15,7 @@ class Severity(str, Enum):
     LOW = "LOW"
     INFO = "INFO"
 
+
 class Finding(BaseModel):
     title: str
     severity: Severity
@@ -20,12 +23,14 @@ class Finding(BaseModel):
     cwe: str
     remediation: str
 
+
 class ScanResult(BaseModel):
     target: str
     scanner_name: str
     findings: List[Finding] = []
     duration_ms: float = 0.0
     status: str = "completed"
+
 
 class BaseScanner(ABC):
     """Abstract base class for all scanners"""

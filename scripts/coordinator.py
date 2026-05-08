@@ -3,10 +3,10 @@
 Coordinator - Waits for agents to finish, then commits and pushes
 """
 
-import time
 import subprocess
-from pathlib import Path
+import time
 from datetime import datetime
+from pathlib import Path
 
 print("🎯 Coordinator waiting for agents to complete...")
 

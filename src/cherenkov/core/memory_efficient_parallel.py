@@ -3,11 +3,12 @@ Memory-Efficient Parallel Agent Execution
 Batched processing with aggressive memory cleanup
 """
 
-from crewai import Agent, Task, Crew, Process, LLM
-from typing import List, Dict, Any
 import gc
 import os
 from datetime import datetime
+from typing import Any, Dict, List
+
+from crewai import LLM, Agent, Crew, Process, Task
 
 
 class MemoryEfficientCrew:
@@ -46,9 +47,7 @@ class MemoryEfficientCrew:
             agent=agent,
         )
 
-    def run_batch(
-        self, batch_agents: List[Dict], batch_tasks: List[Dict], batch_num: int
-    ):
+    def run_batch(self, batch_agents: List[Dict], batch_tasks: List[Dict], batch_num: int):
         """Execute a single batch of agents/tasks"""
         print("\n" + "=" * 70)
         print(f"📦 BATCH {batch_num}")
@@ -59,15 +58,10 @@ class MemoryEfficientCrew:
         agents = [self.create_agent(cfg) for cfg in batch_agents]
 
         # Create tasks
-        tasks = [
-            self.create_task(task_cfg, agents[i])
-            for i, task_cfg in enumerate(batch_tasks)
-        ]
+        tasks = [self.create_task(task_cfg, agents[i]) for i, task_cfg in enumerate(batch_tasks)]
 
         # Execute batch
-        crew = Crew(
-            agents=agents, tasks=tasks, process=Process.sequential, verbose=True
-        )
+        crew = Crew(agents=agents, tasks=tasks, process=Process.sequential, verbose=True)
 
         start_time = datetime.now()
         result = crew.kickoff()
@@ -129,7 +123,7 @@ class MemoryEfficientCrew:
 
         total_duration = sum(r["duration"] for r in results)
         print(f"⏱️  Total time: {total_duration:.1f}s")
-        print(f"💾 Memory cleaned after each batch")
+        print("💾 Memory cleaned after each batch")
 
         return results
 

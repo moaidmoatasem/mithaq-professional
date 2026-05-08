@@ -8,9 +8,8 @@ import sys
 
 sys.path.insert(0, ".")
 
-from pathlib import Path
 import subprocess
-import re
+from pathlib import Path
 
 print("""
 ╔══════════════════════════════════════════════════════════════╗
@@ -40,9 +39,7 @@ def remove_duplicate_docstrings(text):
             docstring_lines.append(line)
             # Check if this docstring is a duplicate
             docstring_text = "\n".join(docstring_lines)
-            if docstring_text not in "\n".join(
-                result[-20:] if len(result) > 20 else result
-            ):
+            if docstring_text not in "\n".join(result[-20:] if len(result) > 20 else result):
                 result.extend(docstring_lines)
             in_docstring = False
             docstring_lines = []
@@ -202,4 +199,3 @@ subprocess.run(
 )
 
 print("\n🎉 All iterations complete! Ready to push!")
-

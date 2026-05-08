@@ -1,8 +1,7 @@
-import sqlite3
 import json
-from pathlib import Path
+import sqlite3
 from datetime import datetime, timedelta, timezone
-
+from pathlib import Path
 
 _DB_PATH = Path.home() / ".cherenkov" / "results.db"
 
@@ -36,9 +35,16 @@ def init_db(path: Path = _DB_PATH) -> None:
         conn.executescript(_DDL)
 
 
-def save_scan(scan_id: str, target: str, findings: list, meta: dict | None = None,
-              status: str = "done", started_at: str | None = None,
-              finished_at: str | None = None, path: Path = _DB_PATH) -> None:
+def save_scan(
+    scan_id: str,
+    target: str,
+    findings: list,
+    meta: dict | None = None,
+    status: str = "done",
+    started_at: str | None = None,
+    finished_at: str | None = None,
+    path: Path = _DB_PATH,
+) -> None:
     now = datetime.now(timezone.utc).isoformat()
     with _connect(path) as conn:
         conn.execute(
@@ -91,4 +97,3 @@ def _row_to_dict(row: sqlite3.Row) -> dict:
     d["findings"] = json.loads(d["findings"])
     d["meta"] = json.loads(d["meta"])
     return d
-

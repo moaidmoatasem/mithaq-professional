@@ -8,10 +8,11 @@ import sys
 
 sys.path.insert(0, ".")
 
+import subprocess
+from pathlib import Path
+
 from cherenkov.agents.micro_swarm.micro_agent import MicroAgent, MicroAgentConfig
 from cherenkov.agents.micro_swarm.swarm_orchestrator import MicroSwarm
-from pathlib import Path
-import subprocess
 
 print("""
 ╔══════════════════════════════════════════════════════════════╗
@@ -42,9 +43,7 @@ def analyze_orchestrator_file(file_path: str):
         "file": file_path,
         "lines": len(code.split("\n")),
         "issues": issues,
-        "recommendation": (
-            "Add exception handling and logging" if issues else "Code looks good"
-        ),
+        "recommendation": ("Add exception handling and logging" if issues else "Code looks good"),
     }
 
 
@@ -63,9 +62,7 @@ def check_tests_coverage(test_file: str):
         "test_count": test_count,
         "has_mocks": has_mocks,
         "recommendation": (
-            "Add mocks to avoid external dependencies"
-            if not has_mocks
-            else "Good test coverage"
+            "Add mocks to avoid external dependencies" if not has_mocks else "Good test coverage"
         ),
     }
 
@@ -96,9 +93,7 @@ def update_notes(improvements: str):
     with open(notes_file, "a") as f:
         from datetime import datetime
 
-        f.write(
-            f"\n## MicroSwarm Analysis {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}\n\n"
-        )
+        f.write(f"\n## MicroSwarm Analysis {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}\n\n")
         f.write(improvements + "\n")
 
     return {"updated": str(notes_file)}
@@ -181,4 +176,3 @@ except:
     print("⚠️  No changes to commit")
 
 print("\n🎉 Autonomous workflow complete!")
-

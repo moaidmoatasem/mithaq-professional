@@ -1,6 +1,5 @@
-
-import sys
 import os
+import sys
 from unittest.mock import MagicMock
 
 # Mock flask
@@ -26,6 +25,7 @@ mock_flask.request = mock_request
 
 import src.cherenkov.autonomous_generated.scanners.authenticationerror as auth_module
 
+
 class TestFix(unittest.TestCase):
     def setUp(self):
         # Initialize scanner_permissions to avoid AttributeError
@@ -33,7 +33,10 @@ class TestFix(unittest.TestCase):
         auth_module.MOCK_ACCESS_CONTROL["admin"] = ["scanner"]
 
     def test_fix_with_env_token(self):
-        from src.cherenkov.autonomous_generated.scanners.authenticationerror import requires_authentication, AuthenticationError
+        from src.cherenkov.autonomous_generated.scanners.authenticationerror import (
+            AuthenticationError,
+            requires_authentication,
+        )
 
         @requires_authentication
         def dummy_f():
@@ -41,7 +44,9 @@ class TestFix(unittest.TestCase):
 
         # Set the expected token in environment
         with patch.dict(os.environ, {"CHERENKOV_AUTH_TOKEN": "secure_token_123"}):
-            with patch("src.cherenkov.autonomous_generated.scanners.authenticationerror.request") as mock_req:
+            with patch(
+                "src.cherenkov.autonomous_generated.scanners.authenticationerror.request"
+            ) as mock_req:
                 # Test success with correct token
                 mock_req.headers.get.return_value = "Bearer secure_token_123"
                 mock_req.identity = "admin"
@@ -64,7 +69,10 @@ class TestFix(unittest.TestCase):
                 print("Rejected 'wrong_token'")
 
     def test_failure_without_env_token(self):
-        from src.cherenkov.autonomous_generated.scanners.authenticationerror import requires_authentication, AuthenticationError
+        from src.cherenkov.autonomous_generated.scanners.authenticationerror import (
+            AuthenticationError,
+            requires_authentication,
+        )
 
         @requires_authentication
         def dummy_f():
@@ -72,7 +80,9 @@ class TestFix(unittest.TestCase):
 
         # Ensure environment token is NOT set
         with patch.dict(os.environ, {}, clear=True):
-            with patch("src.cherenkov.autonomous_generated.scanners.authenticationerror.request") as mock_req:
+            with patch(
+                "src.cherenkov.autonomous_generated.scanners.authenticationerror.request"
+            ) as mock_req:
                 mock_req.headers.get.return_value = "Bearer any_token"
                 mock_req.identity = "admin"
                 mock_req.path = "/scan"
@@ -84,20 +94,25 @@ class TestFix(unittest.TestCase):
                 print("Authentication denied (fail-closed) when CHERENKOV_AUTH_TOKEN is not set")
 
     def test_invalid_header_format(self):
-        from src.cherenkov.autonomous_generated.scanners.authenticationerror import requires_authentication, AuthenticationError
+        from src.cherenkov.autonomous_generated.scanners.authenticationerror import (
+            AuthenticationError,
+            requires_authentication,
+        )
 
         @requires_authentication
         def dummy_f():
             return "success"
 
-        with patch("src.cherenkov.autonomous_generated.scanners.authenticationerror.request") as mock_req:
-            mock_req.headers.get.return_value = "Basic dXNlcjpwYXNz" # Wrong type
+        with patch(
+            "src.cherenkov.autonomous_generated.scanners.authenticationerror.request"
+        ) as mock_req:
+            mock_req.headers.get.return_value = "Basic dXNlcjpwYXNz"  # Wrong type
             with self.assertRaises(AuthenticationError) as cm:
                 dummy_f()
             self.assertIn("Invalid Authorization header", str(cm.exception))
             print("Rejected invalid header format 'Basic'")
 
-            mock_req.headers.get.return_value = "Bearer" # Missing token
+            mock_req.headers.get.return_value = "Bearer"  # Missing token
             with self.assertRaises(AuthenticationError) as cm:
                 dummy_f()
             self.assertIn("Invalid Authorization header", str(cm.exception))
@@ -107,7 +122,9 @@ class TestFix(unittest.TestCase):
         # Verify handle_scan doesn't raise NameError for mock_scan
         # We call the original function (undecorated if possible) or just mock what the decorator needs
         with patch.dict(os.environ, {"CHERENKOV_AUTH_TOKEN": "secure_token_123"}):
-            with patch("src.cherenkov.autonomous_generated.scanners.authenticationerror.request") as mock_req:
+            with patch(
+                "src.cherenkov.autonomous_generated.scanners.authenticationerror.request"
+            ) as mock_req:
                 mock_req.headers.get.return_value = "Bearer secure_token_123"
                 mock_req.identity = "admin"
                 mock_req.path = "/scan"
@@ -125,7 +142,9 @@ class TestFix(unittest.TestCase):
 
                 # Let's check if it's a mock
                 if isinstance(response, MagicMock):
-                    print("handle_scan is a Mock due to @app.route. Testing the underlying function instead.")
+                    print(
+                        "handle_scan is a Mock due to @app.route. Testing the underlying function instead."
+                    )
                     # We can't easily get the underlying function if it was overwritten by the mock decorator.
                     # But wait, requires_authentication is ALSO a decorator.
                     # In authenticationerror.py:
@@ -142,6 +161,7 @@ class TestFix(unittest.TestCase):
                     self.assertEqual(response["scanned_url"], "http://example.com")
                     self.assertEqual(response["scanner_id"], "123")
                     print("handle_scan executed successfully without NameError")
+
 
 if __name__ == "__main__":
     unittest.main()

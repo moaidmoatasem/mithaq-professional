@@ -148,4 +148,3 @@ class TestSecurityCrew:
         crew = SecurityCrew(process=Process.hierarchical)
 
         assert crew.process == Process.hierarchical
-

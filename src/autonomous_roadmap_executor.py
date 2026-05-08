@@ -5,8 +5,9 @@ Let AI agents work on the roadmap continuously
 """
 
 import time
-from pathlib import Path
 from datetime import datetime
+from pathlib import Path
+
 from cherenkov.core.memory_efficient_parallel import MemoryEfficientCrew
 
 print("""
@@ -64,9 +65,7 @@ output_dir = Path("autonomous_development")
 output_dir.mkdir(exist_ok=True)
 
 # Log file
-log_file = (
-    output_dir / f"roadmap_execution_{datetime.now().strftime('%Y%m%d_%H%M%S')}.log"
-)
+log_file = output_dir / f"roadmap_execution_{datetime.now().strftime('%Y%m%d_%H%M%S')}.log"
 
 
 def log(message):
@@ -127,15 +126,14 @@ Focus on quality and production-readiness.
         }
 
         try:
-            log(f"   🤖 AI agent working on task...")
+            log("   🤖 AI agent working on task...")
 
             # Run single agent task
             result = crew.run_parallel_batches([agent_config], [task_config])
 
             # Save result
             task_file = (
-                output_dir
-                / f"phase{phase_idx}_task{task_idx}_{task.replace(' ', '_')[:30]}.txt"
+                output_dir / f"phase{phase_idx}_task{task_idx}_{task.replace(' ', '_')[:30]}.txt"
             )
             crew.save_results(result, output_dir=str(output_dir))
 
@@ -149,13 +147,11 @@ Focus on quality and production-readiness.
 
         except KeyboardInterrupt:
             log("\n⚠️  Execution interrupted by user")
-            log(
-                f"📊 Completed {completed_tasks}/{total_tasks} tasks before interruption"
-            )
+            log(f"📊 Completed {completed_tasks}/{total_tasks} tasks before interruption")
             break
         except Exception as e:
             log(f"   ❌ Task failed: {e}")
-            log(f"   ⏭️  Continuing to next task...")
+            log("   ⏭️  Continuing to next task...")
             continue
 
         # Brief pause between tasks
@@ -190,4 +186,3 @@ log("╚════════════════════════
 
 print(f"\n📁 Check {output_dir}/ for all generated code!")
 print(f"📝 Full log: {log_file}")
-

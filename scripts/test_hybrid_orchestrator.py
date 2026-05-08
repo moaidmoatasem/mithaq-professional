@@ -1,5 +1,6 @@
-from cherenkov.core.hybrid_orchestrator import HybridOrchestrator, ExecutionMode
 from dotenv import load_dotenv
+
+from cherenkov.core.hybrid_orchestrator import ExecutionMode, HybridOrchestrator
 
 load_dotenv()
 
@@ -36,7 +37,7 @@ print(f"Success: {result['success']}")
 print(f"Task: {result['task_name']}")
 print(f"Execution Mode: {result['execution_mode']}")
 print(f"Tokens Used: {result['tokens_used']}")
-print(f"\nRedaction Summary:")
+print("\nRedaction Summary:")
 print(f"  - Redacted Fields: {', '.join(result['redacted_fields'])}")
 print(f"  - Hash: {result['output']['redaction_summary']['hash_signature']}")
 print(f"  - Safe for Cloud: {result['output']['redaction_summary']['is_safe']}")
@@ -47,4 +48,3 @@ print("=" * 70)
 summary = orchestrator.get_execution_summary()
 for key, value in summary.items():
     print(f"{key}: {value}")
-

@@ -8,12 +8,14 @@ import sys
 
 sys.path.insert(0, "cherenkov/scanners/refined")
 
-from xss_scanner import scan_xss
-from csrf_scanner import scan_csrf
-from open_redirect_scanner import scan_open_redirect
-from ..header_scanner import SimpleScanner
 import json
 from datetime import datetime
+
+from csrf_scanner import scan_csrf
+from open_redirect_scanner import scan_open_redirect
+from xss_scanner import scan_xss
+
+from ..header_scanner import SimpleScanner
 
 
 class UnifiedSecurityScanner:
@@ -77,14 +79,10 @@ class UnifiedSecurityScanner:
         print(f"Target: {self.target}")
         print(f"Total Vulnerabilities: {self.results['total_vulnerabilities']}")
         print("\nBy Scanner:")
-        print(
-            f"  • Headers: {len(self.results['scans']['headers'].get('vulnerabilities', []))}"
-        )
+        print(f"  • Headers: {len(self.results['scans']['headers'].get('vulnerabilities', []))}")
         print(f"  • XSS: {self.results['scans']['xss'].get('count', 0)}")
         print(f"  • CSRF: {self.results['scans']['csrf'].get('count', 0)}")
-        print(
-            f"  • Open Redirect: {self.results['scans']['open_redirect'].get('count', 0)}"
-        )
+        print(f"  • Open Redirect: {self.results['scans']['open_redirect'].get('count', 0)}")
 
     def save_report(self, filename=None):
         """Save scan report"""
@@ -106,4 +104,3 @@ if __name__ == "__main__":
     scanner = UnifiedSecurityScanner(sys.argv[1])
     scanner.run_all_scans()
     scanner.save_report()
-

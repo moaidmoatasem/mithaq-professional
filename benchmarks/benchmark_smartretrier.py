@@ -1,7 +1,7 @@
-import sys
 import asyncio
+import sys
 import time
-from unittest.mock import MagicMock, AsyncMock
+from unittest.mock import AsyncMock, MagicMock
 
 # Mock requests and httpx to avoid ModuleNotFoundError and simulate behavior
 mock_requests = MagicMock()
@@ -21,15 +21,20 @@ sys.modules["httpx"] = mock_httpx
 # Import SmartRetrier after mocking
 from src.cherenkov.autonomous_generated.misc.smartretrier import SmartRetrier
 
+
 async def run_benchmark(implementation_type="requests", num_requests=200, latency=0.1):
-    print(f"Running benchmark for {implementation_type} with {num_requests} requests and {latency}s latency...")
+    print(
+        f"Running benchmark for {implementation_type} with {num_requests} requests and {latency}s latency..."
+    )
 
     if implementation_type == "requests":
+
         def mock_get(url, **kwargs):
             time.sleep(latency)
             resp = MagicMock()
             resp.status_code = 200
             return resp
+
         mock_requests.get.side_effect = mock_get
 
         # We need a version of SmartRetrier that uses requests for the baseline
@@ -54,12 +59,14 @@ async def run_benchmark(implementation_type="requests", num_requests=200, latenc
     except Exception as e:
         print(f"Benchmark failed: {e}")
         import traceback
+
         traceback.print_exc()
     end_time = time.perf_counter()
 
     duration = end_time - start_time
     print(f"Duration: {duration:.4f} seconds")
     return duration
+
 
 if __name__ == "__main__":
     # Measure new implementation (httpx)

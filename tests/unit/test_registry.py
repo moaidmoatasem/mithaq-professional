@@ -1,41 +1,46 @@
 import sys
-from unittest.mock import patch, MagicMock
+from unittest.mock import MagicMock, patch
+
 
 # 1. Mock dependencies BEFORE importing cherenkov modules
 class MockBaseModel:
     def __init__(self, **data):
         for key, value in data.items():
             setattr(self, key, value)
+
     def model_dump(self):
         return self.__dict__
+
     @classmethod
     def model_validate(cls, obj):
         return cls(**obj)
 
+
 mock_pydantic = MagicMock()
 mock_pydantic.BaseModel = MockBaseModel
-sys.modules['pydantic'] = mock_pydantic
+sys.modules["pydantic"] = mock_pydantic
 
 mock_httpx = MagicMock()
-sys.modules['httpx'] = mock_httpx
+sys.modules["httpx"] = mock_httpx
 
 # 2. Now imports will work even if pydantic/httpx are missing in the environment
 import unittest
-from cherenkov.core.registry import ScannerRegistry
+
 from cherenkov.core.base_scanner import BaseScanner, ScanResult
+from cherenkov.core.registry import ScannerRegistry
+
 
 class MockScanner(BaseScanner):
     async def scan(self, target: str, timeout: float = 10.0) -> ScanResult:
         return ScanResult(target=target, scanner_name="mock")
 
+
 class TestScannerRegistry(unittest.TestCase):
     def setUp(self):
         # We patch load_scanners to avoid actual file system scanning during most tests
-        with patch.object(ScannerRegistry, '_load_scanners'):
+        with patch.object(ScannerRegistry, "_load_scanners"):
             self.registry = ScannerRegistry()
-            self.registry._registry = {
-                "mock": MockScanner
-            }
+            self.registry._registry = {"mock": MockScanner}
 
     def test_get_scanner_success(self):
         """Test retrieving a scanner that exists in the registry"""
@@ -61,6 +66,7 @@ class TestScannerRegistry(unittest.TestCase):
         scanner = self.registry.create_scanner("mock")
         self.assertIsInstance(scanner, MockScanner)
         self.assertEqual(scanner.name, "MockScanner")
+
 
 if __name__ == "__main__":
     unittest.main()

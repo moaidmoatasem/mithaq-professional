@@ -44,4 +44,3 @@ def csrf_scanner_plus(target_url):
 # Example usage
 result = csrf_scanner_plus("https://example.com")
 print(result)
-

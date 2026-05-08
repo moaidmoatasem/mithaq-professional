@@ -3,11 +3,12 @@
 Docker Agent Worker - Each agent runs in its own container
 """
 
-import sys
 import os
-from pathlib import Path
+import sys
 from datetime import datetime
-from crewai import Agent, Task, Crew, Process, LLM
+from pathlib import Path
+
+from crewai import LLM, Agent, Crew, Process, Task
 
 AGENT_TASKS = {
     "orchestrator_refactor": {
@@ -85,4 +86,3 @@ if __name__ == "__main__":
 
     agent_role = sys.argv[1]
     run_agent(agent_role)
-

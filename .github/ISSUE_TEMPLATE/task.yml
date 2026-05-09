@@ -1,0 +1,59 @@
+name: Task
+description: Create a development task
+title: "[TASK] "
+labels: ["task"]
+assignees: []
+body:
+  - type: textarea
+    id: description
+    attributes:
+      label: Description
+    validations:
+      required: true
+  - type: textarea
+    id: criteria
+    attributes:
+      label: Acceptance Criteria
+      placeholder: |
+        - [ ] Criterion 1
+        - [ ] Criterion 2
+      render: markdown
+    validations:
+      required: true
+  - type: dropdown
+    id: priority
+    attributes:
+      label: Priority
+      options:
+        - priority:critical
+        - priority:high
+        - priority:medium
+        - priority:low
+    validations:
+      required: true
+  - type: dropdown
+    id: area
+    attributes:
+      label: Area
+      options:
+        - area:scanner
+        - area:orchestrator
+        - area:ui
+        - area:api
+        - area:docs
+        - area:infra
+        - area:agent
+        - area:security
+  - type: dropdown
+    id: autonomy
+    attributes:
+      label: Agent Autonomy Level
+      options:
+        - Fully autonomous
+        - Human review required
+        - Human execution required
+  - type: input
+    id: milestone
+    attributes:
+      label: Milestone
+      placeholder: v1.1.0

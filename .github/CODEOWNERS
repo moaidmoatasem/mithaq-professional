@@ -1,0 +1,30 @@
+# CHERENKOV CODEOWNERS - Auto-assign reviewers based on file areas
+* @moaidmoatasem
+
+ARCHITECTURE.md @moaidmoatasem
+docs/architecture/ @moaidmoatasem
+CHERENKOV_SSOT.md @moaidmoatasem
+src/cherenkov/scanners/ @moaidmoatasem
+src/cherenkov/orchestrator/ @moaidmoatasem
+src/cherenkov/dev_crew/ @moaidmoatasem
+src/cherenkov/core/ @moaidmoatasem
+src/cherenkov/schemas/ @moaidmoatasem
+src/cherenkov/api/ @moaidmoatasem
+src/cherenkov/web/ @moaidmoatasem
+cherenkov-portal/ @moaidmoatasem
+cherenkov-frontend/ @moaidmoatasem
+.github/ @moaidmoatasem
+.github/workflows/ @moaidmoatasem
+Dockerfile* @moaidmoatasem
+docker-compose* @moaidmoatasem
+deploy/ @moaidmoatasem
+docs/ @moaidmoatasem
+*.md @moaidmoatasem
+pyproject.toml @moaidmoatasem
+requirements*.txt @moaidmoatasem
+.env.example @moaidmoatasem
+scripts/ @moaidmoatasem
+tools/ @moaidmoatasem
+tests/ @moaidmoatasem
+SECURITY.md @moaidmoatasem
+CODE_OF_CONDUCT.md @moaidmoatasem

@@ -1,0 +1,62 @@
+name: Release Automation
+on:
+  release:
+    types: [published]
+
+jobs:
+  post-release:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+      discussions: write
+      issues: write
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Create Discussion announcement
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const r = context.payload.release;
+            try {
+              await github.rest.discussions.create({
+                owner: context.repo.owner, repo: context.repo.repo,
+                title: `Release: ${r.name || r.tag_name}`,
+                body: `## ${r.name || r.tag_name}\n\n${r.body || ''}`,
+                category_name: 'Announcements'
+              });
+            } catch (e) { console.log('Discussions not enabled:', e.message); }
+
+      - name: Close milestone
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const tag = context.payload.release.tag_name;
+            const title = tag.startsWith('v') ? tag : `v${tag}`;
+            const { data: ms } = await github.rest.issues.listMilestones({
+              owner: context.repo.owner, repo: context.repo.repo, state: 'open'
+            });
+            const m = ms.find(x => x.title === title || x.title === tag);
+            if (m) {
+              await github.rest.issues.updateMilestone({
+                owner: context.repo.owner, repo: context.repo.repo,
+                milestone_number: m.number, state: 'closed'
+              });
+            }
+
+      - name: Update CHANGELOG.md
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          $TAG="${{ github.event.release.tag_name }}"
+          $DATE=$(Get-Date -Format "yyyy-MM-dd")
+          $header = "## $TAG ($DATE)`n"
+          $changelog = Get-Content CHANGELOG.md -Raw
+          $lines = $changelog -split "`n", 2
+          Set-Content -Path CHANGELOG.md -Value ($lines[0] + "`n`n" + $header + "`n" + $lines[1]) -Encoding UTF8
+          git add CHANGELOG.md
+          git diff --cached --quiet || git commit -m "docs($TAG): update changelog"
+          git push
+        shell: pwsh

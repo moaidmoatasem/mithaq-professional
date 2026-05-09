@@ -1,0 +1,78 @@
+name: Project Board Automation
+on:
+  issues:
+    types: [opened, reopened, labeled, milestoned]
+  pull_request:
+    types: [closed]
+
+jobs:
+  triage:
+    runs-on: ubuntu-latest
+    permissions:
+      issues: write
+      pull-requests: write
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Auto-label new issues by content
+        if: github.event_name == 'issues' && github.event.action == 'opened'
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const body = context.payload.issue.body || '';
+            const title = context.payload.issue.title || '';
+            const labels = [];
+            if (title.match(/\[BUG\]/i)) labels.push('bug');
+            else if (title.match(/\[FEAT\]/i)) labels.push('feature');
+            else if (title.match(/\[TASK\]/i)) labels.push('task');
+            else if (title.match(/\[EPIC\]/i)) labels.push('epic');
+            else if (title.match(/\[SEC\]/i)) labels.push('security');
+            else if (title.match(/\[STORY\]/i)) labels.push('story');
+            if (body.match(/scanner|scan/i)) labels.push('area:scanner');
+            if (body.match(/orchestrat|agent|swarm/i)) labels.push('area:orchestrator');
+            if (body.match(/ui|dashboard|portal/i)) labels.push('area:ui');
+            if (body.match(/api|endpoint/i)) labels.push('area:api');
+            if (body.match(/doc|wiki|readme/i)) labels.push('area:docs');
+            if (body.match(/docker|deploy|ci|cd/i)) labels.push('area:infra');
+            if (body.match(/security|vuln|cve/i)) labels.push('area:security');
+            if (body.match(/autonomous|agent/i)) labels.push('ai:autonomous');
+            if (labels.length > 0) {
+              await github.rest.issues.addLabels({
+                owner: context.repo.owner, repo: context.repo.repo,
+                issue_number: context.payload.issue.number, labels: labels
+              });
+            }
+
+      - name: Auto-set priority:critical for security issues
+        if: github.event_name == 'issues' && github.event.action == 'labeled'
+        uses: actions/github-script@v7
+        with:
+          script: |
+            if (context.payload.label.name === 'security') {
+              await github.rest.issues.addLabels({
+                owner: context.repo.owner, repo: context.repo.repo,
+                issue_number: context.payload.issue.number, labels: ['priority:critical']
+              });
+            }
+
+      - name: Auto-close issues linked to merged PRs
+        if: github.event_name == 'pull_request' && github.event.action == 'closed' && github.event.pull_request.merged
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const body = context.payload.pull_request.body || '';
+            const matches = body.match(/(?:close|closes|closed|fix|fixes|fixed|resolve|resolves|resolved)\s+#(\d+)/gi);
+            if (matches) {
+              for (const m of matches) {
+                const num = parseInt(m.match(/#(\d+)/)[1]);
+                await github.rest.issues.createComment({
+                  owner: context.repo.owner, repo: context.repo.repo,
+                  issue_number: num,
+                  body: `Closed by merge of PR #${context.payload.pull_request.number}.`
+                });
+                await github.rest.issues.update({
+                  owner: context.repo.owner, repo: context.repo.repo,
+                  issue_number: num, state: 'closed'
+                });
+              }
+            }

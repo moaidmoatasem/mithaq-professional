@@ -8,36 +8,90 @@ To ensure proper project management and adherence to standard GitHub workflows, 
   - Types: `feature`, `bugfix`, `hotfix`, `docs`, `refactor`.
   - Example: `git checkout -b feature/42-implement-new-scanner`
 
-## 2. GitHub Project Management (via `gh` CLI)
-You are required to use the GitHub CLI (`gh`) to manage the project state.
-- **Issues**: Ensure an issue exists for your task. If not, create one: `gh issue create --title "..." --body "..."`
-- **Assignments**: Assign the issue to yourself or the relevant user: `gh issue edit <issue> --add-assignee "@me"`
-- **Labels**: Apply semantic labels to issues and PRs (e.g., `bug`, `enhancement`, `security`, `documentation`): `gh issue edit <issue> --add-label "enhancement"`
-- **Milestones & Projects**: Link issues and PRs to active milestones and GitHub Projects to maintain a clear roadmap.
-- **Wikis**: For architectural decisions, major guides, or extensive documentation, update the repository Wiki.
+## 2. GitHub Project Management
+You MUST use the tools and scripts below to manage the full project lifecycle.
+
+### 2A. Label Taxonomy
+Use these labels consistently. Every issue/PR must have at least one Type + Priority label.
+
+| Category | Labels |
+|---|---|
+| **Type** | `epic`, `story`, `task`, `bug`, `feature`, `enhancement`, `chore`, `docs`, `refactor`, `test`, `security` |
+| **Priority** | `priority:critical`, `priority:high`, `priority:medium`, `priority:low` |
+| **Phase** | `phase-0` to `phase-5` |
+| **Area** | `area:scanner`, `area:orchestrator`, `area:ui`, `area:api`, `area:docs`, `area:infra`, `area:agent`, `area:security` |
+| **Status** | `status:blocked`, `status:in-progress`, `status:review-needed`, `status:done` |
+| **AI** | `ai:generated`, `ai:reviewed`, `ai:autonomous` |
+| **Sprint** | `sprint-1` through `sprint-5` |
+
+### 2B. Milestones
+All work must be linked to a milestone:
+- `v1.0.0-rc1` — Sovereign Foundation (complete)
+- `v1.1.0` — Swarm Concurrency
+- `v1.5.0` — Enterprise Validation & HITL
+- `v2.0.0` — Mobile Triad
+- `v2.5.0` — Ecosystem Integration
+
+### 2C. Agent PM Tool (`tools/gh_project_manager.py`)
+```bash
+# Create an issue with full metadata
+python tools/gh_project_manager.py issue-create \
+  --title "[TASK] Implement BaseScanner" \
+  --body "Description" \
+  --labels "task,phase-0,area:scanner,priority:high" \
+  --milestone "v1.1.0" \
+  --assignee "@me"
+
+# Update issue labels/status/milestone
+python tools/gh_project_manager.py issue-update \
+  --issue 42 --add-labels "status:in-progress" --milestone "v1.1.0"
+
+# List issues with filters
+python tools/gh_project_manager.py issue-list --label "phase-0" --state open
+
+# Create a release
+python tools/gh_project_manager.py release-create \
+  --tag "v1.1.0" --title "Swarm Concurrency" --notes "Release notes..." --discuss
+
+# Generate status report
+python tools/gh_project_manager.py status-report
+
+# Generate changelog from merged PRs
+python tools/gh_project_manager.py generate-changelog
+```
+
+### 2D. Issue Command Shortcuts
+In any issue comment, use these commands:
+- `/assign [@user]` — Assign the issue
+- `/milestone <name>` — Set milestone
+- `/label <label1, label2>` — Add labels
+- `/phase <phase-n>` — Set phase
+- `/priority <level>` — Set priority
+- `/close` — Close the issue
+- `/help` — Show available commands
+
+### 2E. Weekly Agent PM Cadence
+- **Monday**: Weekly sprint sync auto-creates issues from TODO.md
+- **Daily**: Update status labels (`status:in-progress`, `status:review-needed`)
+- **Friday**: Run status report, update TODO.md, close completed issues
+- **Release Day**: Create release, milestone closes automatically, CHANGELOG.md updated
 
 ## 3. Commit Strategy
-- **Atomic Commits**: Commits should be small, self-contained, and represent a single logical change.
-- **Conventional Commits**: Follow the conventional format (`feat:`, `fix:`, `docs:`, `test:`, `refactor:`, `chore:`).
-- **Issue Linking**: Reference the corresponding issue number in the commit message (e.g., `feat: add input validation (#42)`).
+- **Atomic Commits**: Small, self-contained, single logical change.
+- **Conventional Commits**: `feat:`, `fix:`, `docs:`, `test:`, `refactor:`, `chore:`.
+- **Issue Linking**: Reference issue number (e.g., `feat: add input validation (#42)`).
 
 ## 4. Merging Strategy
-- **Pull Requests (PRs)**: Always create a Pull Request to merge your feature branch.
-  - Create the PR via CLI: `gh pr create --title "..." --body "Closes #42" --base main`
-- **Metadata**: Add reviewers, assignees, labels, and milestones to the PR.
-- **No Self-Merging**: Do not merge your own PRs. Wait for CI checks (tests, linters, security scans) to pass and for Human-in-the-Loop (HITL) approval.
+- **Pull Requests**: `gh pr create --title "..." --body "Closes #42" --base main`
+- **No Self-Merging**: Wait for CI checks and HITL approval.
 
-## 5. State Tracking & Documentation
-You must keep the project tracking files up to date at all times to maintain a clear source of truth:
-- `TODO.md`: Check off completed tasks and add newly discovered ones.
-- `STATUS.md`: Update with current build/project status.
-- `PROJECT_SUMMARY.md`: Update if major features or architectural shifts occur.
-- `CHANGELOG.md`: Document user-facing changes, features, and fixes.
-- `AGENT_MEMORY.md`: Record context, technical decisions, and lessons learned for future sessions.
-- `SESSION_ACHIEVEMENTS.md` / `TONIGHT_ACHIEVEMENTS.md`: Log the specific tasks completed during your session.
+## 5. State Tracking
+- `TODO.md`: Synced with GitHub Issues weekly
+- `STATUS.md`: Current build/project status
+- `CHANGELOG.md`: Updated automatically on release
+- `AGENT_MEMORY.md`: Technical decisions and lessons learned
 
 ## 6. Pre-Commit Verification
-Always run verification checks before committing:
-- Format code (e.g., `black`, `ruff`) only on the specific files modified to avoid massive diffs.
-- Run tests (`pytest`) related to your changes.
-- Ensure all required pre-commit instructions are followed.
+- Format code (`black`, `ruff`) on modified files
+- Run `pytest` for relevant tests
+- Ensure pre-commit hooks pass

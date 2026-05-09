@@ -1,0 +1,56 @@
+name: Security Advisory
+description: Report a security vulnerability
+title: "[SEC] "
+labels: ["security"]
+assignees: []
+body:
+  - type: dropdown
+    id: severity
+    attributes:
+      label: Severity
+      options:
+        - CRITICAL
+        - HIGH
+        - MEDIUM
+        - LOW
+    validations:
+      required: true
+  - type: textarea
+    id: description
+    attributes:
+      label: Vulnerability Description
+    validations:
+      required: true
+  - type: textarea
+    id: impact
+    attributes:
+      label: Impact
+    validations:
+      required: true
+  - type: textarea
+    id: reproduction
+    attributes:
+      label: Steps to Reproduce
+      render: shell
+  - type: textarea
+    id: remediation
+    attributes:
+      label: Suggested Remediation
+  - type: dropdown
+    id: area
+    attributes:
+      label: Affected Area
+      options:
+        - area:scanner
+        - area:orchestrator
+        - area:ui
+        - area:api
+        - area:security
+        - area:infra
+    validations:
+      required: true
+  - type: input
+    id: cve
+    attributes:
+      label: CVE Reference
+      placeholder: CVE-2026-xxxx

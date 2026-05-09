@@ -1,0 +1,51 @@
+name: User Story
+description: A user-facing feature story for sprint planning
+title: "[STORY] "
+labels: ["story"]
+assignees: []
+body:
+  - type: textarea
+    id: narrative
+    attributes:
+      label: User Story
+      description: "As a... I want... So that..."
+      placeholder: |
+        **As a** security analyst
+        **I want** to export scan results as PDF
+        **So that** I can share reports with my team
+      render: markdown
+    validations:
+      required: true
+  - type: textarea
+    id: criteria
+    attributes:
+      label: Acceptance Criteria
+    validations:
+      required: true
+  - type: dropdown
+    id: priority
+    attributes:
+      label: Priority
+      options:
+        - priority:critical
+        - priority:high
+        - priority:medium
+        - priority:low
+    validations:
+      required: true
+  - type: dropdown
+    id: story_points
+    attributes:
+      label: Story Points
+      options:
+        - "1"
+        - "2"
+        - "3"
+        - "5"
+        - "8"
+        - "13"
+  - type: input
+    id: epic
+    attributes:
+      label: Parent Epic
+      placeholder: "#epic-number"

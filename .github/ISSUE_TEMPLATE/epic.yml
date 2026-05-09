@@ -1,0 +1,44 @@
+name: Epic
+description: A large cross-cutting feature initiative
+title: "[EPIC] "
+labels: ["epic"]
+assignees: []
+body:
+  - type: textarea
+    id: summary
+    attributes:
+      label: Epic Summary
+    validations:
+      required: true
+  - type: textarea
+    id: objectives
+    attributes:
+      label: Objectives & Key Results
+  - type: textarea
+    id: scope
+    attributes:
+      label: Scope
+      value: |
+        ### In Scope
+        ### Out of Scope
+  - type: dropdown
+    id: priority
+    attributes:
+      label: Priority
+      options:
+        - priority:high
+        - priority:medium
+        - priority:low
+    validations:
+      required: true
+  - type: input
+    id: milestone
+    attributes:
+      label: Target Milestone
+      placeholder: v2.0.0
+    validations:
+      required: true
+  - type: textarea
+    id: risks
+    attributes:
+      label: Risks & Dependencies

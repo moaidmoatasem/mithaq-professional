@@ -1,0 +1,62 @@
+name: Weekly Sprint Sync
+on:
+  schedule:
+    - cron: '0 6 * * 1'
+  workflow_dispatch:
+
+jobs:
+  sprint-sync:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+      issues: write
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Create issues from TODO.md unchecked items
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const fs = require('fs');
+            const todo = fs.readFileSync('TODO.md', 'utf8');
+            let phase = 'backlog';
+            for (const line of todo.split('\n')) {
+              const t = line.trim();
+              if (t.startsWith('## ')) phase = t.replace(/## /,'').toLowerCase().replace(/\s+/g,'-').split('(')[0].replace(/-$/,'');
+              if (t.startsWith('- [ ] ')) {
+                const task = t.replace('- [ ] ','');
+                const { data: existing } = await github.rest.issues.listForRepo({
+                  owner: context.repo.owner, repo: context.repo.repo, state: 'open', per_page: 100
+                });
+                if (!existing.some(i => i.title.includes(task.slice(0,40)))) {
+                  await github.rest.issues.create({
+                    owner: context.repo.owner, repo: context.repo.repo,
+                    title: `[TASK] ${task}`,
+                    body: `**Source:** TODO.md\n**Phase:** ${phase}\n\n---\n*Auto-created by weekly-sprint-sync*`,
+                    labels: ['task']
+                  });
+                }
+              }
+            }
+
+      - name: Generate weekly summary
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const since = new Date(Date.now() - 7*24*60*60*1000).toISOString();
+            const { data: issues } = await github.rest.issues.listForRepo({
+              owner: context.repo.owner, repo: context.repo.repo, state: 'all', since, per_page: 50
+            });
+            const closed = issues.filter(i => i.state === 'closed');
+            const opened = issues.filter(i => i.state === 'open' && new Date(i.created_at) > new Date(since));
+            let summary = `# Weekly Summary ${new Date().toISOString().slice(0,10)}\n\n## Closed\n`;
+            closed.forEach(i => summary += `- #${i.number} ${i.title}\n`);
+            summary += '\n## Opened\n';
+            opened.forEach(i => summary += `- #${i.number} ${i.title}\n`);
+            await github.rest.issues.create({
+              owner: context.repo.owner, repo: context.repo.repo,
+              title: `[Weekly Summary] ${new Date().toISOString().slice(0,10)}`,
+              body: summary, labels: ['docs']
+            });

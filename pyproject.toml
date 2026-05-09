@@ -13,7 +13,7 @@ dependencies = [
 ]
 
 [tool.setuptools.packages.find]
-where = ["src"]
+where = ["packages"]
 
 [tool.setuptools.package-data]
 cherenkov = ["py.typed"]
@@ -45,10 +45,14 @@ testpaths = ["tests"]
 python_files = ["test_*.py"]
 python_functions = ["test_*"]
 addopts = "-v --tb=short"
+markers = [
+    "integration: tests that require external services (Ollama, GROQ, network)",
+    "ai_generated: tests for AI-generated code with known pre-existing bugs",
+]
 
 [tool.coverage.run]
 source = ["cherenkov"]
-omit = ["tests/*", "venv/*", "candidates/*"]
+omit = ["tests/*", "venv/*", "candidates/*", "packages/cherenkov/autonomous_generated/*"]
 
 [tool.coverage.report]
 fail_under = 25

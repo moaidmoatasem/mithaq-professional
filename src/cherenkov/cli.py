@@ -22,7 +22,7 @@ def _get_registry():
     try:
         from cherenkov.core.registry import ScannerRegistry
 
-        return ScannerRegistry
+        return ScannerRegistry()
     except ImportError as exc:
         console.print(f"[red]Registry unavailable:[/red] {exc}")
         raise typer.Exit(code=1) from exc
@@ -86,13 +86,14 @@ def history(
 def list_scanners() -> None:
     """List all registered scanners."""
     registry = _get_registry()
-    scanners = registry.all()
-    if not scanners:
+    names = registry.list_scanners()
+    if not names:
         console.print("[yellow]No scanners registered.[/yellow]")
         return
     t = Table("Name", "CWE", "Description")
-    for s in scanners:
-        t.add_row(s.name, getattr(s, "cwe", "—"), getattr(s, "__doc__", "—") or "—")
+    for name in names:
+        scanner_cls = registry.get_scanner(name)
+        t.add_row(name, getattr(scanner_cls, "cwe", "—"), getattr(scanner_cls, "__doc__", "—") or "—")
     console.print(t)
 
 

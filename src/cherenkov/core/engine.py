@@ -20,7 +20,7 @@ class ScanEngine:
     ) -> ScanResult:
         """Run single scanner"""
         scanner_class = self.registry.get_scanner(scanner_name)
-        scanner = scanner_class(scanner_class.__name__, "")
+        scanner = scanner_class()
 
         start_time = time.time()
         result = await scanner.scan(target, timeout)

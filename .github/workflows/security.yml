@@ -28,11 +28,25 @@ jobs:
         python-version: '3.11'
 
     - name: Run Bandit (security linter)
+      id: bandit
       run: |
         pip install "bandit[sarif]"
-        bandit -r src/ -f sarif -o bandit-results.sarif || true
+        TARGETS=""
+        if [ -d "src" ]; then TARGETS="$TARGETS src"; fi
+        if [ -d "packages" ]; then TARGETS="$TARGETS packages"; fi
+        TARGETS="$(echo "$TARGETS" | xargs)"
+
+        if [ -z "$TARGETS" ]; then
+          echo "No src/ or packages/ directory found; skipping Bandit."
+          exit 0
+        fi
+
+        bandit -r $TARGETS -f sarif -o bandit-results.sarif || true
 
     - name: Upload Bandit to GitHub Security
+      if: >
+        hashFiles('bandit-results.sarif') != '' &&
+        (github.event_name != 'pull_request' || github.event.pull_request.head.repo.full_name == github.repository)
       uses: github/codeql-action/upload-sarif@v4
       with:
         sarif_file: 'bandit-results.sarif'
@@ -59,11 +73,5 @@ jobs:
     - name: Perform CodeQL Analysis
       uses: github/codeql-action/analyze@v4
       with:
-        upload: false
-        output: ${{ runner.workspace }}/results
-
-    - name: Upload CodeQL Results
-      uses: github/codeql-action/upload-sarif@v4
-      with:
-        sarif_file: ${{ runner.workspace }}/results/python.sarif
+        upload: true
         category: 'codeql'

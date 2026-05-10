@@ -1,0 +1,31 @@
+name: CHERENKOV Detonation Pipeline
+
+on:
+  pull_request:
+    branches: [ main, dev ]
+
+jobs:
+  tokamak-detonation:
+    name: TOKAMAK Sandbox Detonation
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Intercept Payload (Checkout Code)
+        uses: actions/checkout@v4
+
+      - name: Initialize Tokamak Containment Field
+        run: |
+          echo "Building TOKAMAK Lite Sandbox..."
+          docker build -f Dockerfile.tokamak -t cherenkov-tokamak .
+
+      - name: Execute Detonation (Network Disabled)
+        # The --network none flag physically severs the virtual NIC (Meissner Lite)
+        run: |
+          echo "Initiating payload execution with Zero-Egress isolation..."
+          docker run --rm --network none cherenkov-tokamak
+
+      - name: Meissner Shred (Cleanup)
+        if: always()
+        run: |
+          echo "Wiping ephemeral containment environment..."
+          docker rmi cherenkov-tokamak -f

@@ -1,0 +1,26 @@
+# CHERENKOV TOKAMAK LITE (Community Edition)
+# Purpose: Ephemeral, network-isolated detonation sandbox
+
+FROM python:3.11-alpine
+
+# Enforce Meissner zero-egress at the container level
+# (Disables internet access during the run phase)
+LABEL cherenkov.isolation.network="disabled"
+LABEL cherenkov.perimeter="MEISSNER-LITE"
+
+# Create a non-root user for detonation
+RUN addgroup -S tokamak_group && adduser -S tokamak_user -G tokamak_group
+
+WORKDIR /sandbox
+
+# Copy the suspicious payload/PR into the sandbox
+# Alignment fix: using packages/ instead of non-existent src/
+COPY ./packages /sandbox/packages
+COPY ./tests /sandbox/tests
+
+# Drop privileges immediately
+USER tokamak_user
+
+# The default command will be overridden by the CI/CD pipeline
+# to run the specific test or payload
+CMD ["python", "-m", "pytest", "tests/"]

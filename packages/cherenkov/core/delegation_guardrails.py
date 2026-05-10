@@ -213,7 +213,7 @@ class DelegationGuardrails:
             DelegationResult.SUCCESS if allowed, or specific error reason
         """
         chain = list(existing_chain) if existing_chain else []
-
+        if not self.policy.allow_delegation:
             logger.warning("Delegation denied: policy forbids all delegation")
             return DelegationResult.POLICY_DENIED
 
@@ -230,7 +230,9 @@ class DelegationGuardrails:
                 f"Chain: {chain} -> {target_agent_id}"
             )
             return DelegationResult.CIRCULAR_DELEGATION
-
+        if self.policy.require_capability_match:
+            target_reg = self._capability_registry.get_registration(target_agent_id)
+            if target_reg is None:
                 logger.warning(f"Delegation denied: target agent {target_agent_id} not registered")
                 return DelegationResult.CAPABILITY_MISMATCH
 
@@ -283,7 +285,7 @@ class DelegationGuardrails:
 
         if not chain and source_agent_id:
             chain = [source_agent_id] + existing_chain if existing_chain else [source_agent_id]
-
+        if target_agent_id is None:
             candidates = self._capability_registry.find_agents_for_capability(capability_needed)
 
             available_candidates = []

@@ -16,6 +16,8 @@ States:
 
 import asyncio
 import logging
+import platform
+import subprocess
 import time
 from dataclasses import dataclass
 from enum import Enum
@@ -486,6 +488,109 @@ class CircuitBreaker:
             self._transition_to_closed()
 
 
+class Meissner(CircuitBreaker):
+    """
+    Sovereign implementation of the Circuit Breaker pattern.
+    Enforces kernel-level network isolation (Fail-Closed) when tripped.
+
+    Physical-Physics Axiom:
+    When a Sovereign Breach is detected (failure threshold exceeded),
+    the system must physically drop all egress to prevent data exfiltration.
+    """
+
+    def __init__(self, config: Optional[CircuitBreakerConfig] = None):
+        super().__init__(config)
+        self._isolation_active = False
+
+    def _transition_to_open(self) -> None:
+        """Transition to OPEN and enforce fail-closed isolation."""
+        super()._transition_to_open()
+        self.fail_closed()
+
+    def _transition_to_closed(self) -> None:
+        """Transition to CLOSED and restore network connectivity."""
+        super()._transition_to_closed()
+        self.fail_open()
+
+    def fail_closed(self) -> None:
+        """
+        Enforce physical egress isolation using OS-level network drops.
+        """
+        if self._isolation_active:
+            return
+
+        system = platform.system().lower()
+        logger.critical(f"MEISSNER FAIL-CLOSED TRIGGERED: Dropping all egress on {system}")
+
+        try:
+            if system == "linux":
+                # Use iptables to drop all output traffic
+                # -I OUTPUT 1 inserts at the top of the chain
+                subprocess.run(["iptables", "-I", "OUTPUT", "1", "-j", "DROP"], check=True)
+                logger.info("Linux iptables: Egress dropped successfully.")
+            elif system == "windows":
+                # Use netsh to block all outgoing traffic
+                # First ensure firewall is on, then set default to block outbound
+                subprocess.run(
+                    ["netsh", "advfirewall", "set", "allprofiles", "state", "on"], check=True
+                )
+                subprocess.run(
+                    [
+                        "netsh",
+                        "advfirewall",
+                        "set",
+                        "allprofiles",
+                        "firewallpolicy",
+                        "blockinbound,blockoutbound",
+                    ],
+                    check=True,
+                )
+                logger.info("Windows Firewall: Outbound traffic blocked successfully.")
+            else:
+                logger.error(f"Unsupported OS for Meissner isolation: {system}")
+
+            self._isolation_active = True
+        except subprocess.CalledProcessError as e:
+            logger.error(f"Sovereign Breach: Failed to enforce kernel isolation: {e}")
+        except Exception as e:
+            logger.error(f"Unexpected error during Meissner isolation: {e}")
+
+    def fail_open(self) -> None:
+        """
+        Restore network connectivity after recovery or manual override.
+        """
+        if not self._isolation_active:
+            return
+
+        system = platform.system().lower()
+        logger.info(f"MEISSNER RECOVERY: Restoring egress on {system}")
+
+        try:
+            if system == "linux":
+                # Remove the drop rule
+                subprocess.run(["iptables", "-D", "OUTPUT", "-j", "DROP"], check=True)
+                logger.info("Linux iptables: Egress restored.")
+            elif system == "windows":
+                # Restore default outbound behavior (allow)
+                subprocess.run(
+                    [
+                        "netsh",
+                        "advfirewall",
+                        "set",
+                        "allprofiles",
+                        "firewallpolicy",
+                        "blockinbound,allowoutbound",
+                    ],
+                    check=True,
+                )
+                logger.info("Windows Firewall: Outbound traffic allowed.")
+
+            self._isolation_active = False
+        except Exception as e:
+            logger.error(f"Meissner Recovery Error: Failed to restore connectivity: {e}")
+
+
+
 class CircuitBreakerRegistry:
     """
     Registry for managing multiple circuit breakers.
@@ -536,25 +641,46 @@ class CircuitBreakerRegistry:
 
 
 default_registry = CircuitBreakerRegistry()
+meissner_hub = Meissner(CircuitBreakerConfig(name="meissner_hub", failure_threshold=3))
 
 
 def circuit_breaker(
     name: str = "default",
     failure_threshold: int = 5,
     recovery_timeout: float = 30.0,
+    use_meissner: bool = False,
 ) -> Callable[[Callable[..., Any]], Callable[..., Any]]:
     """
     Decorator factory for circuit breaker.
 
-    Usage:
-        @circuit_breaker(name="api_calls", failure_threshold=3)
-        def call_external_api():
-            ...
+    Args:
+        name: Name of the breaker
+        failure_threshold: Number of failures before opening
+        recovery_timeout: Time to wait before half-open
+        use_meissner: If True, uses Meissner (kernel isolation) instead of standard breaker
     """
     config = CircuitBreakerConfig(
         name=name,
         failure_threshold=failure_threshold,
         recovery_timeout=recovery_timeout,
     )
-    breaker = default_registry.get_or_create(name, config)
-    return breaker
+
+    with default_registry._lock:
+        if name not in default_registry._breakers:
+            if use_meissner:
+                default_registry._breakers[name] = Meissner(config)
+            else:
+                default_registry._breakers[name] = CircuitBreaker(config)
+
+    return default_registry._breakers[name]
+
+
+def fail_closed() -> None:
+    """Trigger global Meissner fail-closed isolation."""
+    meissner_hub.fail_closed()
+
+
+def fail_open() -> None:
+    """Restore global network connectivity."""
+    meissner_hub.fail_open()
+

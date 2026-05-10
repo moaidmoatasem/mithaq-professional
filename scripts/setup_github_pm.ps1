@@ -101,6 +101,57 @@ if ($LASTEXITCODE -eq 0) {
     $d = Join-Path $wikiDir $p.dst
     if (Test-Path $s) { Copy-Item $s $d -Force }
   }
+
+  # Rewrite relative markdown links to absolute wiki links
+  foreach ($p in $pages) {
+    $d = Join-Path $wikiDir $p.dst
+    if (Test-Path $d) {
+      $fileContent = Get-Content -Path $d -Raw
+      # This regex replaces relative links with wiki absolute links
+      # Example matching: [text](../path/to/file.md) -> [text](https://github.com/moaidmoatasem/cherenkov-professional/wiki/file)
+      $fileContent = [regex]::Replace($fileContent, '(?<=\[[^\]]+\]\()(?![A-Za-z]+:)([^\)]+)(?=\))', {
+        param($match)
+        $link = $match.Groups[1].Value
+        $linkNoHash = $link.Split('#')[0]
+
+        $wikiMap = @{
+            "README.md" = "Home"
+            "docs/architecture/SYSTEM_ARCHITECTURE.md" = "Architecture"
+            "SYSTEM_ARCHITECTURE.md" = "Architecture"
+            "docs/pm/ROADMAP.md" = "Roadmap"
+            "ROADMAP.md" = "Roadmap"
+            "docs/pm/DEVELOPMENT_PLAN.md" = "Development-Plan"
+            "DEVELOPMENT_PLAN.md" = "Development-Plan"
+            "docs/github/RELEASES.md" = "Release-Strategy"
+            "RELEASES.md" = "Release-Strategy"
+            "DESIGN_SYSTEM.md" = "Design-System"
+            "AGENTS.md" = "Agent-Instructions"
+            "CHERENKOV_SSOT.md" = "Single-Source-of-Truth"
+            "CONTRIBUTING.md" = "Contributing"
+            "CHANGELOG.md" = "Changelog"
+            "PROJECT_BRIEFING.md" = "Project-Briefing"
+        }
+
+        $wikiPage = ""
+        foreach ($key in $wikiMap.Keys) {
+            if ($linkNoHash.EndsWith($key)) {
+                $wikiPage = $wikiMap[$key]
+                break
+            }
+        }
+
+        if ($wikiPage -ne "") {
+            $hashPart = ""
+            if ($link.Contains('#')) {
+                $hashPart = "#" + $link.Split('#')[1]
+            }
+            return "https://github.com/moaidmoatasem/cherenkov-professional/wiki/$wikiPage$hashPart"
+        }
+        return $match.Value
+      })
+      Set-Content -Path $d -Value $fileContent -NoNewline
+    }
+  }
   Set-Content -Path (Join-Path $wikiDir "_Sidebar.md") -Value "# Wiki`n- [[Home]]`n- [[Architecture]]`n- [[Roadmap]]`n- [[Development-Plan]]`n- [[Release-Strategy]]`n- [[Agent-Instructions]]" -Encoding UTF8
   Push-Location $wikiDir; git add -A; git commit -m "docs: initial wiki"; git push origin master; Pop-Location
   Remove-Item -Recurse -Force $wikiDir

@@ -20,4 +20,4 @@ _Updated: 2026-05-10_
 ## Board
 
 Project board: https://github.com/users/moaidmoatasem/projects/2
-Wiki: https://github.com/moaidmoatasem/cherenkov-professional/wiki
+Wiki: https://docs.cherenkov-security.com

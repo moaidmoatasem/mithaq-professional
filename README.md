@@ -87,6 +87,8 @@ We refuse to utilize the "SSO Wall of Shame." Core security features (SSO, RBAC,
 <p align="center">
   <a href="DESIGN_SYSTEM.md">🎨 Design System</a> ·
   <a href="docs/">📚 Documentation</a> ·
+  <a href="https://docs.cherenkov-security.com/">🌐 docs.cherenkov-security.com</a> ·
+  <a href="docs/PROJECT_BRIEFING.md">📋 Project briefing</a> ·
   <a href="ARCHITECTURE.md">🏗️ Architecture</a> ·
   <a href="CONTRIBUTING.md">🤝 Contributing</a>
 </p>

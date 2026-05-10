@@ -10,7 +10,7 @@ def gh(args, capture=True):
     cmd = ["gh"] + args + ["--repo", REPO]
     try:
         r = subprocess.run(cmd, capture_output=capture, text=True, check=True)
-        return r.stdout.strip()
+        return r.stdout.strip() if capture and r.stdout else ""
     except subprocess.CalledProcessError as e:
         print(f"Error: {e.stderr}", file=sys.stderr); return None
 
@@ -97,6 +97,7 @@ def generate_changelog(args):
         print(f"### {cat}"); [print(i) for i in items]; print()
 
 def main():
+    global REPO
     p = argparse.ArgumentParser(description="CHERENKOV GitHub PM CLI")
     p.add_argument("--repo", default=REPO)
     s = p.add_subparsers(dest="cmd")
@@ -113,7 +114,6 @@ def main():
         for arg, req in args_list: sp.add_argument(arg, required=req)
     args = p.parse_args()
     if not args.cmd: p.print_help(); return
-    global REPO
     if args.repo: REPO = args.repo
     {"issue-create":issue_create,"issue-update":issue_update,"issue-list":issue_list,
      "milestone-list":milestone_list,"release-create":release_create,

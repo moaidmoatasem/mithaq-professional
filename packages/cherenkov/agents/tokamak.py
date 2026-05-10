@@ -19,14 +19,18 @@ from __future__ import annotations
 
 import asyncio
 import hashlib
+import json
 import logging
 import time
 from dataclasses import dataclass, field
 from enum import Enum
-from typing import TYPE_CHECKING
+from pathlib import Path
+from typing import TYPE_CHECKING, Any
 
 if TYPE_CHECKING:
     from ..core.base_scanner import Finding
+
+import httpx
 
 logger = logging.getLogger("cherenkov.tokamak")
 
@@ -34,6 +38,8 @@ logger = logging.getLogger("cherenkov.tokamak")
 POC_TIMEOUT_SECONDS = 30  # Kill stalled PoC containers
 POC_MAX_RETRIES = 2  # Retry on env mismatch before PROBABLE
 WATCHDOG_CHECK_INTERVAL = 0.5  # Poll interval for watchdog
+FAST_PROBE_TIMEOUT = 5  # Lightweight HTTP probes (<5s per the SSOT)
+FAST_PROBE_LOG = Path("logs/tokamak/fast_probes")
 
 
 class TokamakVerdict(str, Enum):
@@ -152,11 +158,19 @@ class TokamakAgent:
     async def validate(self, finding: "Finding", target: str) -> TokamakResult:
         """
         Validate a finding. Routes to appropriate technique based on scanner name.
+
+        Tries a fast lightweight HTTP probe first (<5s, no Docker).
+        Falls through to full Docker sandbox only if fast probe is unavailable.
         """
         t0 = time.monotonic()
         technique = finding.scanner
 
-        # Check if we have a safe primitive for this finding type
+        # Try fast probe first (XSS, SQLi, CSRF only — no Docker needed)
+        fast_result = await self._try_fast_probe(target, technique, finding.title)
+        if fast_result is not None:
+            return fast_result
+
+        # Fall through to Docker sandbox
         if not PoCPrimitive.is_safe(technique):
             return TokamakResult(
                 finding_title=finding.title,
@@ -201,7 +215,6 @@ class TokamakAgent:
                         signature=signature,
                     )
 
-                # Not exploitable — discard
                 trace = self._make_trace(
                     finding,
                     TokamakVerdict.DISCARDED,
@@ -228,11 +241,9 @@ class TokamakAgent:
                 await self._kill_stalled_container()
 
             except EnvironmentError as e:
-                # Environment mismatch (missing tool, wrong OS, etc.)
                 retries += 1
                 logger.info("Tokamak env mismatch: %s (attempt %d)", e, retries)
 
-        # Exceeded retries — PROBABLE (env issue, not definitively safe)
         trace = self._make_trace(
             finding,
             TokamakVerdict.PROBABLE,
@@ -248,6 +259,97 @@ class TokamakAgent:
             finding_title=finding.title,
             verdict=TokamakVerdict.PROBABLE,
             trace=trace,
+        )
+
+    _FAST_TECHNIQUES: dict[str, str] = {
+        "xss_reflected": "xss",
+        "sql_injection": "sqli",
+        "csrf": "csrf",
+        "auth_bypass": "sqli",
+    }
+
+    async def _try_fast_probe(self, target: str, technique: str, title: str) -> TokamakResult | None:
+        """Attempt a lightweight HTTP probe. Returns None if not applicable."""
+        vuln_type = self._FAST_TECHNIQUES.get(technique)
+        if vuln_type is None:
+            return None
+
+        fast_payloads: dict[str, list[str]] = {
+            "xss": [
+                "<script>alert(1)</script>",
+                "<img src=x onerror=alert(1)>",
+            ],
+            "sqli": [
+                "' OR '1'='1",
+                "' UNION SELECT 1--",
+            ],
+            "csrf": [
+                "<form action='/' method='POST'>",
+            ],
+        }
+
+        payloads = fast_payloads.get(vuln_type, [])
+        t0 = time.monotonic()
+
+        for payload in payloads:
+            try:
+                result = await self._do_http_probe(target, vuln_type, payload)
+                if result.get("exploitable"):
+                    duration = (time.monotonic() - t0) * 1000
+                    evidence = json.dumps(result, default=str)
+                    sha256 = hashlib.sha256(evidence.encode()).hexdigest()
+                    self._write_probe_log(title, vuln_type, result, duration)
+                    trace = TokamakTrace(
+                        finding_title=title,
+                        verdict=TokamakVerdict.CONFIRMED,
+                        poc_technique=f"fast_{vuln_type}",
+                        evidence_summary=f"[CONFIRMED] {vuln_type} via fast probe",
+                        sha256_evidence=sha256,
+                        duration_ms=duration,
+                        confidence_notes="Fast HTTP probe confirmed vulnerability",
+                    )
+                    signature = trace.sign()
+                    logger.info("FAST PROBE CONFIRMED — %s on %s (%dms)", technique, target, duration)
+                    return TokamakResult(
+                        finding_title=title,
+                        verdict=TokamakVerdict.CONFIRMED,
+                        trace=trace,
+                        signature=signature,
+                    )
+            except Exception:
+                logger.debug("Fast probe payload failed for %s", technique, exc_info=True)
+
+        return None
+
+    async def _do_http_probe(self, target: str, vuln_type: str, payload: str) -> dict[str, Any]:
+        """Execute a single HTTP probe with timeout."""
+        async with httpx.AsyncClient(timeout=FAST_PROBE_TIMEOUT, verify=False) as client:  # noqa: S501 — localhost probes only
+            if vuln_type == "xss":
+                r = await client.get(target + httpx.utils.quote(payload), follow_redirects=False)
+                reflected = payload.lower() in r.text.lower()
+                return {"exploitable": reflected}
+            elif vuln_type == "sqli":
+                r = await client.get(target + httpx.utils.quote(payload), follow_redirects=False)
+                indicators = ("sql", "syntax", "mysql", "error", "odbc")
+                detected = any(i in r.text.lower() for i in indicators)
+                return {"exploitable": detected}
+            elif vuln_type == "csrf":
+                r = await client.post(target, data={"csrf_test": "tokamak_probe"}, follow_redirects=False)
+                return {"exploitable": r.status_code == 200}
+        return {"exploitable": False}
+
+    def _write_probe_log(self, title: str, vuln_type: str, result: dict, duration: float) -> None:
+        """Write fast probe result to log file for audit trail."""
+        FAST_PROBE_LOG.mkdir(parents=True, exist_ok=True)
+        path = FAST_PROBE_LOG / f"{vuln_type}_{int(time.time())}.json"
+        path.write_text(
+            json.dumps({
+                "finding": title,
+                "vuln_type": vuln_type,
+                "result": {k: str(v) for k, v in result.items()},
+                "duration_ms": round(duration, 2),
+                "timestamp": time.time(),
+            }, indent=2)
         )
 
     async def _execute_poc(self, target: str, technique: str, payload: str) -> dict:

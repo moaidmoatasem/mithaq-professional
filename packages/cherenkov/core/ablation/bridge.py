@@ -1,6 +1,4 @@
-# src/cherenkov/ai/ablation.py
-"""
-Ablation (السيادة) — Fail-closed sanitization bridge.
+"""Ablation (السيادة) — Fail-closed sanitization bridge.
 
 INVARIANTS (cannot be violated):
   1. sanitize() output contains zero raw credentials / IPs / paths / source code.
@@ -12,6 +10,7 @@ INVARIANTS (cannot be violated):
 from __future__ import annotations
 
 import hashlib
+import logging
 import re
 import time
 from dataclasses import dataclass, field
@@ -20,9 +19,7 @@ from typing import Any
 
 from pydantic import BaseModel, ValidationError
 
-# ──────────────────────────────────────────────
-# Telemetry (Accepted: Gemini + Copilot + Arch)
-# ──────────────────────────────────────────────
+logger = logging.getLogger("cherenkov.ablation")
 
 
 class DropReason(str, Enum):
@@ -46,11 +43,6 @@ class SanitizationAttempt:
 
 @dataclass
 class AblationTelemetry:
-    """
-    First-class telemetry. Exposed in CLI output and SQLite.
-    Prevents fail-closed from becoming an invisible black box.
-    """
-
     attempts: int = 0
     successes: int = 0
     drops: int = 0
@@ -76,13 +68,10 @@ class AblationTelemetry:
             reason = attempt.drop_reason.value if attempt.drop_reason else "unknown"
             self.drop_reasons[reason] = self.drop_reasons.get(reason, 0) + 1
         self.history.append(attempt)
-        # Alert if drop rate exceeds threshold
         if self.attempts >= 10 and self.drop_rate > 0.20:
-            import logging
-
-            logging.getLogger("cherenkov.ablation").warning(
+            logger.warning(
                 "Ablation drop rate is %.1f%% (%d/%d). "
-                "Check sanitization patterns for this scan surface.",
+                "Check sanitization patterns for this surface.",
                 self.drop_rate * 100,
                 self.drops,
                 self.attempts,
@@ -96,10 +85,6 @@ class AblationTelemetry:
             f"{self.total_redactions} redactions"
         )
 
-
-# ──────────────────────────────────────────────
-# Redaction patterns
-# ──────────────────────────────────────────────
 
 _PATTERNS: list[tuple[str, re.Pattern, str]] = [
     ("aws_key", re.compile(r"AKIA[0-9A-Z]{16}"), "[AWS_KEY_REDACTED]"),
@@ -132,19 +117,14 @@ _PATTERNS: list[tuple[str, re.Pattern, str]] = [
     ("db_conn", re.compile(r"(?i)(mysql|postgresql|mongodb|redis)://\S+"), "[DB_CONN_REDACTED]"),
 ]
 
-_MAX_PAYLOAD_BYTES = 32_768  # 32KB ceiling per payload
+_MAX_PAYLOAD_BYTES = 32_768
 _PII_RESIDUAL_CHECK = re.compile(
     r"(AKIA[0-9A-Z]{8}|password\s*=\s*\S{4,}|"
-    r"\b\d{16}\b|"  # credit card
+    r"\b\d{16}\b|"
     r"-----BEGIN .* KEY-----|"
     r"\b(?:10|192\.168|172\.1[6-9])\.\d+\.\d+\b)",
     re.IGNORECASE,
 )
-
-
-# ──────────────────────────────────────────────
-# Pydantic schema for inbound cloud commands
-# ──────────────────────────────────────────────
 
 
 class AllowedToolName(str, Enum):
@@ -155,107 +135,63 @@ class AllowedToolName(str, Enum):
 
 
 class CloudCommand(BaseModel):
-    """Every JSON instruction from the cloud must validate against this schema."""
-
     tool: AllowedToolName
     scanner: str | None = None
     target_id: int | None = None
     parameters: dict[str, str | int | bool] = {}
-
-    model_config = {"extra": "forbid"}  # reject unknown fields
-
-
-# ──────────────────────────────────────────────
-# Sanitization result
-# ──────────────────────────────────────────────
+    model_config = {"extra": "forbid"}
 
 
 @dataclass
 class SanitizationResult:
     sanitized_payload: dict
     redaction_count: int
-    placeholders: dict[str, str]  # original_hash → placeholder_id
-    sha256_local_evidence: str  # stored locally, NEVER transmitted
-
-
-# ──────────────────────────────────────────────
-# The bridge
-# ──────────────────────────────────────────────
+    placeholders: dict[str, str]
+    sha256_local_evidence: str
 
 
 class SanitizationError(Exception):
-    """Raised when a payload cannot be deterministically scrubbed."""
-
     def __init__(self, reason: DropReason, detail: str = ""):
         self.reason = reason
         super().__init__(f"Sanitization failed [{reason.value}]: {detail}")
 
 
 class AblationBridge:
-    """
-    The fail-closed sanitization bridge.
-
-    Usage:
-        bridge = AblationBridge()
-        try:
-            result = bridge.sanitize(raw_finding)
-            # result.sanitized_payload is safe to transmit
-        except SanitizationError as e:
-            # Nothing was transmitted. Log e.reason.
-    """
-
     def __init__(self) -> None:
         self.telemetry = AblationTelemetry()
 
     def sanitize(self, raw_finding: dict[str, Any]) -> SanitizationResult:
-        """
-        Three-step fail-closed sanitization. Any step failure → SanitizationError.
-        Raw evidence is SHA-256 hashed and stored locally, never transmitted.
-        """
         t0 = time.monotonic()
         attempt = SanitizationAttempt(
             timestamp=t0, success=False, payload_size_bytes=len(str(raw_finding))
         )
-
         try:
-            # Guard: size ceiling
             raw_str = str(raw_finding)
             if len(raw_str.encode()) > _MAX_PAYLOAD_BYTES:
                 raise SanitizationError(
                     DropReason.SIZE_EXCEEDED,
                     f"Payload {len(raw_str)} bytes exceeds {_MAX_PAYLOAD_BYTES}",
                 )
-
-            # Guard: binary content
             if any(isinstance(v, bytes) for v in self._flatten_values(raw_finding)):
                 raise SanitizationError(
                     DropReason.BINARY_CONTENT, "Binary content must not leave local environment"
                 )
-
-            # Step 1: regex redaction
             sanitized, redaction_count, placeholders = self._redact(raw_finding)
-
-            # Step 2: residual PII check
             if _PII_RESIDUAL_CHECK.search(str(sanitized)):
                 raise SanitizationError(
                     DropReason.PII_RESIDUAL_DETECTED, "Residual PII detected after redaction"
                 )
-
-            # Step 3: SHA-256 of raw evidence (stored locally, never transmitted)
             sha256 = hashlib.sha256(str(raw_finding).encode()).hexdigest()
-
             attempt.success = True
             attempt.redaction_count = redaction_count
             attempt.duration_ms = (time.monotonic() - t0) * 1000
             self.telemetry.record(attempt)
-
             return SanitizationResult(
                 sanitized_payload=sanitized,
                 redaction_count=redaction_count,
                 placeholders=placeholders,
                 sha256_local_evidence=sha256,
             )
-
         except SanitizationError as e:
             attempt.drop_reason = e.reason
             attempt.duration_ms = (time.monotonic() - t0) * 1000
@@ -263,11 +199,6 @@ class AblationBridge:
             raise
 
     def validate_inbound_command(self, raw_json: dict[str, Any]) -> CloudCommand:
-        """
-        Validate every cloud instruction against CloudCommand schema.
-        Defeats prompt injection (OWASP LLM Top 10 #1).
-        Raises SanitizationError on schema failure.
-        """
         try:
             return CloudCommand(**raw_json)
         except ValidationError as e:
@@ -277,7 +208,6 @@ class AblationBridge:
             ) from e
 
     def _redact(self, obj: Any) -> tuple[Any, int, dict[str, str]]:
-        """Recursively redact all string values in a nested structure."""
         count = 0
         placeholders: dict[str, str] = {}
 
@@ -304,7 +234,6 @@ class AblationBridge:
         return redact_obj(obj), count, placeholders
 
     def _flatten_values(self, obj: Any):
-        """Yield all leaf values from a nested structure."""
         if isinstance(obj, dict):
             for v in obj.values():
                 yield from self._flatten_values(v)

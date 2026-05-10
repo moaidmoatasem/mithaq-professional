@@ -1,6 +1,6 @@
-# CHERENKOV / CHERENKOV Architecture
+# CHERENKOV Architecture
 
-This document describes the architectural principles and design patterns of the CHERENKOV / CHERENKOV project.
+This document describes the architectural principles and design patterns of the CHERENKOV project.
 
 ## 1. The Trident of Truth
 CHERENKOV operates on the "Trident of Truth" framework:

@@ -82,16 +82,18 @@ class DelegationRecord:
     task_id: str
     capability_needed: str
 
-    record_id: str = field(default_factory=lambda: f"dlg-{datetime.now(timezone.utc).strftime('%Y%m%d%H%M%S')}-{id(threading.current_thread())}")
+    record_id: str = field(
+        default_factory=lambda: (
+            f"dlg-{datetime.now(timezone.utc).strftime('%Y%m%d%H%M%S')}-{id(threading.current_thread())}"
+        )
+    )
     result: str = DelegationResult.SUCCESS
     error_message: Optional[str] = None
 
     delegation_chain: List[str] = field(default_factory=list)
     handoff_snapshot_id: Optional[str] = None
 
-    created_at: str = field(
-        default_factory=lambda: datetime.now(timezone.utc).isoformat()
-    )
+    created_at: str = field(default_factory=lambda: datetime.now(timezone.utc).isoformat())
     completed_at: Optional[str] = None
     outcome: Optional[str] = None
 
@@ -100,6 +102,7 @@ class DelegationRecord:
     def to_dict(self) -> Dict[str, Any]:
         """Serialize to dictionary."""
         from dataclasses import asdict
+
         return asdict(self)
 
     def mark_completed(self, outcome: str, error_message: Optional[str] = None) -> None:
@@ -234,9 +237,7 @@ class DelegationGuardrails:
         if self.policy.require_capability_match:
             target_reg = self._capability_registry.get_registration(target_agent_id)
             if target_reg is None:
-                logger.warning(
-                    f"Delegation denied: target agent {target_agent_id} not registered"
-                )
+                logger.warning(f"Delegation denied: target agent {target_agent_id} not registered")
                 return DelegationResult.CAPABILITY_MISMATCH
 
             if capability_needed not in target_reg.capabilities:
@@ -290,9 +291,7 @@ class DelegationGuardrails:
             chain = [source_agent_id] + existing_chain if existing_chain else [source_agent_id]
 
         if target_agent_id is None:
-            candidates = self._capability_registry.find_agents_for_capability(
-                capability_needed
-            )
+            candidates = self._capability_registry.find_agents_for_capability(capability_needed)
 
             available_candidates = []
             for c in candidates:

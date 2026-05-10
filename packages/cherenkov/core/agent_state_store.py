@@ -86,12 +86,8 @@ class AgentState:
     errors: List[Dict[str, Any]] = field(default_factory=list)
     capabilities: List[str] = field(default_factory=list)
 
-    created_at: str = field(
-        default_factory=lambda: datetime.now(timezone.utc).isoformat()
-    )
-    updated_at: str = field(
-        default_factory=lambda: datetime.now(timezone.utc).isoformat()
-    )
+    created_at: str = field(default_factory=lambda: datetime.now(timezone.utc).isoformat())
+    updated_at: str = field(default_factory=lambda: datetime.now(timezone.utc).isoformat())
     version: int = 1
 
     def touch(self) -> None:
@@ -208,9 +204,7 @@ class HandoverSnapshot:
     source_status: str = AgentStatus.IDLE
     source_version: int = 1
 
-    created_at: str = field(
-        default_factory=lambda: datetime.now(timezone.utc).isoformat()
-    )
+    created_at: str = field(default_factory=lambda: datetime.now(timezone.utc).isoformat())
     accepted_at: Optional[str] = None
     rejected_at: Optional[str] = None
     rejection_reason: Optional[str] = None

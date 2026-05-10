@@ -65,9 +65,7 @@ class AgentRegistration:
     priority_score: float = 0.5
     metadata: Dict[str, Any] = field(default_factory=dict)
 
-    registered_at: str = field(
-        default_factory=lambda: datetime.now(timezone.utc).isoformat()
-    )
+    registered_at: str = field(default_factory=lambda: datetime.now(timezone.utc).isoformat())
     last_heartbeat_at: Optional[str] = None
     is_active: bool = True
 
@@ -230,14 +228,11 @@ class AIMDCapacityController:
             self.consecutive_successes = 0
             self.total_failures += 1
 
-            new_capacity = max(
-                self.min_capacity, int(old_capacity * self.decrease_factor)
-            )
+            new_capacity = max(self.min_capacity, int(old_capacity * self.decrease_factor))
 
             if new_capacity != old_capacity:
                 logger.warning(
-                    f"AIMD: Decreasing capacity {old_capacity} -> {new_capacity} "
-                    f"after failure"
+                    f"AIMD: Decreasing capacity {old_capacity} -> {new_capacity} after failure"
                 )
                 self.current_capacity = new_capacity
 
@@ -378,9 +373,7 @@ class CapabilityRegistry:
             if agent_id not in self._agents:
                 return False
 
-            self._agents[agent_id].last_heartbeat_at = datetime.now(
-                timezone.utc
-            ).isoformat()
+            self._agents[agent_id].last_heartbeat_at = datetime.now(timezone.utc).isoformat()
             self._agents[agent_id].is_active = True
             return True
 

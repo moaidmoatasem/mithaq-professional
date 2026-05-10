@@ -119,7 +119,7 @@ class AgentMessageBus:
             if message.in_reply_to and message.in_reply_to in self._pending_requests:
                 pending = self._pending_requests.pop(message.in_reply_to)
                 pending.response = message
-                if hasattr(pending.event, 'set'):
+                if hasattr(pending.event, "set"):
                     try:
                         pending.event.set()
                     except Exception:
@@ -134,9 +134,7 @@ class AgentMessageBus:
                     try:
                         callback(message)
                     except Exception as e:
-                        logger.error(
-                            f"Error in message callback for agent {self.agent_id}: {e}"
-                        )
+                        logger.error(f"Error in message callback for agent {self.agent_id}: {e}")
 
     def subscribe(self, topic: str, callback: Callable[[AgentMessage], Any]) -> None:
         """Subscribe to messages on a specific topic.
@@ -169,7 +167,9 @@ class AgentMessageBus:
         """
         self.subscribe(topic_for_role(role), callback)
 
-    def subscribe_to_capability(self, capability: str, callback: Callable[[AgentMessage], Any]) -> None:
+    def subscribe_to_capability(
+        self, capability: str, callback: Callable[[AgentMessage], Any]
+    ) -> None:
         """Subscribe to all messages for agents with a specific capability.
 
         Args:
@@ -178,7 +178,9 @@ class AgentMessageBus:
         """
         self.subscribe(topic_for_capability(capability), callback)
 
-    def subscribe_to_workflow(self, workflow_id: str, callback: Callable[[AgentMessage], Any]) -> None:
+    def subscribe_to_workflow(
+        self, workflow_id: str, callback: Callable[[AgentMessage], Any]
+    ) -> None:
         """Subscribe to all messages for a specific workflow.
 
         Args:
@@ -199,7 +201,8 @@ class AgentMessageBus:
             self._subscriptions[self._my_topic] = []
         else:
             self._subscriptions[self._my_topic] = [
-                cb for cb in self._subscriptions[self._my_topic]
+                cb
+                for cb in self._subscriptions[self._my_topic]
                 if cb != self._handle_event_bus_message
             ]
 

@@ -9,45 +9,50 @@
 
 ### Core Systems
 - [x] Package restructure: `packages/cherenkov/` (logical subpackages, single installable)
-- [x] Design System: Unified tokens (`cherenkov-portal/design-tokens/tokens.json`), Atomic Design
+- [x] Design System: Unified tokens, Atomic Design
 - [x] Error Hierarchy: 15 typed exception types in `core/exceptions.py`
-- [x] Logging: All hand-written modules use `logging.getLogger(__name__)` — zero `print()` in hand-written code
-- [x] Event Bus: Constructor injection pattern (`EventBus` accepted in `UnifiedScanner`)
-- [x] God-class splitting: `AgentRegistry`, `WorkflowScheduler`, `WorkflowExecutor` extracted from `orchestration_api.py`
-- [x] Type annotations: All hand-written modules annotated (params + return types)
-- [x] PEP 561: `py.typed` marker present
-- [x] Stale `src/cherenkov/` removed (imports now resolve to `packages/cherenkov/`)
+- [x] Logging: All hand-written modules use `logging.getLogger(__name__)`
+- [x] Event Bus: Constructor injection pattern
+- [x] God-class splitting: AgentRegistry, WorkflowScheduler, WorkflowExecutor
+- [x] Type annotations: All hand-written modules annotated
 - [x] Autonomous Development Team (9 agents)
 - [x] Memory-Efficient Parallel Execution
-- [x] Security Scanner Suite (header_scanner, unified_scanner, vulnerabilityseverityscore)
+- [x] Security Scanner Suite (header_scanner, unified_scanner, etc.)
 - [x] CLI Interface (typer-based)
 - [x] Report Generation
 - [x] Batch Processing
-- [x] GitHub Project Management — Full PM lifecycle
+- [x] GitHub Project Management — Fully operational
 
-### GitHub PM Infrastructure
-- [x] Comprehensive label taxonomy (40+ labels, 7 categories)
-- [x] 5 milestones mapped to release strategy
-- [x] 6 YAML issue forms (bug, feature, task, epic, security, story)
-- [x] CODEOWNERS file
-- [x] Agent PM Python CLI (`tools/gh_project_manager.py`)
-- [x] 6 PM automation workflows
-- [x] Wiki setup script
-- [x] Updated AGENTS.md with PM instructions
+### GitHub PM Infrastructure — LIVE
+- [x] 41 labels (7 categories) on GitHub
+- [x] 5 milestones (v1.0.0-rc1 → v2.5.0)
+- [x] 6 YAML issue forms + CODEOWNERS
+- [x] Project board "CHERENKOV Sovereign Roadmap" with 20 items
+- [x] Wiki (10 pages) published
+- [x] Discussions enabled (4 categories)
+- [x] 6 PM automation workflows + Agent CLI
+
+### Backlog by Milestone
+| Milestone | Issues | Status |
+|---|---|---|
+| v1.0.0-rc1 — Sovereign Foundation | #16-#20 | 2 done, 3 in progress |
+| v1.1.0 — Swarm Concurrency | #21-#25, #88-#91, #102 | 10 open |
+| v1.5.0 — Enterprise Validation & HITL | #93-#96 | 4 open |
+| v2.0.0 — Mobile Triad | #97-#99 | 3 open |
+| v2.5.0 — Ecosystem Integration | #100-#101 | 2 open |
 
 ### Package Layout
 ```
 packages/cherenkov/
-├── core/           — BaseScanner, Registry, Engine, Events, Exceptions, Ablation, Storage, Schemas
-├── scanners/       — header_scanner, unified_scanner, scan_runner, http_methods, tls_detection, etc.
-├── orchestration/  — orchestration_api, AgentRegistry, WorkflowScheduler, WorkflowExecutor, ResultStore, etc.
-├── agents/         — architect_agent, developer_agent, tester_agent, tokamak, cloud providers
-├── crews/          — autonomous_developer_crew, autonomous_dev_team, security_crew
-├── api/            — FastAPI REST server (main.py)
-├── cli/            — Typer CLI (main.py)
-├── dev_crew/       — swarm_orchestrator, scanner_generator
-├── autonomous_generated/ — AI-generated code (excluded from coverage, GENERATED.md)
-└── micro_swarm/    — stubs
+├── core/             — BaseScanner, Registry, Engine, Events, Exceptions
+├── scanners/         — header_scanner, unified_scanner, scan_runner, etc.
+├── orchestration/    — orchestration_api, AgentRegistry, WorkflowScheduler
+├── agents/           — architect_agent, developer_agent, tester_agent
+├── crews/            — autonomous_developer_crew, security_crew
+├── api/              — FastAPI REST server
+├── cli/              — Typer CLI
+├── dev_crew/         — swarm_orchestrator, scanner_generator
+└── autonomous_generated/ — AI-generated code
 ```
 
 ### Scanners Available
@@ -58,14 +63,8 @@ packages/cherenkov/
 - RAM Usage: 4-6GB | Speed: 2-3x sequential | Reliability: 100% | Cost: $0
 
 ## Next Steps
-- [ ] Authenticate gh CLI and run setup_github_pm.ps1
-- [ ] Enable Discussions in repo settings
-- [ ] Replace `print()` calls in `unified_scanner.py`, `header_scanner.py` with logging
-- [ ] Write integration tests for AgentRegistry/WorkflowScheduler
-- [ ] Wire CI (GitHub Actions)
+## Next Steps
+- [ ] Complete v1.0.0-rc1 issues (#18 Sanitization Bridge, #19 Trace Schema, #20 Trace Recorder)
+- [ ] Start v1.1.0 backlog (HTTP client, mobile scanners, CI pipeline)
 
-## Metrics
-- Files: ~80 | Lines: ~5,000+ | Hand-written modules: 40+ | Tests: 51 pass / 1 known fail
-- GitHub PM: 40+ labels, 5 milestones, 6 workflows, 6 issue forms
-
-**Status:** READY FOR PRODUCTION
+**Status:** READY FOR DEVELOPMENT

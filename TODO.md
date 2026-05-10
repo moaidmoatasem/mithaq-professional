@@ -15,50 +15,56 @@
 - [x] Event bus constructor injection
 - [x] Stale src/cherenkov/ removed
 
-## GitHub PM Infrastructure (Completed)
-- [x] Comprehensive label taxonomy (40+ labels, 7 categories)
-- [x] 5 milestones mapped to release strategy
-- [x] 6 YAML issue forms (bug_report, feature_request, task, epic, security_advisory, user_story)
-- [x] CODEOWNERS file
+## v1.0.0-rc1 — Sovereign Foundation (Milestone 4)
+Issues: #16, #17, #18, #19, #20
+- [x] #16 Hardware-Agnostic Environment Setup Script
+- [x] #17 Dynamic Model Quantization & Benchmarking
+- [ ] #18 Context-Preserving Sanitization Bridge
+- [ ] #19 Define Cherenkov Trace Schema
+- [ ] #20 Trace Recorder & State Engine
+
+## v1.1.0 — Swarm Concurrency (Milestone 5)
+Issues: #21, #22, #23, #24, #25, #88, #89, #90, #91, #102
+- [ ] #21 Expose Professional Scanners as Local Tools
+- [ ] #22 Stateless Local Executor
+- [ ] #23 Burhan Validator (Stateless MiniGPT)
+- [ ] #24 First End-to-End "Hello Cherenkov" Scenario
+- [ ] #25 Agentic Dev Orchestrator (PM-Agent)
+- [ ] #88 HTTP Client for Groq/Gemini
+- [ ] #89 APKTool Wrapper for Mobile Scanning
+- [ ] #90 Androguard Integration
+- [ ] #91 Replace print() with logging in scanners
+- [ ] #102 Wire CI Pipeline (lint, typecheck, test)
+
+## v1.5.0 — Enterprise Validation & HITL (Milestone 6)
+Issues: #93, #94, #95, #96
+- [ ] #93 Compliance-as-Code Engine
+- [ ] #94 WORM SQLite Audit Vault
+- [ ] #95 Human-in-the-Loop Workflows for Critical Vulns
+- [ ] #96 Enterprise SSO/RBAC for Local Portal
+
+## v2.0.0 — Mobile Triad (Milestone 7)
+Issues: #97, #98, #99
+- [ ] #97 Mobile Scanner: APKTool + Androguard Integration
+- [ ] #98 Frida Hook Generator
+- [ ] #99 Drozer PoC Executor under Tokamak Sandbox
+
+## v2.5.0 — Ecosystem Integration (Milestone 8)
+Issues: #100, #101
+- [ ] #100 Local PDF Report Generator
+- [ ] #101 SARIF Exporter for CI/CD Integration
+
+## GitHub PM Infrastructure — SETUP COMPLETE
+- [x] Label taxonomy (41 labels, 7 categories)
+- [x] 5 version milestones (v1.0.0-rc1 → v2.5.0)
+- [x] 6 YAML issue forms + CODEOWNERS
 - [x] Agent PM Python CLI (tools/gh_project_manager.py)
 - [x] 6 PM automation workflows
-- [x] Wiki/discussions setup scripts
-- [x] Updated AGENTS.md with PM lifecycle instructions
-
-## Pending Setup (Requires gh auth)
-- [ ] Run scripts/setup_github_pm.ps1 to create labels, milestones, project, wiki
-- [ ] Enable Discussions in repo settings
-
-## Phase 1: Multi-Provider Orchestration (Week 2-8)
-- [ ] HTTP client for Groq/Gemini
-- [ ] Fallback logic
-- [ ] Circuit breaker
-- [ ] Rate limit enforcer
-- [ ] Integration tests
-
-## Phase 2: Tool Integration (Week 9-20)
-- [ ] APKTool wrapper
-- [x] Fix eval() injection vulnerability
-- [x] Merge Cloudflare configuration (PR #66)
-- [ ] Androguard integration
-- [ ] Frida hook generator
-- [ ] Drozer PoC executor
-
-## Phase 3: Tokamak Validation (Week 21-28)
-- [ ] PoC runner | Evidence verification | False positive elimination
-
-## Phase 4: Security Hardening (Week 29-35)
-- [ ] Supply chain audit | SBOM generation | Penetration testing
-
-## Phase 5: Enterprise Readiness (Week 36-41)
-- [ ] PyQt6 UI | PDF reporter | SARIF exporter | DIVA benchmark
-
-## Current Sprint
-**Focus:** Architecture cleanup and test coverage — COMPLETE
-**Next task:** Wire CI (GitHub Actions) or start Phase 1 features
+- [x] Project board "CHERENKOV Sovereign Roadmap" linked
+- [x] Wiki pushed (10 pages)
+- [x] Discussions enabled
+- [x] AGENTS.md updated with PM lifecycle
 
 ## Technical Debt / Quick Wins
-- [ ] Replace `print()` calls in `unified_scanner.py`, `header_scanner.py` with logging
-- [ ] Write integration tests for new classes
-- [ ] Wire CI pipeline (GitHub Actions: lint, typecheck, test)
-- [ ] Create release v1.0.0-rc1
+- [ ] #91 Replace `print()` calls in scanners with logging
+- [ ] #102 Wire CI pipeline (GitHub Actions: lint, typecheck, test)

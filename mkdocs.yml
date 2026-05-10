@@ -20,3 +20,5 @@ nav:
   - Project Plan:
     - Development Plan: plan/development_plan.md
     - Roadmap & Progress: plan/ROADMAP_PROGRESS.md
+
+site_dir: site

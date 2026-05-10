@@ -9,7 +9,6 @@ Enhanced Workflow Orchestration - Full-featured workflow engine with:
 This module enhances and replaces the placeholder orchestration_api.py functionality.
 """
 
-import asyncio
 import logging
 import threading
 import time
@@ -17,20 +16,15 @@ from concurrent.futures import ThreadPoolExecutor, as_completed
 from dataclasses import dataclass, field
 from datetime import datetime, timezone
 from enum import Enum
-from pathlib import Path
-from typing import Any, Callable, Dict, List, Optional, Tuple, Union
+from typing import Any, Dict, List, Optional, Tuple
 from uuid import uuid4
 
 from cherenkov.core.circuit_breaker import (
-    CircuitBreaker,
     CircuitBreakerConfig,
-    CircuitOpenError,
-    CircuitState,
     default_registry,
 )
 from cherenkov.core.workflow_checkpoint import (
     CheckpointType,
-    FileCheckpointBackend,
     WorkflowCheckpoint,
     WorkflowCheckpointManager,
     default_checkpoint_manager,
@@ -40,7 +34,6 @@ from cherenkov.core.workflow_retry import (
     RetryPolicy,
     RetryResult,
     WorkflowRetryManager,
-    create_retry_policy,
     default_retry_manager,
 )
 
@@ -173,9 +166,7 @@ class EnhancedWorkflowExecutor:
             max_attempts=retry_config.get("max_attempts", 3),
             initial_delay=retry_config.get("initial_delay", 1.0),
             max_delay=retry_config.get("max_delay", 60.0),
-            backoff_strategy=BackoffStrategy(
-                retry_config.get("strategy", "exponential").lower()
-            ),
+            backoff_strategy=BackoffStrategy(retry_config.get("strategy", "exponential").lower()),
             jitter=retry_config.get("jitter", True),
         )
 
@@ -205,9 +196,7 @@ class EnhancedWorkflowExecutor:
             max_attempts=task_retry.get("max_attempts", self.default_retry_policy.max_attempts),
             initial_delay=task_retry.get("initial_delay", self.default_retry_policy.initial_delay),
             max_delay=task_retry.get("max_delay", self.default_retry_policy.max_delay),
-            backoff_strategy=BackoffStrategy(
-                task_retry.get("strategy", "exponential").lower()
-            ),
+            backoff_strategy=BackoffStrategy(task_retry.get("strategy", "exponential").lower()),
             jitter=task_retry.get("jitter", self.default_retry_policy.jitter),
         )
 
@@ -306,7 +295,11 @@ class EnhancedWorkflowExecutor:
         duration = time.time() - start_time
 
         if retry_result.success:
-            result_data = retry_result.result if isinstance(retry_result.result, dict) else {"result": retry_result.result}
+            result_data = (
+                retry_result.result
+                if isinstance(retry_result.result, dict)
+                else {"result": retry_result.result}
+            )
 
             with self._lock:
                 self.accumulated_results[f"task_{task_index}"] = result_data
@@ -411,9 +404,7 @@ class EnhancedWorkflowExecutor:
             return self._execute_task_with_retry(i, task_config, agent)
 
         with ThreadPoolExecutor(max_workers=self.max_workers) as executor:
-            future_to_index = {
-                executor.submit(run_task, i): i for i in tasks_to_run
-            }
+            future_to_index = {executor.submit(run_task, i): i for i in tasks_to_run}
 
             for future in as_completed(future_to_index):
                 try:
@@ -438,7 +429,9 @@ class EnhancedWorkflowExecutor:
             last_result = results[-1]
             self._create_task_checkpoint(
                 task_index=last_result.task_index,
-                task_config=self.tasks[last_result.task_index] if last_result.task_index < len(self.tasks) else {},
+                task_config=self.tasks[last_result.task_index]
+                if last_result.task_index < len(self.tasks)
+                else {},
                 task_result=last_result,
             )
 
@@ -473,7 +466,9 @@ class EnhancedWorkflowExecutor:
                 self.accumulated_results = dict(checkpoint.accumulated_results)
                 self.workflow_id = checkpoint.workflow_id
                 previous_checkpoint_id = resume_from_checkpoint
-                logger.info(f"Resuming workflow from checkpoint {resume_from_checkpoint} at task {start_index}")
+                logger.info(
+                    f"Resuming workflow from checkpoint {resume_from_checkpoint} at task {start_index}"
+                )
 
         if previous_checkpoint_id is None:
             start_checkpoint = self._create_start_checkpoint()

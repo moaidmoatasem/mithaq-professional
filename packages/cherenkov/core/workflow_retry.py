@@ -16,11 +16,10 @@ import asyncio
 import logging
 import random
 import time
-from abc import ABC, abstractmethod
-from dataclasses import dataclass, field
+from dataclasses import dataclass
 from datetime import datetime, timezone
 from enum import Enum
-from typing import Any, Callable, Dict, List, Optional, Tuple, Type, Union
+from typing import Any, Callable, Dict, List, Optional, Tuple, Type
 
 logger = logging.getLogger(__name__)
 
@@ -314,9 +313,8 @@ class WorkflowRetryManager:
         if stats["total_operations"] > 0:
             stats["retry_rate"] = stats["total_retries"] / stats["total_operations"]
             stats["success_rate"] = (
-                (stats["success_on_first"] + stats["succeeded_after_retry"])
-                / stats["total_operations"]
-            )
+                stats["success_on_first"] + stats["succeeded_after_retry"]
+            ) / stats["total_operations"]
         return stats
 
     def reset_stats(self) -> None:

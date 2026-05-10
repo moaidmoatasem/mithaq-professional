@@ -78,12 +78,12 @@ class WorkflowAnalytics:
 
         report = f"""# Workflow Analytics Report
 
-Generated: {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}
+Generated: {datetime.now().strftime("%Y-%m-%d %H:%M:%S")}
 
 ## Summary Statistics
 
-- **Total Executions**: {stats['total_executions']}
-- **Unique Workflows**: {stats['unique_workflows']}
+- **Total Executions**: {stats["total_executions"]}
+- **Unique Workflows**: {stats["unique_workflows"]}
 
 ## Workflow Breakdown
 

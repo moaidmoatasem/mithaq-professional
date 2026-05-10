@@ -200,7 +200,7 @@ Additional requirements:
 - Implement: async def scan(self) -> ScanResult
 - Use httpx.AsyncClient for HTTP requests
 - Only flag clear evidence (conservative — prefer false negatives over false positives)
-- Docstring MUST contain the exact CWE ID (e.g. "CWE-{spec.cwe_id.split('-')[1]}"), technique, and one-sentence remediation
+- Docstring MUST contain the exact CWE ID (e.g. "CWE-{spec.cwe_id.split("-")[1]}"), technique, and one-sentence remediation
 - Handle exceptions: catch httpx.ConnectError and httpx.TimeoutException
 - Set scanner tags to ["passive"] unless it sends payloads (then ["active"])
 
@@ -225,7 +225,7 @@ Other requirements:
 - async def scan(self) -> ScanResult
 - Uses httpx.AsyncClient
 - Handles httpx.ConnectError and httpx.TimeoutException
-- Docstring MUST contain the CWE ID (e.g. "CWE-{spec.cwe_id.split('-')[1]}")
+- Docstring MUST contain the CWE ID (e.g. "CWE-{spec.cwe_id.split("-")[1]}")
 
 Produce the complete fixed file. Python code only. No explanation. No markdown fences.
 """
@@ -355,7 +355,7 @@ class Stub{spec.cwe_id.replace("-", "")}Scanner(BaseScanner):
     Technique: TODO
     Remediation: TODO
     """
-    name = "stub_{spec.cwe_id.lower().replace("-","_")}"
+    name = "stub_{spec.cwe_id.lower().replace("-", "_")}"
     description = "{spec.description[:60]}"
     tags = ["passive"]
 

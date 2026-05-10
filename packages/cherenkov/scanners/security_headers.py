@@ -51,17 +51,21 @@ class SecurityHeadersScanner(BaseScanner):
 
             for header, (severity, purpose, cwe, remediation) in checks.items():
                 if header not in headers:
-                    findings.append(Finding(
-                        title=f"Missing Security Header: {header}",
-                        severity=severity,
-                        description=f"Missing {header} ({purpose})",
-                        cwe=cwe,
-                        remediation=remediation,
-                    ))
-        except Exception as e:
+                    findings.append(
+                        Finding(
+                            title=f"Missing Security Header: {header}",
+                            severity=severity,
+                            description=f"Missing {header} ({purpose})",
+                            cwe=cwe,
+                            remediation=remediation,
+                        )
+                    )
+        except Exception:
             return ScanResult(
-                target=target, scanner_name=self.name,
-                status="failed", findings=[],
+                target=target,
+                scanner_name=self.name,
+                status="failed",
+                findings=[],
             )
 
         return ScanResult(target=target, scanner_name=self.name, findings=findings)

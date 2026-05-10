@@ -1,5 +1,5 @@
-from cherenkov.orchestration.agent_registry import AgentRegistry
 from cherenkov.orchestration.agent_factory import AgentFactory
+from cherenkov.orchestration.agent_registry import AgentRegistry
 from cherenkov.orchestration.orchestration_api import (
     WorkflowExecutor,
     execute_parallel,

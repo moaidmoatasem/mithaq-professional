@@ -7,7 +7,6 @@ import threading
 from queue import Queue
 from typing import Any, Dict, List, Optional
 
-from cherenkov.core.exceptions import OrchestrationError, WorkflowError
 from cherenkov.orchestration.agent_registry import AgentRegistry
 from cherenkov.orchestration.types import AgentID, WorkflowResult
 from cherenkov.orchestration.workflow_scheduler import WorkflowScheduler
@@ -44,6 +43,7 @@ class WorkflowExecutor:
     def setup_agents(self) -> int:
         """Initialize agents from workflow config."""
         from cherenkov.orchestration.agent_factory import AgentFactory
+
         self.agents = AgentFactory.create_agents_from_workflow(self.config)
         logger.info("Set up %d agents for workflow", len(self.agents))
         return len(self.agents)
@@ -62,11 +62,7 @@ class WorkflowExecutor:
                     agent = self.agents[i]
                     result: Dict[str, Any] = {
                         "task": task.get("name", "unknown"),
-                        "agent": (
-                            agent.config.role
-                            if hasattr(agent, "config")
-                            else str(agent)
-                        ),
+                        "agent": (agent.config.role if hasattr(agent, "config") else str(agent)),
                         "status": "completed",
                         "description": task.get("description", ""),
                     }
@@ -110,19 +106,23 @@ def execute_parallel(agents: List[Any], tasks: List[Any]) -> List[Dict[str, Any]
 
     def worker(agent: Any, task: Any, index: int) -> None:
         try:
-            result_queue.put({
-                "agent": str(agent),
-                "task": str(task),
-                "index": index,
-                "success": True,
-            })
+            result_queue.put(
+                {
+                    "agent": str(agent),
+                    "task": str(task),
+                    "index": index,
+                    "success": True,
+                }
+            )
         except Exception as e:
-            result_queue.put({
-                "agent": str(agent),
-                "index": index,
-                "success": False,
-                "error": str(e),
-            })
+            result_queue.put(
+                {
+                    "agent": str(agent),
+                    "index": index,
+                    "success": False,
+                    "error": str(e),
+                }
+            )
 
     threads = []
     for i, (agent, task) in enumerate(zip(agents, tasks, strict=False)):

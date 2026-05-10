@@ -2,6 +2,10 @@ import sys
 import unittest
 from unittest.mock import AsyncMock, MagicMock
 
+import pytest
+
+pytestmark = pytest.mark.ai_generated
+
 # Mock httpx to avoid ModuleNotFoundError
 mock_httpx = MagicMock()
 sys.modules["httpx"] = mock_httpx

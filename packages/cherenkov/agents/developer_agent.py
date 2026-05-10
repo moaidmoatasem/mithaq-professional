@@ -151,8 +151,7 @@ class DeveloperAgent(BaseAgent):
             CloudInstruction for payload crafting
         """
         reasoning = (
-            f"Payload crafting for {attack_vector} targeting {target_tech}. "
-            f"Encoding: {encoding}"
+            f"Payload crafting for {attack_vector} targeting {target_tech}. Encoding: {encoding}"
         )
 
         return self.create_instruction(

@@ -21,6 +21,14 @@ src/mithaq/roadmap_execution_*.log
 # Swarm queue — content is managed at runtime, only .gitkeep is tracked
 manifests/cwe_queue.yaml
 
+# Runtime agent/workflow state
+agent_state/
+workflow_checkpoints/
+workflow_results/
+
+# MkDocs build output
+site/
+
 
 # Secrets
 .env

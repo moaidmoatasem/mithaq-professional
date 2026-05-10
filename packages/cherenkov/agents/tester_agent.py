@@ -106,8 +106,7 @@ class TesterAgent(BaseAgent):
         sanitized_url = self.sanitize_input(url)
 
         reasoning = (
-            f"Web application penetration testing. "
-            f"Test coverage: {len(test_types)} security checks"
+            f"Web application penetration testing. Test coverage: {len(test_types)} security checks"
         )
 
         return self.create_instruction(

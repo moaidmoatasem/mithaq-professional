@@ -50,7 +50,7 @@ class WorkflowResponse(BaseModel):
 
 # Routes
 @app.get("/")
-async def root():
+async def root() -> dict:
     return {
         "message": "cherenkov Autonomous Agent API",
         "version": "1.0.0",
@@ -64,12 +64,12 @@ async def root():
 
 
 @app.get("/health")
-async def health():
+async def health() -> dict:
     return {"status": "healthy", "agents": "operational"}
 
 
 @app.post("/workflows/execute", response_model=WorkflowResponse)
-async def execute_workflow(request: WorkflowExecuteRequest):
+async def execute_workflow(request: WorkflowExecuteRequest) -> WorkflowResponse:
     """Execute a workflow by name or config"""
     try:
         # Load workflow config
@@ -98,7 +98,7 @@ async def execute_workflow(request: WorkflowExecuteRequest):
 
 
 @app.get("/workflows")
-async def list_workflows():
+async def list_workflows() -> dict:
     """List available workflows"""
     from pathlib import Path
 
@@ -110,7 +110,7 @@ async def list_workflows():
 
 
 @app.get("/results/{workflow_name}")
-async def get_results(workflow_name: str):
+async def get_results(workflow_name: str) -> dict:
     """Get latest results for a workflow"""
     store = ResultStore()
     result = store.get_latest(workflow_name)

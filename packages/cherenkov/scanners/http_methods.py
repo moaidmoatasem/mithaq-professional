@@ -1,6 +1,7 @@
 """HTTP Methods Scanner — checks for dangerous HTTP methods"""
 
 import httpx
+
 from cherenkov.core.base_scanner import BaseScanner, Finding, ScanResult, Severity
 
 
@@ -20,13 +21,15 @@ class HTTPMethodsScanner(BaseScanner):
                 try:
                     response = await client.request(method, target)
                     if response.status_code not in (405, 501):
-                        findings.append(Finding(
-                            title=f"Dangerous HTTP Method Enabled: {method}",
-                            severity=Severity.HIGH,
-                            description=f"The {method} method is allowed (Status: {response.status_code})",
-                            cwe="CWE-749",
-                            remediation=f"Disable the {method} method in server configuration.",
-                        ))
+                        findings.append(
+                            Finding(
+                                title=f"Dangerous HTTP Method Enabled: {method}",
+                                severity=Severity.HIGH,
+                                description=f"The {method} method is allowed (Status: {response.status_code})",
+                                cwe="CWE-749",
+                                remediation=f"Disable the {method} method in server configuration.",
+                            )
+                        )
                 except (httpx.ConnectError, httpx.TimeoutException, httpx.RemoteProtocolError):
                     pass
 

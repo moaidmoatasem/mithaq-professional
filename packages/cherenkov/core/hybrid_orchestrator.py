@@ -10,8 +10,8 @@ from typing import Any, Dict, List, Optional
 
 from pydantic import BaseModel, Field
 
-from cherenkov.core.ablation.redactor import DataRedactor, RedactionLevel
 from cherenkov.agents.cloud.strategic_planner import StrategicPlanner, ThreatAnalysisTask
+from cherenkov.core.ablation.redactor import DataRedactor, RedactionLevel
 from cherenkov.core.exceptions import CognitiveLoopError
 
 logger = logging.getLogger(__name__)
@@ -76,8 +76,12 @@ class HybridOrchestrator:
         Returns:
             Audit results with findings
         """
-        logger.info("Starting hybrid security audit: target=%s mode=%s scope=%s",
-                     target_type, mode.value, analysis_scope)
+        logger.info(
+            "Starting hybrid security audit: target=%s mode=%s scope=%s",
+            target_type,
+            mode.value,
+            analysis_scope,
+        )
 
         redaction_result = self.redactor.redact_dict(local_context)
 
@@ -153,8 +157,12 @@ class HybridOrchestrator:
         )
 
         self.execution_history.append(result)
-        logger.info("Audit complete: mode=%s tokens=%d redacted=%d",
-                     mode.value, tokens_used, len(redaction_result.redacted_fields))
+        logger.info(
+            "Audit complete: mode=%s tokens=%d redacted=%d",
+            mode.value,
+            tokens_used,
+            len(redaction_result.redacted_fields),
+        )
         return result.model_dump()
 
     def handle_inference_result(self, success: bool) -> None:

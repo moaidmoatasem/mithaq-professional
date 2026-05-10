@@ -4,8 +4,7 @@ from pathlib import Path
 import pytest
 from flask import json
 
-# Add src to Python path
-sys.path.insert(0, str(Path(__file__).parent.parent / "src"))
+sys.path.insert(0, str(Path(__file__).parent.parent.parent.parent))
 
 from cherenkov_web import app
 

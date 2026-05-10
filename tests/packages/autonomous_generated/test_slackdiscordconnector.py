@@ -2,6 +2,10 @@ import os
 import sys
 from unittest.mock import MagicMock, patch
 
+import pytest
+
+pytestmark = pytest.mark.ai_generated
+
 # Add src to Python path
 sys.path.insert(0, os.path.abspath("src"))
 

@@ -17,12 +17,10 @@ States:
 import asyncio
 import logging
 import time
-from dataclasses import dataclass, field
-from datetime import datetime, timezone
+from dataclasses import dataclass
 from enum import Enum
 from threading import Lock
-from typing import Any, Callable, Dict, List, Optional, Tuple, Type, Union
-from uuid import uuid4
+from typing import Any, Callable, Dict, List, Optional, Tuple, Type
 
 logger = logging.getLogger(__name__)
 
@@ -95,9 +93,7 @@ class CircuitBreakerMetrics:
             "circuit_closings": self.circuit_closings,
             "rejected_requests": self.rejected_requests,
             "success_rate": (
-                self.successful_requests / self.total_requests
-                if self.total_requests > 0
-                else 1.0
+                self.successful_requests / self.total_requests if self.total_requests > 0 else 1.0
             ),
         }
 

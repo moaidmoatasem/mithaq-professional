@@ -36,21 +36,18 @@ jobs:
       run: |
         pip install -r requirements.txt
         pip install -e ".[dev]"
-        pip install flake8
 
-    - name: Run Black (code formatting)
+    - name: Run Ruff (lint)
       run: |
-        black --check src/ scripts/ || true
+        ruff check packages/ --ignore W,S,B
 
-    - name: Run Flake8
+    - name: Run Ruff (format check)
       run: |
-        flake8 src/ scripts/ --count --select=E9,F63,F7,F82 --show-source --statistics || true
-        flake8 src/ scripts/ --count --exit-zero --max-complexity=10 --max-line-length=127 --statistics || true
+        ruff format --check packages/
 
-    - name: Run unit tests
+    - name: Run tests
       run: |
-        pytest tests/unit/ -p no:cov
-        echo "✅ Code quality checks completed"
+        pytest -m "not (integration or ai_generated)" --tb=short
 
     - name: Upload coverage to Codecov
       if: always()

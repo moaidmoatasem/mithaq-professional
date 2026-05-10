@@ -4,8 +4,8 @@ Handles communication with different cloud LLM providers (Groq, Gemini).
 """
 
 import os
-from typing import Dict, List, Optional, Any
 from abc import ABC, abstractmethod
+from typing import Any, Dict, Optional
 
 # Conditional imports
 try:
@@ -21,7 +21,9 @@ except ImportError:
 
 class LLMProvider(ABC):
     @abstractmethod
-    def generate(self, system_prompt: str, user_prompt: str, temperature: float = 0.3) -> Dict[str, Any]:
+    def generate(
+        self, system_prompt: str, user_prompt: str, temperature: float = 0.3
+    ) -> Dict[str, Any]:
         pass
 
 
@@ -35,7 +37,9 @@ class GroqProvider(LLMProvider):
         self.client = Groq(api_key=self.api_key)
         self.model = model
 
-    def generate(self, system_prompt: str, user_prompt: str, temperature: float = 0.3) -> Dict[str, Any]:
+    def generate(
+        self, system_prompt: str, user_prompt: str, temperature: float = 0.3
+    ) -> Dict[str, Any]:
         response = self.client.chat.completions.create(
             model=self.model,
             messages=[
@@ -63,26 +67,28 @@ class GeminiProvider(LLMProvider):
         self.model_name = model
         self.model = genai.GenerativeModel(model)
 
-    def generate(self, system_prompt: str, user_prompt: str, temperature: float = 0.3) -> Dict[str, Any]:
-        # Combine system and user prompts for Gemini if needed, 
+    def generate(
+        self, system_prompt: str, user_prompt: str, temperature: float = 0.3
+    ) -> Dict[str, Any]:
+        # Combine system and user prompts for Gemini if needed,
         # but Gemini 1.5 supports system_instruction in constructor or as first message
-        chat = self.model.start_chat(history=[])
-        
+        self.model.start_chat(history=[])
+
         # Using a simple combined prompt if system_instruction wasn't set in __init__
         # but let's assume we want to be explicit
         full_prompt = f"SYSTEM: {system_prompt}\n\nUSER: {user_prompt}"
-        
+
         response = self.model.generate_content(
             full_prompt,
             generation_config=genai.types.GenerationConfig(
                 temperature=temperature,
-            )
+            ),
         )
-        
+
         # Note: token counting in Gemini is separate
         return {
             "content": response.text,
-            "tokens_used": 0, # To be implemented via response.usage_metadata
+            "tokens_used": 0,  # To be implemented via response.usage_metadata
             "model": self.model_name,
         }
 

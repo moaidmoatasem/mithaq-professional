@@ -4,9 +4,8 @@ import logging
 import time
 from typing import Any, Dict, Optional
 
-from cherenkov.core.exceptions import OrchestrationError, WorkflowError
-from cherenkov.orchestration.types import WorkflowResult
 from cherenkov.orchestration.result_persistence import ResultStore
+from cherenkov.orchestration.types import WorkflowResult
 
 logger = logging.getLogger(__name__)
 

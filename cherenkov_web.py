@@ -26,11 +26,25 @@ def index():
 @app.route("/api/scan", methods=["POST"])
 def run_scan():
     """Run security scan"""
-    data = request.json
-    target_url = data.get("url")
+    if not request.json:
+        return jsonify({"error": "Request body is required"}), 400
 
-    if not target_url:
-        return jsonify({"error": "No URL provided"}), 400
+    target_url = request.json.get("url")
+
+    if not target_url and target_url is None:
+        return jsonify({"error": "URL is required"}), 400
+
+    try:
+        from urllib.parse import urlparse
+
+        parsed = urlparse(target_url)
+    except Exception:
+        return jsonify({"error": "Invalid URL format"}), 400
+
+    if parsed.scheme not in ("http", "https"):
+        return jsonify({"error": "Only http/https URLs are supported"}), 400
+    if not parsed.netloc:
+        return jsonify({"error": "Invalid URL: missing hostname"}), 400
 
     # Run scan
     scanner = SimpleScanner(target_url)

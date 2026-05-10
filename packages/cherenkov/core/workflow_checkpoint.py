@@ -133,10 +133,7 @@ class WorkflowCheckpoint:
 
     def get_last_completed_task(self) -> Optional[TaskCheckpoint]:
         """Get the last successfully completed task checkpoint."""
-        completed = [
-            tc for tc in self.task_checkpoints
-            if tc.status == "completed"
-        ]
+        completed = [tc for tc in self.task_checkpoints if tc.status == "completed"]
         if completed:
             return completed[-1]
         return None
@@ -241,7 +238,11 @@ class FileCheckpointBackend(CheckpointBackend):
 
         latest_path = workflow_dir / "latest.json"
         with open(latest_path, "w") as f:
-            json.dump({"checkpoint_id": checkpoint.checkpoint_id, "saved_at": checkpoint.created_at}, f, indent=2)
+            json.dump(
+                {"checkpoint_id": checkpoint.checkpoint_id, "saved_at": checkpoint.created_at},
+                f,
+                indent=2,
+            )
 
         return str(filepath)
 

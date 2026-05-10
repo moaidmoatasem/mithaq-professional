@@ -9,7 +9,8 @@ import sys
 from datetime import datetime
 from typing import Any, Dict
 
-from cherenkov.core.events import EventBus, event_bus as _global_event_bus
+from cherenkov.core.events import EventBus
+from cherenkov.core.events import event_bus as _global_event_bus
 from cherenkov.core.registry import ScannerRegistry
 from cherenkov.orchestration.result_persistence import ResultStore
 

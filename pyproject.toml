@@ -31,10 +31,16 @@ dev = [
 [tool.ruff]
 line-length = 100
 target-version = "py310"
+exclude = ["packages/cherenkov/autonomous_generated", "packages/cherenkov/scanners/generated"]
 
 [tool.ruff.lint]
 select = ["E", "F", "I", "N", "W", "B", "S"]
 ignore = ["E501", "S101"]
+
+[tool.ruff.lint.per-file-ignores]
+"packages/cherenkov/tools/**" = ["F841", "S608"]
+"packages/cherenkov/dev_crew/**" = ["S603", "S607"]
+"packages/cherenkov/orchestration/ai_workflows_orchestrator.py" = ["E402"]
 
 [tool.bandit]
 exclude_dirs = ["tests", "venv", ".venv", "candidates"]

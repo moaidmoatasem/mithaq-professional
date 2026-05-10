@@ -17,7 +17,7 @@ class OutputFormat(str, Enum):
     sarif = "sarif"
 
 
-def _get_registry():
+def _get_registry() -> "ScannerRegistry":  # noqa: F821
     # Lazy import — registry pulls pydantic which may not be installed in minimal envs.
     try:
         from cherenkov.core.registry import ScannerRegistry
@@ -93,7 +93,9 @@ def list_scanners() -> None:
     t = Table("Name", "CWE", "Description")
     for name in names:
         scanner_cls = registry.get_scanner(name)
-        t.add_row(name, getattr(scanner_cls, "cwe", "—"), getattr(scanner_cls, "__doc__", "—") or "—")
+        t.add_row(
+            name, getattr(scanner_cls, "cwe", "—"), getattr(scanner_cls, "__doc__", "—") or "—"
+        )
     console.print(t)
 
 

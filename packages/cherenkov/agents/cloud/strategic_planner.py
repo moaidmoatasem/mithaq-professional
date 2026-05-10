@@ -52,7 +52,7 @@ Focus on methodology, not specific values."""
         user_prompt = f"""
 Target Type: {task.target_type}
 Context: {task.abstract_context}
-Scope: {', '.join(task.analysis_scope)}
+Scope: {", ".join(task.analysis_scope)}
 
 Create a strategic security audit plan with:
 1. Threat modeling approach

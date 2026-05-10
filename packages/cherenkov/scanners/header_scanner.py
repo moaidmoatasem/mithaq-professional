@@ -8,6 +8,7 @@ import argparse
 import asyncio
 import concurrent.futures
 import json
+import logging
 from datetime import datetime
 from typing import List, Optional
 from urllib.parse import urlparse
@@ -15,6 +16,8 @@ from urllib.parse import urlparse
 import requests
 
 from cherenkov.core.base_scanner import BaseScanner, Finding, ScanResult, Severity
+
+logger = logging.getLogger(__name__)
 
 
 class SimpleScanner(BaseScanner):
@@ -45,9 +48,11 @@ class SimpleScanner(BaseScanner):
             "vulnerabilities": [],
         }
 
-    def scan_security_headers(self, findings_list: List[Finding]):
+    def scan_security_headers(self, findings_list: Optional[List[Finding]] = None):
         """Check for missing security headers"""
-        print(f"\n[*] Scanning security headers for {self.target}")
+        logger.info("Scanning security headers for %s", self.target)
+        if findings_list is None:
+            findings_list = []
 
         try:
             response = requests.get(self.target, timeout=10)
@@ -84,16 +89,18 @@ class SimpleScanner(BaseScanner):
                         )
                     )
 
-                    print(f"  [!] MISSING: {header}")
+                    logger.warning("MISSING: %s", header)
                 else:
-                    print(f"  [✓] Found: {header}")
+                    logger.info("Found: %s", header)
 
         except Exception as e:
-            print(f"  [!] Error: {e}")
+            logger.error("Error scanning headers: %s", e)
 
-    def scan_http_methods(self, findings_list: List[Finding]):
+    def scan_http_methods(self, findings_list: Optional[List[Finding]] = None):
         """Check for dangerous HTTP methods"""
-        print("\n[*] Checking HTTP methods")
+        logger.info("Checking HTTP methods")
+        if findings_list is None:
+            findings_list = []
 
         dangerous_methods = ["PUT", "DELETE", "TRACE", "CONNECT"]
 
@@ -113,7 +120,7 @@ class SimpleScanner(BaseScanner):
 
             for method, response, error in results:
                 if error:
-                    print(f"  [✓] {method} is blocked or unreachable")
+                    logger.info("%s is blocked or unreachable", method)
                 else:
                     if response.status_code not in [405, 501]:
                         vuln = {
@@ -134,13 +141,15 @@ class SimpleScanner(BaseScanner):
                             )
                         )
 
-                        print(f"  [!] {method} is ALLOWED (Status: {response.status_code})")
+                        logger.warning("%s is ALLOWED (Status: %s)", method, response.status_code)
                     else:
-                        print(f"  [✓] {method} is blocked")
+                        logger.info("%s is blocked", method)
 
-    def scan_ssl_tls(self, findings_list: List[Finding]):
+    def scan_ssl_tls(self, findings_list: Optional[List[Finding]] = None):
         """Check SSL/TLS configuration"""
-        print("\n[*] Checking SSL/TLS")
+        logger.info("Checking SSL/TLS")
+        if findings_list is None:
+            findings_list = []
 
         parsed = urlparse(self.target)
         if parsed.scheme != "https":
@@ -161,34 +170,34 @@ class SimpleScanner(BaseScanner):
                 )
             )
 
-            print("  [!] Site is using HTTP (insecure)")
+            logger.warning("Site is using HTTP (insecure)")
         else:
-            print("  [✓] Site is using HTTPS")
+            logger.info("Site is using HTTPS")
 
     def generate_report(self):
         """Generate scan report"""
-        print("\n" + "=" * 70)
-        print("SCAN REPORT")
-        print("=" * 70)
-        print(f"Target: {self.results['target']}")
-        print(f"Scan Time: {self.results['timestamp']}")
-        print(f"Vulnerabilities Found: {len(self.results['vulnerabilities'])}")
-        print("=" * 70)
+        logger.info("=" * 70)
+        logger.info("SCAN REPORT")
+        logger.info("=" * 70)
+        logger.info("Target: %s", self.results["target"])
+        logger.info("Scan Time: %s", self.results["timestamp"])
+        logger.info("Vulnerabilities Found: %s", len(self.results["vulnerabilities"]))
+        logger.info("=" * 70)
 
         if not self.results["vulnerabilities"]:
-            print("\n✅ No vulnerabilities detected!")
+            logger.info("No vulnerabilities detected!")
         else:
-            print("\n⚠️  VULNERABILITIES:")
+            logger.warning("VULNERABILITIES:")
             for i, vuln in enumerate(self.results["vulnerabilities"], 1):
-                print(f"\n{i}. {vuln['type']} [{vuln['severity']}]")
-                print(f"   {vuln.get('description', '')}")
+                logger.warning("%s. %s [%s]", i, vuln["type"], vuln["severity"])
+                logger.warning("   %s", vuln.get("description", ""))
 
         # Save to file
         report_file = f"scan_report_{datetime.now().strftime('%Y%m%d_%H%M%S')}.json"
         with open(report_file, "w") as f:
             json.dump(self.results, f, indent=2)
 
-        print(f"\n📄 Full report saved to: {report_file}")
+        logger.info("Full report saved to: %s", report_file)
 
     async def scan(self, target: str, timeout: float = 10.0) -> ScanResult:
         """Implement BaseScanner async scan method"""
@@ -219,9 +228,9 @@ class SimpleScanner(BaseScanner):
 
     def run(self):
         """Run all scans"""
-        print("=" * 70)
-        print("🔍 cherenkov SECURITY SCANNER")
-        print("=" * 70)
+        logger.info("=" * 70)
+        logger.info("cherenkov SECURITY SCANNER")
+        logger.info("=" * 70)
 
         findings = []
         self.scan_security_headers(findings)

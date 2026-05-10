@@ -39,7 +39,7 @@ CHERENKOV has transitioned from a legacy architecture into a **Sovereign Securit
 <<<<<<< HEAD
 - **Multi-Agent Orchestration (Swarm Architecture)**: Decoupling strategy (TENSOR) from execution (KINETIC) to prevent context poisoning.
 =======
-- **Multi-Agent Orchestration (Swarm Architecture)**: Decoupling strategy (Al-Muhandis) from execution (Al-Munafeedh) to prevent context poisoning.
+- **Multi-Agent Orchestration (Swarm Architecture)**: Decoupling strategy (TENSOR) from execution (KINETIC) to prevent context poisoning.
 >>>>>>> 730f1df (feat: integrate security hardening, Cloudflare config, and v0.1.2 docs)
 - **AIMD Circuit Breaker**: Prevents agent cascades during high latency or API failures.
 - **Memory RAG**: Local Qdrant instance for dialect-aware retrieval and CVE mapping.

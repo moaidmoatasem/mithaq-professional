@@ -23,16 +23,12 @@ from datetime import datetime, timezone
 from enum import Enum
 from typing import Any, Dict, List, Optional
 
-from cherenkov.core.agent_messages import AgentMessage
 from cherenkov.core.agent_state_store import (
-    AgentState,
     AgentStateStore,
     AgentStatus,
-    HandoverSnapshot,
     default_state_store,
 )
 from cherenkov.core.capability_registry import (
-    AgentRegistration,
     CapabilityRegistry,
     DelegationPolicy,
     SelectionStrategy,
@@ -218,7 +214,7 @@ class DelegationGuardrails:
         chain = list(existing_chain) if existing_chain else []
 
         if not self.policy.allow_delegation:
-            logger.warning(f"Delegation denied: policy forbids all delegation")
+            logger.warning("Delegation denied: policy forbids all delegation")
             return DelegationResult.POLICY_DENIED
 
         current_depth = len(chain)
@@ -337,7 +333,7 @@ class DelegationGuardrails:
                 return check_result
 
         source_state = self._state_store.get(source_agent_id)
-        target_state = self._state_store.get(target_agent_id)
+        _ = self._state_store.get(target_agent_id)
 
         source_role = source_state.role if source_state else "unknown"
         target_role = "unknown"

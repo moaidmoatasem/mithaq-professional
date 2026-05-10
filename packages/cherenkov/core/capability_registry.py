@@ -18,10 +18,9 @@ import threading
 from dataclasses import dataclass, field
 from datetime import datetime, timezone
 from enum import Enum
-from typing import Any, Callable, Dict, List, Optional
+from typing import Any, Dict, List, Optional
 
 from cherenkov.core.agent_state_store import (
-    AgentState,
     AgentStateStore,
     AgentStatus,
     default_state_store,

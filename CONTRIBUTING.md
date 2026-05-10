@@ -1,4 +1,4 @@
-# Contributing to CHERENKOV / MITHAQ
+# Contributing to CHERENKOV / CHERENKOV
 
 Thank you for your interest in contributing! We welcome contributions that align with our **Sovereign Security Standard** and strictly follow our designated flows, roles, rules, and best practices.
 

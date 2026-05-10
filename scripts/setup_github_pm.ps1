@@ -95,7 +95,7 @@ if ($LASTEXITCODE -eq 0) {
     @{src="CONTRIBUTING.md"; dst="Contributing.md"}
     @{src="CHANGELOG.md"; dst="Changelog.md"}
   )
-  $root = "C:\Users\moaid\mithaq-professional"
+  $root = "C:\Users\moaid\cherenkov-professional"
   foreach ($p in $pages) {
     $s = Join-Path $root $p.src
     $d = Join-Path $wikiDir $p.dst

@@ -1,8 +1,23 @@
 site_name: CHERENKOV Architecture
+site_description: THE FORENSIC REVEAL
 theme:
   name: material
   palette:
     scheme: slate
+    primary: cyan
+    accent: purple
+  logo: assets/cherenkov-logo.svg
+  favicon: assets/cherenkov-logo.svg
+  font:
+    text: Inter
+    code: IBM Plex Mono
+  features:
+    - navigation.tabs
+    - navigation.top
+    - navigation.indexes
+extra_css:
+  - stylesheets/extra.css
+
 markdown_extensions:
   - admonition
   - pymdownx.details

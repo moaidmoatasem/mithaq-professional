@@ -6,16 +6,12 @@
       <meta charset="utf-8">
       <meta name="viewport" content="width=device-width,initial-scale=1">
       
-        <meta name="description" content="Sovereign security platform — architecture, roadmap, and engineering docs.">
+        <meta name="description" content="THE FORENSIC REVEAL">
       
       
-        <meta name="author" content="CHERENKOV">
       
       
-        <link rel="canonical" href="https://docs.cherenkov-security.com/plan/development_plan/">
-      
-      
-        <link rel="prev" href="../../pm/DESIGN_PATTERNS_BEST_PRACTICES/">
+        <link rel="prev" href="../../architecture/LLD_DIAGRAM/">
       
       
         <link rel="next" href="../ROADMAP_PROGRESS/">
@@ -24,12 +20,12 @@
         
       
       
-      <link rel="icon" href="../../assets/images/favicon.png">
+      <link rel="icon" href="../../assets/cherenkov-logo.svg">
       <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.7.6">
     
     
       
-        <title>Full development plan - CHERENKOV Documentation</title>
+        <title>Development Plan - CHERENKOV Architecture</title>
       
     
     
@@ -50,11 +46,13 @@
         
         
         <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-        <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:300,300i,400,400i,700,700i%7CRoboto+Mono:400,400i,700,700i&display=fallback">
-        <style>:root{--md-text-font:"Roboto";--md-code-font:"Roboto Mono"}</style>
+        <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Inter:300,300i,400,400i,700,700i%7CIBM+Plex+Mono:400,400i,700,700i&display=fallback">
+        <style>:root{--md-text-font:"Inter";--md-code-font:"IBM Plex Mono"}</style>
       
     
     
+      <link rel="stylesheet" href="../../stylesheets/extra.css">
+
     <script>__md_scope=new URL("../..",location),__md_hash=e=>[...e].reduce(((e,_)=>(e<<5)-e+_.charCodeAt(0)),0),__md_get=(e,_=localStorage,t=__md_scope)=>JSON.parse(_.getItem(t.pathname+"."+e)),__md_set=(e,_,t=localStorage,a=__md_scope)=>{try{t.setItem(a.pathname+"."+e,JSON.stringify(_))}catch(e){}}</script>
     
       
@@ -65,8 +63,6 @@
   
   
     
-    
-      
     
     
     
@@ -92,14 +88,11 @@
     
       
 
-  
-
-<header class="md-header md-header--shadow" data-md-component="header">
+<header class="md-header" data-md-component="header">
   <nav class="md-header__inner md-grid" aria-label="Header">
-    <a href="../.." title="CHERENKOV Documentation" class="md-header__button md-logo" aria-label="CHERENKOV Documentation" data-md-component="logo">
+    <a href="../.." title="CHERENKOV Architecture" class="md-header__button md-logo" aria-label="CHERENKOV Architecture" data-md-component="logo">
       
-  
-  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54"/></svg>
+  <img src="../../assets/cherenkov-logo.svg" alt="logo">
 
     </a>
     <label class="md-header__button md-icon" for="__drawer">
@@ -110,13 +103,13 @@
       <div class="md-header__ellipsis">
         <div class="md-header__topic">
           <span class="md-ellipsis">
-            CHERENKOV Documentation
+            CHERENKOV Architecture
           </span>
         </div>
         <div class="md-header__topic" data-md-component="header-topic">
           <span class="md-ellipsis">
             
-              Full development plan
+              Development Plan
             
           </span>
         </div>
@@ -124,33 +117,7 @@
     </div>
     
       
-        <form class="md-header__option" data-md-component="palette">
-  
     
-    
-    
-    <input class="md-option" data-md-color-media="" data-md-color-scheme="slate" data-md-color-primary="cyan" data-md-color-accent="purple"  aria-label="Switch to light mode"  type="radio" name="__palette" id="__palette_0">
-    
-      <label class="md-header__button md-icon" title="Switch to light mode" for="__palette_1" hidden>
-        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 18c-.89 0-1.74-.2-2.5-.55C11.56 16.5 13 14.42 13 12s-1.44-4.5-3.5-5.45C10.26 6.2 11.11 6 12 6a6 6 0 0 1 6 6 6 6 0 0 1-6 6m8-9.31V4h-4.69L12 .69 8.69 4H4v4.69L.69 12 4 15.31V20h4.69L12 23.31 15.31 20H20v-4.69L23.31 12z"/></svg>
-      </label>
-    
-  
-    
-    
-    
-    <input class="md-option" data-md-color-media="" data-md-color-scheme="default" data-md-color-primary="indigo" data-md-color-accent="cyan"  aria-label="Switch to dark mode"  type="radio" name="__palette" id="__palette_1">
-    
-      <label class="md-header__button md-icon" title="Switch to dark mode" for="__palette_0" hidden>
-        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a4 4 0 0 0-4 4 4 4 0 0 0 4 4 4 4 0 0 0 4-4 4 4 0 0 0-4-4m0 10a6 6 0 0 1-6-6 6 6 0 0 1 6-6 6 6 0 0 1 6 6 6 6 0 0 1-6 6m8-9.31V4h-4.69L12 .69 8.69 4H4v4.69L.69 12 4 15.31V20h4.69L12 23.31 15.31 20H20v-4.69L23.31 12z"/></svg>
-      </label>
-    
-  
-</form>
-      
-    
-    
-      <script>var palette=__md_get("__palette");if(palette&&palette.color){if("(prefers-color-scheme)"===palette.color.media){var media=matchMedia("(prefers-color-scheme: light)"),input=document.querySelector(media.matches?"[data-md-color-media='(prefers-color-scheme: light)']":"[data-md-color-media='(prefers-color-scheme: dark)']");palette.color.media=input.getAttribute("data-md-color-media"),palette.color.scheme=input.getAttribute("data-md-color-scheme"),palette.color.primary=input.getAttribute("data-md-color-primary"),palette.color.accent=input.getAttribute("data-md-color-accent")}for(var[key,value]of Object.entries(palette.color))document.body.setAttribute("data-md-color-"+key,value)}</script>
     
     
     
@@ -179,8 +146,6 @@
         </button>
       </nav>
       
-        <div class="md-search__suggest" data-md-component="search-suggest"></div>
-      
     </form>
     <div class="md-search__output">
       <div class="md-search__scrollwrap" tabindex="0" data-md-scrollfix>
@@ -197,18 +162,6 @@
       
     
     
-      <div class="md-header__source">
-        <a href="https://github.com/moaidmoatasem/cherenkov-professional" title="Go to repository" class="md-source" data-md-component="source">
-  <div class="md-source__icon md-icon">
-    
-    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><!--! Font Awesome Free 7.1.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2025 Fonticons, Inc.--><path d="M439.6 236.1 244 40.5c-5.4-5.5-12.8-8.5-20.4-8.5s-15 3-20.4 8.4L162.5 81l51.5 51.5c27.1-9.1 52.7 16.8 43.4 43.7l49.7 49.7c34.2-11.8 61.2 31 35.5 56.7-26.5 26.5-70.2-2.9-56-37.3L240.3 199v121.9c25.3 12.5 22.3 41.8 9.1 55-6.4 6.4-15.2 10.1-24.3 10.1s-17.8-3.6-24.3-10.1c-17.6-17.6-11.1-46.9 11.2-56v-123c-20.8-8.5-24.6-30.7-18.6-45L142.6 101 8.5 235.1C3 240.6 0 247.9 0 255.5s3 15 8.5 20.4l195.6 195.7c5.4 5.4 12.7 8.4 20.4 8.4s15-3 20.4-8.4l194.7-194.7c5.4-5.4 8.4-12.8 8.4-20.4s-3-15-8.4-20.4"/></svg>
-  </div>
-  <div class="md-source__repository">
-    cherenkov-professional
-  </div>
-</a>
-      </div>
-    
   </nav>
   
 </header>
@@ -218,47 +171,110 @@
       
         
           
-        
+            
+<nav class="md-tabs" aria-label="Tabs" data-md-component="tabs">
+  <div class="md-grid">
+    <ul class="md-tabs__list">
       
+
+  
+  
+  
+  
+    <li class="md-tabs__item">
+      <a href="../.." class="md-tabs__link">
+        
+  
+  
+    
+  
+  Home
+
+      </a>
+    </li>
+  
+
+      
+
+  
+  
+  
+  
+    
+
+      <li class="md-tabs__item">
+        <a href="../../architecture/SYSTEM_ARCHITECTURE/" class="md-tabs__link">
+
+  
+  
+    
+  
+  Architecture
+
+        </a>
+      </li>
+
+  
+
+      
+
+  
+  
+  
+    
+
+
+    
+    
+      <li class="md-tabs__item md-tabs__item--active">
+        <a href="./" class="md-tabs__link">
+          
+  
+  
+    
+  
+  Project Plan
+
+        </a>
+      </li>
+    
+  
+
+
+    </ul>
+  </div>
+</nav>
+
+        
+
       <main class="md-main" data-md-component="main">
         <div class="md-main__inner md-grid">
-          
+
             
               
               <div class="md-sidebar md-sidebar--primary" data-md-component="sidebar" data-md-type="navigation" >
                 <div class="md-sidebar__scrollwrap">
                   <div class="md-sidebar__inner">
-                    
 
 
 
-<nav class="md-nav md-nav--primary" aria-label="Navigation" data-md-level="0">
-  <label class="md-nav__title" for="__drawer">
-    <a href="../.." title="CHERENKOV Documentation" class="md-nav__button md-logo" aria-label="CHERENKOV Documentation" data-md-component="logo">
-      
   
-  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54"/></svg>
+
+
+<nav class="md-nav md-nav--primary md-nav--lifted" aria-label="Navigation" data-md-level="0">
+  <label class="md-nav__title" for="__drawer">
+    <a href="../.." title="CHERENKOV Architecture" class="md-nav__button md-logo" aria-label="CHERENKOV Architecture" data-md-component="logo">
+
+  <img src="../../assets/cherenkov-logo.svg" alt="logo">
 
     </a>
-    CHERENKOV Documentation
+    CHERENKOV Architecture
   </label>
   
-    <div class="md-nav__source">
-      <a href="https://github.com/moaidmoatasem/cherenkov-professional" title="Go to repository" class="md-source" data-md-component="source">
-  <div class="md-source__icon md-icon">
-    
-    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><!--! Font Awesome Free 7.1.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2025 Fonticons, Inc.--><path d="M439.6 236.1 244 40.5c-5.4-5.5-12.8-8.5-20.4-8.5s-15 3-20.4 8.4L162.5 81l51.5 51.5c27.1-9.1 52.7 16.8 43.4 43.7l49.7 49.7c34.2-11.8 61.2 31 35.5 56.7-26.5 26.5-70.2-2.9-56-37.3L240.3 199v121.9c25.3 12.5 22.3 41.8 9.1 55-6.4 6.4-15.2 10.1-24.3 10.1s-17.8-3.6-24.3-10.1c-17.6-17.6-11.1-46.9 11.2-56v-123c-20.8-8.5-24.6-30.7-18.6-45L142.6 101 8.5 235.1C3 240.6 0 247.9 0 255.5s3 15 8.5 20.4l195.6 195.7c5.4 5.4 12.7 8.4 20.4 8.4s15-3 20.4-8.4l194.7-194.7c5.4-5.4 8.4-12.8 8.4-20.4s-3-15-8.4-20.4"/></svg>
-  </div>
-  <div class="md-source__repository">
-    cherenkov-professional
-  </div>
-</a>
-    </div>
-  
   <ul class="md-nav__list" data-md-scrollfix>
-    
-      
-      
+
+
+
   
   
   
@@ -290,53 +306,30 @@
   
   
   
-    <li class="md-nav__item">
-      <a href="../../PROJECT_BRIEFING/" class="md-nav__link">
-        
-  
-  
-  <span class="md-ellipsis">
     
-  
-    Project briefing
-  
+    
+      
+        
+
+        
+      
+
+
 
     
-  </span>
-  
-  
+    
 
-      </a>
-    </li>
-  
 
-    
-      
-      
-  
-  
-  
-  
-    
-    
-    
-    
+
+
+    <li class="md-nav__item md-nav__item--nested">
       
         
         
-      
-    
-    
-    <li class="md-nav__item md-nav__item--section md-nav__item--nested">
-      
-        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_2" >
         
           
-        
-        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_3" >
-        
-          
-          <label class="md-nav__link" for="__nav_3" id="__nav_3_label" tabindex="">
+          <label class="md-nav__link" for="__nav_2" id="__nav_2_label" tabindex="0">
             
   
   
@@ -354,8 +347,8 @@
             <span class="md-nav__icon md-icon"></span>
           </label>
         
-        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_3_label" aria-expanded="false">
-          <label class="md-nav__title" for="__nav_3">
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_2_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_2">
             <span class="md-nav__icon md-icon"></span>
             
   
@@ -379,7 +372,7 @@
   <span class="md-ellipsis">
     
   
-    System architecture
+    System Architecture
   
 
     
@@ -407,7 +400,7 @@
   <span class="md-ellipsis">
     
   
-    High-level design (HLD)
+    High-Level Design (HLD)
   
 
     
@@ -435,7 +428,7 @@
   <span class="md-ellipsis">
     
   
-    Low-level design (LLD)
+    Low-Level Design (LLD)
   
 
     
@@ -460,246 +453,24 @@
       
   
   
+    
+  
   
   
     
     
+
+
+
+
+
+
     
     
       
         
         
-      
-    
-    
-    <li class="md-nav__item md-nav__item--section md-nav__item--nested">
-      
-        
-        
-          
-        
-        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_4" >
-        
-          
-          <label class="md-nav__link" for="__nav_4" id="__nav_4_label" tabindex="">
-            
-  
-  
-  <span class="md-ellipsis">
-    
-  
-    Product & planning
-  
 
-    
-  </span>
-  
-  
-
-            <span class="md-nav__icon md-icon"></span>
-          </label>
-        
-        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_4_label" aria-expanded="false">
-          <label class="md-nav__title" for="__nav_4">
-            <span class="md-nav__icon md-icon"></span>
-            
-  
-    Product & planning
-  
-
-          </label>
-          <ul class="md-nav__list" data-md-scrollfix>
-            
-              
-                
-  
-  
-  
-  
-    <li class="md-nav__item">
-      <a href="../../pm/ROADMAP/" class="md-nav__link">
-        
-  
-  
-  <span class="md-ellipsis">
-    
-  
-    Product roadmap
-  
-
-    
-  </span>
-  
-  
-
-      </a>
-    </li>
-  
-
-              
-            
-              
-                
-  
-  
-  
-  
-    <li class="md-nav__item">
-      <a href="../../pm/DEVELOPMENT_PLAN/" class="md-nav__link">
-        
-  
-  
-  <span class="md-ellipsis">
-    
-  
-    Development plan (sprints)
-  
-
-    
-  </span>
-  
-  
-
-      </a>
-    </li>
-  
-
-              
-            
-              
-                
-  
-  
-  
-  
-    <li class="md-nav__item">
-      <a href="../../pm/SYSTEM_DESIGN/" class="md-nav__link">
-        
-  
-  
-  <span class="md-ellipsis">
-    
-  
-    System design
-  
-
-    
-  </span>
-  
-  
-
-      </a>
-    </li>
-  
-
-              
-            
-              
-                
-  
-  
-  
-  
-    <li class="md-nav__item">
-      <a href="../../pm/ROADMAP_FOR_WEB/" class="md-nav__link">
-        
-  
-  
-  <span class="md-ellipsis">
-    
-  
-    Roadmap for web
-  
-
-    
-  </span>
-  
-  
-
-      </a>
-    </li>
-  
-
-              
-            
-              
-                
-  
-  
-  
-  
-    <li class="md-nav__item">
-      <a href="../../pm/INTEGRATIONS_AND_APPROVALS/" class="md-nav__link">
-        
-  
-  
-  <span class="md-ellipsis">
-    
-  
-    Integrations & approvals
-  
-
-    
-  </span>
-  
-  
-
-      </a>
-    </li>
-  
-
-              
-            
-              
-                
-  
-  
-  
-  
-    <li class="md-nav__item">
-      <a href="../../pm/DESIGN_PATTERNS_BEST_PRACTICES/" class="md-nav__link">
-        
-  
-  
-  <span class="md-ellipsis">
-    
-  
-    Design patterns
-  
-
-    
-  </span>
-  
-  
-
-      </a>
-    </li>
-  
-
-              
-            
-          </ul>
-        </nav>
-      
-    </li>
-  
-
-    
-      
-      
-  
-  
-    
-  
-  
-  
-    
-    
-    
-    
-      
-        
-        
       
     
     
@@ -707,17 +478,17 @@
       
         
         
-        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_5" checked>
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_3" checked>
         
           
-          <label class="md-nav__link" for="__nav_5" id="__nav_5_label" tabindex="">
+          <label class="md-nav__link" for="__nav_3" id="__nav_3_label" tabindex="">
             
   
   
   <span class="md-ellipsis">
     
   
-    Engineering plans
+    Project Plan
   
 
     
@@ -728,12 +499,12 @@
             <span class="md-nav__icon md-icon"></span>
           </label>
         
-        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_5_label" aria-expanded="true">
-          <label class="md-nav__title" for="__nav_5">
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_3_label" aria-expanded="true">
+          <label class="md-nav__title" for="__nav_3">
             <span class="md-nav__icon md-icon"></span>
             
   
-    Engineering plans
+    Project Plan
   
 
           </label>
@@ -762,7 +533,7 @@
   <span class="md-ellipsis">
     
   
-    Full development plan
+    Development Plan
   
 
     
@@ -780,7 +551,7 @@
   <span class="md-ellipsis">
     
   
-    Full development plan
+    Development Plan
   
 
     
@@ -1476,7 +1247,7 @@
   <span class="md-ellipsis">
     
   
-    Roadmap & progress
+    Roadmap & Progress
   
 
     
@@ -1493,499 +1264,6 @@
           </ul>
         </nav>
       
-    </li>
-  
-
-    
-      
-      
-  
-  
-  
-  
-    
-    
-    
-    
-      
-        
-        
-      
-    
-    
-    <li class="md-nav__item md-nav__item--section md-nav__item--nested">
-      
-        
-        
-          
-        
-        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_6" >
-        
-          
-          <label class="md-nav__link" for="__nav_6" id="__nav_6_label" tabindex="">
-            
-  
-  
-  <span class="md-ellipsis">
-    
-  
-    Processes
-  
-
-    
-  </span>
-  
-  
-
-            <span class="md-nav__icon md-icon"></span>
-          </label>
-        
-        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_6_label" aria-expanded="false">
-          <label class="md-nav__title" for="__nav_6">
-            <span class="md-nav__icon md-icon"></span>
-            
-  
-    Processes
-  
-
-          </label>
-          <ul class="md-nav__list" data-md-scrollfix>
-            
-              
-                
-  
-  
-  
-  
-    <li class="md-nav__item">
-      <a href="../../processes/DEVELOPMENT_WORKFLOW/" class="md-nav__link">
-        
-  
-  
-  <span class="md-ellipsis">
-    
-  
-    Development workflow
-  
-
-    
-  </span>
-  
-  
-
-      </a>
-    </li>
-  
-
-              
-            
-          </ul>
-        </nav>
-      
-    </li>
-  
-
-    
-      
-      
-  
-  
-  
-  
-    
-    
-    
-    
-      
-        
-        
-      
-    
-    
-    <li class="md-nav__item md-nav__item--section md-nav__item--nested">
-      
-        
-        
-          
-        
-        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_7" >
-        
-          
-          <label class="md-nav__link" for="__nav_7" id="__nav_7_label" tabindex="">
-            
-  
-  
-  <span class="md-ellipsis">
-    
-  
-    Standards
-  
-
-    
-  </span>
-  
-  
-
-            <span class="md-nav__icon md-icon"></span>
-          </label>
-        
-        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_7_label" aria-expanded="false">
-          <label class="md-nav__title" for="__nav_7">
-            <span class="md-nav__icon md-icon"></span>
-            
-  
-    Standards
-  
-
-          </label>
-          <ul class="md-nav__list" data-md-scrollfix>
-            
-              
-                
-  
-  
-  
-  
-    <li class="md-nav__item">
-      <a href="../../standards/CODE_STANDARDS/" class="md-nav__link">
-        
-  
-  
-  <span class="md-ellipsis">
-    
-  
-    Code standards
-  
-
-    
-  </span>
-  
-  
-
-      </a>
-    </li>
-  
-
-              
-            
-              
-                
-  
-  
-  
-  
-    <li class="md-nav__item">
-      <a href="../../standards/CHERENKOV_BRAND_GUIDELINES/" class="md-nav__link">
-        
-  
-  
-  <span class="md-ellipsis">
-    
-  
-    Brand guidelines
-  
-
-    
-  </span>
-  
-  
-
-      </a>
-    </li>
-  
-
-              
-            
-          </ul>
-        </nav>
-      
-    </li>
-  
-
-    
-      
-      
-  
-  
-  
-  
-    
-    
-    
-    
-      
-        
-        
-      
-    
-    
-    <li class="md-nav__item md-nav__item--section md-nav__item--nested">
-      
-        
-        
-          
-        
-        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_8" >
-        
-          
-          <label class="md-nav__link" for="__nav_8" id="__nav_8_label" tabindex="">
-            
-  
-  
-  <span class="md-ellipsis">
-    
-  
-    GitHub
-  
-
-    
-  </span>
-  
-  
-
-            <span class="md-nav__icon md-icon"></span>
-          </label>
-        
-        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_8_label" aria-expanded="false">
-          <label class="md-nav__title" for="__nav_8">
-            <span class="md-nav__icon md-icon"></span>
-            
-  
-    GitHub
-  
-
-          </label>
-          <ul class="md-nav__list" data-md-scrollfix>
-            
-              
-                
-  
-  
-  
-  
-    <li class="md-nav__item">
-      <a href="../../github/WIKI_INDEX/" class="md-nav__link">
-        
-  
-  
-  <span class="md-ellipsis">
-    
-  
-    Wiki index
-  
-
-    
-  </span>
-  
-  
-
-      </a>
-    </li>
-  
-
-              
-            
-              
-                
-  
-  
-  
-  
-    <li class="md-nav__item">
-      <a href="../../github/RELEASES/" class="md-nav__link">
-        
-  
-  
-  <span class="md-ellipsis">
-    
-  
-    Releases
-  
-
-    
-  </span>
-  
-  
-
-      </a>
-    </li>
-  
-
-              
-            
-              
-                
-  
-  
-  
-  
-    
-    
-    
-    
-      
-    
-    
-    <li class="md-nav__item md-nav__item--nested">
-      
-        
-        
-          
-        
-        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_8_3" >
-        
-          
-          <label class="md-nav__link" for="__nav_8_3" id="__nav_8_3_label" tabindex="0">
-            
-  
-  
-  <span class="md-ellipsis">
-    
-  
-    Issue drafts
-  
-
-    
-  </span>
-  
-  
-
-            <span class="md-nav__icon md-icon"></span>
-          </label>
-        
-        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_8_3_label" aria-expanded="false">
-          <label class="md-nav__title" for="__nav_8_3">
-            <span class="md-nav__icon md-icon"></span>
-            
-  
-    Issue drafts
-  
-
-          </label>
-          <ul class="md-nav__list" data-md-scrollfix>
-            
-              
-                
-  
-  
-  
-  
-    <li class="md-nav__item">
-      <a href="../../github/issues/001-implement-basescanner/" class="md-nav__link">
-        
-  
-  
-  <span class="md-ellipsis">
-    
-  
-    BaseScanner orchestration
-  
-
-    
-  </span>
-  
-  
-
-      </a>
-    </li>
-  
-
-              
-            
-              
-                
-  
-  
-  
-  
-    <li class="md-nav__item">
-      <a href="../../github/issues/002-implement-asyncio-orchestration/" class="md-nav__link">
-        
-  
-  
-  <span class="md-ellipsis">
-    
-  
-    Asyncio orchestration
-  
-
-    
-  </span>
-  
-  
-
-      </a>
-    </li>
-  
-
-              
-            
-              
-                
-  
-  
-  
-  
-    <li class="md-nav__item">
-      <a href="../../github/issues/003-implement-hitl-approval/" class="md-nav__link">
-        
-  
-  
-  <span class="md-ellipsis">
-    
-  
-    HITL approval
-  
-
-    
-  </span>
-  
-  
-
-      </a>
-    </li>
-  
-
-              
-            
-          </ul>
-        </nav>
-      
-    </li>
-  
-
-              
-            
-          </ul>
-        </nav>
-      
-    </li>
-  
-
-    
-      
-      
-  
-  
-  
-  
-    <li class="md-nav__item">
-      <a href="../../ui/UI_REQUIREMENTS/" class="md-nav__link">
-        
-  
-  
-  <span class="md-ellipsis">
-    
-  
-    UI
-  
-
-    
-  </span>
-  
-  
-
-      </a>
     </li>
   
 
@@ -2680,22 +1958,14 @@
                   
 
 
-  
-    <a href="https://github.com/moaidmoatasem/cherenkov-professional/edit/main/docs/plan/development_plan.md" title="Edit this page" class="md-content__button md-icon" rel="edit">
-      
-      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M10 20H6V4h7v5h5v3.1l2-2V8l-6-6H6c-1.1 0-2 .9-2 2v16c0 1.1.9 2 2 2h4zm10.2-7c.1 0 .3.1.4.2l1.3 1.3c.2.2.2.6 0 .8l-1 1-2.1-2.1 1-1c.1-.1.2-.2.4-.2m0 3.9L14.1 23H12v-2.1l6.1-6.1z"/></svg>
-    </a>
-  
-  
 
-
-<h1 id="cherenkov-final-refined-development-plan">cherenkov — Final Refined Development Plan<a class="headerlink" href="#cherenkov-final-refined-development-plan" title="Permanent link">&para;</a></h1>
+<h1 id="cherenkov-final-refined-development-plan">cherenkov — Final Refined Development Plan</h1>
 <blockquote>
 <p>Version: 2.0 | Synthesized from: Deep code review + Gemini + Perplexity
 Date: May 2026 | 26 weeks to v1.0</p>
 </blockquote>
 <hr />
-<h2 id="table-of-contents">Table of Contents<a class="headerlink" href="#table-of-contents" title="Permanent link">&para;</a></h2>
+<h2 id="table-of-contents">Table of Contents</h2>
 <ol>
 <li><a href="#1-executive-summary">Executive Summary</a></li>
 <li><a href="#2-ground-truth-what-exists-today">Ground Truth: What Exists Today</a></li>
@@ -2714,7 +1984,7 @@ Date: May 2026 | 26 weeks to v1.0</p>
 <li><a href="#15-what-not-to-do">What NOT to Do</a></li>
 </ol>
 <hr />
-<h2 id="1-executive-summary">1. Executive Summary<a class="headerlink" href="#1-executive-summary" title="Permanent link">&para;</a></h2>
+<h2 id="1-executive-summary">1. Executive Summary</h2>
 <p>cherenkov is a local-first, AI-assisted security testing framework. The vision is
 legitimate: deterministic scanners + local LLM triage, zero cloud dependency,
 async plugin architecture. The gap between that vision and the current codebase
@@ -2724,7 +1994,7 @@ phase-gated execution path. The 132 generated scanner modules are not thrown
 away — they become candidates that earn their place by passing a validation gate.</p>
 <p><strong>The single guiding principle:</strong> prove it first, claim it second.</p>
 <hr />
-<h2 id="2-ground-truth-what-exists-today">2. Ground Truth: What Exists Today<a class="headerlink" href="#2-ground-truth-what-exists-today" title="Permanent link">&para;</a></h2>
+<h2 id="2-ground-truth-what-exists-today">2. Ground Truth: What Exists Today</h2>
 <table>
 <thead>
 <tr>
@@ -2780,11 +2050,11 @@ scanners. They are raw material. They become official scanners one by one as
 they pass the Phase 3 validation gate. Until then they live in candidates/ and
 do not appear in any public-facing claims.</p>
 <hr />
-<h2 id="3-phase-0-emergency-security-fixes">3. Phase 0 — Emergency Security Fixes<a class="headerlink" href="#3-phase-0-emergency-security-fixes" title="Permanent link">&para;</a></h2>
+<h2 id="3-phase-0-emergency-security-fixes">3. Phase 0 — Emergency Security Fixes</h2>
 <p><strong>Timeline:</strong> This week. No exceptions.
 <strong>Blocker:</strong> Do not publish, announce, or link to this project until this
 phase is complete and tagged as v0.1.1-security.</p>
-<h3 id="31-flask-debug-mode-host-binding-critical-cvss-100">3.1 Flask Debug Mode + Host Binding (CRITICAL — CVSS 10.0)<a class="headerlink" href="#31-flask-debug-mode-host-binding-critical-cvss-100" title="Permanent link">&para;</a></h3>
+<h3 id="31-flask-debug-mode-host-binding-critical-cvss-100">3.1 Flask Debug Mode + Host Binding (CRITICAL — CVSS 10.0)</h3>
 <p>Flask debug=True activates the Werkzeug interactive debugger, which exposes
 arbitrary Python code execution via browser. Binding to 0.0.0.0 makes this
 reachable by anyone on the same network.</p>
@@ -2801,7 +2071,7 @@ reachable by anyone on the same network.</p>
 FLASK_HOST=127.0.0.1
 FLASK_PORT=5000
 </code></pre></div></p>
-<h3 id="32-stored-xss-in-web-ui-critical-cvss-90">3.2 Stored XSS in Web UI (CRITICAL — CVSS 9.0)<a class="headerlink" href="#32-stored-xss-in-web-ui-critical-cvss-90" title="Permanent link">&para;</a></h3>
+<h3 id="32-stored-xss-in-web-ui-critical-cvss-90">3.2 Stored XSS in Web UI (CRITICAL — CVSS 9.0)</h3>
 <p>Two-layer fix required. The root issue is JavaScript-side; server-side
 validation is the second layer.</p>
 <div class="highlight"><pre><span></span><code><span class="c1">// templates/index.html — JavaScript fix</span>
@@ -2833,7 +2103,7 @@ validation is the second layer.</p>
  <span class="k">return</span> <span class="n">jsonify</span><span class="p">({</span><span class="s1">&#39;error&#39;</span><span class="p">:</span> <span class="s1">&#39;Invalid URL format&#39;</span><span class="p">}),</span> <span class="mi">400</span>
  <span class="c1"># ... rest of function</span>
 </code></pre></div>
-<h3 id="33-bare-exception-handlers-high">3.3 Bare Exception Handlers (HIGH)<a class="headerlink" href="#33-bare-exception-handlers-high" title="Permanent link">&para;</a></h3>
+<h3 id="33-bare-exception-handlers-high">3.3 Bare Exception Handlers (HIGH)</h3>
 <p>Silent exceptions in a security scanner produce false negatives.</p>
 <div class="highlight"><pre><span></span><code><span class="c1"># Find all instances</span>
 grep<span class="w"> </span>-rn<span class="w"> </span><span class="s2">&quot;except:&quot;</span><span class="w"> </span>.<span class="w"> </span>--include<span class="o">=</span><span class="s2">&quot;*.py&quot;</span><span class="w"> </span><span class="p">|</span><span class="w"> </span>grep<span class="w"> </span>-v<span class="w"> </span><span class="s2">&quot;#&quot;</span>
@@ -2850,7 +2120,7 @@ grep<span class="w"> </span>-rn<span class="w"> </span><span class="s2">&quot;ex
  <span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s2">&quot;Method </span><span class="si">%s</span><span class="s2"> unreachable: </span><span class="si">%s</span><span class="s2">&quot;</span><span class="p">,</span> <span class="n">method</span><span class="p">,</span> <span class="n">e</span><span class="p">)</span>
  <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot; [✓] </span><span class="si">{</span><span class="n">method</span><span class="si">}</span><span class="s2"> is blocked or unreachable&quot;</span><span class="p">)</span>
 </code></pre></div>
-<h3 id="34-url-input-validation">3.4 URL Input Validation<a class="headerlink" href="#34-url-input-validation" title="Permanent link">&para;</a></h3>
+<h3 id="34-url-input-validation">3.4 URL Input Validation</h3>
 <div class="highlight"><pre><span></span><code><span class="kn">from</span><span class="w"> </span><span class="nn">urllib.parse</span><span class="w"> </span><span class="kn">import</span> <span class="n">urlparse</span>
 
 <span class="k">class</span><span class="w"> </span><span class="nc">SimpleScanner</span><span class="p">:</span>
@@ -2862,7 +2132,7 @@ grep<span class="w"> </span>-rn<span class="w"> </span><span class="s2">&quot;ex
  <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Invalid URL: missing hostname.&quot;</span><span class="p">)</span>
  <span class="bp">self</span><span class="o">.</span><span class="n">target</span> <span class="o">=</span> <span class="n">target_url</span>
 </code></pre></div>
-<h3 id="35-http-methods-consent-warning">3.5 HTTP Methods Consent Warning<a class="headerlink" href="#35-http-methods-consent-warning" title="Permanent link">&para;</a></h3>
+<h3 id="35-http-methods-consent-warning">3.5 HTTP Methods Consent Warning</h3>
 <p>The scanner sends PUT/DELETE without warning. This can modify server state.</p>
 <div class="highlight"><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">scan_http_methods</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
  <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;</span><span class="se">\n</span><span class="s2">[!] WARNING: This sends PUT/DELETE/TRACE requests to the target.&quot;</span><span class="p">)</span>
@@ -2872,7 +2142,7 @@ grep<span class="w"> </span>-rn<span class="w"> </span><span class="s2">&quot;ex
  <span class="nb">print</span><span class="p">(</span><span class="s2">&quot; Skipping HTTP methods scan.&quot;</span><span class="p">)</span>
  <span class="k">return</span>
 </code></pre></div>
-<h3 id="36-phase-0-commit">3.6 Phase 0 Commit<a class="headerlink" href="#36-phase-0-commit" title="Permanent link">&para;</a></h3>
+<h3 id="36-phase-0-commit">3.6 Phase 0 Commit</h3>
 <div class="highlight"><pre><span></span><code>git<span class="w"> </span>checkout<span class="w"> </span>-b<span class="w"> </span>fix/phase-0-critical-security
 git<span class="w"> </span>add<span class="w"> </span>-A
 git<span class="w"> </span>commit<span class="w"> </span>-m<span class="w"> </span><span class="s2">&quot;fix: resolve critical security vulnerabilities</span>
@@ -2892,11 +2162,11 @@ git<span class="w"> </span>tag<span class="w"> </span>-a<span class="w"> </span>
 git<span class="w"> </span>push<span class="w"> </span>--tags
 </code></pre></div>
 <hr />
-<h2 id="4-phase-1-repository-foundation-cleanup">4. Phase 1 — Repository &amp; Foundation Cleanup<a class="headerlink" href="#4-phase-1-repository-foundation-cleanup" title="Permanent link">&para;</a></h2>
+<h2 id="4-phase-1-repository-foundation-cleanup">4. Phase 1 — Repository &amp; Foundation Cleanup</h2>
 <p><strong>Timeline:</strong> Weeks 1–2
 <strong>Goal:</strong> A senior security engineer clones this repo and understands what it
 does and doesn't do within 5 minutes.</p>
-<h3 id="41-honest-readme-rewrite">4.1 Honest README Rewrite<a class="headerlink" href="#41-honest-readme-rewrite" title="Permanent link">&para;</a></h3>
+<h3 id="41-honest-readme-rewrite">4.1 Honest README Rewrite</h3>
 <div class="highlight"><pre><span></span><code><span class="gh"># cherenkov — Local AI Security Testing Framework</span>
 
 <span class="k">&gt; </span><span class="ge">**Status:** Alpha · v0.1.1 · Phase 1 of 5</span>
@@ -2920,7 +2190,7 @@ does and doesn't do within 5 minutes.</p>
 | Test coverage | ~30% | 80% |
 | AI integration | scaffold | end-to-end |
 </code></pre></div>
-<h3 id="42-remove-all-development-diary-files">4.2 Remove All Development Diary Files<a class="headerlink" href="#42-remove-all-development-diary-files" title="Permanent link">&para;</a></h3>
+<h3 id="42-remove-all-development-diary-files">4.2 Remove All Development Diary Files</h3>
 <div class="highlight"><pre><span></span><code>git<span class="w"> </span>rm<span class="w"> </span>TONIGHT_ACHIEVEMENTS.md<span class="w"> </span>SESSION_ACHIEVEMENTS.md<span class="w"> </span>AGENT_MEMORY.md
 git<span class="w"> </span>rm<span class="w"> </span>PROJECT_SUMMARY.md<span class="w"> </span>README.md.backup<span class="w"> </span>README_BADGES.txt
 git<span class="w"> </span>rm<span class="w"> </span>-f<span class="w"> </span>cherenkov-nexus-web
@@ -2950,7 +2220,7 @@ swarm_outputs/
 orchestration_iterations/
 autonomous_development/
 </code></pre></div></p>
-<h3 id="43-consolidate-dependencies-single-pyprojecttoml">4.3 Consolidate Dependencies — Single pyproject.toml<a class="headerlink" href="#43-consolidate-dependencies-single-pyprojecttoml" title="Permanent link">&para;</a></h3>
+<h3 id="43-consolidate-dependencies-single-pyprojecttoml">4.3 Consolidate Dependencies — Single pyproject.toml</h3>
 <div class="highlight"><pre><span></span><code><span class="k">[build-system]</span>
 <span class="n">requires</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">[</span><span class="s2">&quot;setuptools&gt;=68.0&quot;</span><span class="p">]</span>
 <span class="n">build-backend</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s2">&quot;setuptools.backends.legacy:build&quot;</span>
@@ -3009,7 +2279,7 @@ autonomous_development/
 <span class="n">ignore</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">[</span><span class="s2">&quot;E501&quot;</span><span class="p">,</span><span class="w"> </span><span class="s2">&quot;S101&quot;</span><span class="p">]</span>
 </code></pre></div>
 <p>Delete requirements.txt entirely. One source of truth.</p>
-<h3 id="44-clean-repository-root">4.4 Clean Repository Root<a class="headerlink" href="#44-clean-repository-root" title="Permanent link">&para;</a></h3>
+<h3 id="44-clean-repository-root">4.4 Clean Repository Root</h3>
 <div class="highlight"><pre><span></span><code>mkdir<span class="w"> </span>-p<span class="w"> </span>scripts/dev<span class="w"> </span>scripts/docker<span class="w"> </span>tools
 
 mv<span class="w"> </span>launch_*.sh<span class="w"> </span>celebration_scan.sh<span class="w"> </span>deploy_now.sh<span class="w"> </span>scripts/dev/
@@ -3020,7 +2290,7 @@ mv<span class="w"> </span>analyze_generated_scanners.py<span class="w"> </span>e
 mv<span class="w"> </span>refine_scanners.py<span class="w"> </span>auto_improve_scanners.py<span class="w"> </span>tools/
 mv<span class="w"> </span>autonomous_roadmap_executor.py<span class="w"> </span>tools/
 </code></pre></div>
-<h3 id="45-real-changelogmd-and-statusmd">4.5 Real CHANGELOG.md and STATUS.md<a class="headerlink" href="#45-real-changelogmd-and-statusmd" title="Permanent link">&para;</a></h3>
+<h3 id="45-real-changelogmd-and-statusmd">4.5 Real CHANGELOG.md and STATUS.md</h3>
 <p>CHANGELOG.md first real entry:
 <div class="highlight"><pre><span></span><code><span class="gh"># Changelog</span>
 
@@ -3040,13 +2310,13 @@ mv<span class="w"> </span>autonomous_roadmap_executor.py<span class="w"> </span>
 <span class="k">-</span><span class="w"> </span>Basic CLI
 </code></pre></div></p>
 <hr />
-<h2 id="5-phase-2-architecture-overhaul">5. Phase 2 — Architecture Overhaul<a class="headerlink" href="#5-phase-2-architecture-overhaul" title="Permanent link">&para;</a></h2>
+<h2 id="5-phase-2-architecture-overhaul">5. Phase 2 — Architecture Overhaul</h2>
 <p><strong>Timeline:</strong> Weeks 2–4</p>
-<h3 id="51-drop-flask-use-fastapi">5.1 Drop Flask, Use FastAPI<a class="headerlink" href="#51-drop-flask-use-fastapi" title="Permanent link">&para;</a></h3>
+<h3 id="51-drop-flask-use-fastapi">5.1 Drop Flask, Use FastAPI</h3>
 <p>Flask is replaced by FastAPI for three concrete reasons: async support for
 concurrent scanning, native Pydantic integration, auto-generated OpenAPI docs.
 The current web app is ~200 lines — migration is small.</p>
-<h3 id="52-basescanner-plugin-architecture">5.2 BaseScanner Plugin Architecture<a class="headerlink" href="#52-basescanner-plugin-architecture" title="Permanent link">&para;</a></h3>
+<h3 id="52-basescanner-plugin-architecture">5.2 BaseScanner Plugin Architecture</h3>
 <div class="highlight"><pre><span></span><code><span class="c1"># src/cherenkov/core/base_scanner.py</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">abc</span><span class="w"> </span><span class="kn">import</span> <span class="n">ABC</span><span class="p">,</span> <span class="n">abstractmethod</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">dataclasses</span><span class="w"> </span><span class="kn">import</span> <span class="n">dataclass</span><span class="p">,</span> <span class="n">field</span>
@@ -3112,7 +2382,7 @@ The current web app is ~200 lines — migration is small.</p>
  <span class="ow">and</span> <span class="n">obj</span> <span class="ow">is</span> <span class="ow">not</span> <span class="n">BaseScanner</span> <span class="ow">and</span> <span class="n">obj</span><span class="o">.</span><span class="n">name</span><span class="p">):</span>
  <span class="n">_registry</span><span class="p">[</span><span class="n">obj</span><span class="o">.</span><span class="n">name</span><span class="p">]</span> <span class="o">=</span> <span class="n">obj</span>
 </code></pre></div></p>
-<h3 id="53-async-scan-engine-with-rate-limiting">5.3 Async Scan Engine with Rate Limiting<a class="headerlink" href="#53-async-scan-engine-with-rate-limiting" title="Permanent link">&para;</a></h3>
+<h3 id="53-async-scan-engine-with-rate-limiting">5.3 Async Scan Engine with Rate Limiting</h3>
 <p>Rate limiting is not optional. An async engine running 10+ concurrent scanners
 can trigger WAF blocks or accidentally overload fragile staging environments.</p>
 <div class="highlight"><pre><span></span><code><span class="c1"># src/cherenkov/core/engine.py</span>
@@ -3168,7 +2438,7 @@ can trigger WAF blocks or accidentally overload fragile staging environments.</p
 
  <span class="k">return</span> <span class="k">await</span> <span class="n">asyncio</span><span class="o">.</span><span class="n">gather</span><span class="p">(</span><span class="o">*</span><span class="p">[</span><span class="n">run_one</span><span class="p">(</span><span class="n">n</span><span class="p">,</span> <span class="n">c</span><span class="p">)</span> <span class="k">for</span> <span class="n">n</span><span class="p">,</span> <span class="n">c</span> <span class="ow">in</span> <span class="n">scanners</span><span class="o">.</span><span class="n">items</span><span class="p">])</span>
 </code></pre></div>
-<h3 id="54-sqlite-persistence-layer">5.4 SQLite Persistence Layer<a class="headerlink" href="#54-sqlite-persistence-layer" title="Permanent link">&para;</a></h3>
+<h3 id="54-sqlite-persistence-layer">5.4 SQLite Persistence Layer</h3>
 <p>The in-memory scan history list is replaced with SQLite. No external services
 required. Data persists at ~/.cherenkov/results.db.</p>
 <div class="highlight"><pre><span></span><code><span class="c1"># src/cherenkov/storage/database.py</span>
@@ -3217,7 +2487,7 @@ required. Data persists at ~/.cherenkov/results.db.</p>
  <span class="k">with</span> <span class="n">sqlite3</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="n">DB_PATH</span><span class="p">)</span> <span class="k">as</span> <span class="n">conn</span><span class="p">:</span>
  <span class="k">return</span> <span class="n">conn</span><span class="o">.</span><span class="n">execute</span><span class="p">(</span><span class="s2">&quot;DELETE FROM scans WHERE started_at &lt; ?&quot;</span><span class="p">,</span> <span class="p">(</span><span class="n">cutoff</span><span class="p">,))</span><span class="o">.</span><span class="n">rowcount</span>
 </code></pre></div>
-<h3 id="55-canonical-project-structure">5.5 Canonical Project Structure<a class="headerlink" href="#55-canonical-project-structure" title="Permanent link">&para;</a></h3>
+<h3 id="55-canonical-project-structure">5.5 Canonical Project Structure</h3>
 <div class="highlight"><pre><span></span><code>cherenkov-professional/
 ├── src/cherenkov/
 │ ├── cli.py
@@ -3251,7 +2521,7 @@ required. Data persists at ~/.cherenkov/results.db.</p>
 ├── docker-compose.yml
 └── README.md
 </code></pre></div>
-<h3 id="56-typer-cli">5.6 Typer CLI<a class="headerlink" href="#56-typer-cli" title="Permanent link">&para;</a></h3>
+<h3 id="56-typer-cli">5.6 Typer CLI</h3>
 <div class="highlight"><pre><span></span><code><span class="c1"># src/cherenkov/cli.py</span>
 <span class="kn">import</span><span class="w"> </span><span class="nn">typer</span><span class="o">,</span><span class="w"> </span><span class="nn">asyncio</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">rich.console</span><span class="w"> </span><span class="kn">import</span> <span class="n">Console</span>
@@ -3294,11 +2564,11 @@ required. Data persists at ~/.cherenkov/results.db.</p>
  <span class="n">console</span><span class="o">.</span><span class="n">print</span><span class="p">(</span><span class="n">t</span><span class="p">)</span>
 </code></pre></div>
 <hr />
-<h2 id="6-phase-3-real-scanner-library">6. Phase 3 — Real Scanner Library<a class="headerlink" href="#6-phase-3-real-scanner-library" title="Permanent link">&para;</a></h2>
+<h2 id="6-phase-3-real-scanner-library">6. Phase 3 — Real Scanner Library</h2>
 <p><strong>Timeline:</strong> Weeks 4–10
 <strong>Target:</strong> 50 validated scanners. Not 132. Quality over quantity.
 <strong>Rule:</strong> Every scanner passes the validation gate before being counted.</p>
-<h3 id="61-validation-gate-required-for-every-scanner">6.1 Validation Gate (Required for Every Scanner)<a class="headerlink" href="#61-validation-gate-required-for-every-scanner" title="Permanent link">&para;</a></h3>
+<h3 id="61-validation-gate-required-for-every-scanner">6.1 Validation Gate (Required for Every Scanner)</h3>
 <p>No exceptions. Not for candidates generated by CrewAI, not for hand-written ones.</p>
 <ol>
 <li>Unit test: positive case (finds the vulnerability with mocked HTTP)</li>
@@ -3308,7 +2578,7 @@ required. Data persists at ~/.cherenkov/results.db.</p>
 <li>Bandit: no new security issues</li>
 <li>Documentation: CWE ID, description, technique, remediation in docstring</li>
 </ol>
-<h3 id="62-tier-1-infrastructure-configuration-weeks-46">6.2 Tier 1 — Infrastructure &amp; Configuration (Weeks 4–6)<a class="headerlink" href="#62-tier-1-infrastructure-configuration-weeks-46" title="Permanent link">&para;</a></h3>
+<h3 id="62-tier-1-infrastructure-configuration-weeks-46">6.2 Tier 1 — Infrastructure &amp; Configuration (Weeks 4–6)</h3>
 <p>Deterministic header/config checks. Highest confidence, lowest false-positive rate.</p>
 <table>
 <thead>
@@ -3371,7 +2641,7 @@ required. Data persists at ~/.cherenkov/results.db.</p>
 </tr>
 </tbody>
 </table>
-<h3 id="63-tier-2-input-validation-weeks-68">6.3 Tier 2 — Input Validation (Weeks 6–8)<a class="headerlink" href="#63-tier-2-input-validation-weeks-68" title="Permanent link">&para;</a></h3>
+<h3 id="63-tier-2-input-validation-weeks-68">6.3 Tier 2 — Input Validation (Weeks 6–8)</h3>
 <p>Active probing. Require explicit user consent before firing.</p>
 <table>
 <thead>
@@ -3423,7 +2693,7 @@ required. Data persists at ~/.cherenkov/results.db.</p>
 </tr>
 </tbody>
 </table>
-<h3 id="64-tier-3-authentication-business-logic-weeks-810">6.4 Tier 3 — Authentication &amp; Business Logic (Weeks 8–10)<a class="headerlink" href="#64-tier-3-authentication-business-logic-weeks-810" title="Permanent link">&para;</a></h3>
+<h3 id="64-tier-3-authentication-business-logic-weeks-810">6.4 Tier 3 — Authentication &amp; Business Logic (Weeks 8–10)</h3>
 <table>
 <thead>
 <tr>
@@ -3475,9 +2745,9 @@ required. Data persists at ~/.cherenkov/results.db.</p>
 </tbody>
 </table>
 <hr />
-<h2 id="7-phase-4-ai-integration-real">7. Phase 4 — AI Integration (Real)<a class="headerlink" href="#7-phase-4-ai-integration-real" title="Permanent link">&para;</a></h2>
+<h2 id="7-phase-4-ai-integration-real">7. Phase 4 — AI Integration (Real)</h2>
 <p><strong>Timeline:</strong> Weeks 10–18</p>
-<h3 id="71-dual-brain-the-actual-spec">7.1 Dual-Brain: The Actual Spec<a class="headerlink" href="#71-dual-brain-the-actual-spec" title="Permanent link">&para;</a></h3>
+<h3 id="71-dual-brain-the-actual-spec">7.1 Dual-Brain: The Actual Spec</h3>
 <p><strong>Brain 1 — Deterministic:</strong> Scanner engine from Phase 3. Rule-based, fast,
 high precision. Always runs. Its output is ground truth.</p>
 <p><strong>Brain 2 — LLM triage:</strong> Local model via Ollama. Receives Brain 1's structured
@@ -3487,7 +2757,7 @@ findings and adds:
 - Produces plain-English remediation steps in context</p>
 <p>Brain 2 never overrides Brain 1. If Ollama isn't running, full scanner results
 are returned without enrichment. The AI layer enriches; it never gates.</p>
-<h3 id="72-llm-with-context-window-management">7.2 LLM with Context Window Management<a class="headerlink" href="#72-llm-with-context-window-management" title="Permanent link">&para;</a></h3>
+<h3 id="72-llm-with-context-window-management">7.2 LLM with Context Window Management</h3>
 <p>Findings are chunked before sending. 50 scanners on a large app can easily
 exceed a 3B–8B model's context window.</p>
 <div class="highlight"><pre><span></span><code><span class="c1"># src/cherenkov/ai/triage.py</span>
@@ -3557,7 +2827,7 @@ exceed a 3B–8B model's context window.</p>
  <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;Ollama unavailable — returning results without AI triage&quot;</span><span class="p">)</span>
  <span class="k">return</span> <span class="p">{</span><span class="s2">&quot;error&quot;</span><span class="p">:</span> <span class="s2">&quot;Ollama not available&quot;</span><span class="p">,</span> <span class="s2">&quot;raw_findings&quot;</span><span class="p">:</span> <span class="p">[</span><span class="n">f</span><span class="o">.</span><span class="n">title</span> <span class="k">for</span> <span class="n">f</span> <span class="ow">in</span> <span class="n">findings</span><span class="p">]}</span>
 </code></pre></div>
-<h3 id="73-model-recommendations">7.3 Model Recommendations<a class="headerlink" href="#73-model-recommendations" title="Permanent link">&para;</a></h3>
+<h3 id="73-model-recommendations">7.3 Model Recommendations</h3>
 <table>
 <thead>
 <tr>
@@ -3599,14 +2869,14 @@ exceed a 3B–8B model's context window.</p>
 </tr>
 </tbody>
 </table>
-<h3 id="74-crewai-one-specific-job">7.4 CrewAI: One Specific Job<a class="headerlink" href="#74-crewai-one-specific-job" title="Permanent link">&para;</a></h3>
+<h3 id="74-crewai-one-specific-job">7.4 CrewAI: One Specific Job</h3>
 <p>CrewAI's only role: given a vulnerability class description, generate a Python
 scanner that passes the Phase 3 validation gate. It does not run scans. It does
 not do triage. Every scanner it generates still must pass every gate step.</p>
 <hr />
-<h2 id="8-phase-5-production-hardening-v10">8. Phase 5 — Production Hardening &amp; v1.0<a class="headerlink" href="#8-phase-5-production-hardening-v10" title="Permanent link">&para;</a></h2>
+<h2 id="8-phase-5-production-hardening-v10">8. Phase 5 — Production Hardening &amp; v1.0</h2>
 <p><strong>Timeline:</strong> Weeks 18–26</p>
-<h3 id="81-output-formats">8.1 Output Formats<a class="headerlink" href="#81-output-formats" title="Permanent link">&para;</a></h3>
+<h3 id="81-output-formats">8.1 Output Formats</h3>
 <div class="highlight"><pre><span></span><code>cherenkov<span class="w"> </span>scan<span class="w"> </span>https://example.com<span class="w"> </span>--output<span class="w"> </span>table<span class="w"> </span><span class="c1"># default</span>
 cherenkov<span class="w"> </span>scan<span class="w"> </span>https://example.com<span class="w"> </span>--output<span class="w"> </span>json<span class="w"> </span><span class="c1"># machine-readable</span>
 cherenkov<span class="w"> </span>scan<span class="w"> </span>https://example.com<span class="w"> </span>--output<span class="w"> </span>sarif<span class="w"> </span><span class="c1"># CI/CD (GitHub Code Scanning)</span>
@@ -3615,12 +2885,12 @@ cherenkov<span class="w"> </span>scan<span class="w"> </span>https://example.com
 <p>SARIF v2.1 output enables direct GitHub Code Scanning and GitLab SAST
 integration without additional tooling. This is the single most important
 feature for professional pipeline adoption.</p>
-<h3 id="82-supply-chain-security">8.2 Supply Chain Security<a class="headerlink" href="#82-supply-chain-security" title="Permanent link">&para;</a></h3>
+<h3 id="82-supply-chain-security">8.2 Supply Chain Security</h3>
 <div class="highlight"><pre><span></span><code>pip-audit<span class="w"> </span><span class="c1"># dependency CVE audit</span>
 cyclonedx-py<span class="w"> </span>requirements<span class="w"> </span>&gt;<span class="w"> </span>sbom.xml<span class="w"> </span><span class="c1"># generate SBOM</span>
 pre-commit<span class="w"> </span>run<span class="w"> </span>--all-files<span class="w"> </span><span class="c1"># lint + security hooks</span>
 </code></pre></div>
-<h3 id="83-cicd-pipeline">8.3 CI/CD Pipeline<a class="headerlink" href="#83-cicd-pipeline" title="Permanent link">&para;</a></h3>
+<h3 id="83-cicd-pipeline">8.3 CI/CD Pipeline</h3>
 <div class="highlight"><pre><span></span><code><span class="c1"># .github/workflows/ci.yml</span>
 <span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">CI</span>
 <span class="nt">on</span><span class="p">:</span><span class="w"> </span><span class="p p-Indicator">[</span><span class="nv">push</span><span class="p p-Indicator">,</span><span class="w"> </span><span class="nv">pull_request</span><span class="p p-Indicator">]</span>
@@ -3641,7 +2911,7 @@ pre-commit<span class="w"> </span>run<span class="w"> </span>--all-files<span cl
 <span class="w"> </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">run</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">pytest --cov=cherenkov --cov-fail-under=80</span>
 <span class="w"> </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">uses</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">codecov/codecov-action@v4</span>
 </code></pre></div>
-<h3 id="84-v10-definition-of-done">8.4 v1.0 Definition of Done<a class="headerlink" href="#84-v10-definition-of-done" title="Permanent link">&para;</a></h3>
+<h3 id="84-v10-definition-of-done">8.4 v1.0 Definition of Done</h3>
 <p>All boxes must be checked. No exceptions.</p>
 <ul>
 <li>[ ] 50+ validated scanners (each with unit tests + DVWA proof)</li>
@@ -3657,8 +2927,8 @@ pre-commit<span class="w"> </span>run<span class="w"> </span>--all-files<span cl
 <li>[ ] One external user has successfully run it</li>
 </ul>
 <hr />
-<h2 id="9-testing-strategy">9. Testing Strategy<a class="headerlink" href="#9-testing-strategy" title="Permanent link">&para;</a></h2>
-<h3 id="91-infrastructure">9.1 Infrastructure<a class="headerlink" href="#91-infrastructure" title="Permanent link">&para;</a></h3>
+<h2 id="9-testing-strategy">9. Testing Strategy</h2>
+<h3 id="91-infrastructure">9.1 Infrastructure</h3>
 <div class="highlight"><pre><span></span><code>docker<span class="w"> </span>run<span class="w"> </span>-d<span class="w"> </span>-p<span class="w"> </span><span class="m">8080</span>:80<span class="w"> </span>vulnerables/web-dvwa
 docker<span class="w"> </span>run<span class="w"> </span>-d<span class="w"> </span>-p<span class="w"> </span><span class="m">8081</span>:80<span class="w"> </span>webpwnized/mutillidae
 
@@ -3666,7 +2936,7 @@ pytest<span class="w"> </span>tests/unit/<span class="w"> </span><span class="c1
 pytest<span class="w"> </span>tests/integration/<span class="w"> </span>-m<span class="w"> </span>requires_dvwa
 pytest<span class="w"> </span>--cov<span class="o">=</span>cherenkov<span class="w"> </span>--cov-report<span class="o">=</span>html
 </code></pre></div>
-<h3 id="92-scanner-test-template">9.2 Scanner Test Template<a class="headerlink" href="#92-scanner-test-template" title="Permanent link">&para;</a></h3>
+<h3 id="92-scanner-test-template">9.2 Scanner Test Template</h3>
 <div class="highlight"><pre><span></span><code><span class="c1"># tests/unit/scanners/test_security_headers.py</span>
 <span class="kn">import</span><span class="w"> </span><span class="nn">pytest</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">unittest.mock</span><span class="w"> </span><span class="kn">import</span> <span class="n">AsyncMock</span><span class="p">,</span> <span class="n">patch</span>
@@ -3701,7 +2971,7 @@ pytest<span class="w"> </span>--cov<span class="o">=</span>cherenkov<span class=
  <span class="n">result</span> <span class="o">=</span> <span class="k">await</span> <span class="n">SecurityHeadersScanner</span><span class="p">(</span><span class="s2">&quot;http://localhost:8080&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">scan</span>
  <span class="k">assert</span> <span class="nb">len</span><span class="p">(</span><span class="n">result</span><span class="o">.</span><span class="n">findings</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span>
 </code></pre></div>
-<h3 id="93-coverage-targets-per-phase">9.3 Coverage Targets Per Phase<a class="headerlink" href="#93-coverage-targets-per-phase" title="Permanent link">&para;</a></h3>
+<h3 id="93-coverage-targets-per-phase">9.3 Coverage Targets Per Phase</h3>
 <table>
 <thead>
 <tr>
@@ -3737,7 +3007,7 @@ pytest<span class="w"> </span>--cov<span class="o">=</span>cherenkov<span class=
 </tbody>
 </table>
 <hr />
-<h2 id="10-storage-persistence-layer">10. Storage &amp; Persistence Layer<a class="headerlink" href="#10-storage-persistence-layer" title="Permanent link">&para;</a></h2>
+<h2 id="10-storage-persistence-layer">10. Storage &amp; Persistence Layer</h2>
 <ul>
 <li>SQLite by default at ~/.cherenkov/results.db — zero external deps</li>
 <li>cherenkov_DB_URL env var accepts PostgreSQL connection string for teams</li>
@@ -3745,8 +3015,8 @@ pytest<span class="w"> </span>--cov<span class="o">=</span>cherenkov<span class=
 <li>Alembic for schema migrations — never drop/recreate the database</li>
 </ul>
 <hr />
-<h2 id="11-docker-container-security">11. Docker &amp; Container Security<a class="headerlink" href="#11-docker-container-security" title="Permanent link">&para;</a></h2>
-<h3 id="111-non-root-user-required">11.1 Non-Root User (Required)<a class="headerlink" href="#111-non-root-user-required" title="Permanent link">&para;</a></h3>
+<h2 id="11-docker-container-security">11. Docker &amp; Container Security</h2>
+<h3 id="111-non-root-user-required">11.1 Non-Root User (Required)</h3>
 <p>A security tool executing active payloads must never run as root in its container.</p>
 <div class="highlight"><pre><span></span><code><span class="k">FROM</span><span class="w"> </span><span class="s">python:3.12-slim</span><span class="w"> </span><span class="k">AS</span><span class="w"> </span><span class="s">base</span>
 <span class="k">RUN</span><span class="w"> </span>useradd<span class="w"> </span>--create-home<span class="w"> </span>--shell<span class="w"> </span>/bin/bash<span class="w"> </span>cherenkov
@@ -3763,13 +3033,13 @@ pytest<span class="w"> </span>--cov<span class="o">=</span>cherenkov<span class=
 <span class="k">EXPOSE</span><span class="w"> </span><span class="s">8000</span>
 <span class="k">CMD</span><span class="w"> </span><span class="p">[</span><span class="s2">&quot;uvicorn&quot;</span><span class="p">,</span><span class="w"> </span><span class="s2">&quot;cherenkov.api.main:app&quot;</span><span class="p">,</span><span class="w"> </span><span class="s2">&quot;--host&quot;</span><span class="p">,</span><span class="w"> </span><span class="s2">&quot;0.0.0.0&quot;</span><span class="p">,</span><span class="w"> </span><span class="s2">&quot;--port&quot;</span><span class="p">,</span><span class="w"> </span><span class="s2">&quot;8000&quot;</span><span class="p">]</span>
 </code></pre></div>
-<h3 id="112-keep-two-dockerfiles-only">11.2 Keep Two Dockerfiles Only<a class="headerlink" href="#112-keep-two-dockerfiles-only" title="Permanent link">&para;</a></h3>
+<h3 id="112-keep-two-dockerfiles-only">11.2 Keep Two Dockerfiles Only</h3>
 <ul>
 <li>Dockerfile — full build (scanner + web + AI deps)</li>
 <li>Dockerfile.minimal — scanner + CLI only</li>
 </ul>
 <p>Delete Dockerfile.agent, Dockerfile.optimized, Dockerfile.simple.</p>
-<h3 id="113-docker-compose">11.3 Docker Compose<a class="headerlink" href="#113-docker-compose" title="Permanent link">&para;</a></h3>
+<h3 id="113-docker-compose">11.3 Docker Compose</h3>
 <div class="highlight"><pre><span></span><code><span class="nt">services</span><span class="p">:</span>
 <span class="w"> </span><span class="nt">cherenkov</span><span class="p">:</span>
 <span class="w"> </span><span class="nt">build</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">.</span>
@@ -3786,7 +3056,7 @@ pytest<span class="w"> </span>--cov<span class="o">=</span>cherenkov<span class=
 <span class="w"> </span><span class="nt">ollama-data</span><span class="p">:</span>
 </code></pre></div>
 <hr />
-<h2 id="12-documentation-strategy">12. Documentation Strategy<a class="headerlink" href="#12-documentation-strategy" title="Permanent link">&para;</a></h2>
+<h2 id="12-documentation-strategy">12. Documentation Strategy</h2>
 <p>Write docs when the code exists. Never before.</p>
 <table>
 <thead>
@@ -3829,15 +3099,15 @@ pytest<span class="w"> </span>--cov<span class="o">=</span>cherenkov<span class=
 <p>Record an asciinema demo of cherenkov scanning DVWA before any community promotion.
 That single asset does more for adoption than every badge and feature list combined.</p>
 <hr />
-<h2 id="13-community-open-source-strategy">13. Community &amp; Open Source Strategy<a class="headerlink" href="#13-community-open-source-strategy" title="Permanent link">&para;</a></h2>
-<h3 id="131-issue-templates">13.1 Issue Templates<a class="headerlink" href="#131-issue-templates" title="Permanent link">&para;</a></h3>
+<h2 id="13-community-open-source-strategy">13. Community &amp; Open Source Strategy</h2>
+<h3 id="131-issue-templates">13.1 Issue Templates</h3>
 <ul>
 <li>bug_report.md</li>
 <li>scanner_request.md</li>
 <li>false_positive.md</li>
 <li>scanner_contribution.md</li>
 </ul>
-<h3 id="132-pr-template">13.2 PR Template<a class="headerlink" href="#132-pr-template" title="Permanent link">&para;</a></h3>
+<h3 id="132-pr-template">13.2 PR Template</h3>
 <div class="highlight"><pre><span></span><code><span class="gu">## What does this PR do?</span>
 
 <span class="gu">## Scanner validation (scanner PRs only)</span>
@@ -3852,7 +3122,7 @@ That single asset does more for adoption than every badge and feature list combi
 <span class="k">- [ ]</span> bandit passes with no new issues
 <span class="k">- [ ]</span> pytest passes with no coverage regression
 </code></pre></div>
-<h3 id="133-when-to-promote">13.3 When to Promote<a class="headerlink" href="#133-when-to-promote" title="Permanent link">&para;</a></h3>
+<h3 id="133-when-to-promote">13.3 When to Promote</h3>
 <p>Do not post to Hacker News, Reddit, or security communities until:
 - 20+ validated scanners exist
 - The README reflects reality
@@ -3862,7 +3132,7 @@ That single asset does more for adoption than every badge and feature list combi
 these conditions are met and the comments section will be permanent reputational
 damage that is very hard to recover from.</p>
 <hr />
-<h2 id="14-honest-metrics-success-criteria">14. Honest Metrics &amp; Success Criteria<a class="headerlink" href="#14-honest-metrics-success-criteria" title="Permanent link">&para;</a></h2>
+<h2 id="14-honest-metrics-success-criteria">14. Honest Metrics &amp; Success Criteria</h2>
 <table>
 <thead>
 <tr>
@@ -3898,7 +3168,7 @@ damage that is very hard to recover from.</p>
 </tbody>
 </table>
 <hr />
-<h2 id="15-what-not-to-do">15. What NOT to Do<a class="headerlink" href="#15-what-not-to-do" title="Permanent link">&para;</a></h2>
+<h2 id="15-what-not-to-do">15. What NOT to Do</h2>
 <p><strong>Do not count AI-generated drafts as working scanners.</strong>
 Files in candidates/ are not scanners. They count when they pass the gate.</p>
 <p><strong>Do not update the README before the code.</strong>
@@ -3958,27 +3228,6 @@ Update the Ground Truth section at the start of every phase.</em></p>
   
 </div>
       
-        
-<div class="md-social">
-  
-    
-    
-    
-    
-    <a href="https://cherenkov-security.com" target="_blank" rel="noopener" title="cherenkov-security.com" class="md-social__link">
-      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M16.36 14c.08-.66.14-1.32.14-2s-.06-1.34-.14-2h3.38c.16.64.26 1.31.26 2s-.1 1.36-.26 2m-5.15 5.56c.6-1.11 1.06-2.31 1.38-3.56h2.95a8.03 8.03 0 0 1-4.33 3.56M14.34 14H9.66c-.1-.66-.16-1.32-.16-2s.06-1.35.16-2h4.68c.09.65.16 1.32.16 2s-.07 1.34-.16 2M12 19.96c-.83-1.2-1.5-2.53-1.91-3.96h3.82c-.41 1.43-1.08 2.76-1.91 3.96M8 8H5.08A7.92 7.92 0 0 1 9.4 4.44C8.8 5.55 8.35 6.75 8 8m-2.92 8H8c.35 1.25.8 2.45 1.4 3.56A8 8 0 0 1 5.08 16m-.82-2C4.1 13.36 4 12.69 4 12s.1-1.36.26-2h3.38c-.08.66-.14 1.32-.14 2s.06 1.34.14 2M12 4.03c.83 1.2 1.5 2.54 1.91 3.97h-3.82c.41-1.43 1.08-2.77 1.91-3.97M18.92 8h-2.95a15.7 15.7 0 0 0-1.38-3.56c1.84.63 3.37 1.9 4.33 3.56M12 2C6.47 2 2 6.5 2 12a10 10 0 0 0 10 10 10 10 0 0 0 10-10A10 10 0 0 0 12 2"/></svg>
-    </a>
-  
-    
-    
-    
-    
-    <a href="https://github.com/moaidmoatasem/cherenkov-professional" target="_blank" rel="noopener" title="Source on GitHub" class="md-social__link">
-      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><!--! Font Awesome Free 7.1.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2025 Fonticons, Inc.--><path d="M173.9 397.4c0 2-2.3 3.6-5.2 3.6-3.3.3-5.6-1.3-5.6-3.6 0-2 2.3-3.6 5.2-3.6 3-.3 5.6 1.3 5.6 3.6m-31.1-4.5c-.7 2 1.3 4.3 4.3 4.9 2.6 1 5.6 0 6.2-2s-1.3-4.3-4.3-5.2c-2.6-.7-5.5.3-6.2 2.3m44.2-1.7c-2.9.7-4.9 2.6-4.6 4.9.3 2 2.9 3.3 5.9 2.6 2.9-.7 4.9-2.6 4.6-4.6-.3-1.9-3-3.2-5.9-2.9M252.8 8C114.1 8 8 113.3 8 252c0 110.9 69.8 205.8 169.5 239.2 12.8 2.3 17.3-5.6 17.3-12.1 0-6.2-.3-40.4-.3-61.4 0 0-70 15-84.7-29.8 0 0-11.4-29.1-27.8-36.6 0 0-22.9-15.7 1.6-15.4 0 0 24.9 2 38.6 25.8 21.9 38.6 58.6 27.5 72.9 20.9 2.3-16 8.8-27.1 16-33.7-55.9-6.2-112.3-14.3-112.3-110.5 0-27.5 7.6-41.3 23.6-58.9-2.6-6.5-11.1-33.3 2.6-67.9 20.9-6.5 69 27 69 27 20-5.6 41.5-8.5 62.8-8.5s42.8 2.9 62.8 8.5c0 0 48.1-33.6 69-27 13.7 34.7 5.2 61.4 2.6 67.9 16 17.7 25.8 31.5 25.8 58.9 0 96.5-58.9 104.2-114.8 110.5 9.2 7.9 17 22.9 17 46.4 0 33.7-.3 75.4-.3 83.6 0 6.5 4.6 14.4 17.3 12.1C436.2 457.8 504 362.9 504 252 504 113.3 391.5 8 252.8 8M105.2 352.9c-1.3 1-1 3.3.7 5.2 1.6 1.6 3.9 2.3 5.2 1 1.3-1 1-3.3-.7-5.2-1.6-1.6-3.9-2.3-5.2-1m-10.8-8.1c-.7 1.3.3 2.9 2.3 3.9 1.6 1 3.6.7 4.3-.7.7-1.3-.3-2.9-2.3-3.9-2-.6-3.6-.3-4.3.7m32.4 35.6c-1.6 1.3-1 4.3 1.3 6.2 2.3 2.3 5.2 2.6 6.5 1 1.3-1.3.7-4.3-1.3-6.2-2.2-2.3-5.2-2.6-6.5-1m-11.4-14.7c-1.6 1-1.6 3.6 0 5.9s4.3 3.3 5.6 2.3c1.6-1.3 1.6-3.9 0-6.2-1.4-2.3-4-3.3-5.6-2"/></svg>
-    </a>
-  
-</div>
-      
     </div>
   </div>
 </footer>
@@ -3992,7 +3241,7 @@ Update the Ground Truth section at the start of every phase.</em></p>
     
       
       
-      <script id="__config" type="application/json">{"annotate": null, "base": "../..", "features": ["navigation.instant", "navigation.tracking", "navigation.expand", "navigation.sections", "navigation.top", "search.suggest", "search.highlight", "content.action.edit", "content.code.copy"], "search": "../../assets/javascripts/workers/search.2c215733.min.js", "tags": null, "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}, "version": null}</script>
+      <script id="__config" type="application/json">{"annotate": null, "base": "../..", "features": ["navigation.tabs", "navigation.top", "navigation.indexes"], "search": "../../assets/javascripts/workers/search.2c215733.min.js", "tags": null, "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}, "version": null}</script>
     
     
       <script src="../../assets/javascripts/bundle.79ae519e.min.js"></script>

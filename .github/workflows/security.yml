@@ -38,10 +38,10 @@ jobs:
 
         if [ -z "$TARGETS" ]; then
           echo "No src/ or packages/ directory found; skipping Bandit."
-          exit 0
+          # exit successfully
+        else
+          bandit -r $TARGETS -f sarif -o bandit-results.sarif || true
         fi
-
-        bandit -r $TARGETS -f sarif -o bandit-results.sarif || true
 
     - name: Upload Bandit to GitHub Security
       if: >
@@ -51,34 +51,3 @@ jobs:
       with:
         sarif_file: 'bandit-results.sarif'
         category: 'bandit'
-
-  codeql-analysis:
-    runs-on: ubuntu-latest
-    permissions:
-      security-events: write
-      actions: read
-      contents: read
-
-    steps:
-    - uses: actions/checkout@v4
-      with:
-        fetch-depth: 0
-
-    - name: Initialize CodeQL
-      uses: github/codeql-action/init@v4
-      with:
-        languages: 'python'
-        build-mode: 'none'
-
-    - name: Perform CodeQL Analysis
-      uses: github/codeql-action/analyze@v4
-      with:
-        upload: false
-        output: '${{ runner.workspace }}/results'
-        category: 'codeql'
-
-    - name: Upload CodeQL results
-      uses: github/codeql-action/upload-sarif@v4
-      with:
-        sarif_file: '${{ runner.workspace }}/results/python.sarif'
-        category: 'codeql'

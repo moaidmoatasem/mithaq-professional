@@ -1,0 +1,22 @@
+/* CHERENKOV Custom Styles */
+
+/* Primary brand colors for headers and specific elements */
+h1, h2, h3, h4, h5, h6 {
+  color: var(--md-primary-fg-color);
+  font-weight: 800;
+}
+
+/* Subtle glow effect for important links or buttons */
+.md-button--primary {
+  box-shadow: 0 0 10px rgba(0, 224, 255, 0.3);
+  transition: box-shadow 0.3s ease;
+}
+
+.md-button--primary:hover {
+  box-shadow: 0 0 15px rgba(0, 224, 255, 0.6);
+}
+
+/* Accent lines or borders */
+.md-nav__item--active > .md-nav__link {
+  color: var(--md-accent-fg-color);
+}

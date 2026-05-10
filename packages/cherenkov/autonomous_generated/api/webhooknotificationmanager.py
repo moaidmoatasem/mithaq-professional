@@ -33,7 +33,7 @@ class EmailWebhookNotificationManager(WebhookNotificationManager):
 
     def send(self, message):
         try:
-            response = requests.post(url=self.email_service_url, json={"message": message})
+            response = requests.post(url=self.email_service_url, json={"message": message}, timeout=10)
             response.raise_for_status()
         except requests.RequestException as e:
             raise Exception(f"Failed to send webhook notification: {e}")

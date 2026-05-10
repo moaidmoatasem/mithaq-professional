@@ -3,19 +3,19 @@ CHERENKOV Agent Factory - Sovereign Execution Plane
 Enforces the 'Read-SSOT' loop for all subordinate agents.
 """
 
-import os
-from typing import Any, Dict
 from pathlib import Path
+from typing import Any, Dict
 
 from cherenkov.agents.micro_swarm.micro_agent import MicroAgent, MicroAgentConfig
 from cherenkov.agents.micro_swarm.payload_tester import PayloadTester
 from cherenkov.agents.micro_swarm.sanitization_agent import SanitizationAgent
 
+
 class AgentFactory:
     """
     Sovereign Factory: Instantiates agents only if they acknowledge the C2 SSOT.
     """
-    
+
     def __init__(self):
         self.ssot_path = Path("CHERENKOV_SSOT.md")
         self._verify_sovereignty()
@@ -36,7 +36,7 @@ class AgentFactory:
         config["system_constraints"] = {
             "perimeter": "MEISSNER_FAIL_CLOSED",
             "isolation": "TOKAMAK_CONFINEMENT",
-            "privacy": "ABLATION_MANDATORY"
+            "privacy": "ABLATION_MANDATORY",
         }
 
         if agent_type == "sanitizer":

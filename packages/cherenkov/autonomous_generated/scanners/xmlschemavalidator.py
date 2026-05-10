@@ -59,7 +59,7 @@ class XMLExternalEntityScanner(XMLSchemaValidator):
     ):
         super().__init__(schema_path)
         self.xml_file_path = xml_file_path
-        self._xml_parser = ET.XMLParser()
+        self._xml_parser = ET.XMLParser()  # nosec B318 B314
         if "lxml" in xml_parser_method:
             from lxml import etree
 

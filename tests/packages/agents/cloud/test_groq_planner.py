@@ -1,5 +1,6 @@
 import pytest
 from dotenv import load_dotenv
+from unittest.mock import patch, MagicMock
 
 from cherenkov.agents.cloud.strategic_planner import StrategicPlanner, ThreatAnalysisTask
 
@@ -7,8 +8,16 @@ load_dotenv()
 
 
 @pytest.mark.integration
-def test_groq_planner():
+@patch("cherenkov.agents.cloud.strategic_planner.Groq")
+def test_groq_planner(mock_groq_class):
     # Test strategic planner
+    mock_client = MagicMock()
+    mock_response = MagicMock()
+    mock_response.choices = [MagicMock(message=MagicMock(content="Mock plan"))]
+    mock_response.usage = MagicMock(total_tokens=42)
+    mock_client.chat.completions.create.return_value = mock_response
+    mock_groq_class.return_value = mock_client
+
     planner = StrategicPlanner()
 
     task = ThreatAnalysisTask(

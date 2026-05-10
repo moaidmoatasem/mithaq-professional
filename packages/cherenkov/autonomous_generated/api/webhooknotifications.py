@@ -59,7 +59,7 @@ class WebhookNotifications:
                 headers={
                     "Authorization": f"Bearer {self.api_key}"
                 },  # Ensure secure key transmission
-                json=payload,  # Convert payload to JSON format automatically by the requests library
+                json=payload, timeout=10  # Convert payload to JSON format automatically by the requests library
             )
             response.raise_for_status()  # Raise an HTTPError if a server error occurred.
         except Exception as e:

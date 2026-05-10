@@ -44,7 +44,7 @@ class CVEIntegrator:
             dict: Dictionary containing information about the fetched CVEs.
         """
         headers = {"Authorization": f"Bearer {api_key}"}
-        response = requests.get(f"{self.api_url}/vulnerabilities", headers=headers)
+        response = requests.get(f"{self.api_url}/vulnerabilities", headers=headers, timeout=10)
         return response.json()
 
     def check_product_vulnerability(self, product_id, api_key):
@@ -59,7 +59,7 @@ class CVEIntegrator:
             dict: Dictionary containing information about if the product is vulnerable and which CVEs apply.
         """
         headers = {"Authorization": f"Bearer {api_key}"}
-        response = requests.get(f"{self.api_url}/products/{product_id}", headers=headers)
+        response = requests.get(f"{self.api_url}/products/{product_id}", headers=headers, timeout=10)
         return response.json()
 
     def main(self, api_key):

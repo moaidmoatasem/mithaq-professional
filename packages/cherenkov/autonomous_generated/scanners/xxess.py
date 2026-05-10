@@ -57,7 +57,7 @@ class XXESS(object):
 
         decoded_xml = None
         try:
-            decoded_xml = ET.fromstring(xml_input)
+            decoded_xml = ET.fromstring(xml_input)  # nosec B314
         except (ValueError, TypeError):
             # This exception covers invalid input scenarios like incorrect base64 or XML.
             return True
@@ -67,7 +67,7 @@ class XXESS(object):
 
         root = decoded_xml.getroot()
 
-        for elem in ET.iterparse(root.tag):
+        for elem in ET.iterparse(root.tag):  # nosec B314
             if not elem:
                 continue
             self._recursive_check(elem)

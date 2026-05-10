@@ -12,6 +12,7 @@ from datetime import datetime
 logging.basicConfig(level=logging.INFO, format="%(levelname)s: %(message)s")
 logger = logging.getLogger(__name__)
 
+
 def fetch_internal_status() -> dict:
     """
     Simulates parsing REPORT.md and STATUS.md for the latest internal updates.
@@ -22,8 +23,9 @@ def fetch_internal_status() -> dict:
         "version": "0.1.3 (STABLE)",
         "phase": "Phase 2: Swarm Optimization (IN PROGRESS)",
         "highlight": "Implemented Trident Topology for DORA/SAMA compliance.",
-        "tech_debt_cleared": "Transitioned to localized logging, refactored mocked air-gap CI tests."
+        "tech_debt_cleared": "Transitioned to localized logging, refactored mocked air-gap CI tests.",
     }
+
 
 def fetch_external_trends() -> list:
     """
@@ -32,9 +34,16 @@ def fetch_external_trends() -> list:
     logger.info("Scraping external threat intelligence and compliance trends...")
     # In production, integrate with NewsAPI or an RSS scraper focusing on "DORA", "SAMA".
     return [
-        {"title": "DORA Implementation Deadlines Approaching for EU Finance", "source": "CyberRegs Weekly"},
-        {"title": "The Rise of Zero-Trust in MENA: SAMA CSF Updates", "source": "InfoSec Middle East"}
+        {
+            "title": "DORA Implementation Deadlines Approaching for EU Finance",
+            "source": "CyberRegs Weekly",
+        },
+        {
+            "title": "The Rise of Zero-Trust in MENA: SAMA CSF Updates",
+            "source": "InfoSec Middle East",
+        },
     ]
+
 
 def generate_newsletter(internal: dict, external: list) -> str:
     """
@@ -44,7 +53,7 @@ def generate_newsletter(internal: dict, external: list) -> str:
     date_str = datetime.now().strftime("%B %d, %Y")
 
     newsletter = f"""# 📰 The Sovereign Stack
-**Issue Date:** {date_str} | **Project Version:** {internal['version']}
+**Issue Date:** {date_str} | **Project Version:** {internal["version"]}
 
 ## 🌍 The Threat Horizon
 Market shifts this week highlight the growing pressure on regulated sectors:
@@ -54,17 +63,18 @@ Market shifts this week highlight the growing pressure on regulated sectors:
 
     newsletter += f"""
 ## 🛡️ The CHERENKOV Response
-To meet these emerging market demands, we are actively advancing through **{internal['phase']}**.
-**Highlight of the Week:** {internal['highlight']}
+To meet these emerging market demands, we are actively advancing through **{internal["phase"]}**.
+**Highlight of the Week:** {internal["highlight"]}
 
 ## ⚙️ Under the Hood
 Technical excellence is required for sovereign security. This week our team focused on eliminating technical debt:
-- {internal['tech_debt_cleared']}
+- {internal["tech_debt_cleared"]}
 
 ---
 *Subscribe to stay updated on the future of air-gapped, AI-driven cybersecurity.*
 """
     return newsletter
+
 
 if __name__ == "__main__":
     internal_data = fetch_internal_status()

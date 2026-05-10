@@ -43,7 +43,7 @@ _PROFILE_CONFIGS: dict[TOKAMAKProfile, dict] = {
         "cpu_period": 100_000,
         "cpu_quota": 50_000,  # 50% CPU
         "read_only": True,
-        "tmpfs": {"/tmp": "size=64m"},
+        "tmpfs": {"/tmp": "size=64m"},  # nosec B108
         "security_opt": [
             "no-new-privileges",
             "seccomp=./seccomp-profile.json",
@@ -58,7 +58,7 @@ _PROFILE_CONFIGS: dict[TOKAMAKProfile, dict] = {
         "cpu_period": 100_000,
         "cpu_quota": 80_000,  # 80% CPU for decompilation
         "read_only": False,  # Frida writes to /tmp/frida
-        "tmpfs": {"/tmp": "size=256m"},
+        "tmpfs": {"/tmp": "size=256m"},  # nosec B108
         "security_opt": [
             "no-new-privileges",
             # NOTE: No seccomp for mobile — ptrace required by Frida

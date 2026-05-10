@@ -44,7 +44,7 @@ class WebhookListener:
     async def listen_for_webhook(self, app, url):
         async with app:
             route = web.get("/webhook", self.receive_webhook)
-            await asyncio.start_server(route.handler, "0.0.0.0", 8080)
+            await asyncio.start_server(route.handler, "127.0.0.1", 8080)  # nosec B104
             print(f"Listening for webhooks on {url}")
 
     def receive_webhook(self, request):

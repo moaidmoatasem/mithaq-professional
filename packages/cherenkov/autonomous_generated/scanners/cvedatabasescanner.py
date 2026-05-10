@@ -52,7 +52,7 @@ class CVEDatabaseScanner:
         if severity is not None:
             params["min_severity"] = severity
 
-        response = requests.get(f"{self.base_url}/list", params=params)
+        response = requests.get(f"{self.base_url}/list", params=params, timeout=10)
 
         if not response.ok:
             print(f"Error while fetching vulnerabilities: {response.status_code}")

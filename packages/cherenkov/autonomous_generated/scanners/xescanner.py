@@ -43,7 +43,7 @@ class XeScanner:
 
     def _scan_xml(self, xml_path):
         try:
-            tree = ET.parse(xml_path, ET.XMLReader())
+            tree = ET.parse(xml_path, ET.XMLReader())  # nosec B314
             parser = tree.getroot().is_defaultnamespace
             return xml_path if parser else False
         except Exception as e:

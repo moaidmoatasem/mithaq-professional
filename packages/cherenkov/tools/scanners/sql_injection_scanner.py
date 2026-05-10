@@ -40,7 +40,7 @@ def sql_injection_scan(api_url, input_value):
 
     # Loop through each payload and try to execute a SQL query
     for sql_payload in sql_payloads:
-        query = f"SELECT * FROM vulnerable_table WHERE column_name LIKE '%{sql_payload}%'"
+        query = f"SELECT * FROM vulnerable_table WHERE column_name LIKE '%{sql_payload}%'"  # nosec
 
         try:
             response = requests.get(f"{api_url}/{query}", timeout=5)

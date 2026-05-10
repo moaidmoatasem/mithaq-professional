@@ -44,7 +44,7 @@ def send_webhook(notify_url: str, notify_data: dict) -> None:
         raise ValueError("Notify URL cannot be empty or None.")
 
     try:
-        response = requests.post(notify_url, json=notify_data)
+        response = requests.post(notify_url, json=notify_data, timeout=10)
         response.raise_for_status()  # Raises an HTTPError for bad status codes.
     except (requests.RequestException, requests.HTTPError) as e:
         logger.error(f"Failed to send webhook data due to error - {str(e)}")

@@ -268,7 +268,9 @@ class TokamakAgent:
         "auth_bypass": "sqli",
     }
 
-    async def _try_fast_probe(self, target: str, technique: str, title: str) -> TokamakResult | None:
+    async def _try_fast_probe(
+        self, target: str, technique: str, title: str
+    ) -> TokamakResult | None:
         """Attempt a lightweight HTTP probe. Returns None if not applicable."""
         vuln_type = self._FAST_TECHNIQUES.get(technique)
         if vuln_type is None:
@@ -309,7 +311,9 @@ class TokamakAgent:
                         confidence_notes="Fast HTTP probe confirmed vulnerability",
                     )
                     signature = trace.sign()
-                    logger.info("FAST PROBE CONFIRMED — %s on %s (%dms)", technique, target, duration)
+                    logger.info(
+                        "FAST PROBE CONFIRMED — %s on %s (%dms)", technique, target, duration
+                    )
                     return TokamakResult(
                         finding_title=title,
                         verdict=TokamakVerdict.CONFIRMED,
@@ -323,7 +327,7 @@ class TokamakAgent:
 
     async def _do_http_probe(self, target: str, vuln_type: str, payload: str) -> dict[str, Any]:
         """Execute a single HTTP probe with timeout."""
-        async with httpx.AsyncClient(timeout=FAST_PROBE_TIMEOUT, verify=False) as client:  # noqa: S501 — localhost probes only
+        async with httpx.AsyncClient(timeout=FAST_PROBE_TIMEOUT, verify=False) as client:  # nosec B501 # noqa: S501 localhost probes only
             if vuln_type == "xss":
                 r = await client.get(target + httpx.utils.quote(payload), follow_redirects=False)
                 reflected = payload.lower() in r.text.lower()
@@ -334,7 +338,9 @@ class TokamakAgent:
                 detected = any(i in r.text.lower() for i in indicators)
                 return {"exploitable": detected}
             elif vuln_type == "csrf":
-                r = await client.post(target, data={"csrf_test": "tokamak_probe"}, follow_redirects=False)
+                r = await client.post(
+                    target, data={"csrf_test": "tokamak_probe"}, follow_redirects=False
+                )
                 return {"exploitable": r.status_code == 200}
         return {"exploitable": False}
 
@@ -343,13 +349,16 @@ class TokamakAgent:
         FAST_PROBE_LOG.mkdir(parents=True, exist_ok=True)
         path = FAST_PROBE_LOG / f"{vuln_type}_{int(time.time())}.json"
         path.write_text(
-            json.dumps({
-                "finding": title,
-                "vuln_type": vuln_type,
-                "result": {k: str(v) for k, v in result.items()},
-                "duration_ms": round(duration, 2),
-                "timestamp": time.time(),
-            }, indent=2)
+            json.dumps(
+                {
+                    "finding": title,
+                    "vuln_type": vuln_type,
+                    "result": {k: str(v) for k, v in result.items()},
+                    "duration_ms": round(duration, 2),
+                    "timestamp": time.time(),
+                },
+                indent=2,
+            )
         )
 
     async def _execute_poc(self, target: str, technique: str, payload: str) -> dict:

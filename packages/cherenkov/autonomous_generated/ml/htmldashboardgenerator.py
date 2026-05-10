@@ -44,7 +44,7 @@ class HTMLDashboardGenerator:
 
     def __init__(self):
         # Load Jinja2 template files
-        self.environment = Environment(loader=FileSystemLoader("templates"))
+        self.environment = Environment(loader=FileSystemLoader("templates"), autoescape=True)
 
     def generate_html_report(self, data: list):
         """
@@ -70,7 +70,12 @@ class HTMLDashboardGenerator:
         rendered_report = TEMPLATE.render(data=data)
 
         # Write the rendered report to disk (for demonstration purposes, use your destination path here)
-        with open("/tmp/interactive_dashboard.html", "w") as file:
+        import tempfile
+        import os
+
+        # Use tempfile to securely create temporary files
+        fd, temp_path = tempfile.mkstemp(suffix=".html", prefix="interactive_dashboard_")
+        with os.fdopen(fd, "w") as file:
             file.write(rendered_report)
 
 

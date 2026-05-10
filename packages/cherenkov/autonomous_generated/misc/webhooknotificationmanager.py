@@ -74,7 +74,7 @@ class WebhookNotifier(WebhookNotificationManager):
             raise ValueError("Invalid URL. Please provide a valid HTTPS/HTTP web hook resource.")
 
         try:
-            response = requests.post(final_url, json=payload)
+            response = requests.post(final_url, json=payload, timeout=10)
             response.raise_for_status()
         except requests.RequestException as err:
             raise ValueError(f"Failed to send webhook: {err}")

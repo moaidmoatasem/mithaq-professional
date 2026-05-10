@@ -5,6 +5,7 @@ Category: misc
 """
 
 from subprocess import check_call
+import shlex
 
 
 class CICDIntegration:
@@ -42,7 +43,7 @@ class CICDIntegration:
             ValueError: If the process execution fails with an error message.
         """
         try:
-            self.process_result = check_call([test_command], shell=True)
+            self.process_result = check_call(shlex.split(test_command), shell=False)
             if not self.process_result == 0:
                 raise ValueError(self.error_message)
         except Exception as e:

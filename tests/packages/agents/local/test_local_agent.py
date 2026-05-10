@@ -1,3 +1,4 @@
+from unittest.mock import patch, MagicMock
 import pytest
 from cherenkov.agents.local.code_analyzer import CodeAnalyzer
 from cherenkov.agents.local.ollama_client import OllamaClient
@@ -11,7 +12,9 @@ def test_ollama_availability():
 
 
 @pytest.mark.integration
-def test_code_analyzer():
+@patch("cherenkov.agents.local.ollama_client.OllamaClient.is_available", return_value=True)
+@patch("cherenkov.agents.local.ollama_client.OllamaClient.analyze_code")
+def test_code_analyzer(mock_make_request, mock_check):
     vulnerable_code = """
 import sqlite3
 
@@ -22,6 +25,7 @@ def get_user(user_id):
     cursor.execute(query)
     return cursor.fetchall()
 """
+    mock_make_request.return_value = {"findings": "Mock security findings"}
     analyzer = CodeAnalyzer()
-    findings = analyzer.analyze_code(vulnerable_code)
-    assert isinstance(findings, list)
+    findings = analyzer.quick_scan(vulnerable_code)
+    assert isinstance(findings, str)

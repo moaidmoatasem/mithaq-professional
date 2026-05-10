@@ -35,9 +35,9 @@ class SlackDiscordAPI:
         headers = {"Authorization": f"Bearer {self.token}"}
 
         if self.method.upper() == "GET":
-            resp = requests.get(f"{self.url}{endpoint}", headers=headers)
+            resp = requests.get(f"{self.url}{endpoint}", headers=headers, timeout=10)
         else:
-            resp = requests.post(f"{self.url}{endpoint}", headers=headers, json=data)
+            resp = requests.post(f"{self.url}{endpoint}", headers=headers, json=data, timeout=10)
 
         if not resp.ok:
             raise Exception(

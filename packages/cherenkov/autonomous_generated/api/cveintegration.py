@@ -45,7 +45,7 @@ class CVEIntegration:
         params = {"searchRequest": cve_query}
 
         response = requests.get(
-            f"{self.base_url}/securityVulnerabilities", headers=headers, params=params
+            f"{self.base_url}/securityVulnerabilities", headers=headers, params=params, timeout=10
         )
         if response.status_code != 200:
             raise requests.HTTPError(response.text)

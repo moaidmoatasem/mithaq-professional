@@ -55,7 +55,7 @@ class WebhookNotification:
         """
         headers = {"Content-Type": "application/json"}
         try:
-            response = requests.post(self.webhook_url, json={"message": message}, headers=headers)
+            response = requests.post(self.webhook_url, json={"message": message}, headers=headers, timeout=10)
             response.raise_for_status()  # Raises an error for bad HTTP responses
         except requests.RequestException as e:
             raise requests.RequestException(f"Failed to send webhook: {e}")

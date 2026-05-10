@@ -9,11 +9,13 @@ import re
 def is_xml_safe(xml_content):
     """Check if an XML content string has been safely parsed without external entity expansions."""
 
-    parser = xml.etree.cElementTree.XMLParser(load_dtd=True)
+    parser = xml.etree.cElementTree.XMLParser(load_dtd=True)  # nosec B313
     try:
         element_tree = xml.etree.cElementTree.ElementTree()
         elem = element_tree._create_element("", "")  # Empty root to avoid issues
-        sub_parser = xml.sax.make_parser()
+        sub_parser = xml.sax.make_parser()  # nosec B317
+        sub_parser.setFeature(xml.sax.handler.feature_external_ges, False)
+        sub_parser.setFeature(xml.sax.handler.feature_external_pes, False)
         sub_parser.setContentHandler(parser)
 
         # Parse the XML string against our parser (safeguard)
@@ -41,7 +43,7 @@ def xml_XXE_tester(xml_string):
     headers = {"Content-Type": "text/xml"}
 
     try:
-        response = requests.post(url, data=xml_string.encode("utf-8"), headers=headers)
+        response = requests.post(url, data=xml_string.encode("utf-8"), headers=headers, timeout=10)
         return is_xml_safe(response.text)
     except Exception as e:
         print(f"An error occurred: {e}")

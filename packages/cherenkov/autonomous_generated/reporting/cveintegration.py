@@ -33,7 +33,7 @@ class CVEIntegration:
             "endDate": endDate,
         }
 
-        response = requests.get(CVE_API_URL, params=params)
+        response = requests.get(CVE_API_URL, params=params, timeout=10)
         response.raise_for_status()
 
         return response.text.split("\n")

@@ -39,7 +39,7 @@ class WebhookNotifications:
             bool: True if the URL is valid, False otherwise.
         """
         try:
-            result = requests.head(self.url)
+            result = requests.head(self.url, timeout=10)
             return result.status_code == 200
         except Exception as e:
             print(f"Warning: Failed to validate URL with head request. {e}")
@@ -56,7 +56,7 @@ class WebhookNotifications:
             bool: True if the send operation is successful, False otherwise and raises an exception on failure.
         """
         try:
-            result = requests.post(self.url, json=event_data)
+            result = requests.post(self.url, json=event_data, timeout=10)
             return 200 <= result.status_code < 300
         except Exception as e:
             print(

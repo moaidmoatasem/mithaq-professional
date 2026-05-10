@@ -42,7 +42,7 @@ class SmartRetrier:
 
         while tries_remaining > 0:
             try:
-                response = requests.get(url)
+                response = requests.get(url, timeout=10)
                 response.raise_for_status()  # Raises for HTTP errors if there is a bad request, etc.
                 return response
             except (requests.exceptions.RequestException, ValueError):

@@ -34,7 +34,7 @@ class CICDIntegrationScanner:
         """
         try_times = 3
         for attempt in range(try_times):
-            response = requests.get(url)
+            response = requests.get(url, timeout=10)
             if response.status_code == 200:
                 return response.content
             elif response.status_code >= 500 and response.status_code < 600:  # Server errors (5XX)

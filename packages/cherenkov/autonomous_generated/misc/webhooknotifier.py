@@ -35,7 +35,7 @@ class WebhookNotifier:
         :param data: The payload of the notification.
         """
         self._validate_endpoint()
-        response = requests.post(url=self.endpoint, json=data)
+        response = requests.post(url=self.endpoint, json=data, timeout=10)
         return response.status_code
 
 

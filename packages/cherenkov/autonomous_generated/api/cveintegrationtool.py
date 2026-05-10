@@ -31,7 +31,7 @@ class CVEIntegrationTool:
         headers = {"Authorization": self.api_key}
 
         try:
-            resp = requests.get(url, headers=headers)
+            resp = requests.get(url, headers=headers, timeout=10)
             resp.raise_for_status()
         except requests.RequestException as e:
             raise Exception(f"An error occurred while fetching the CVE: {e}")
@@ -48,7 +48,7 @@ class CVEIntegrationTool:
         headers = {"Authorization": self.api_key}
 
         try:
-            resp = requests.get(url, headers=headers)
+            resp = requests.get(url, headers=headers, timeout=10)
             resp.raise_for_status()
         except requests.RequestException as e:
             raise Exception(f"An error occurred while fetching all CVEs: {e}")
@@ -65,7 +65,7 @@ class CVEIntegrationTool:
         headers = {"Authorization": self.api_key}
 
         try:
-            resp = requests.get(url, headers=headers)
+            resp = requests.get(url, headers=headers, timeout=10)
             resp.raise_for_status()
         except requests.RequestException as e:
             raise Exception(f"An error occurred while fetching vulnerable systems: {e}")

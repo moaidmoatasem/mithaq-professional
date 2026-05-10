@@ -30,7 +30,7 @@ class CVEDatabase:
 
         headers = self._build_headers()
 
-        response = requests.get(url, headers=headers, params=params)
+        response = requests.get(url, headers=headers, params=params, timeout=10)
         if not response.ok:
             raise Exception(f"Failed to fetch CVEs for {product_name}. Response: {response.text}")
 

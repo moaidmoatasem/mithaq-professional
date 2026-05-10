@@ -32,7 +32,7 @@ def csrf_scanner_plus(target_url):
             )
 
     # Attempt to read a hidden file.txt
-    response = requests.get(target_url + "/images/file.txt")
+    response = requests.get(target_url + "/images/file.txt", timeout=10)
     if "Content-Type" in response.headers:
         csrf_vulnerable.append(
             "Accessing content of hidden or restricted files likely indicates possible directory traversal attack"

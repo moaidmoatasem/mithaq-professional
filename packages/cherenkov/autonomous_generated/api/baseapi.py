@@ -29,12 +29,12 @@ class BaseApi:
         url = f"{self.base_url}/{endpoint}"
         try:
             if method == "GET":
-                return requests.get(url)
+                return requests.get(url, timeout=10)
             elif method in ["POST", "PUT"]:
                 if data is not None:
-                    response = requests.request(method, url, json=data)
+                    response = requests.request(method, url, json=data, timeout=10)
                 else:
-                    response = requests.request(method, url)
+                    response = requests.request(method, url, timeout=10)
             else:
                 raise Exception(f"Unsupported HTTP method: {method}")
         except Exception as e:

@@ -29,14 +29,14 @@ class CveDatabaseIntegration:
 
     def check_cve_exists(self, cve_id: str) -> bool:
         """Check if a CVE ID exists in the database."""
-        response = requests.get(f"{self.base_url}cves/search", params={"key": cve_id})
+        response = requests.get(f"{self.base_url}cves/search", params={"key": cve_id}, timeout=10)
         return response.status_code == 200 and response.json().get("success") is True
 
     def get_cve_details(self, cve_id: str) -> dict:
         """Retrieve details for a specific CVE ID."""
         if not self.check_cve_exists(cve_id):
             raise ValueError(f"CVE {cve_id} does not exist in the database.")
-        response = requests.get(f"{self.base_url}cves/details/{cve_id}")
+        response = requests.get(f"{self.base_url}cves/details/{cve_id}", timeout=10)
         return response.json()
 
     def search_by_criteria(self, **criteria: dict) -> list:
@@ -48,7 +48,7 @@ class CveDatabaseIntegration:
                 "Search criteria must include at least one of `key`, `vendor`, or `product`."
             )
 
-        response = requests.post(f"{self.base_url}cves/search", json=criteria)
+        response = requests.post(f"{self.base_url}cves/search", json=criteria, timeout=10)
         return [
             rec["details"]
             for rec in response.json().get("records", [])

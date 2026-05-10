@@ -27,7 +27,7 @@ class CVEConnector:
         if severity:
             params["severity"] = severity
 
-        response = requests.get(urljoin(self.base_url, "vulnerabilities/search"), params=params)
+        response = requests.get(urljoin(self.base_url, "vulnerabilities/search"), params=params, timeout=10)
         return json.loads(response.text)
 
 

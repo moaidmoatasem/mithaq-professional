@@ -37,7 +37,7 @@ class PipelineIntegrationScanner:
         """
 
         try:
-            response = requests.get(url=self.url)
+            response = requests.get(url=self.url, timeout=10)
             response.raise_for_status()  # Raise an HTTPError for bad responses
         except requests.RequestException as e:
             raise Exception(f"Failed to connect. Error: {e}")

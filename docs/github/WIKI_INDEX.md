@@ -6,9 +6,9 @@ Reader-facing docs are also published at [https://docs.cherenkov-security.com/](
 
 ## 1. Getting Started
 * [Project briefing (single entry)](../PROJECT_BRIEFING.md)
-* [Quick Start & Local Deployment](../../README.md)
+* [Quick Start & Local Deployment](https://github.com/moaidmoatasem/cherenkov-professional/blob/main/README.md)
 * [The Trident of Truth Architecture](../architecture/SYSTEM_ARCHITECTURE.md)
-* [CHERENKOV vs Traditional Scanners](../../README.md)
+* [CHERENKOV vs Traditional Scanners](https://github.com/moaidmoatasem/cherenkov-professional/blob/main/README.md)
 
 ## 2. Technical Product Management (TPM)
 * [Product Roadmap](../pm/ROADMAP.md)
@@ -22,6 +22,6 @@ Reader-facing docs are also published at [https://docs.cherenkov-security.com/](
 * [Human-in-the-Loop (HITL) Enforcement](../pm/SYSTEM_DESIGN.md#22-orchestration-flow)
 
 ## 4. Contributing
-* [Code of Conduct](../../CODE_OF_CONDUCT.md)
-* [Contribution Guidelines](../../CONTRIBUTING.md)
-* [Security Policy](../../SECURITY.md)
+* [Code of Conduct](https://github.com/moaidmoatasem/cherenkov-professional/blob/main/CODE_OF_CONDUCT.md)
+* [Contribution Guidelines](https://github.com/moaidmoatasem/cherenkov-professional/blob/main/CONTRIBUTING.md)
+* [Security Policy](https://github.com/moaidmoatasem/cherenkov-professional/blob/main/SECURITY.md)

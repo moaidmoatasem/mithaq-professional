@@ -1,7 +1,7 @@
 # CHERENKOV TOKAMAK LITE (Community Edition)
 # Purpose: Ephemeral, network-isolated detonation sandbox
 
-FROM python:3.11-alpine
+FROM python:3.11
 
 # Enforce Meissner zero-egress at the container level
 # (Disables internet access during the run phase)
@@ -9,7 +9,7 @@ LABEL cherenkov.isolation.network="disabled"
 LABEL cherenkov.perimeter="MEISSNER-LITE"
 
 # Create a non-root user for detonation
-RUN addgroup -S tokamak_group && adduser -S tokamak_user -G tokamak_group
+RUN useradd -ms /bin/bash tokamak_user
 
 WORKDIR /sandbox
 
@@ -20,8 +20,8 @@ COPY ./tests /sandbox/tests
 
 # Install pytest
 COPY requirements.txt requirements-api.txt ./
-RUN pip install -r requirements.txt -r requirements-api.txt
-RUN pip install pytest pytest-asyncio pytest-cov pydantic python-dotenv flask typer requests cryptography crewai pyyaml
+COPY pyproject.toml ./
+RUN pip install -r requirements.txt -r requirements-api.txt && pip install pytest pytest-asyncio pytest-cov httpx python-dotenv pydantic requests cryptography crewai pyyaml flask typer
 
 # Drop privileges immediately
 USER tokamak_user

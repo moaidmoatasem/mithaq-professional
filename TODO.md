@@ -19,7 +19,7 @@
 Issues: #16, #17, #18, #19, #20
 - [x] #16 Hardware-Agnostic Environment Setup Script
 - [x] #17 Dynamic Model Quantization & Benchmarking
-- [ ] #18 Context-Preserving Sanitization Bridge
+- [x] #18 Context-Preserving Sanitization Bridge
 - [x] #19 Define Cherenkov Trace Schema
 - [x] #20 Trace Recorder & State Engine
 

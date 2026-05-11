@@ -64,7 +64,8 @@ packages/cherenkov/
 
 ## Next Steps
 ## Next Steps
-- [ ] Complete v1.0.0-rc1 issues (#18 Sanitization Bridge, #19 Trace Schema, #20 Trace Recorder)
+- [x] Complete v1.0.0-rc1 issues (#18 Sanitization Bridge, #19 Trace Schema, #20 Trace Recorder)
+- [x] v1.0.0-rc1 Sovereign Foundation is now COMPLETE.
 - [ ] Start v1.1.0 backlog (HTTP client, mobile scanners, CI pipeline)
 
 **Status:** READY FOR DEVELOPMENT

@@ -20,8 +20,8 @@ Issues: #16, #17, #18, #19, #20
 - [x] #16 Hardware-Agnostic Environment Setup Script
 - [x] #17 Dynamic Model Quantization & Benchmarking
 - [ ] #18 Context-Preserving Sanitization Bridge
-- [ ] #19 Define Cherenkov Trace Schema
-- [ ] #20 Trace Recorder & State Engine
+- [x] #19 Define Cherenkov Trace Schema
+- [x] #20 Trace Recorder & State Engine
 
 ## v1.1.0 — Swarm Concurrency (Milestone 5)
 Issues: #21, #22, #23, #24, #25, #88, #89, #90, #91, #102

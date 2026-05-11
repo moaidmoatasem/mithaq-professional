@@ -18,9 +18,14 @@ WORKDIR /sandbox
 COPY ./packages /sandbox/packages
 COPY ./tests /sandbox/tests
 
+# Install pytest
+COPY requirements.txt requirements-api.txt ./
+RUN pip install -r requirements.txt -r requirements-api.txt
+RUN pip install pytest pytest-asyncio pytest-cov pydantic python-dotenv flask typer requests cryptography crewai pyyaml
+
 # Drop privileges immediately
 USER tokamak_user
 
 # The default command will be overridden by the CI/CD pipeline
 # to run the specific test or payload
-CMD ["python", "-m", "pytest", "tests/"]
+CMD ["pytest", "tests/"]

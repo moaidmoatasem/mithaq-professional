@@ -1,23 +1,37 @@
-# CHERENKOV Roadmap — Progress
+# Roadmap & Progress
 
-_Updated: 2026-05-10_
+_Updated: 2026-05-11_
 
-## Milestone Progress
+```mermaid
+gantt
+    title CHERENKOV Roadmap
+    dateFormat YYYY-MM-DD
+    v1.0.0-rc1 :active, 2026-05-10
+    v1.1.0 :active, 2026-07-10
+    v1.5.0 :active, 2026-09-10
+    v2.0.0 :active, 2027-01-10
+    v2.5.0 :active, 2027-05-10
+```
 
-| Milestone | Phase | Due | Issues | Progress |
-|---|---|---|---|---|
-| v1.0.0-rc1 | Sovereign Foundation | 2026-05 | #16-#20 (5 issues) | 40% (2/5 closed) |
-| v1.1.0 | Swarm Concurrency | 2026-07 | #21-#25, #88-#91, #102 (10 issues) | 0% |
-| v1.5.0 | Enterprise Validation & HITL | 2026-09 | #93-#96 (4 issues) | 0% |
-| v2.0.0 | Mobile Triad | 2027-01 | #97-#99 (3 issues) | 0% |
-| v2.5.0 | Ecosystem Integration | 2027-05 | #100-#101 (2 issues) | 0% |
+## Status
 
-## Active Sprint
+### v1.0.0-rc1
+- **Progress:** 67% (4/6)
+- **Due:** 2026-05-10
 
-- **v1.0.0-rc1**: #16, #17 ✅ — #18 (Sanitization Bridge), #19 (Trace Schema), #20 (Trace Recorder) in progress
-- **Next**: Complete Phase 1a (Zero-Trust Core), then start v1.1.0
+### v1.1.0
+- **Progress:** 10% (1/10)
+- **Due:** 2026-07-10
 
-## Board
+### v1.5.0
+- **Progress:** 0% (0/4)
+- **Due:** 2026-09-10
 
-Project board: https://github.com/users/moaidmoatasem/projects/2
-Wiki: https://docs.cherenkov-security.com
+### v2.0.0
+- **Progress:** 0% (0/3)
+- **Due:** 2027-01-10
+
+### v2.5.0
+- **Progress:** 0% (0/2)
+- **Due:** 2027-05-10
+

@@ -1,6 +1,6 @@
 # Roadmap & Progress
 
-_Updated: 2026-05-11_
+_Updated: 2026-05-12_
 
 ```mermaid
 gantt
@@ -16,7 +16,7 @@ gantt
 ## Status
 
 ### v1.0.0-rc1
-- **Progress:** 67% (4/6)
+- **Progress:** 57% (4/7)
 - **Due:** 2026-05-10
 
 ### v1.1.0

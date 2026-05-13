@@ -33,7 +33,9 @@ site/
 # Secrets
 .env
 
-# wrangler files
+# Node / wrangler
+node_modules/
+package-lock.json
 .wrangler
 .dev.vars*
 !.dev.vars.example

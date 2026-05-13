@@ -4,8 +4,10 @@ from .schemas.cherenkov_trace import CherenkovTrace
 
 logger = logging.getLogger(__name__)
 
+
 class TraceRecorder:
     """Trace Recorder & State Engine for Cherenkov traces."""
+
     def __init__(self, trace_log_path: str = "cherenkov_traces.jsonl"):
         self.trace_log_path = trace_log_path
 

@@ -590,7 +590,6 @@ class Meissner(CircuitBreaker):
             logger.error(f"Meissner Recovery Error: Failed to restore connectivity: {e}")
 
 
-
 class CircuitBreakerRegistry:
     """
     Registry for managing multiple circuit breakers.
@@ -683,4 +682,3 @@ def fail_closed() -> None:
 def fail_open() -> None:
     """Restore global network connectivity."""
     meissner_hub.fail_open()
-

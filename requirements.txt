@@ -1,7 +1,7 @@
 crewai>=1.14.4
 requests>=2.33.1
 httpx>=0.27.0
-flask>=3.1.3
+# flask removed — dashboard migrated to FastAPI (see packages/cherenkov/api/main.py)
 ollama>=0.6.2
 python-dotenv>=1.0.0
 pydantic>=2.0.0

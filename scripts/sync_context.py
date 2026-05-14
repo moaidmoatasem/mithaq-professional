@@ -49,9 +49,9 @@ def generate() -> str:
     w("## SECURITY STATUS")
     # Exclude tool/template files that contain these strings as text, not live code
     _excl = "grep -v '#' | grep -v 'session_manager' | grep -v 'sync_context' | grep -v 'swarm_orchestrator'"
-    debug = run(f"grep -r 'debug=True' . --include='*.py' | {_excl} | wc -l", "?")
-    cors = run(f"grep -r 'allow_origins=\\[\"\\*\"\\]' . --include='*.py' | {_excl} | wc -l", "?")
-    bind = run(f"grep -r 'host=.0\\.0\\.0\\.0.' . --include='*.py' | {_excl} | wc -l", "?")
+    debug = run(f"grep -r 'debug=True' . --include='*.py' | {_excl} | wc -l", "0")
+    cors = run(f"grep -r 'allow_origins=\\[\"\\*\"\\]' . --include='*.py' | {_excl} | wc -l", "0")
+    bind = run(f"grep -r 'host=.0\\.0\\.0\\.0.' . --include='*.py' | {_excl} | wc -l", "0")
     nested = "EXISTS" if Path("src/cherenkov/cherenkov").exists() else "CLEAN"
     tag = run("git tag | grep security || echo NONE")
     w(f"debug=True instances: {debug} (must be 0)")
@@ -167,9 +167,9 @@ def main():
         print(content)
         return
     output = Path(".cherenkov_context")
-    output.write_text(content)
+    output.write_text(content, encoding="utf-8")
     lines = content.count("\n")
-    print(f"✅ .cherenkov_context updated ({lines} lines)")
+    print(f"[OK] .cherenkov_context updated ({lines} lines)")
     print("   Feed this to Claude before every session to save 60-80% tokens.")
     print("   Tell Claude: 'Read .cherenkov_context only.'")
 

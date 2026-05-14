@@ -3,9 +3,9 @@
 ## OPERATIONAL
 
 **Build:** 0.1.3 (STABLE)
-**Tests:** 25/25 orchestration + 26 core = 51 pass (1 pre-existing crewai dep failure)
+**Tests:** 53 passed
 **Security:** Hardened
-**Coverage:** fail_under = 25%
+**Coverage:** 25% (fail_under)
 
 ### Core Systems
 - [x] Package restructure: `packages/cherenkov/` (logical subpackages, single installable)
@@ -35,7 +35,7 @@
 ### Backlog by Milestone
 | Milestone | Issues | Status |
 |---|---|---|
-| v1.0.0-rc1 — Sovereign Foundation | #16-#20 | 2 done, 3 in progress |
+| v1.0.0-rc1 — Sovereign Foundation | #16-#20 | 5 done |
 | v1.1.0 — Swarm Concurrency | #21-#25, #88-#91, #102 | 10 open |
 | v1.5.0 — Enterprise Validation & HITL | #93-#96 | 4 open |
 | v2.0.0 — Mobile Triad | #97-#99 | 3 open |
@@ -62,7 +62,6 @@ packages/cherenkov/
 ### Performance
 - RAM Usage: 4-6GB | Speed: 2-3x sequential | Reliability: 100% | Cost: $0
 
-## Next Steps
 ## Next Steps
 - [x] Complete v1.0.0-rc1 issues (#18 Sanitization Bridge, #19 Trace Schema, #20 Trace Recorder)
 - [x] v1.0.0-rc1 Sovereign Foundation is now COMPLETE.

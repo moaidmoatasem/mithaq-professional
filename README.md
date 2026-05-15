@@ -39,6 +39,19 @@ CHERENKOV operates on a mathematically provable "Trident of Truth": it finds vul
 
 ---
 
+## 📊 Current Status
+
+| Item | Status |
+|---|---|
+| Security baseline | ✅ v0.1.1-security |
+| Core architecture (11 files) | ✅ Phase 2 complete |
+| P0 security fixes | ✅ PR #143 merged |
+| Validated scanners | 🟡 5 of 50 target |
+| TOKAMAK PoC execution | ⬜ Phase 4 |
+| Cairo pilot | ⬜ Phase 6 |
+
+---
+
 ## 🛡️ The Trident Architecture
 
 The platform divides cognitive execution across a highly restricted multi-agent swarm, governed by strict physical and cryptographic boundaries.
@@ -66,11 +79,11 @@ CHERENKOV is built for Docker-native, offline execution.
 git clone https://github.com/moaidmoatasem/cherenkov-professional.git
 cd cherenkov-professional
 
-# 2. Configure environment (No external APIs required)
+# 2. Configure environment
 cp .env.example .env
 
-# 3. Initialize the MEISSNER perimeter and local Ollama swarm
-bash launch_perfection.sh
+# 3. Start the stack
+docker-compose -f deploy/docker-compose.yml up
 ```
 
 ## ⚖️ Licensing & The Ethical Open-Core

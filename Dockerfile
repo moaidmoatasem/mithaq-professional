@@ -17,13 +17,13 @@ COPY requirements.txt .
 # Install Python dependencies
 RUN pip install --no-cache-dir -r requirements.txt
 
-# Copy application code (fix: remove non-existent cherenkov/ directory)
-COPY src/ ./src/
-COPY scripts/ ./scripts/ 
+# Copy application code
+COPY packages/ ./packages/
+COPY scripts/ ./scripts/
 COPY examples/ ./examples/
 
 # Set PYTHONPATH
-ENV PYTHONPATH=/app/src:/app
+ENV PYTHONPATH=/app/packages:/app
 
 # Create workflow results directory
 RUN mkdir -p /app/workflow_results

@@ -6,21 +6,21 @@ Category: misc
 
 # Production-ready Implementation of Smart Retry Logic
 
-from time import sleep
+import asyncio
 from urllib.parse import urljoin
 
-import requests
+import httpx
 
 
 class SmartRetrier:
     """
     A class to implement smart retry logic for HTTP request. It handles exponential backoff
-    and includes detailed error handling.
+    and includes detailed error handling using httpx.AsyncClient.
 
     Example Usage:
-    def process_url(url: str) -> None:
-        retrier = SmartRetrier()
-        response = retrier.fetch_data(url)
+    async def process_url(url: str) -> None:
+        retrier = SmartRetrier(url)
+        response = await retrier.fetch_data(url)
         print(response.text if response else "Request failed after all retries.")
 
     """
@@ -29,43 +29,46 @@ class SmartRetrier:
         self.base_url = base_url
         self.max_retries = max_retries
 
-    def _fetch_data(self, url: str, sleep_time: float = 1.0) -> requests.Response:
+    async def _fetch_data(self, url: str, initial_sleep_time: float = 1.0) -> httpx.Response:
         """Fetches data from the given URL.
         Implements exponential backoff retry logic up to a maximum number of attempts."""
 
         if not url.startswith("http"):
             url = self.base_url + url
 
-        response = None
         tries_remaining = self.max_retries
-        sleep_time = 2**tries_remaining  # Exponential backoff
+        attempt = 0
 
-        while tries_remaining > 0:
-            try:
-                response = requests.get(url, timeout=10)
-                response.raise_for_status()  # Raises for HTTP errors if there is a bad request, etc.
-                return response
-            except (requests.exceptions.RequestException, ValueError):
-                print(f"Request failed. Retrying in {sleep_time:.1f} seconds...")
-                sleep(sleep_time)
-                tries_remaining -= 1
+        async with httpx.AsyncClient() as client:
+            while tries_remaining > 0:
+                try:
+                    response = await client.get(url, timeout=10.0)
+                    response.raise_for_status()  # Raises for HTTP errors if there is a bad request, etc.
+                    return response
+                except (httpx.RequestError, httpx.HTTPStatusError, ValueError):
+                    sleep_time = initial_sleep_time * (2 ** attempt)  # Exponential backoff
+                    print(f"Request failed. Retrying in {sleep_time:.1f} seconds...")
+                    await asyncio.sleep(sleep_time)
+                    tries_remaining -= 1
+                    attempt += 1
 
         raise Exception("Max retries reached and no success. Aborting.")
 
-    def fetch_data(self, url: str) -> requests.Response:
+    async def fetch_data(self, url: str) -> httpx.Response:
         """Primary method to be used externally. It encapsulates the internal logic of fetching data.
 
         Arguments:
             url: The full URL for the request.
 
         Returns:
-            A `requests.Response` object or an exception on failure."""
-        url = self.base_url + url  # Ensures valid url format
-        return self._fetch_data(url=url)
+            A `httpx.Response` object or an exception on failure."""
+        if not url.startswith("http"):
+            url = self.base_url + url  # Ensures valid url format
+        return await self._fetch_data(url=url)
 
 
 # Example usage
-def process_url(urls_to_process: list) -> None:
+async def process_url(urls_to_process: list) -> None:
     """Processes a list of URLs. It retries failed requests up to max_retries times.
 
     Arguments:
@@ -74,18 +77,18 @@ def process_url(urls_to_process: list) -> None:
     for url in urls_to_process:
         try:
             retrier = SmartRetrier(url)
-            response = retrier.fetch_data(url)
+            response = await retrier.fetch_data(url)
             print(f"Success: {url}")
         except Exception as e:
             print(str(e))
 
 
 # Example check function
-def check_function():
+async def check_function():
     smart_retrier = SmartRetrier("https://example.invalid/endpoint/")
     try:
         # Simulate request which could fail, for example, due to timeout.
-        response = smart_retrier.fetch_data(urljoin("http://", "verywrongurl"))
+        response = await smart_retrier.fetch_data(urljoin("http://", "verywrongurl"))
         if response.status_code == 404 or "unreachable" in str(response.content):
             print("Simulated failure.")
     except Exception as e:
@@ -95,5 +98,5 @@ def check_function():
 
 
 if __name__ == "__main__":
-    process_url(["https://example.com", "/invalid"])
-    check_function()
+    asyncio.run(process_url(["https://example.com", "/invalid"]))
+    asyncio.run(check_function())

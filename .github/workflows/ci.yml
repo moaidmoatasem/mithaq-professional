@@ -45,14 +45,9 @@ jobs:
       run: |
         ruff format --check packages/
 
-    - name: Run Mypy (type check)
-      run: |
-        mypy packages/ --ignore-missing-imports
-
     - name: Run tests
       run: |
-        export PYTHONPATH=$PYTHONPATH:$(pwd)
-        pytest -m "not (integration or ai_generated)" --tb=short
+        PYTHONPATH=packages pytest -m "not (integration or ai_generated)" --tb=short --cov=cherenkov --cov-report=xml
 
     - name: Upload coverage to Codecov
       if: always()

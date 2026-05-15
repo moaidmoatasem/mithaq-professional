@@ -43,10 +43,10 @@ def test_imports():
 # Test 2: Check file structure
 def test_structure():
     required_dirs = [
-        "cherenkov/agents",
-        "cherenkov/core",
-        "cherenkov/scanners",
-        "cherenkov/crews",
+        "packages/cherenkov/agents",
+        "packages/cherenkov/core",
+        "packages/cherenkov/scanners",
+        "packages/cherenkov/crews",
     ]
     for dir_path in required_dirs:
         assert Path(dir_path).exists(), f"Missing: {dir_path}"
@@ -57,14 +57,15 @@ def test_structure():
 def test_scanner():
     from cherenkov.scanners.header_scanner import SimpleScanner
 
-    scanner = SimpleScanner("https://example.com")
+    scanner = SimpleScanner(target_url="https://example.com")
     assert scanner.target == "https://example.com"
     print("✓ Scanner initialized correctly")
 
 
 # Test 4: AI-generated scanners exist
 def test_generated_scanners():
-    scanner_dir = Path("cherenkov/scanners/generated")
+    # Looking in autonomous_generated directory due to new structure
+    scanner_dir = Path("packages/cherenkov/autonomous_generated/scanners")
     python_files = list(scanner_dir.glob("*.py"))
     count = len([f for f in python_files if f.name != "__init__.py"])
     print(f"✓ Found {count} AI-generated scanners")

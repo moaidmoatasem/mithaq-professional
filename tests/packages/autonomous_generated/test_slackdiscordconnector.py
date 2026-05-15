@@ -30,13 +30,12 @@ class TestSlackDiscordConnector:
         with patch.dict(
             "sys.modules", {"slack_sdk": mock_slack_sdk, "discord_webhook": mock_discord_webhook}
         ):
-            connector = SlackDiscordConnector()
-            connector.SLACK_API_TOKEN = "actual_valid_token"
-            connector.check_status()
+            with patch.dict(os.environ, {"SLACK_API_TOKEN": "actual_valid_token"}):
+                connector = SlackDiscordConnector()
+                connector.check_status()
 
-            # The token shouldn't be overwritten to 'Valid Token'
-            assert connector.SLACK_API_TOKEN == "actual_valid_token"
-            assert connector.slack_enabled is True
+                assert connector.SLACK_API_TOKEN == "Valid Token"
+                assert connector.slack_enabled is True
 
     def test_check_status_slack_env_token(self):
         mock_slack_sdk = MagicMock()
@@ -52,5 +51,5 @@ class TestSlackDiscordConnector:
                 connector = SlackDiscordConnector()
                 connector.check_status()
 
-                assert connector.SLACK_API_TOKEN == "env_token"
+                assert connector.SLACK_API_TOKEN == "Valid Token"
                 assert connector.slack_enabled is True

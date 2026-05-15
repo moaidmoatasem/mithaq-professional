@@ -3,4 +3,4 @@
 # site, the theme + pymdownx config below is sufficient for Material 9.x.
 mkdocs>=1.6.1,<2
 mkdocs-material>=9.5.0,<10
-pymdown-extensions>=10.7,<11
+pymdown-extensions>=10.21.3,<11

@@ -1,4 +1,4 @@
 import sys
-from pathlib import Path
+import os
 
-sys.path.insert(0, str(Path(__file__).parent.parent / "packages"))
+sys.path.insert(0, os.path.join(os.path.dirname(__file__), "..", "packages"))

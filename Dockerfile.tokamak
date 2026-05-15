@@ -32,4 +32,5 @@ USER tokamak_user
 
 # The default command will be overridden by the CI/CD pipeline
 # to run the specific test or payload
+ENV PYTHONPATH="/sandbox:${PYTHONPATH}"
 CMD ["pytest", "tests/"]

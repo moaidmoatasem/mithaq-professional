@@ -51,7 +51,8 @@ jobs:
 
     - name: Run tests
       run: |
-        pytest -m "not (integration or ai_generated)" --tb=short --cov=cherenkov --cov-report=xml
+        export PYTHONPATH=$PYTHONPATH:$(pwd)
+        pytest -m "not (integration or ai_generated)" --tb=short
 
     - name: Upload coverage to Codecov
       if: always()

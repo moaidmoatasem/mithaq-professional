@@ -21,10 +21,9 @@ COPY cherenkov_web.py /sandbox/cherenkov_web.py
 COPY cherenkov_simple_scanner.py /sandbox/cherenkov_simple_scanner.py
 COPY system_dashboard.py /sandbox/system_dashboard.py
 
-# Install pytest
-COPY requirements.txt requirements-api.txt ./
+# Install dependencies via pyproject.toml (requirements.txt removed — pyproject.toml is canonical)
 COPY pyproject.toml ./
-RUN pip install -r requirements.txt -r requirements-api.txt && pip install pytest pytest-asyncio pytest-cov httpx python-dotenv pydantic requests cryptography crewai pyyaml flask typer
+RUN pip install --no-cache-dir pytest pytest-asyncio pytest-cov httpx python-dotenv pydantic requests cryptography crewai pyyaml typer
 ENV PYTHONPATH=/sandbox/packages:/sandbox
 
 # Drop privileges immediately

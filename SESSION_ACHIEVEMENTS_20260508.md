@@ -10,7 +10,7 @@
 ## 🚀 Features Completed
 
 ### Repository Alignment & Rebranding
-- [x] Repository fully rebranded to `cherenkov-professional`; local files updated, manual folder rename instructed.
+- [x] Repository fully rebranded to `cherenkov-professional` (Local files updated, manual folder rename instructed).
 - [x] Global string replacement in `CITATION.cff`, `Dockerfile`, `.env.example`, and metadata files.
 - [x] Aligned documentation terminology (MEISSNER, ABLATION, TOKAMAK).
 

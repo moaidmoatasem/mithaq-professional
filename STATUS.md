@@ -3,9 +3,9 @@
 ## OPERATIONAL
 
 **Build:** 0.1.3 (STABLE)
-**Tests:** 53 passed
+**Tests:** 25/25 orchestration + 26 core = 51 pass (1 pre-existing crewai dep failure)
 **Security:** Hardened
-**Coverage:** 25% (fail_under)
+**Coverage:** fail_under = 25%
 
 ### Core Systems
 - [x] Package restructure: `packages/cherenkov/` (logical subpackages, single installable)
@@ -35,8 +35,8 @@
 ### Backlog by Milestone
 | Milestone | Issues | Status |
 |---|---|---|
-| v1.0.0-rc1 — Sovereign Foundation | #16-#20 | 5 done |
-| v1.1.0 — Swarm Concurrency | #21-#25, #88-#91, #102 | 10 open |
+| v1.0.0-rc1 — Sovereign Foundation | #16-#20 | 2 done, 3 in progress |
+| v1.1.0 — Swarm Concurrency | #21-#25, #88-#91, #102 | 2 done, 8 open |
 | v1.5.0 — Enterprise Validation & HITL | #93-#96 | 4 open |
 | v2.0.0 — Mobile Triad | #97-#99 | 3 open |
 | v2.5.0 — Ecosystem Integration | #100-#101 | 2 open |
@@ -63,8 +63,11 @@ packages/cherenkov/
 - RAM Usage: 4-6GB | Speed: 2-3x sequential | Reliability: 100% | Cost: $0
 
 ## Next Steps
+## Next Steps
 - [x] Complete v1.0.0-rc1 issues (#18 Sanitization Bridge, #19 Trace Schema, #20 Trace Recorder)
 - [x] v1.0.0-rc1 Sovereign Foundation is now COMPLETE.
-- [ ] Start v1.1.0 backlog (HTTP client, mobile scanners, CI pipeline)
+- [ ] Start v1.1.0 backlog (HTTP client, mobile scanners)
+- [x] Wire CI Pipeline (lint, typecheck, test) (#102)
+- [x] Replace print() with logging in scanners (#91)
 
 **Status:** READY FOR DEVELOPMENT

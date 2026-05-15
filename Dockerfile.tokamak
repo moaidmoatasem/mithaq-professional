@@ -17,11 +17,15 @@ WORKDIR /sandbox
 # Alignment fix: using packages/ instead of non-existent src/
 COPY ./packages /sandbox/packages
 COPY ./tests /sandbox/tests
+COPY cherenkov_web.py /sandbox/cherenkov_web.py
+COPY cherenkov_simple_scanner.py /sandbox/cherenkov_simple_scanner.py
+COPY system_dashboard.py /sandbox/system_dashboard.py
 
 # Install pytest
 COPY requirements.txt requirements-api.txt ./
 COPY pyproject.toml ./
 RUN pip install -r requirements.txt -r requirements-api.txt && pip install pytest pytest-asyncio pytest-cov httpx python-dotenv pydantic requests cryptography crewai pyyaml flask typer
+ENV PYTHONPATH=/sandbox/packages:/sandbox
 
 # Drop privileges immediately
 USER tokamak_user

@@ -6,10 +6,13 @@ Minimal viable product - Actually works!
 
 import argparse
 import json
+import logging
 from datetime import datetime
 from urllib.parse import urlparse
 
 import requests
+
+logger = logging.getLogger(__name__)
 
 
 class SimpleScanner:
@@ -25,7 +28,7 @@ class SimpleScanner:
 
     def scan_security_headers(self):
         """Check for missing security headers"""
-        print(f"\n[*] Scanning security headers for {self.target}")
+        logger.info("[*] Scanning security headers for %s", self.target)
 
         try:
             response = requests.get(self.target, timeout=10)
@@ -49,16 +52,16 @@ class SimpleScanner:
                         "description": f"Missing {header} ({purpose})",
                     }
                     self.results["vulnerabilities"].append(vuln)
-                    print(f"  [!] MISSING: {header}")
+                    logger.warning("  [!] MISSING: %s", header)
                 else:
-                    print(f"  [✓] Found: {header}")
+                    logger.info("  [✓] Found: %s", header)
 
         except Exception as e:
-            print(f"  [!] Error: {e}")
+            logger.error("  [!] Error: %s", e)
 
     def scan_http_methods(self):
         """Check for dangerous HTTP methods"""
-        print("\n[*] Checking HTTP methods")
+        logger.info("[*] Checking HTTP methods")
 
         dangerous_methods = ["PUT", "DELETE", "TRACE", "CONNECT"]
 
@@ -73,15 +76,15 @@ class SimpleScanner:
                         "description": f"{method} method is allowed",
                     }
                     self.results["vulnerabilities"].append(vuln)
-                    print(f"  [!] {method} is ALLOWED (Status: {response.status_code})")
+                    logger.warning("  [!] %s is ALLOWED (Status: %s)", method, response.status_code)
                 else:
-                    print(f"  [✓] {method} is blocked")
+                    logger.info("  [✓] %s is blocked", method)
             except:
-                print(f"  [✓] {method} is blocked")
+                logger.info("  [✓] %s is blocked", method)
 
     def scan_ssl_tls(self):
         """Check SSL/TLS configuration"""
-        print("\n[*] Checking SSL/TLS")
+        logger.info("[*] Checking SSL/TLS")
 
         parsed = urlparse(self.target)
         if parsed.scheme != "https":
@@ -91,40 +94,40 @@ class SimpleScanner:
                 "description": "Site is not using HTTPS",
             }
             self.results["vulnerabilities"].append(vuln)
-            print("  [!] Site is using HTTP (insecure)")
+            logger.warning("  [!] Site is using HTTP (insecure)")
         else:
-            print("  [✓] Site is using HTTPS")
+            logger.info("  [✓] Site is using HTTPS")
 
     def generate_report(self):
         """Generate scan report"""
-        print("\n" + "=" * 70)
-        print("SCAN REPORT")
-        print("=" * 70)
-        print(f"Target: {self.results['target']}")
-        print(f"Scan Time: {self.results['timestamp']}")
-        print(f"Vulnerabilities Found: {len(self.results['vulnerabilities'])}")
-        print("=" * 70)
+        logger.info("\n" + "=" * 70)
+        logger.info("SCAN REPORT")
+        logger.info("=" * 70)
+        logger.info("Target: %s", self.results['target'])
+        logger.info("Scan Time: %s", self.results['timestamp'])
+        logger.info("Vulnerabilities Found: %d", len(self.results['vulnerabilities']))
+        logger.info("=" * 70)
 
         if not self.results["vulnerabilities"]:
-            print("\n✅ No vulnerabilities detected!")
+            logger.info("\n✅ No vulnerabilities detected!")
         else:
-            print("\n⚠️  VULNERABILITIES:")
+            logger.warning("\n⚠️  VULNERABILITIES:")
             for i, vuln in enumerate(self.results["vulnerabilities"], 1):
-                print(f"\n{i}. {vuln['type']} [{vuln['severity']}]")
-                print(f"   {vuln.get('description', '')}")
+                logger.warning("\n%d. %s [%s]", i, vuln['type'], vuln['severity'])
+                logger.warning("   %s", vuln.get('description', ''))
 
         # Save to file
         report_file = f"scan_report_{datetime.now().strftime('%Y%m%d_%H%M%S')}.json"
         with open(report_file, "w") as f:
             json.dump(self.results, f, indent=2)
 
-        print(f"\n📄 Full report saved to: {report_file}")
+        logger.info("\n📄 Full report saved to: %s", report_file)
 
     def run(self):
         """Run all scans"""
-        print("=" * 70)
-        print("🔍 cherenkov SECURITY SCANNER")
-        print("=" * 70)
+        logger.info("=" * 70)
+        logger.info("🔍 cherenkov SECURITY SCANNER")
+        logger.info("=" * 70)
 
         self.scan_security_headers()
         self.scan_http_methods()
@@ -133,6 +136,7 @@ class SimpleScanner:
 
 
 if __name__ == "__main__":
+    logging.basicConfig(level=logging.INFO, format="%(levelname)s: %(message)s")
     parser = argparse.ArgumentParser(description="cherenkov - Simple Security Scanner")
     parser.add_argument("url", help="Target URL to scan (e.g., https://example.com)")
 

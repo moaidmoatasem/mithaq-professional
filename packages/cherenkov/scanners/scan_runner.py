@@ -84,7 +84,7 @@ class UnifiedScanner:
 
 async def main() -> None:
     if len(sys.argv) < 2:
-        print("Usage: python scan_runner.py <target_url>")
+        print("Usage: python scan_runner.py <target_url>", file=sys.stderr)
         sys.exit(1)
 
     scanner = UnifiedScanner(sys.argv[1])

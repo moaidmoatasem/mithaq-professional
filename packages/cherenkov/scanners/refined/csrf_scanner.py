@@ -3,10 +3,13 @@ CSRF Scanner - Refined Version
 Detects Cross-Site Request Forgery vulnerabilities
 """
 
+import logging
 import re
 from typing import Dict, List
 
 import requests
+
+logger = logging.getLogger(__name__)
 
 
 class CSRFScanner:
@@ -18,7 +21,7 @@ class CSRFScanner:
 
     def scan_csrf_tokens(self) -> List[Dict]:
         """Check for CSRF token protection"""
-        print(f"[*] Scanning for CSRF protection: {self.target}")
+        logger.info("[*] Scanning for CSRF protection: %s", self.target)
 
         try:
             response = requests.get(self.target, timeout=10)
@@ -28,10 +31,10 @@ class CSRFScanner:
             forms = re.findall(r"<form[^>]*>", content, re.IGNORECASE)
 
             if not forms:
-                print("  [!] No forms found")
+                logger.info("  [!] No forms found")
                 return []
 
-            print(f"  [*] Found {len(forms)} form(s)")
+            logger.info("  [*] Found %d form(s)", len(forms))
 
             # Check each form for CSRF tokens
             for i, form in enumerate(forms, 1):
@@ -45,12 +48,12 @@ class CSRFScanner:
                         "description": f"Form {i} missing CSRF protection token",
                     }
                     self.vulnerabilities.append(vuln)
-                    print(f"  [!] Form {i} has NO CSRF token")
+                    logger.warning("  [!] Form %d has NO CSRF token", i)
                 else:
-                    print(f"  [✓] Form {i} has CSRF protection")
+                    logger.info("  [✓] Form %d has CSRF protection", i)
 
         except Exception as e:
-            print(f"  [!] Error: {e}")
+            logger.error("  [!] Error: %s", e)
 
         return self.vulnerabilities
 
@@ -71,7 +74,7 @@ class CSRFScanner:
 
     def scan_samesite_cookies(self) -> List[Dict]:
         """Check for SameSite cookie attribute"""
-        print("[*] Checking SameSite cookie protection")
+        logger.info("[*] Checking SameSite cookie protection")
 
         try:
             response = requests.get(self.target, timeout=10)
@@ -86,22 +89,22 @@ class CSRFScanner:
                         "description": "Cookies missing SameSite attribute (CSRF protection)",
                     }
                     self.vulnerabilities.append(vuln)
-                    print("  [!] Cookies missing SameSite attribute")
+                    logger.warning("  [!] Cookies missing SameSite attribute")
                 else:
-                    print("  [✓] SameSite cookie protection enabled")
+                    logger.info("  [✓] SameSite cookie protection enabled")
             else:
-                print("  [*] No cookies set")
+                logger.info("  [*] No cookies set")
 
         except Exception as e:
-            print(f"  [!] Error: {e}")
+            logger.error("  [!] Error: %s", e)
 
         return self.vulnerabilities
 
     def run(self) -> Dict:
         """Run all CSRF scans"""
-        print("\n" + "=" * 70)
-        print("🔍 CSRF VULNERABILITY SCANNER")
-        print("=" * 70)
+        logger.info("\n" + "=" * 70)
+        logger.info("🔍 CSRF VULNERABILITY SCANNER")
+        logger.info("=" * 70)
 
         self.scan_csrf_tokens()
         self.scan_samesite_cookies()
@@ -122,6 +125,7 @@ def scan_csrf(url: str) -> Dict:
 if __name__ == "__main__":
     import sys
 
+    logging.basicConfig(level=logging.INFO, format="%(levelname)s: %(message)s")
     if len(sys.argv) > 1:
         result = scan_csrf(sys.argv[1])
-        print(f"\n✅ Scan complete. Found {result['count']} CSRF vulnerabilities")
+        logger.info("\n✅ Scan complete. Found %d CSRF vulnerabilities", result['count'])

@@ -1,39 +1,97 @@
-site_name: CHERENKOV Architecture
-site_description: THE FORENSIC REVEAL
+site_name: CHERENKOV
+site_description: Sovereign AI Security Testing Platform — The Forensic Reveal
+site_url: https://docs.cherenkov-security.com
+repo_url: https://github.com/moaidmoatasem/cherenkov-professional
+repo_name: cherenkov-professional
+edit_uri: edit/main/docs/
+
 theme:
   name: material
   palette:
     scheme: slate
-    primary: cyan
-    accent: purple
-  logo: assets/cherenkov-logo.svg
-  favicon: assets/cherenkov-logo.svg
+    primary: custom
+    accent: custom
   font:
     text: Inter
-    code: IBM Plex Mono
+    code: Space Mono
   features:
     - navigation.tabs
+    - navigation.sections
+    - navigation.expand
     - navigation.top
     - navigation.indexes
+    - toc.integrate
+    - search.suggest
+    - search.highlight
+    - content.code.copy
+  icon:
+    repo: fontawesome/brands/github
+
 extra_css:
-  - stylesheets/extra.css
+  - assets/cherenkov.css
+
+nav:
+  - Home:
+    - index.md
+    - Quick Start: quickstart.md
+    - What is CHERENKOV?: what-is-cherenkov.md
+  - Architecture:
+    - architecture/index.md
+    - The Trident: architecture/trident.md
+    - MEISSNER (Shield): architecture/meissner.md
+    - ABLATION (Redaction): architecture/ablation.md
+    - TOKAMAK (Proof): architecture/tokamak.md
+    - Cognitive Swarm: architecture/swarm.md
+    - Data Tiers: architecture/data-tiers.md
+    - Adaptive Learning: architecture/adaptive-learning.md
+  - Scanners:
+    - scanners/index.md
+    - Validated Scanners: scanners/validated.md
+    - Scanner Strategy: scanners/strategy.md
+    - Writing a Scanner: scanners/writing.md
+    - Validation Gate: scanners/validation-gate.md
+    - Third-Party Wrappers: scanners/third-party.md
+  - Configuration:
+    - configuration/index.md
+    - cherenkov.yaml: configuration/cherenkov-yaml.md
+    - Deployment Profiles: configuration/profiles.md
+    - Docker Compose: configuration/docker.md
+    - Environment Variables: configuration/env-vars.md
+  - API Reference:
+    - api/index.md
+    - REST Endpoints: api/rest.md
+    - WebSocket Events: api/websocket.md
+    - Error Codes: api/errors.md
+  - CLI:
+    - cli/index.md
+  - Compliance:
+    - compliance/index.md
+    - EGY-FIN CSF: compliance/egyfincsf.md
+    - SAMA CSF: compliance/samacsf.md
+    - DORA: compliance/dora.md
+  - Development:
+    - development/index.md
+    - Contributing: development/contributing.md
+    - Swarm Orchestrator: development/swarm.md
+    - Session Protocol: development/session-protocol.md
+    - Roadmap: development/roadmap.md
+  - Security:
+    - security/index.md
+    - Vulnerability Disclosure: security/disclosure.md
+
+plugins:
+  - search
+  - git-revision-date-localized:
+      enable_creation_date: true
 
 markdown_extensions:
   - admonition
   - pymdownx.details
-  - pymdownx.superfences:
-      custom_fences:
-        - name: mermaid
-          class: mermaid
-          format: !!python/name:pymdownx.superfences.fence_code_format
-nav:
-  - Home: index.md
-  - Architecture:
-    - System Architecture: architecture/SYSTEM_ARCHITECTURE.md
-    - High-Level Design (HLD): architecture/HLD_DIAGRAM.md
-    - Low-Level Design (LLD): architecture/LLD_DIAGRAM.md
-  - Project Plan:
-    - Development Plan: plan/development_plan.md
-    - Roadmap & Progress: plan/ROADMAP_PROGRESS.md
-
-site_dir: site
+  - pymdownx.superfences
+  - pymdownx.highlight:
+      anchor_linenums: true
+  - pymdownx.tabbed:
+      alternate_style: true
+  - tables
+  - toc:
+      permalink: true

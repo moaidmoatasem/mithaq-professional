@@ -36,12 +36,23 @@ logger = logging.getLogger(__name__)
 
 _STATIC_DIR = Path(__file__).parent / "static"
 
-# In-memory ring buffer of recent scan results (last 50).
 app = FastAPI(
     title="cherenkov Sovereign Security API",
     description="Scan API, workflow orchestration, and web dashboard. Flask retired.",
     version="1.1.0",
 )
+
+
+@app.on_event("startup")
+async def startup_event():
+    from cherenkov.core.circuit_breaker import meissner_hub
+
+    meissner_hub.on_open(
+        lambda: asyncio.create_task(
+            _broadcast({"type": "circuit_breaker", "state": "OPEN", "reason": "threshold_exceeded"})
+        )
+    )
+
 
 # Include localhost:3000 (React dev server) alongside the API host origins
 _ALLOWED_ORIGINS = os.getenv(
@@ -101,6 +112,17 @@ class SandboxExecuteRequest(BaseModel):
 v1 = APIRouter(prefix="/api/v1")
 
 
+
+
+async def _check_ollama() -> str:
+    try:
+        async with httpx.AsyncClient(timeout=1.0) as c:
+            r = await c.get("http://localhost:11434/api/tags")
+            return "ready" if r.status_code == 200 else "offline"
+    except Exception:
+        return "offline"
+
+
 def _get_active_scans_count() -> int:
     try:
         with sqlite3.connect(_DB_PATH) as conn:
@@ -119,13 +141,8 @@ async def v1_health() -> dict:
     from cherenkov.core.circuit_breaker import meissner_hub
 
     active_scans = _get_active_scans_count()
-
-    ollama_status = "ready"
-    try:
-        async with httpx.AsyncClient() as client:
-            await client.get("http://localhost:11434/api/tags", timeout=1.0)
-    except httpx.RequestError:
-        ollama_status = "offline"
+    ollama_status = await _check_ollama()
+    meissner_state = meissner_hub.state.value.upper()
 
     return {
         "status": "healthy",
@@ -133,7 +150,7 @@ async def v1_health() -> dict:
         "queue": {"scan_jobs_pending": active_scans},
         "uptime": time.time(),
         "active_scans": active_scans,
-        "meissner": {"state": meissner_hub.state.value},
+        "meissner": {"state": meissner_state},
         "nodes": {
             "tensor": {"status": ollama_status, "model": "Llama 3.1 8B"},
             "kinetic": {"status": ollama_status, "model": "Qwen2.5 3B", "ram_gb": 8},
@@ -221,22 +238,16 @@ async def v1_scan(request: "ScanRequest") -> dict:
 @v1.get("/scans/history")
 async def v1_scan_history() -> list[dict]:
     """Return recent scan results for the ThreatIntelPanel sidebar."""
-    from cherenkov.core.storage.database import _DB_PATH, _row_to_dict
+    from cherenkov.core.storage.database import list_scans
 
-    try:
-        with sqlite3.connect(_DB_PATH) as conn:
-            conn.row_factory = sqlite3.Row
-            rows = conn.execute("SELECT * FROM scans ORDER BY finished_at DESC LIMIT 20").fetchall()
-        return [_row_to_dict(r) for r in rows]
-    except Exception:
-        return []
+    return list_scans(20)
 
 
 @v1.get("/reports/{scan_id}/sarif")
 async def v1_scan_report_sarif(scan_id: str) -> dict:
     """Return a scan report in SARIF 2.1.0 format."""
-    from cherenkov.core.storage.database import get_scan
     from cherenkov.compliance.mapper import ComplianceMapper
+    from cherenkov.core.storage.database import get_scan
 
     scan = get_scan(scan_id)
     if not scan:

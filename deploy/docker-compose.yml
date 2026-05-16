@@ -110,6 +110,20 @@ services:
       - cherenkov-net
     restart: unless-stopped
 
+  # Kali TOKAMAK (air-gapped ephemeral PoC container)
+  tokamak:
+    image: kalilinux/kali-rolling
+    container_name: cherenkov-tokamak
+    network_mode: none
+    read_only: true
+    tmpfs:
+      - /tmp
+    cap_drop:
+      - ALL
+    security_opt:
+      - no-new-privileges
+    restart: "no"
+
 networks:
   cherenkov-net:
     driver: bridge

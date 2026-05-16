@@ -64,7 +64,7 @@
 | 2C-6 | Register all 5 in `ScannerRegistry` | `core/registry.py` |
 | 2C-7 | `GET /api/v1/scanners` — list registered scanners + metadata | `api/main.py` |
 
-### 2D · Parallel Orchestration Hardening
+### 2D · Parallel Orchestration Hardening [Issue #182]
 
 | # | Task | File |
 |---|---|---|
@@ -77,7 +77,7 @@
 
 ## Phase 3 — Production Hardening & HITL (v1.5.0) ⏳ NEXT — Q3 2026
 
-### 3A · HITL Approval Gate
+### 3A · HITL Approval Gate [Issue #183]
 
 | # | Task | File |
 |---|---|---|
@@ -92,7 +92,7 @@
 | 3A-9 | `usePendingApprovals(intervalMs)` hook | `web/src/hooks/useMetrics.ts` |
 | 3A-10 | Unit tests for all three endpoints | `tests/unit/test_hitl_api.py` |
 
-### 3B · Compliance Mapper
+### 3B · Compliance Mapper [Issue #184]
 
 | # | Task | File |
 |---|---|---|
@@ -103,7 +103,7 @@
 | 3B-5 | `GET /api/v1/reports/{scan_id}/pdf` — local PDF (reportlab, zero cloud) | `api/main.py` |
 | 3B-6 | Unit tests: CWE mapping coverage + SARIF schema validation | `tests/unit/test_compliance_mapper.py` |
 
-### 3C · WORM Audit Vault
+### 3C · WORM Audit Vault [Issue #185]
 
 | # | Task | File |
 |---|---|---|
@@ -113,7 +113,7 @@
 | 3C-4 | `GET /api/v1/audit` — chronological audit log endpoint | `api/main.py` |
 | 3C-5 | Unit test: verify no row can be mutated after insert | `tests/unit/test_audit_vault.py` |
 
-### 3D · SSO / RBAC Portal
+### 3D · SSO / RBAC Portal [Issue #186]
 
 | # | Task | File |
 |---|---|---|
@@ -127,7 +127,7 @@
 
 ## Phase 4 — Mobile Triage (v2.0.0) ⏳ Q4 2026 – Q1 2027
 
-### 4A · Android Scanner
+### 4A · Android Scanner [Issue #187]
 
 | # | Task | File |
 |---|---|---|
@@ -137,7 +137,7 @@
 | 4A-4 | Hardcoded secrets detector (API keys, tokens in smali/java) | `scanners/mobile/secrets_scanner.py` |
 | 4A-5 | TOKAMAK integration — run mobile payloads in `--network none` container | `core/tokamak.py` |
 
-### 4B · iOS Scanner
+### 4B · iOS Scanner [Issue #188]
 
 | # | Task | File |
 |---|---|---|

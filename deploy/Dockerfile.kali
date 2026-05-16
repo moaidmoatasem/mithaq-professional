@@ -1,0 +1,15 @@
+FROM kalilinux/kali-rolling
+
+RUN apt-get update && apt-get install -y \
+    nmap \
+    curl \
+    nikto \
+    && rm -rf /var/lib/apt/lists/*
+
+RUN curl -fsSL https://github.com/projectdiscovery/nuclei/releases/latest/download/nuclei_linux_amd64.zip \
+    -o /tmp/nuclei.zip \
+    && unzip /tmp/nuclei.zip -d /usr/local/bin/ \
+    && rm /tmp/nuclei.zip \
+    && nuclei -update-templates
+
+ENTRYPOINT ["/bin/bash"]

@@ -2,9 +2,10 @@
 """
 Scan tokamak — ephemeral Docker containers per scan.
 
-TWO PROFILES (accepted: Copilot — Frida/mobile needs different caps):
-  TOKAMAKProfile.STANDARD — web/infra scans (strict, minimal caps)
-  TOKAMAKProfile.MOBILE   — APK/Frida scans (controlled exceptions, audited)
+THREE PROFILES:
+  TOKAMAKProfile.STANDARD — web/infra scans (strict, minimal caps, python:3.11-slim)
+  TOKAMAKProfile.MOBILE   — APK/Frida scans (controlled exceptions, python:3.11-slim)
+  TOKAMAKProfile.KALI     — active/web vuln scanning (air-gapped, kalilinux/kali-rolling)
 
 Every container is destroyed on exit. Malicious payloads cannot persist.
 """
@@ -31,6 +32,7 @@ except ImportError:
 class TOKAMAKProfile(str, Enum):
     STANDARD = "standard"  # web, infra — strict
     MOBILE = "mobile"  # APK, Frida — controlled exceptions
+    KALI = "kali"  # Kali rolling — active/web vuln scanning
 
 
 # ──────────────────────────────────────────────
@@ -39,6 +41,7 @@ class TOKAMAKProfile(str, Enum):
 
 _PROFILE_CONFIGS: dict[TOKAMAKProfile, dict] = {
     TOKAMAKProfile.STANDARD: {
+        "image": "python:3.11-slim",
         "mem_limit": "512m",
         "cpu_period": 100_000,
         "cpu_quota": 50_000,  # 50% CPU
@@ -54,6 +57,7 @@ _PROFILE_CONFIGS: dict[TOKAMAKProfile, dict] = {
         "audit_note": "Standard web/infra scan — maximal restrictions",
     },
     TOKAMAKProfile.MOBILE: {
+        "image": "python:3.11-slim",
         "mem_limit": "2g",  # Frida + Android emulator needs RAM
         "cpu_period": 100_000,
         "cpu_quota": 80_000,  # 80% CPU for decompilation
@@ -75,6 +79,25 @@ _PROFILE_CONFIGS: dict[TOKAMAKProfile, dict] = {
             "Reviewed in security audit v0.X.X. "
             "Justification: Frida requires ptrace for instrumentation. "
             "Mitigation: separate docker network, no egress to prod."
+        ),
+    },
+    TOKAMAKProfile.KALI: {
+        "image": "kalilinux/kali-rolling",
+        "mem_limit": "1g",
+        "cpu_period": 100_000,
+        "cpu_quota": 70_000,  # 70% CPU
+        "read_only": True,
+        "tmpfs": {"/tmp": "size=128m"},  # nosec B108
+        "security_opt": [
+            "no-new-privileges",
+        ],
+        "cap_drop": ["ALL"],
+        "cap_add": [],
+        "network_mode": "none",  # Air-gapped — no egress at all
+        "audit_note": (
+            "Kali rolling — full tool suite (nmap, nuclei, nikto). "
+            "Network mode 'none' ensures no exfiltration. "
+            "Ephemeral: container destroyed after PoC execution."
         ),
     },
 }
@@ -125,7 +148,7 @@ class ScanTOKAMAK:
         try:
             container = await asyncio.to_thread(
                 self.client.containers.run,
-                image="cherenkov-scanner:latest",
+                image=cfg["image"],
                 detach=True,
                 environment={
                     "cherenkov_TARGET": target_url,

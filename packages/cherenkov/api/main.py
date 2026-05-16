@@ -21,7 +21,7 @@ from typing import Any, Dict, Literal, Optional, Set
 from urllib.parse import urlparse
 
 import httpx
-from fastapi import FastAPI, HTTPException, WebSocket, WebSocketDisconnect
+from fastapi import FastAPI, HTTPException, WebSocket, WebSocketDisconnect, Depends, status
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import FileResponse
 from fastapi.routing import APIRouter
@@ -32,6 +32,15 @@ from cherenkov.core.storage.database import _DB_PATH
 from cherenkov.orchestration.orchestration_api import orchestrate_workflow
 from cherenkov.orchestration.result_persistence import ResultStore
 from cherenkov.orchestration.workflow_parser import load_workflow
+from cherenkov.api.middleware.auth import (
+    Role, 
+    RoleChecker, 
+    get_current_user, 
+    create_access_token, 
+    verify_password,
+    User as AuthUser
+)
+from cherenkov.core.storage.database import get_user, save_user
 
 logger = logging.getLogger(__name__)
 
@@ -114,6 +123,33 @@ class SandboxExecuteRequest(BaseModel):
 
 
 v1 = APIRouter(prefix="/api/v1")
+
+
+class AuthRequest(BaseModel):
+    username: str
+    password: str
+
+
+@v1.post("/auth/token")
+async def v1_auth_token(request: AuthRequest) -> dict:
+    """Authenticate a user and return a JWT token."""
+    user_data = get_user(request.username)
+    if not user_data or not verify_password(request.password, user_data["password"]):
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Incorrect username or password",
+        )
+    
+    access_token = create_access_token(
+        data={"sub": request.username, "role": user_data["role"]}
+    )
+    return {"access_token": access_token, "token_type": "bearer"}
+
+
+@v1.get("/auth/me")
+async def v1_auth_me(current_user: AuthUser = Depends(get_current_user)) -> dict:
+    """Return the current authenticated user's profile."""
+    return {"username": current_user.username, "role": current_user.role.name}
 
 
 async def _check_ollama() -> str:
@@ -320,26 +356,32 @@ async def v1_get_pending_findings() -> list[dict]:
 
 
 @v1.post("/findings/{finding_id}/approve")
-async def v1_approve_finding(finding_id: str, operator_id: Optional[str] = None) -> dict:
-    """Approve a finding."""
+async def v1_approve_finding(
+    finding_id: str, 
+    current_user: AuthUser = Depends(RoleChecker(Role.OPERATOR))
+) -> dict:
+    """Approve a finding. Requires OPERATOR role or higher."""
     from cherenkov.core.storage.database import init_db, update_finding_status
 
     try:
         init_db()
-        update_finding_status(finding_id, "approved", operator_id)
+        update_finding_status(finding_id, "approved", current_user.username)
         return {"status": "success", "finding_id": finding_id, "new_status": "approved"}
     except Exception as exc:
         raise HTTPException(status_code=500, detail=f"Failed to approve finding: {exc}") from exc
 
 
 @v1.post("/findings/{finding_id}/reject")
-async def v1_reject_finding(finding_id: str, operator_id: Optional[str] = None) -> dict:
-    """Reject a finding."""
+async def v1_reject_finding(
+    finding_id: str, 
+    current_user: AuthUser = Depends(RoleChecker(Role.OPERATOR))
+) -> dict:
+    """Reject a finding. Requires OPERATOR role or higher."""
     from cherenkov.core.storage.database import init_db, update_finding_status
 
     try:
         init_db()
-        update_finding_status(finding_id, "rejected", operator_id)
+        update_finding_status(finding_id, "rejected", current_user.username)
         return {"status": "success", "finding_id": finding_id, "new_status": "rejected"}
     except Exception as exc:
         raise HTTPException(status_code=500, detail=f"Failed to reject finding: {exc}") from exc

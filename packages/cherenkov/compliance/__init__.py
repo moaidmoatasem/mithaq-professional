@@ -1,1 +1,3 @@
-"""Compliance module for mapping CWE to regulatory frameworks."""
+from .mapper import ComplianceMapper
+
+__all__ = ["ComplianceMapper"]

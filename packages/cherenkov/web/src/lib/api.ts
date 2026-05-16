@@ -19,6 +19,22 @@ export function getWsUrl(path: string = '/ws/live'): string {
   return `${proto}//${window.location.host}${path}`;
 }
 
+/**
+ * Get the current auth token from sessionStorage and return as a Header object.
+ */
+export function getAuthHeader(): Record<string, string> {
+  const token = sessionStorage.getItem('cherenkov_token');
+  return token ? { 'Authorization': `Bearer ${token}` } : {};
+}
+
+/**
+ * Clear the current auth session.
+ */
+export function logout(): void {
+  sessionStorage.removeItem('cherenkov_token');
+  window.location.reload();
+}
+
 export interface ScanRequestPayload {
   url: string;
   profile?: string;
@@ -70,7 +86,10 @@ export interface NodeInfo {
 export async function submitScan(payload: ScanRequestPayload): Promise<ScanResult> {
   const res = await fetch(`${API_BASE}/scan`, {
     method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
+    headers: { 
+      'Content-Type': 'application/json',
+      ...getAuthHeader()
+    },
     body: JSON.stringify({ url: payload.url }),
   });
 
@@ -86,7 +105,9 @@ export async function submitScan(payload: ScanRequestPayload): Promise<ScanResul
  * Fetch scan history from the backend.
  */
 export async function fetchScanHistory(): Promise<ScanResult[]> {
-  const res = await fetch(`${API_BASE}/scans/history`);
+  const res = await fetch(`${API_BASE}/scans/history`, {
+    headers: getAuthHeader()
+  });
   if (!res.ok) return [];
   return res.json();
 }
@@ -95,7 +116,9 @@ export async function fetchScanHistory(): Promise<ScanResult[]> {
  * Fetch pending approvals (HITL gate)
  */
 export async function fetchPendingApprovals(): Promise<Vulnerability[]> {
-  const res = await fetch(`${API_BASE}/findings/pending`);
+  const res = await fetch(`${API_BASE}/findings/pending`, {
+    headers: getAuthHeader()
+  });
   if (!res.ok) return [];
   return res.json();
 }
@@ -106,6 +129,7 @@ export async function fetchPendingApprovals(): Promise<Vulnerability[]> {
 export async function approveFinding(id: string): Promise<void> {
   const res = await fetch(`${API_BASE}/findings/${id}/approve`, {
     method: 'POST',
+    headers: getAuthHeader()
   });
   if (!res.ok) {
     throw new Error(`Failed to approve finding ${id}`);
@@ -118,6 +142,7 @@ export async function approveFinding(id: string): Promise<void> {
 export async function rejectFinding(id: string): Promise<void> {
   const res = await fetch(`${API_BASE}/findings/${id}/reject`, {
     method: 'POST',
+    headers: getAuthHeader()
   });
   if (!res.ok) {
     throw new Error(`Failed to reject finding ${id}`);

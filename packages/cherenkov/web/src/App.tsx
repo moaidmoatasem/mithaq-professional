@@ -1,5 +1,6 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { MainLayout } from './components/templates/MainLayout';
+import { LoginPage } from './components/templates/LoginPage';
 import { ForensicHeader } from './components/organisms/ForensicHeader';
 import { TacticalOperationsPanel } from './components/organisms/TacticalOperationsPanel';
 import { ThreatIntelPanel } from './components/organisms/ThreatIntelPanel';
@@ -7,7 +8,12 @@ import { LogoKit, AssistantWidget } from './components/organisms';
 import { AnimatePresence } from 'motion/react';
 
 export default function App() {
+  const [token, setToken] = useState<string | null>(sessionStorage.getItem('cherenkov_token'));
   const [showLogoKit, setShowLogoKit] = useState(false);
+
+  if (!token) {
+    return <LoginPage onLoginSuccess={setToken} />;
+  }
 
   return (
     <>

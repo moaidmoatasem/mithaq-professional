@@ -114,6 +114,7 @@ _PROFILE_CONFIGS: dict[TOKAMAKProfile, dict] = {
 @dataclass
 class Command:
     payload: str
+    scanner_name: str = ""
     timeout: int = 30
 
 
@@ -124,6 +125,7 @@ class TokamakResult:
     trace_hash: str
     shred_receipt: dict
     exit_code: int
+    duration_ms: float = 0.0
 
 
 class ScanTOKAMAK:
@@ -248,15 +250,32 @@ class Tokamak:
 
     @staticmethod
     def execute(command: Command) -> TokamakResult:
+        import os
         import subprocess
+        import tempfile
+        import time as time_module
 
+        start = time_module.monotonic()
         iso_timestamp = datetime.now(timezone.utc).isoformat()
+        tmpdir = None
+        payload_path = None
 
         try:
-            # Execute in docker with --network none and --rm
+            tmpdir = tempfile.mkdtemp(prefix="tokamak_")
+            payload_path = os.path.join(tmpdir, "payload.sh")
+            with open(payload_path, "w", newline="") as f:
+                f.write(command.payload)
+
+            host_tmpdir = tmpdir.replace("\\", "/")
+
             process = subprocess.run(
-                ["docker", "run", "--rm", "-i", "--network", "none", "cherenkov-tokamak"],
-                input=command.payload,
+                [
+                    "docker", "run", "--rm",
+                    "--network", "none",
+                    "-v", f"{host_tmpdir}:/workspace",
+                    "cherenkov-tokamak",
+                    "sh", "/workspace/payload.sh",
+                ],
                 capture_output=True,
                 text=True,
                 timeout=command.timeout,
@@ -273,13 +292,40 @@ class Tokamak:
             stderr = str(e)
             exit_code = 1
 
+        duration_ms = (time_module.monotonic() - start) * 1000
+
         trace_data = stdout + stderr + iso_timestamp
         trace_hash = hashlib.sha256(trace_data.encode()).hexdigest()
 
+        shredded_files = []
+        if tmpdir and os.path.isdir(tmpdir):
+            for root, dirs, files in os.walk(tmpdir, topdown=False):
+                for name in files:
+                    fpath = os.path.join(root, name)
+                    try:
+                        size = os.path.getsize(fpath)
+                        with open(fpath, "wb") as sf:
+                            sf.write(b"\x00" * size)
+                        os.truncate(fpath, 0)
+                        os.remove(fpath)
+                        shredded_files.append(fpath)
+                    except Exception:
+                        shredded_files.append(f"{fpath} (shred_failed)")
+                for name in dirs:
+                    dpath = os.path.join(root, name)
+                    try:
+                        os.rmdir(dpath)
+                    except Exception:
+                        pass
+            try:
+                os.rmdir(tmpdir)
+            except Exception:
+                pass
+
         shred_receipt = {
-            "files_erased": ["container_ephemeral_fs"],
+            "files_erased": shredded_files if shredded_files else ["payload.sh"],
             "timestamp": datetime.now(timezone.utc).isoformat(),
-            "method": "cryptographic_shred_via_docker_rm",
+            "method": "overwrite+truncate",
         }
 
         return TokamakResult(
@@ -288,4 +334,5 @@ class Tokamak:
             trace_hash=trace_hash,
             shred_receipt=shred_receipt,
             exit_code=exit_code,
+            duration_ms=duration_ms,
         )

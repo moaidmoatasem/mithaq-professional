@@ -23,6 +23,19 @@ CREATE TABLE IF NOT EXISTS scans (
 );
 CREATE INDEX IF NOT EXISTS idx_scans_started ON scans(started_at);
 CREATE INDEX IF NOT EXISTS idx_scans_target  ON scans(target);
+
+CREATE TABLE IF NOT EXISTS findings_pending (
+    id          INTEGER PRIMARY KEY AUTOINCREMENT,
+    finding_id  TEXT    NOT NULL UNIQUE,
+    severity    TEXT    NOT NULL,
+    scanner     TEXT    NOT NULL,
+    title       TEXT    NOT NULL,
+    status      TEXT    NOT NULL DEFAULT 'pending',
+    operator_id TEXT,
+    approved_at TEXT,
+    scan_id     TEXT
+);
+CREATE INDEX IF NOT EXISTS idx_findings_pending_status ON findings_pending(status);
 """
 
 
@@ -100,6 +113,53 @@ def prune_old_scans(days: int = 90, path: Path = _DB_PATH) -> int:
     with _connect(path) as conn:
         cur = conn.execute("DELETE FROM scans WHERE started_at < ?", (cutoff,))
         return cur.rowcount
+
+
+def save_pending_finding(
+    finding_id: str,
+    severity: str,
+    scanner: str,
+    title: str,
+    scan_id: str | None = None,
+    path: Path = None,
+) -> None:
+    path = path or _DB_PATH
+    with _connect(path) as conn:
+        conn.execute(
+            """
+            INSERT OR IGNORE INTO findings_pending (finding_id, severity, scanner, title, scan_id)
+            VALUES (?, ?, ?, ?, ?)
+            """,
+            (finding_id, severity, scanner, title, scan_id),
+        )
+        conn.commit()
+
+
+def get_pending_findings(path: Path = None) -> list[dict]:
+    path = path or _DB_PATH
+    with _connect(path) as conn:
+        rows = conn.execute("SELECT * FROM findings_pending WHERE status = 'pending'").fetchall()
+    return [dict(r) for r in rows]
+
+
+def update_finding_status(
+    finding_id: str,
+    status: str,
+    operator_id: str | None = None,
+    path: Path = None,
+) -> None:
+    path = path or _DB_PATH
+    now = datetime.now(timezone.utc).isoformat() if status == "approved" else None
+    with _connect(path) as conn:
+        conn.execute(
+            """
+            UPDATE findings_pending
+            SET status = ?, operator_id = ?, approved_at = ?
+            WHERE finding_id = ?
+            """,
+            (status, operator_id, now, finding_id),
+        )
+        conn.commit()
 
 
 def _row_to_dict(row: sqlite3.Row) -> dict:

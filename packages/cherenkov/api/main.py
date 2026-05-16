@@ -16,7 +16,7 @@ import time
 import uuid
 from datetime import datetime, timezone
 from pathlib import Path
-from typing import Any, Dict, Optional, Set
+from typing import Any, Dict, Literal, Optional, Set
 from urllib.parse import urlparse
 
 import httpx
@@ -258,6 +258,46 @@ async def v1_scan_report_sarif(scan_id: str) -> dict:
     }
 
 
+@v1.get("/findings/pending")
+async def v1_get_pending_findings() -> list[dict]:
+    """Return a list of all pending findings."""
+    from cherenkov.core.storage.database import get_pending_findings, init_db
+
+    try:
+        init_db()
+        return get_pending_findings()
+    except Exception as exc:
+        raise HTTPException(
+            status_code=500, detail=f"Failed to get pending findings: {exc}"
+        ) from exc
+
+
+@v1.post("/findings/{finding_id}/approve")
+async def v1_approve_finding(finding_id: str, operator_id: Optional[str] = None) -> dict:
+    """Approve a finding."""
+    from cherenkov.core.storage.database import init_db, update_finding_status
+
+    try:
+        init_db()
+        update_finding_status(finding_id, "approved", operator_id)
+        return {"status": "success", "finding_id": finding_id, "new_status": "approved"}
+    except Exception as exc:
+        raise HTTPException(status_code=500, detail=f"Failed to approve finding: {exc}") from exc
+
+
+@v1.post("/findings/{finding_id}/reject")
+async def v1_reject_finding(finding_id: str, operator_id: Optional[str] = None) -> dict:
+    """Reject a finding."""
+    from cherenkov.core.storage.database import init_db, update_finding_status
+
+    try:
+        init_db()
+        update_finding_status(finding_id, "rejected", operator_id)
+        return {"status": "success", "finding_id": finding_id, "new_status": "rejected"}
+    except Exception as exc:
+        raise HTTPException(status_code=500, detail=f"Failed to reject finding: {exc}") from exc
+
+
 # Serve the static dashboard assets
 if _STATIC_DIR.exists():
     app.mount("/static", StaticFiles(directory=str(_STATIC_DIR)), name="static")
@@ -268,6 +308,16 @@ if _STATIC_DIR.exists():
 
 class ScanRequest(BaseModel):
     url: str
+
+
+class FindingApproval(BaseModel):
+    finding_id: str
+    severity: str
+    scanner: str
+    title: str
+    status: Literal["pending", "approved", "rejected"]
+    operator_id: Optional[str] = None
+    approved_at: Optional[str] = None
 
 
 class WorkflowExecuteRequest(BaseModel):
@@ -351,6 +401,32 @@ async def _run_scan(request: "ScanRequest") -> dict:
             started_at=started,
             finished_at=finished,
         )
+
+        from cherenkov.core.storage.database import save_pending_finding
+
+        for v in vulnerabilities:
+            if v["severity"] in ("CRITICAL", "HIGH"):
+                finding_id = str(uuid.uuid4())
+                save_pending_finding(
+                    finding_id=finding_id,
+                    severity=v["severity"],
+                    scanner=v["scanner"],
+                    title=v["title"],
+                    scan_id=scan_id,
+                )
+
+                # We need to await the broadcast event, but broadcast relies on asyncio loop running.
+                # Since _run_scan is async, we can await it directly.
+                asyncio.create_task(
+                    _broadcast(
+                        {
+                            "type": "finding_discovered",
+                            "finding_id": finding_id,
+                            "severity": v["severity"],
+                        }
+                    )
+                )
+
     except Exception as exc:
         logger.error("Failed to persist scan %s: %s", scan_id, exc)
 

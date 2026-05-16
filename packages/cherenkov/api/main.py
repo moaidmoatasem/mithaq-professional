@@ -655,6 +655,17 @@ async def dashboard() -> FileResponse:
 # ── Shared scan implementation ────────────────────────────────────────────────
 
 
+async def _forward_to_siem(vulnerabilities: list[dict], target: str):
+    """Background task to forward findings to local SIEM."""
+    from cherenkov.core.siem import SIEMForwarder
+
+    for v in vulnerabilities:
+        finding = {**v, "target": target}
+        # Default local syslog forward (UDP 514)
+        SIEMForwarder.send_syslog(finding)
+        logger.debug("Forwarded finding to local SIEM: %s", v["title"])
+
+
 async def _run_scan(request: "ScanRequest") -> dict:
     """Core scan logic shared by /api/scan and /api/v1/scan."""
     from cherenkov.core.engine import ScanEngine
@@ -770,6 +781,9 @@ async def _run_scan(request: "ScanRequest") -> dict:
 
     except Exception as exc:
         logger.error("Failed to persist scan %s: %s", scan_id, exc)
+
+    # Trigger SIEM forwarding
+    asyncio.create_task(_forward_to_siem(vulnerabilities, request.url))
 
     return {
         "scan_id": scan_id,
@@ -1032,6 +1046,21 @@ async def get_results(workflow_name: str) -> dict:
     if result:
         return result
     raise HTTPException(status_code=404, detail="No results found")
+
+
+@v1.get("/mesh/nodes")
+async def v1_mesh_nodes(current_user: AuthUser = Depends(get_current_user)) -> dict:
+    """List discovered mesh nodes."""
+    import socket
+
+    from cherenkov.core.mesh import MeshManager
+
+    # Note: In production, this would be a persistent singleton
+    manager = MeshManager(node_name=f"node-{socket.gethostname()}")
+    nodes = manager.discover_nodes(timeout=1.0)
+    manager.shutdown()
+
+    return {"nodes": nodes, "count": len(nodes)}
 
 
 # Register /api/v1 router

@@ -10,5 +10,4 @@ export * from './AssistantWidget';
 export * from './PendingApprovalsPanel';
 export * from './MobileTargetForm';
 export * from './MobileResultsPanel';
-
-
+export * from './SIEMConfigPanel';

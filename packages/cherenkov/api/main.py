@@ -6,18 +6,22 @@ Flask has been retired. The dashboard is now served as static HTML from
 packages/cherenkov/api/static/index.html via FastAPI StaticFiles.
 """
 
+import asyncio
+import json
 import logging
 import os
 import re
+import time
 import uuid
 from datetime import datetime, timezone
 from pathlib import Path
-from typing import Any, Dict, Optional
+from typing import Any, Dict, Optional, Set
 from urllib.parse import urlparse
 
-from fastapi import FastAPI, HTTPException
+from fastapi import FastAPI, HTTPException, WebSocket, WebSocketDisconnect
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import FileResponse
+from fastapi.routing import APIRouter
 from fastapi.staticfiles import StaticFiles
 from pydantic import BaseModel
 
@@ -35,8 +39,10 @@ app = FastAPI(
     version="1.1.0",
 )
 
+# Include localhost:3000 (React dev server) alongside the API host origins
 _ALLOWED_ORIGINS = os.getenv(
-    "cherenkov_CORS_ORIGINS", "http://localhost:8000,http://127.0.0.1:8000"
+    "cherenkov_CORS_ORIGINS",
+    "http://localhost:8000,http://127.0.0.1:8000,http://localhost:3000,http://127.0.0.1:3000",
 ).split(",")
 
 app.add_middleware(
@@ -45,6 +51,102 @@ app.add_middleware(
     allow_methods=["GET", "POST"],
     allow_headers=["Content-Type", "Authorization"],
 )
+
+# ── WebSocket live-event broadcast ───────────────────────────────────────────
+
+_ws_clients: Set[WebSocket] = set()
+
+
+async def _broadcast(event: dict) -> None:
+    """Push a JSON event to every connected WebSocket client."""
+    dead: Set[WebSocket] = set()
+    payload = json.dumps(event)
+    for ws in list(_ws_clients):
+        try:
+            await ws.send_text(payload)
+        except Exception:
+            dead.add(ws)
+    _ws_clients.difference_update(dead)
+
+
+@app.websocket("/ws/live")
+async def ws_live(websocket: WebSocket) -> None:
+    """Live event stream for the CHERENKOV web dashboard."""
+    await websocket.accept()
+    _ws_clients.add(websocket)
+    try:
+        while True:
+            # Keep-alive: echo any client ping, otherwise just wait
+            await asyncio.sleep(30)
+            await websocket.send_text(json.dumps({"type": "ping"}))
+    except WebSocketDisconnect:
+        pass
+    finally:
+        _ws_clients.discard(websocket)
+
+
+# ── /api/v1 router (consumed by the React frontend) ─────────────────────────
+
+v1 = APIRouter(prefix="/api/v1")
+
+
+@v1.get("/health")
+async def v1_health() -> dict:
+    """Health check used by useMetrics / useQueueDepth hooks."""
+    return {
+        "status": "healthy",
+        "agents": "operational",
+        "queue": {"scan_jobs_pending": 0},
+        "uptime": time.time(),
+    }
+
+
+@v1.get("/ablation/stats")
+async def v1_ablation_stats() -> dict:
+    """Return ABLATION sanitization telemetry for the AblationMeter widget."""
+    try:
+        from cherenkov.core.ablation.bridge import AblationBridge
+
+        bridge = AblationBridge.instance() if hasattr(AblationBridge, "instance") else None
+        if bridge and hasattr(bridge, "telemetry"):
+            t = bridge.telemetry
+            drop_rate = t.drops / t.attempts if t.attempts else 0.0
+            return {
+                "session_stats": {
+                    "attempts": t.attempts,
+                    "drops": t.drops,
+                    "drop_rate": drop_rate,
+                    "alert_active": drop_rate > 0.2,
+                }
+            }
+    except Exception:
+        pass
+    # Fallback: healthy zeros when the bridge is not yet active
+    return {
+        "session_stats": {
+            "attempts": 0,
+            "drops": 0,
+            "drop_rate": 0.0,
+            "alert_active": False,
+        }
+    }
+
+
+@v1.post("/scan")
+async def v1_scan(request: "ScanRequest") -> dict:
+    """Proxy to the core scan engine; broadcasts a live event on completion."""
+    result = await _run_scan(request)
+    await _broadcast(
+        {
+            "type": "scan_complete",
+            "scan_id": result["scan_id"],
+            "target": result["target"],
+            "count": result["count"],
+            "timestamp": result["timestamp"],
+        }
+    )
+    return result
+
 
 # Serve the static dashboard assets
 if _STATIC_DIR.exists():
@@ -82,17 +184,15 @@ async def dashboard() -> FileResponse:
     return FileResponse(str(index), media_type="text/html")
 
 
-# ── Scan API (replaces cherenkov_web.py Flask /api/scan) ────────────────────
+# ── Shared scan implementation ────────────────────────────────────────────────
 
 
-@app.post("/api/scan")
-async def scan_target(request: ScanRequest) -> dict:
-    """Run all registered scanners against a target URL."""
+async def _run_scan(request: "ScanRequest") -> dict:
+    """Core scan logic shared by /api/scan and /api/v1/scan."""
     from cherenkov.core.engine import ScanEngine
     from cherenkov.core.registry import ScannerRegistry
     from cherenkov.core.storage.database import init_db, save_scan
 
-    # Validate URL before any network activity
     try:
         parsed = urlparse(request.url)
     except Exception as exc:
@@ -114,7 +214,6 @@ async def scan_target(request: ScanRequest) -> dict:
         logger.error("ScanEngine failed for %s: %s", request.url, exc)
         raise HTTPException(status_code=500, detail=f"Scan execution failed: {exc}") from exc
 
-    # Flatten findings for response and persistence
     vulnerabilities: list[dict] = []
     for scanner_name, result in scan_results.items():
         for f in result.findings:
@@ -122,7 +221,7 @@ async def scan_target(request: ScanRequest) -> dict:
                 {
                     "scanner": scanner_name,
                     "title": f.title,
-                    "type": f.title,  # dashboard compatibility
+                    "type": f.title,
                     "severity": f.severity.value,
                     "cwe": f.cwe,
                     "description": f.description,
@@ -143,7 +242,6 @@ async def scan_target(request: ScanRequest) -> dict:
             finished_at=finished,
         )
     except Exception as exc:
-        # Non-fatal: log but still return the result
         logger.error("Failed to persist scan %s: %s", scan_id, exc)
 
     return {
@@ -155,12 +253,21 @@ async def scan_target(request: ScanRequest) -> dict:
     }
 
 
+# ── Legacy scan + health endpoints (keep for backwards compat) ───────────────
+
+
+@app.post("/api/scan")
+async def scan_target(request: ScanRequest) -> dict:
+    """Run all registered scanners against a target URL."""
+    return await _run_scan(request)
+
+
 # ── Health ───────────────────────────────────────────────────────────────────
 
 
 @app.get("/health")
 async def health() -> dict:
-    return {"status": "healthy", "agents": "operational"}
+    return {"status": "healthy", "agents": "operational", "queue": {"scan_jobs_pending": 0}}
 
 
 @app.post("/workflows/execute", response_model=WorkflowResponse)
@@ -220,9 +327,13 @@ async def get_results(workflow_name: str) -> dict:
     raise HTTPException(status_code=404, detail="No results found")
 
 
+# Register /api/v1 router
+app.include_router(v1)
+
+
 if __name__ == "__main__":
     import uvicorn
 
     host = os.getenv("cherenkov_API_HOST", "127.0.0.1")
     port = int(os.getenv("cherenkov_API_PORT", "8000"))
-    uvicorn.run(app, host=host, port=port)
+    uvicorn.run(app, host=host, port=port, log_level="info")

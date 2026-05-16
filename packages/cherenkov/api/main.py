@@ -14,6 +14,7 @@ import re
 import sqlite3
 import time
 import uuid
+from contextlib import asynccontextmanager
 from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any, Dict, Literal, Optional, Set
@@ -36,15 +37,9 @@ logger = logging.getLogger(__name__)
 
 _STATIC_DIR = Path(__file__).parent / "static"
 
-app = FastAPI(
-    title="cherenkov Sovereign Security API",
-    description="Scan API, workflow orchestration, and web dashboard. Flask retired.",
-    version="1.1.0",
-)
 
-
-@app.on_event("startup")
-async def startup_event():
+@asynccontextmanager
+async def lifespan(app: FastAPI):
     from cherenkov.core.circuit_breaker import meissner_hub
 
     meissner_hub.on_open(
@@ -52,6 +47,15 @@ async def startup_event():
             _broadcast({"type": "circuit_breaker", "state": "OPEN", "reason": "threshold_exceeded"})
         )
     )
+    yield
+
+
+app = FastAPI(
+    title="cherenkov Sovereign Security API",
+    description="Scan API, workflow orchestration, and web dashboard. Flask retired.",
+    version="1.1.0",
+    lifespan=lifespan,
+)
 
 
 # Include localhost:3000 (React dev server) alongside the API host origins
@@ -139,6 +143,7 @@ async def v1_health() -> dict:
     from cherenkov.core.circuit_breaker import meissner_hub
 
     active_scans = _get_active_scans_count()
+
     ollama_status = await _check_ollama()
     meissner_state = meissner_hub.state.value.upper()
 

@@ -35,7 +35,7 @@ if scan_reports:
             with open(report) as f:
                 data = json.load(f)
                 total_vulns += len(data.get("vulnerabilities", []))
-        except:
+        except Exception:
             pass
 
 metrics["total_vulnerabilities_found"] = total_vulns
@@ -46,7 +46,7 @@ for py_file in Path("cherenkov").rglob("*.py"):
     try:
         with open(py_file) as f:
             total_lines += len(f.readlines())
-    except:
+    except Exception:
         pass
 
 metrics["lines_of_code"] = total_lines
@@ -57,16 +57,16 @@ print("📈 FRAMEWORK METRICS")
 print("=" * 70)
 print(f"""
 Core Statistics:
-  • Total Python Files: {metrics['total_files']}
-  • Lines of Code: {metrics['lines_of_code']:,}
-  • Scanner Modules: {metrics['scanner_files']}
-  • AI Agent Files: {metrics['agent_files']}
-  • Test Files: {metrics['test_files']}
+  • Total Python Files: {metrics["total_files"]}
+  • Lines of Code: {metrics["lines_of_code"]:,}
+  • Scanner Modules: {metrics["scanner_files"]}
+  • AI Agent Files: {metrics["agent_files"]}
+  • Test Files: {metrics["test_files"]}
 
 Security Scanning:
-  • Scan Reports Generated: {metrics['scan_reports']}
-  • Total Vulnerabilities Found: {metrics['total_vulnerabilities_found']}
-  • Scans Per Report: {metrics['total_vulnerabilities_found'] / max(metrics['scan_reports'], 1):.1f} avg
+  • Scan Reports Generated: {metrics["scan_reports"]}
+  • Total Vulnerabilities Found: {metrics["total_vulnerabilities_found"]}
+  • Scans Per Report: {metrics["total_vulnerabilities_found"] / max(metrics["scan_reports"], 1):.1f} avg
 
 System Health:
   • Status: ✅ OPERATIONAL

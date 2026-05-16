@@ -1,21 +1,22 @@
 """Integration test for all 9 new multi-agent modules."""
 
-import sys
 import os
+import sys
 import tempfile
 
 import pytest
 
 pytestmark = pytest.mark.integration
 
-sys.path.insert(0, os.path.join(os.path.dirname(__file__), 'src'))
+sys.path.insert(0, os.path.join(os.path.dirname(__file__), "src"))
 
 
 def test_agent_state_store():
     """Test AgentStateStore basic operations."""
     from cherenkov.core.agent_state_store import (
-        AgentState, AgentStatus, HandoverSnapshot,
-        AgentStateStore, FileAgentStateBackend
+        AgentStateStore,
+        AgentStatus,
+        FileAgentStateBackend,
     )
 
     with tempfile.TemporaryDirectory() as tmpdir:
@@ -25,7 +26,7 @@ def test_agent_state_store():
         state = store.get_or_create(
             agent_id="test-agent-001",
             role="developer",
-            capabilities=["code_review", "writing", "testing"]
+            capabilities=["code_review", "writing", "testing"],
         )
 
         assert state.agent_id == "test-agent-001"
@@ -37,18 +38,15 @@ def test_agent_state_store():
         state2 = store.get("test-agent-001")
         assert state2.status == AgentStatus.RUNNING
 
-        assert state.is_available_for_delegation() == False
+        assert not state.is_available_for_delegation()
 
-        snapshot = state.create_handoff_snapshot(
-            target_agent_id="test-agent-002",
-            reason="testing"
-        )
+        snapshot = state.create_handoff_snapshot(target_agent_id="test-agent-002", reason="testing")
         assert snapshot.source_agent_id == "test-agent-001"
         assert snapshot.target_agent_id == "test-agent-002"
-        assert snapshot.is_valid() == True
+        assert snapshot.is_valid()
 
         saved = store.save_handoff(snapshot)
-        assert saved == True
+        assert saved
 
         loaded = store.load_handoff(snapshot.snapshot_id)
         assert loaded is not None
@@ -62,10 +60,7 @@ def test_aimd_capacity_controller():
     from cherenkov.core.capability_registry import AIMDCapacityController
 
     controller = AIMDCapacityController(
-        initial_capacity=4,
-        min_capacity=1,
-        max_capacity=10,
-        success_threshold=3
+        initial_capacity=4, min_capacity=1, max_capacity=10, success_threshold=3
     )
 
     assert controller.get_capacity() == 4
@@ -92,24 +87,19 @@ def test_aimd_capacity_controller():
 def test_capability_registry():
     """Test CapabilityRegistry."""
     from cherenkov.core.capability_registry import (
-        CapabilityRegistry, AgentRegistration, SelectionStrategy
+        AgentRegistration,
+        CapabilityRegistry,
     )
 
     registry = CapabilityRegistry()
 
     reg1 = AgentRegistration(
-        agent_id="dev-1",
-        role="developer",
-        capabilities=["code_review", "testing"],
-        is_local=True
+        agent_id="dev-1", role="developer", capabilities=["code_review", "testing"], is_local=True
     )
     registry.register(reg1)
 
     reg2 = AgentRegistration(
-        agent_id="dev-2",
-        role="developer",
-        capabilities=["code_review", "writing"],
-        is_local=True
+        agent_id="dev-2", role="developer", capabilities=["code_review", "writing"], is_local=True
     )
     registry.register(reg2)
 
@@ -130,11 +120,12 @@ def test_capability_registry():
 
 def test_delegation_guardrails():
     """Test DelegationGuardrails."""
+    from cherenkov.core.agent_state_store import AgentStateStore
+    from cherenkov.core.capability_registry import AgentRegistration, CapabilityRegistry
     from cherenkov.core.delegation_guardrails import (
-        DelegationGuardrails, DelegationResult, DelegationOutcome
+        DelegationGuardrails,
+        DelegationResult,
     )
-    from cherenkov.core.agent_state_store import AgentStateStore, AgentStatus
-    from cherenkov.core.capability_registry import CapabilityRegistry, AgentRegistration
 
     state_store = AgentStateStore()
     registry = CapabilityRegistry(state_store=state_store)
@@ -142,33 +133,22 @@ def test_delegation_guardrails():
     state_store.get_or_create("source-1", "developer", ["code_review"])
     state_store.get_or_create("target-1", "tester", ["testing"])
 
-    registry.register(AgentRegistration(
-        agent_id="target-1",
-        role="tester",
-        capabilities=["testing"]
-    ))
-    registry.register(AgentRegistration(
-        agent_id="target-2",
-        role="developer",
-        capabilities=["code_review"]
-    ))
-
-    guardrails = DelegationGuardrails(
-        state_store=state_store,
-        capability_registry=registry
+    registry.register(
+        AgentRegistration(agent_id="target-1", role="tester", capabilities=["testing"])
+    )
+    registry.register(
+        AgentRegistration(agent_id="target-2", role="developer", capabilities=["code_review"])
     )
 
+    guardrails = DelegationGuardrails(state_store=state_store, capability_registry=registry)
+
     result = guardrails.can_delegate(
-        source_agent_id="source-1",
-        target_agent_id="target-1",
-        capability_needed="testing"
+        source_agent_id="source-1", target_agent_id="target-1", capability_needed="testing"
     )
     assert result == DelegationResult.SUCCESS
 
     result2 = guardrails.can_delegate(
-        source_agent_id="source-1",
-        target_agent_id="target-1",
-        capability_needed="code_review"
+        source_agent_id="source-1", target_agent_id="target-1", capability_needed="code_review"
     )
     assert result2 == DelegationResult.CAPABILITY_MISMATCH
 
@@ -176,7 +156,7 @@ def test_delegation_guardrails():
         source_agent_id="a",
         target_agent_id="b",
         capability_needed="test",
-        existing_chain=["a", "c", "d", "e"]
+        existing_chain=["a", "c", "d", "e"],
     )
     assert depth_test == DelegationResult.DEPTH_LIMIT_EXCEEDED
 
@@ -184,7 +164,7 @@ def test_delegation_guardrails():
         source_agent_id="a",
         target_agent_id="b",
         capability_needed="test",
-        existing_chain=["a", "b"]
+        existing_chain=["a", "b"],
     )
     assert circular_test == DelegationResult.CIRCULAR_DELEGATION
 
@@ -197,26 +177,29 @@ def test_delegation_guardrails():
 def test_agent_messages():
     """Test AgentMessage and helpers."""
     from cherenkov.core.agent_messages import (
-        AgentMessage, MessageType, MessagePriority,
-        topic_for_agent, topic_for_role, topic_for_workflow,
-        parse_topic, create_task_request, create_delegation_request
+        AgentMessage,
+        MessageType,
+        create_delegation_request,
+        create_task_request,
+        parse_topic,
+        topic_for_agent,
+        topic_for_role,
+        topic_for_workflow,
     )
 
     msg = AgentMessage(
-        message_type=MessageType.TASK_REQUEST,
-        source_agent_id="agent-1",
-        payload={"task": "test"}
+        message_type=MessageType.TASK_REQUEST, source_agent_id="agent-1", payload={"task": "test"}
     )
 
     assert msg.message_type == MessageType.TASK_REQUEST
     assert msg.source_agent_id == "agent-1"
-    assert msg.requires_response() == True
-    assert msg.is_expired() == False
+    assert msg.requires_response()
+    assert not msg.is_expired()
 
     msg2 = msg.create_reply(
         message_type=MessageType.TASK_RESPONSE,
         payload={"result": "done"},
-        source_agent_id="agent-2"
+        source_agent_id="agent-2",
     )
     assert msg2.in_reply_to == msg.message_id
     assert msg2.target_agent_id == "agent-1"
@@ -232,16 +215,13 @@ def test_agent_messages():
     task_req = create_task_request(
         source_agent_id="source",
         target_agent_id="target",
-        task_description="Please review this code"
+        task_description="Please review this code",
     )
     assert task_req.message_type == MessageType.TASK_REQUEST
     assert "Please review" in task_req.payload["task_description"]
 
     del_req = create_delegation_request(
-        source_agent_id="a1",
-        target_agent_id="a2",
-        task_id="task-1",
-        workflow_id="wf-1"
+        source_agent_id="a1", target_agent_id="a2", task_id="task-1", workflow_id="wf-1"
     )
     assert del_req.message_type == MessageType.DELEGATION_REQUEST
 

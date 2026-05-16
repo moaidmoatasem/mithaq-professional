@@ -1,6 +1,6 @@
-﻿import pytest
-from cherenkov.scanners.security_headers import SecurityHeadersScanner
+import pytest
 from cherenkov.scanners.http_methods import HTTPMethodsScanner
+from cherenkov.scanners.security_headers import SecurityHeadersScanner
 from cherenkov.scanners.tls_detection import TLSDetectionScanner
 
 

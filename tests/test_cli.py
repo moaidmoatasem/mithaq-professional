@@ -1,5 +1,5 @@
-﻿from typer.testing import CliRunner
 from cherenkov.cli import app
+from typer.testing import CliRunner
 
 runner = CliRunner()
 

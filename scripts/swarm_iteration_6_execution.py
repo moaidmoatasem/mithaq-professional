@@ -35,7 +35,7 @@ from cherenkov.agents.micro_swarm.payload_tester import PayloadTester
 
 class AgentFactory:
     """Factory for creating agents from workflow definitions"""
-    
+
     # Registry of available agent types
     AGENT_TYPES = {
         'vulnerability_scanner': 'VulnerabilityScanner',
@@ -43,32 +43,32 @@ class AgentFactory:
         'payload_tester': PayloadTester,
         'micro_agent': MicroAgent,
     }
-    
+
     @classmethod
     def create_agent(cls, role: str, config: Dict[str, Any]) -> Any:
         """
         Create an agent instance based on role
-        
+
         Args:
             role: Agent role/type
             config: Configuration dict from workflow
-        
+
         Returns:
             Instantiated agent
         """
         agent_class = cls.AGENT_TYPES.get(role)
-        
+
         if agent_class is None:
             # Create a generic MicroAgent if no specific type found
             return cls._create_micro_agent(role, config)
-        
+
         # For actual classes, instantiate them
         if isinstance(agent_class, type):
             return agent_class(config)
-        
+
         # For string references, create generic agents
         return cls._create_micro_agent(role, config)
-    
+
     @classmethod
     def _create_micro_agent(cls, role: str, config: Dict[str, Any]) -> MicroAgent:
         """Create a generic MicroAgent"""
@@ -80,34 +80,34 @@ class AgentFactory:
                 'config': config,
                 'context': context
             }
-        
+
         agent_config = MicroAgentConfig(
             role=role,
             purpose=config.get('description', f'Execute {role} tasks'),
             tool_function=generic_tool
         )
-        
+
         return MicroAgent(agent_config)
-    
+
     @classmethod
     def create_agents_from_workflow(cls, workflow_config: Dict[str, Any]) -> list:
         """
         Create all agents defined in a workflow
-        
+
         Args:
             workflow_config: Parsed workflow configuration
-        
+
         Returns:
             List of instantiated agents
         """
         agents = []
         agent_configs = workflow_config.get('agents', [])
-        
+
         for config in agent_configs:
             role = config.get('role', 'unknown')
             agent = cls.create_agent(role, config)
             agents.append(agent)
-        
+
         return agents
 '''
 
@@ -130,25 +130,25 @@ def implement_workflow_executor(context: str):
 
 class WorkflowExecutor:
     """Executes workflows with real agents"""
-    
+
     def __init__(self, workflow_config: Dict[str, Any]):
         self.config = workflow_config
         self.agents = []
         self.results = []
-    
+
     def setup_agents(self):
         """Initialize agents from workflow config"""
         from cherenkov.agent_factory import AgentFactory
         self.agents = AgentFactory.create_agents_from_workflow(self.config)
         return len(self.agents)
-    
+
     def execute_tasks(self) -> List[Any]:
         """Execute all tasks in the workflow"""
         tasks = self.config.get('tasks', [])
-        
+
         # Check if parallel execution
         execution_mode = self.config.get('execution', {}).get('mode', 'sequential')
-        
+
         if execution_mode == 'parallel' and len(self.agents) > 0:
             # Use parallel execution
             task_descriptions = [task.get('description', '') for task in tasks]
@@ -166,9 +166,9 @@ class WorkflowExecutor:
                         'description': task.get('description', '')
                     }
                     self.results.append(result)
-        
+
         return self.results
-    
+
     def generate_report(self) -> Dict[str, Any]:
         """Generate execution report"""
         return {
@@ -200,32 +200,32 @@ def update_orchestrate_workflow(context: str):
     new_impl = '''def orchestrate_workflow(config: Dict) -> WorkflowResult:
     """
     Execute an AI workflow based on configuration
-    
+
     Args:
         config: Workflow configuration dict
-    
+
     Returns:
         WorkflowResult with execution details
     """
     import time
     start = time.time()
-    
+
     try:
         if not config:
             return WorkflowResult(success=False, outputs={}, duration=0, errors=["Empty config"])
-        
+
         # Create executor
         executor = WorkflowExecutor(config)
-        
+
         # Setup agents
         num_agents = executor.setup_agents()
-        
+
         # Execute tasks
         results = executor.execute_tasks()
-        
+
         # Generate report
         report = executor.generate_report()
-        
+
         return WorkflowResult(
             success=True,
             outputs=report,

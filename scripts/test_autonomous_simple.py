@@ -33,7 +33,7 @@ task = Task(
     - Include error handling
     - Add usage examples
     - Make it production-ready
-    
+
     Provide ONLY the complete code.""",
     expected_output="Complete Python SQL injection scanner with examples",
     agent=coder,

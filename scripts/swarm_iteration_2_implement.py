@@ -109,7 +109,7 @@ class WorkflowResult:
     duration: float
     errors: List[str] = None
 
-@dataclass 
+@dataclass
 class AgentID:
     """Unique identifier for registered agent"""
     id: str
@@ -118,10 +118,10 @@ class AgentID:
 def orchestrate_workflow(config: Dict) -> WorkflowResult:
     """
     Execute an AI workflow based on configuration
-    
+
     Args:
         config: Workflow configuration dict
-    
+
     Returns:
         WorkflowResult with execution details
     """
@@ -135,24 +135,24 @@ def orchestrate_workflow(config: Dict) -> WorkflowResult:
 def register_agent(agent: Any) -> AgentID:
     """
     Register an AI agent with the orchestrator
-    
+
     Args:
         agent: Agent instance to register
-    
+
     Returns:
         AgentID for the registered agent
     """
-    # TODO: Implementation  
+    # TODO: Implementation
     return AgentID(id="agent_001", role=agent.role if hasattr(agent, 'role') else "unknown")
 
 def execute_parallel(agents: List[Any], tasks: List[Any]) -> List[Any]:
     """
     Execute multiple agents in parallel
-    
+
     Args:
         agents: List of agent instances
         tasks: List of tasks to execute
-    
+
     Returns:
         List of results from each agent
     """

@@ -1,7 +1,8 @@
-﻿import asyncio
+import asyncio
+
 from cherenkov.core.base_scanner import BaseScanner, ScanResult
-from cherenkov.core.registry import ScannerRegistry
 from cherenkov.core.engine import ScanEngine
+from cherenkov.core.registry import ScannerRegistry
 
 
 class MockScanner(BaseScanner):

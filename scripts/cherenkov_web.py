@@ -9,9 +9,8 @@ from datetime import datetime
 from pathlib import Path
 from urllib.parse import urlparse
 
-from flask import Flask, jsonify, render_template, request
-
 from cherenkov.scanners.header_scanner import SimpleScanner
+from flask import Flask, jsonify, render_template, request
 
 app = Flask(__name__)
 
@@ -81,33 +80,33 @@ if __name__ == "__main__":
 <head>
     <title>cherenkov Security Scanner</title>
     <style>
-        body { 
-            font-family: Arial, sans-serif; 
-            max-width: 1200px; 
-            margin: 50px auto; 
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 1200px;
+            margin: 50px auto;
             padding: 20px;
             background: #1a1a1a;
             color: #fff;
         }
         h1 { color: #00ff88; }
-        .scan-form { 
-            background: #2a2a2a; 
-            padding: 20px; 
+        .scan-form {
+            background: #2a2a2a;
+            padding: 20px;
             border-radius: 8px;
             margin-bottom: 30px;
         }
-        input[type="text"] { 
-            width: 60%; 
-            padding: 10px; 
+        input[type="text"] {
+            width: 60%;
+            padding: 10px;
             font-size: 16px;
             background: #3a3a3a;
             border: 1px solid #555;
             color: #fff;
             border-radius: 4px;
         }
-        button { 
-            padding: 10px 20px; 
-            font-size: 16px; 
+        button {
+            padding: 10px 20px;
+            font-size: 16px;
             background: #00ff88;
             border: none;
             border-radius: 4px;
@@ -116,14 +115,14 @@ if __name__ == "__main__":
             font-weight: bold;
         }
         button:hover { background: #00cc66; }
-        .results { 
-            background: #2a2a2a; 
+        .results {
+            background: #2a2a2a;
             padding: 20px;
             border-radius: 8px;
         }
-        .vuln { 
-            background: #3a3a3a; 
-            padding: 10px; 
+        .vuln {
+            background: #3a3a3a;
+            padding: 10px;
             margin: 10px 0;
             border-left: 4px solid #ff4444;
             border-radius: 4px;
@@ -136,19 +135,19 @@ if __name__ == "__main__":
 </head>
 <body>
     <h1>🔍 cherenkov Security Scanner</h1>
-    
+
     <div class="scan-form">
         <h2>Run Scan</h2>
         <input type="text" id="url" placeholder="https://example.com" />
         <button onclick="runScan()">Scan Now</button>
         <p class="loading" id="loading">⏳ Scanning...</p>
     </div>
-    
+
     <div class="results">
         <h2>Results</h2>
         <div id="results">No scans yet. Enter a URL above to start.</div>
     </div>
-    
+
     <script>
         async function runScan() {
             const url = document.getElementById('url').value;
@@ -156,27 +155,27 @@ if __name__ == "__main__":
                 alert('Please enter a URL');
                 return;
             }
-            
+
             document.getElementById('loading').style.display = 'block';
             document.getElementById('results').innerHTML = '⏳ Scanning...';
-            
+
             try {
                 const response = await fetch('/api/scan', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({ url: url })
                 });
-                
+
                 const data = await response.json();
                 displayResults(data);
             } catch (error) {
-                document.getElementById('results').innerHTML = 
+                document.getElementById('results').innerHTML =
                     '<p style="color: #ff4444;">Error: ' + error + '</p>';
             }
-            
+
             document.getElementById('loading').style.display = 'none';
         }
-        
+
         function escapeHtml(str) {
             const map = {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#039;'};
             return String(str).replace(/[&<>"']/g, m => map[m]);

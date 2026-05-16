@@ -38,7 +38,7 @@ agents:
       - sql_injection_scanner
       - xss_scanner
       - header_scanner
-    
+
   - role: "sanitization_gatekeeper"
     tools:
       - pii_scrubber
@@ -49,7 +49,7 @@ tasks:
     agent: "vulnerability_scanner"
     description: "Scan the target application for vulnerabilities"
     expected_output: "List of vulnerabilities with severity ratings"
-  
+
   - name: "sanitize_results"
     agent: "sanitization_gatekeeper"
     description: "Remove sensitive data from scan results"
@@ -69,10 +69,10 @@ description: "Test multiple endpoints in parallel for SQL injection"
 agents:
   - role: "payload_tester_1"
     endpoint: "/api/users"
-  
+
   - role: "payload_tester_2"
     endpoint: "/api/products"
-  
+
   - role: "payload_tester_3"
     endpoint: "/api/search"
 
@@ -106,60 +106,60 @@ from pathlib import Path
 
 class WorkflowParser:
     """Parse YAML workflow files into agent configurations"""
-    
+
     def __init__(self, workflow_file: str):
         self.workflow_file = Path(workflow_file)
         self.config = None
-    
+
     def parse(self) -> Dict[str, Any]:
         """Parse the workflow YAML file"""
         if not self.workflow_file.exists():
             raise FileNotFoundError(f"Workflow file not found: {self.workflow_file}")
-        
+
         with open(self.workflow_file, 'r') as f:
             self.config = yaml.safe_load(f)
-        
+
         return self.config
-    
+
     def get_agent_configs(self) -> List[Dict[str, Any]]:
         """Extract agent configurations from workflow"""
         if not self.config:
             self.parse()
-        
+
         agents = self.config.get('agents', [])
         agent_configs = []
-        
+
         for agent in agents:
             agent_configs.append({
                 'role': agent.get('role', 'unknown'),
                 'tools': agent.get('tools', []),
                 'config': agent
             })
-        
+
         return agent_configs
-    
+
     def get_tasks(self) -> List[Dict[str, Any]]:
         """Extract task configurations from workflow"""
         if not self.config:
             self.parse()
-        
+
         return self.config.get('tasks', [])
-    
+
     def is_parallel(self) -> bool:
         """Check if workflow should execute in parallel"""
         if not self.config:
             self.parse()
-        
+
         execution = self.config.get('execution', {})
         return execution.get('mode', 'sequential') == 'parallel'
 
 def load_workflow(workflow_file: str) -> Dict[str, Any]:
     """
     Convenience function to load a workflow file
-    
+
     Args:
         workflow_file: Path to YAML workflow file
-    
+
     Returns:
         Parsed workflow configuration
     """
@@ -188,24 +188,24 @@ def integrate_with_cli(context: str):
 def orchestrate(config, output):
     """Run an orchestration workflow from YAML file"""
     click.echo(f"🎯 Orchestrating workflow from {config}")
-    
+
     try:
         from cherenkov.workflow_parser import load_workflow
         from cherenkov.orchestration_api import orchestrate_workflow
-        
+
         # Load workflow YAML
         workflow_config = load_workflow(config)
         click.echo(f"   Loaded: {workflow_config.get('name', 'Unnamed')}")
-        
+
         # Execute workflow
         result = orchestrate_workflow(workflow_config)
-        
+
         if result.success:
             click.echo(f"✅ Workflow completed in {result.duration:.2f}s")
             click.echo(f"   Results saved to {output}")
         else:
             click.echo(f"❌ Workflow failed: {result.errors}")
-    
+
     except (ImportError, FileNotFoundError) as e:
         click.echo(f"❌ Error: {e}")'''
 
@@ -247,13 +247,14 @@ from cherenkov.orchestration.orchestration_api import orchestrate_workflow
 def test_parse_security_workflow():
     """Test parsing a security scan workflow"""
     workflow_file = "examples/workflows/security_scan_workflow.yaml"
-    
+
+
     if not Path(workflow_file).exists():
         pytest.skip("Example workflow not found")
-    
+
     parser = WorkflowParser(workflow_file)
     config = parser.parse()
-    
+
     assert config['name'] == "Basic Security Scan"
     assert len(config['agents']) == 2
     assert len(config['tasks']) == 2
@@ -261,13 +262,14 @@ def test_parse_security_workflow():
 def test_parse_parallel_workflow():
     """Test parsing a parallel workflow"""
     workflow_file = "examples/workflows/parallel_test_workflow.yaml"
-    
+
+
     if not Path(workflow_file).exists():
         pytest.skip("Example workflow not found")
-    
+
     parser = WorkflowParser(workflow_file)
     config = parser.parse()
-    
+
     assert config['name'] == "Parallel Exploit Testing"
     assert parser.is_parallel() is True
 
@@ -279,9 +281,9 @@ def test_workflow_execution():
         'agents': [{'role': 'tester'}],
         'tasks': [{'name': 'test', 'description': 'run test'}]
     }
-    
+
     result = orchestrate_workflow(workflow)
-    
+
     assert result.success is True
     assert result.duration >= 0
 '''

@@ -18,23 +18,23 @@ def load_tasks():
 
 def generate_scanner(task_name, task_info):
     """Generate a single scanner using AI"""
-    print(f"\n{'='*70}")
+    print(f"\n{'=' * 70}")
     print(f"🤖 Generating: {task_name}")
     print(f"   Type: {task_info.get('type', 'unknown')}")
     print(f"   Description: {task_info.get('description', 'N/A')}")
-    print(f"{'='*70}\n")
+    print(f"{'=' * 70}\n")
 
     # Create a simple prompt for the AI
     prompt = f"""
 Create a Python security scanner for cherenkov framework:
 
 Name: {task_name}
-Type: {task_info.get('type')}
-Description: {task_info.get('description')}
-Features: {task_info.get('features', [])}
+Type: {task_info.get("type")}
+Description: {task_info.get("description")}
+Features: {task_info.get("features", [])}
 
 Requirements:
-1. Create file: src/cherenkov/scanners/{task_name.lower().replace(' ', '_').replace('-', '_')}_scanner.py
+1. Create file: src/cherenkov/scanners/{task_name.lower().replace(" ", "_").replace("-", "_")}_scanner.py
 2. Include comprehensive docstrings
 3. Add error handling
 4. Make it production-ready
@@ -67,7 +67,7 @@ def main():
     completed = 0
 
     # Count total tasks
-    for batch_name, task_list in tasks.items():
+    for _batch_name, task_list in tasks.items():
         if isinstance(task_list, list):
             total_tasks += len(task_list)
 
@@ -80,9 +80,9 @@ def main():
         if not isinstance(task_list, list):
             continue
 
-        print(f"\n{'#'*70}")
+        print(f"\n{'#' * 70}")
         print(f"📦 BATCH: {batch_name}")
-        print(f"{'#'*70}\n")
+        print(f"{'#' * 70}\n")
 
         for task in task_list:
             try:
@@ -101,11 +101,11 @@ def main():
                 print(f"❌ Error processing task: {e}")
                 continue
 
-    print(f"\n{'='*70}")
+    print(f"\n{'=' * 70}")
     print("🎉 EXTENDED DEVELOPMENT COMPLETE!")
     print(f"✅ Completed: {completed}/{total_tasks}")
     print(f"⏰ Finished: {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}")
-    print(f"{'='*70}\n")
+    print(f"{'=' * 70}\n")
 
 
 if __name__ == "__main__":

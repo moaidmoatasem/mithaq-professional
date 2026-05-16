@@ -93,7 +93,7 @@ log("")
 
 # Execute roadmap
 for phase_idx, phase in enumerate(ROADMAP, 1):
-    log(f"\n{'='*70}")
+    log(f"\n{'=' * 70}")
     log(f"🎯 {phase['phase']} ({phase_idx}/{len(ROADMAP)})")
     log("=" * 70)
 
@@ -169,7 +169,7 @@ log("📊 ROADMAP EXECUTION SUMMARY")
 log("=" * 70)
 log(f"Total Tasks: {total_tasks}")
 log(f"Completed: {completed_tasks}")
-log(f"Success Rate: {(completed_tasks/total_tasks*100):.1f}%")
+log(f"Success Rate: {(completed_tasks / total_tasks * 100):.1f}%")
 log(f"Output Directory: {output_dir}/")
 log("")
 

@@ -1,5 +1,4 @@
 import pytest
-
 from cherenkov.core.ablation.sanitizer import AblationSanitizer, SanitizedPayload
 
 # Test data with secrets

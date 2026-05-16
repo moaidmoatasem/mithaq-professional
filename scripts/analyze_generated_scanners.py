@@ -19,7 +19,7 @@ for scanner in python_files:
     if scanner.name == "__init__.py":
         continue
 
-    print(f"\n{'='*70}")
+    print(f"\n{'=' * 70}")
     print(f"📄 {scanner.name}")
     print("=" * 70)
 

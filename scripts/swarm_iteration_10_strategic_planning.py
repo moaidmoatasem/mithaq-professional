@@ -80,27 +80,27 @@ def analyze_current_state(context: str):
 ## Current System State (9 Iterations Complete)
 
 ### ✅ Completed Features
-{chr(10).join(f"- {f}" for f in analysis['completed_features'])}
+{chr(10).join(f"- {f}" for f in analysis["completed_features"])}
 
 ### 📊 Gap Analysis
-{chr(10).join(f"- {gap}" for gap in analysis['gaps_identified'])}
+{chr(10).join(f"- {gap}" for gap in analysis["gaps_identified"])}
 
 ## Priority Matrix
 
 ### 🎯 High Value, Quick Wins (Build These First!)
-{chr(10).join(f"{i+1}. {item}" for i, item in enumerate(analysis['priority_matrix']['high_value_quick_wins']))}
+{chr(10).join(f"{i + 1}. {item}" for i, item in enumerate(analysis["priority_matrix"]["high_value_quick_wins"]))}
 
 ### 🚀 High Value, Complex (Plan These)
-{chr(10).join(f"{i+1}. {item}" for i, item in enumerate(analysis['priority_matrix']['high_value_complex']))}
+{chr(10).join(f"{i + 1}. {item}" for i, item in enumerate(analysis["priority_matrix"]["high_value_complex"]))}
 
 ### 📈 Medium Value (Future Iterations)
-{chr(10).join(f"{i+1}. {item}" for i, item in enumerate(analysis['priority_matrix']['medium_value']))}
+{chr(10).join(f"{i + 1}. {item}" for i, item in enumerate(analysis["priority_matrix"]["medium_value"]))}
 
 ## Recommended: Iteration #10 - Triple Feature Build
 
 Build THREE features in parallel using swarm power:
 
-{chr(10).join(analysis['recommended_iteration_10'])}
+{chr(10).join(analysis["recommended_iteration_10"])}
 
 ### Why These Three?
 
@@ -229,14 +229,14 @@ async def execute_workflow(request: WorkflowExecuteRequest):
             # Load from examples
             workflow_path = f"examples/workflows/{request.workflow_name}.yaml"
             config = load_workflow(workflow_path)
-        
+
         # Execute
         result = orchestrate_workflow(config)
-        
+
         # Save result
         store = ResultStore()
         store.save_result(request.workflow_name, result.outputs)
-        
+
         return WorkflowResponse(
             success=result.success,
             workflow=request.workflow_name,
@@ -317,10 +317,10 @@ from collections import defaultdict
 
 class WorkflowAnalytics:
     """Analyze workflow execution patterns and performance"""
-    
+
     def __init__(self, results_dir: str = "workflow_results"):
         self.results_dir = Path(results_dir)
-    
+
     def load_all_results(self) -> List[Dict]:
         """Load all workflow results"""
         results = []
@@ -329,43 +329,43 @@ class WorkflowAnalytics:
                 with open(file) as f:
                     results.append(json.load(f))
         return results
-    
+
     def workflow_statistics(self) -> Dict[str, Any]:
         """Get overall workflow statistics"""
         results = self.load_all_results()
-        
+
         workflows = defaultdict(list)
         for result in results:
             workflow_name = result.get('workflow', 'unknown')
             workflows[workflow_name].append(result)
-        
+
         stats = {
             'total_executions': len(results),
             'unique_workflows': len(workflows),
             'workflows': {}
         }
-        
+
         for name, executions in workflows.items():
             stats['workflows'][name] = {
                 'executions': len(executions),
                 'last_run': executions[-1].get('timestamp', 'unknown')
             }
-        
+
         return stats
-    
+
     def performance_metrics(self) -> Dict[str, Any]:
         """Calculate performance metrics"""
         results = self.load_all_results()
-        
+
         if not results:
             return {'message': 'No results to analyze'}
-        
+
         # Extract durations if available
         durations = []
         for result in results:
             if 'result' in result and 'duration' in result['result']:
                 durations.append(result['result']['duration'])
-        
+
         if durations:
             return {
                 'avg_duration': sum(durations) / len(durations),
@@ -373,14 +373,14 @@ class WorkflowAnalytics:
                 'max_duration': max(durations),
                 'total_runs': len(durations)
             }
-        
+
         return {'message': 'No duration data available'}
-    
+
     def generate_report(self) -> str:
         """Generate markdown report"""
         stats = self.workflow_statistics()
         perf = self.performance_metrics()
-        
+
         report = f"""# Workflow Analytics Report
 
 Generated: {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}
@@ -397,7 +397,7 @@ Generated: {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}
             report += f"### {name}\n"
             report += f"- Executions: {data['executions']}\n"
             report += f"- Last Run: {data['last_run']}\n\n"
-        
+
         report += "## Performance Metrics\n\n"
         if 'avg_duration' in perf:
             report += f"- Average Duration: {perf['avg_duration']:.4f}s\n"
@@ -405,14 +405,14 @@ Generated: {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}
             report += f"- Slowest: {perf['max_duration']:.4f}s\n"
         else:
             report += f"- {perf.get('message', 'No data')}\n"
-        
+
         return report
 
 def generate_analytics_report(output_file: str = "analytics_report.md"):
     """Generate and save analytics report"""
     analytics = WorkflowAnalytics()
     report = analytics.generate_report()
-    
+
     Path(output_file).write_text(report)
     print(f"📊 Analytics report generated: {output_file}")
     return report
@@ -547,7 +547,7 @@ def create_web_dashboard_foundation(context: str):
             <h1>🤖 cherenkov Autonomous Agents</h1>
             <p>Real-time workflow orchestration dashboard</p>
         </div>
-        
+
         <div class="stats-grid">
             <div class="stat-card">
                 <h3>Total Workflows</h3>
@@ -566,10 +566,10 @@ def create_web_dashboard_foundation(context: str):
                 <div class="value" id="success-rate">100%</div>
             </div>
         </div>
-        
+
         <div class="workflows-section">
             <h2 style="margin-bottom: 20px;">Available Workflows</h2>
-            
+
             <div class="workflow-item">
                 <div>
                     <strong>Security Scan Workflow</strong>
@@ -581,7 +581,7 @@ def create_web_dashboard_foundation(context: str):
                     Execute
                 </button>
             </div>
-            
+
             <div class="workflow-item">
                 <div>
                     <strong>API Testing Workflow</strong>
@@ -593,7 +593,7 @@ def create_web_dashboard_foundation(context: str):
                     Execute
                 </button>
             </div>
-            
+
             <div class="workflow-item">
                 <div>
                     <strong>Quick Scan</strong>
@@ -607,14 +607,14 @@ def create_web_dashboard_foundation(context: str):
             </div>
         </div>
     </div>
-    
+
     <script>
         function executeWorkflow(name) {
             alert(`Executing ${name}...\\n\\nThis will call the REST API when connected!`);
             // TODO: Connect to REST API endpoint
             // fetch('/api/workflows/execute', { method: 'POST', body: JSON.stringify({workflow_name: name}) })
         }
-        
+
         // TODO: Load real data from API
         console.log('🚀 cherenkov Dashboard loaded!');
         console.log('Connect to REST API at http://localhost:8000');

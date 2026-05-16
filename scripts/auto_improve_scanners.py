@@ -53,7 +53,7 @@ task_configs = [
     {
         "description": f"""Review this XSS scanner code and provide improvements:
 
-{scanners_to_improve[0]['code'][:1000] if scanners_to_improve else ""}
+{scanners_to_improve[0]["code"][:1000] if scanners_to_improve else ""}
 
 Provide:
 1. Code quality improvements
@@ -69,7 +69,7 @@ Output: Improved Python code with comments explaining changes.
     {
         "description": f"""Optimize this CSRF scanner for production use:
 
-{scanners_to_improve[1]['code'][:1000] if len(scanners_to_improve) > 1 else ""}
+{scanners_to_improve[1]["code"][:1000] if len(scanners_to_improve) > 1 else ""}
 
 Add:
 1. Comprehensive form parsing
@@ -85,7 +85,7 @@ Output: Production-grade CSRF scanner code.
     {
         "description": f"""Make this open redirect scanner enterprise-ready:
 
-{scanners_to_improve[2]['code'][:1000] if len(scanners_to_improve) > 2 else ""}
+{scanners_to_improve[2]["code"][:1000] if len(scanners_to_improve) > 2 else ""}
 
 Enhance with:
 1. Comprehensive redirect pattern detection

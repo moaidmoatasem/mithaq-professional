@@ -1,7 +1,6 @@
 import os
 
 import pytest
-
 from cherenkov.crews.autonomous_developer_crew import AutonomousDeveloperCrew
 
 

@@ -38,8 +38,8 @@ class AutonomousDevTeam:
         product_manager = Agent(
             role="Product Manager",
             goal="Define roadmap, milestones, and coordinate the team",
-            backstory="""You are an experienced Product Manager who creates 
-            clear roadmaps with milestones and phases. You break down projects 
+            backstory="""You are an experienced Product Manager who creates
+            clear roadmaps with milestones and phases. You break down projects
             into manageable tasks and track progress.""",
             llm=self.llm,
             verbose=True,
@@ -49,8 +49,8 @@ class AutonomousDevTeam:
         architect = Agent(
             role="Technical Architect",
             goal="Design system architecture, HLD, LLD, and design patterns",
-            backstory="""You are a senior architect who creates comprehensive 
-            High-Level Design (HLD) and Low-Level Design (LLD) documents. 
+            backstory="""You are a senior architect who creates comprehensive
+            High-Level Design (HLD) and Low-Level Design (LLD) documents.
             You choose appropriate design patterns and ensure scalability.""",
             llm=self.llm,
             verbose=True,
@@ -60,8 +60,8 @@ class AutonomousDevTeam:
         tech_lead = Agent(
             role="Tech Lead",
             goal="Review code, enforce standards, approve implementations",
-            backstory="""You are a technical leader who reviews all code for 
-            quality, security, and best practices. You ensure the team follows 
+            backstory="""You are a technical leader who reviews all code for
+            quality, security, and best practices. You ensure the team follows
             architectural decisions and coding standards.""",
             llm=self.llm,
             verbose=True,
@@ -71,8 +71,8 @@ class AutonomousDevTeam:
         senior_dev = Agent(
             role="Senior Developer",
             goal="Implement core features with high quality",
-            backstory="""You are an expert developer who writes clean, 
-            maintainable, production-ready code. You follow SOLID principles 
+            backstory="""You are an expert developer who writes clean,
+            maintainable, production-ready code. You follow SOLID principles
             and write comprehensive documentation.""",
             llm=self.llm,
             verbose=True,
@@ -82,7 +82,7 @@ class AutonomousDevTeam:
         backend_dev = Agent(
             role="Backend Developer",
             goal="Implement backend services and APIs",
-            backstory="""You specialize in backend development, creating 
+            backstory="""You specialize in backend development, creating
             robust APIs, database schemas, and business logic.""",
             llm=self.llm,
             verbose=True,
@@ -92,8 +92,8 @@ class AutonomousDevTeam:
         security_dev = Agent(
             role="Security Developer",
             goal="Implement security features and vulnerability scanning",
-            backstory="""You are a security specialist who implements 
-            security controls, vulnerability scanners, and secure coding 
+            backstory="""You are a security specialist who implements
+            security controls, vulnerability scanners, and secure coding
             practices.""",
             llm=self.llm,
             verbose=True,
@@ -103,8 +103,8 @@ class AutonomousDevTeam:
         code_reviewer = Agent(
             role="Code Reviewer",
             goal="Review code for quality, security, and best practices",
-            backstory="""You are a meticulous code reviewer who checks for 
-            bugs, security issues, performance problems, and adherence to 
+            backstory="""You are a meticulous code reviewer who checks for
+            bugs, security issues, performance problems, and adherence to
             coding standards.""",
             llm=self.llm,
             verbose=True,
@@ -114,8 +114,8 @@ class AutonomousDevTeam:
         qa_engineer = Agent(
             role="QA Engineer",
             goal="Write tests and ensure code quality",
-            backstory="""You are a quality assurance expert who writes 
-            comprehensive unit tests, integration tests, and ensures 
+            backstory="""You are a quality assurance expert who writes
+            comprehensive unit tests, integration tests, and ensures
             test coverage meets standards.""",
             llm=self.llm,
             verbose=True,
@@ -125,7 +125,7 @@ class AutonomousDevTeam:
         devops = Agent(
             role="DevOps Engineer",
             goal="Set up CI/CD, deployment, and integration",
-            backstory="""You are a DevOps expert who creates deployment 
+            backstory="""You are a DevOps expert who creates deployment
             pipelines, manages integrations, and ensures smooth releases.""",
             llm=self.llm,
             verbose=True,
@@ -149,14 +149,14 @@ class AutonomousDevTeam:
         # PHASE 1: Planning & Architecture
         task_roadmap = Task(
             description=f"""Create a detailed project roadmap for: {project_description}
-            
+
             Include:
             1. Project phases (Planning, Design, Development, Testing, Deployment)
             2. Milestones with dates
             3. Feature breakdown
             4. Success criteria
             5. Risk assessment
-            
+
             Output a structured markdown roadmap.""",
             expected_output="Detailed project roadmap with phases and milestones",
             agent=team["pm"],
@@ -164,14 +164,14 @@ class AutonomousDevTeam:
 
         task_hld = Task(
             description=f"""Design High-Level Architecture for: {project_description}
-            
+
             Include:
             1. System components and their responsibilities
             2. Data flow diagrams
             3. Technology stack recommendations
             4. Integration points
             5. Scalability considerations
-            
+
             Output a comprehensive HLD document.""",
             expected_output="High-Level Design document",
             agent=team["architect"],
@@ -180,14 +180,14 @@ class AutonomousDevTeam:
 
         task_lld = Task(
             description="""Create Low-Level Design based on the HLD.
-            
+
             Include:
             1. Class diagrams
             2. Database schema
             3. API specifications
             4. Design patterns to use (Factory, Strategy, Observer, etc.)
             5. Module structure
-            
+
             Output detailed LLD document.""",
             expected_output="Low-Level Design document with patterns",
             agent=team["architect"],
@@ -197,13 +197,13 @@ class AutonomousDevTeam:
         # PHASE 2: Development (Parallel)
         task_core_feature = Task(
             description="""Implement the core feature based on LLD.
-            
+
             Requirements:
             1. Follow the design patterns specified
             2. Write clean, documented code
             3. Include error handling
             4. Follow SOLID principles
-            
+
             Output complete Python code.""",
             expected_output="Core feature implementation",
             agent=team["senior_dev"],
@@ -212,13 +212,13 @@ class AutonomousDevTeam:
 
         task_backend = Task(
             description="""Implement backend services and APIs based on LLD.
-            
+
             Requirements:
             1. RESTful API endpoints
             2. Database integration
             3. Input validation
             4. Error responses
-            
+
             Output complete backend code.""",
             expected_output="Backend service implementation",
             agent=team["backend_dev"],
@@ -227,13 +227,13 @@ class AutonomousDevTeam:
 
         task_security = Task(
             description="""Implement security features based on LLD.
-            
+
             Requirements:
             1. Authentication/Authorization
             2. Input sanitization
             3. Vulnerability scanning
             4. Security middleware
-            
+
             Output security module code.""",
             expected_output="Security implementation",
             agent=team["security_dev"],
@@ -243,14 +243,14 @@ class AutonomousDevTeam:
         # PHASE 3: Code Review
         task_review = Task(
             description="""Review all implemented code for quality and security.
-            
+
             Check:
             1. Code follows design patterns
             2. No security vulnerabilities
             3. Proper error handling
             4. Performance optimization opportunities
             5. Code documentation
-            
+
             Output code review report with recommendations.""",
             expected_output="Comprehensive code review report",
             agent=team["reviewer"],
@@ -260,13 +260,13 @@ class AutonomousDevTeam:
         # PHASE 4: Testing
         task_testing = Task(
             description="""Write comprehensive tests for all components.
-            
+
             Include:
             1. Unit tests for each module
             2. Integration tests
             3. Security tests
             4. Edge case tests
-            
+
             Output complete test suite.""",
             expected_output="Complete test suite code",
             agent=team["qa"],
@@ -276,14 +276,14 @@ class AutonomousDevTeam:
         # PHASE 5: Integration & Deployment
         task_integration = Task(
             description="""Create integration and deployment plan.
-            
+
             Include:
             1. CI/CD pipeline configuration
             2. Deployment steps
             3. Rollback procedures
             4. Monitoring setup
             5. Integration checklist
-            
+
             Output deployment guide.""",
             expected_output="Deployment and integration guide",
             agent=team["devops"],
@@ -293,14 +293,14 @@ class AutonomousDevTeam:
         # PHASE 6: Final Review by Tech Lead
         task_tech_lead_approval = Task(
             description="""Review entire project for approval.
-            
+
             Verify:
             1. All architectural decisions followed
             2. Code quality meets standards
             3. Tests are comprehensive
             4. Documentation is complete
             5. Ready for deployment
-            
+
             Output final approval report.""",
             expected_output="Tech lead approval and final recommendations",
             agent=team["tech_lead"],
@@ -411,7 +411,7 @@ if __name__ == "__main__":
     project = """
     Build a web vulnerability scanner with the following features:
     - XSS detection
-    - SQL injection detection  
+    - SQL injection detection
     - CSRF detection
     - Authentication bypass detection
     - RESTful API for scanning

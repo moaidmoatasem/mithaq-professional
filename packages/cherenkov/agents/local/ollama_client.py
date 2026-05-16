@@ -104,7 +104,7 @@ class OllamaClient:
             )
 
         except requests.exceptions.RequestException as e:
-            raise RuntimeError(f"Ollama request failed: {e}")
+            raise RuntimeError(f"Ollama request failed: {e}") from e
 
     def analyze_code(
         self, code: str, language: str = "python", focus: str = "security"
@@ -162,7 +162,7 @@ Provide findings in this format:
         """
 
         system_prompt = """You are a threat modeling expert using STRIDE methodology.
-Analyze applications for: Spoofing, Tampering, Repudiation, 
+Analyze applications for: Spoofing, Tampering, Repudiation,
 Information Disclosure, Denial of Service, Elevation of Privilege."""
 
         context_str = json.dumps(context, indent=2)

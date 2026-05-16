@@ -1,7 +1,6 @@
 import asyncio
 
 import pytest
-
 from cherenkov.core.events import EventBus
 
 

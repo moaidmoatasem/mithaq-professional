@@ -1,6 +1,11 @@
 import pytest
-
-from cherenkov.core.storage.database import get_scan, init_db, list_scans, prune_old_scans, save_scan
+from cherenkov.core.storage.database import (
+    get_scan,
+    init_db,
+    list_scans,
+    prune_old_scans,
+    save_scan,
+)
 
 
 @pytest.fixture()

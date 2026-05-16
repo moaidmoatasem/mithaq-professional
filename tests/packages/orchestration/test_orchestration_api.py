@@ -2,7 +2,7 @@
 Tests for Orchestration API
 """
 
-from unittest.mock import Mock, PropertyMock, patch
+from unittest.mock import Mock, patch
 
 from cherenkov.orchestration.orchestration_api import (
     AgentID,

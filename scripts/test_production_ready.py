@@ -21,7 +21,7 @@ tests_failed = 0
 def test(name, func):
     """Run a test"""
     global tests_passed, tests_failed
-    print(f"\n{'='*70}")
+    print(f"\n{'=' * 70}")
     print(f"🧪 {name}")
     print("=" * 70)
 
@@ -128,7 +128,7 @@ print("📊 PRODUCTION READINESS SUMMARY")
 print("=" * 70)
 print(f"✅ Passed: {tests_passed}")
 print(f"❌ Failed: {tests_failed}")
-print(f"📈 Success Rate: {(tests_passed/(tests_passed+tests_failed)*100):.1f}%")
+print(f"📈 Success Rate: {(tests_passed / (tests_passed + tests_failed) * 100):.1f}%")
 
 if tests_failed == 0:
     print("\n🎉 SYSTEM IS PRODUCTION READY!")

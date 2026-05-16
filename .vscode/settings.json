@@ -8,7 +8,6 @@
     ],
     "python.createEnvironment.trigger": "off",
     "[python]": {
-        "editor.defaultFormatter": "ms-python.black-formatter",
         "editor.formatOnSave": true
     }
 }

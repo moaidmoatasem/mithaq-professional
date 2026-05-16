@@ -98,9 +98,9 @@ agent_configs = [
 task_configs = [
     {
         "description": f"""
-TARGET FILE: {task['file']}
+TARGET FILE: {task["file"]}
 
-TASK: {task['task']}
+TASK: {task["task"]}
 
 REQUIREMENTS:
 - Read the current file if it exists
@@ -145,7 +145,7 @@ timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
 
 for i, result in enumerate(results):
     output_file = (
-        output_dir / f"agent_{i+1}_{SWARM_TASKS[i]['name'].replace(' ', '_')}_{timestamp}.txt"
+        output_dir / f"agent_{i + 1}_{SWARM_TASKS[i]['name'].replace(' ', '_')}_{timestamp}.txt"
     )
     output_file.write_text(str(result["result"]))
     print(f"📄 Saved: {output_file}")

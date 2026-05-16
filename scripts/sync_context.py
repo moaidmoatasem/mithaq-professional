@@ -75,7 +75,7 @@ def generate() -> str:
     for s in validated[:10]:
         w(f"  ✓ {s}")
     if len(validated) > 10:
-        w(f"  ... and {len(validated)-10} more")
+        w(f"  ... and {len(validated) - 10} more")
     w(f"Candidates (unvalidated): {len(candidates)}")
 
     # ── Core files existence ───────────────────────────────────────────────

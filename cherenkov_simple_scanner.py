@@ -79,7 +79,7 @@ class SimpleScanner:
                     logger.warning("  [!] %s is ALLOWED (Status: %s)", method, response.status_code)
                 else:
                     logger.info("  [✓] %s is blocked", method)
-            except:
+            except Exception:
                 logger.info("  [✓] %s is blocked", method)
 
     def scan_ssl_tls(self):
@@ -103,9 +103,9 @@ class SimpleScanner:
         logger.info("\n" + "=" * 70)
         logger.info("SCAN REPORT")
         logger.info("=" * 70)
-        logger.info("Target: %s", self.results['target'])
-        logger.info("Scan Time: %s", self.results['timestamp'])
-        logger.info("Vulnerabilities Found: %d", len(self.results['vulnerabilities']))
+        logger.info("Target: %s", self.results["target"])
+        logger.info("Scan Time: %s", self.results["timestamp"])
+        logger.info("Vulnerabilities Found: %d", len(self.results["vulnerabilities"]))
         logger.info("=" * 70)
 
         if not self.results["vulnerabilities"]:
@@ -113,8 +113,8 @@ class SimpleScanner:
         else:
             logger.warning("\n⚠️  VULNERABILITIES:")
             for i, vuln in enumerate(self.results["vulnerabilities"], 1):
-                logger.warning("\n%d. %s [%s]", i, vuln['type'], vuln['severity'])
-                logger.warning("   %s", vuln.get('description', ''))
+                logger.warning("\n%d. %s [%s]", i, vuln["type"], vuln["severity"])
+                logger.warning("   %s", vuln.get("description", ""))
 
         # Save to file
         report_file = f"scan_report_{datetime.now().strftime('%Y%m%d_%H%M%S')}.json"

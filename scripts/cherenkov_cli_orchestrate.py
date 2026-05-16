@@ -4,8 +4,9 @@ cherenkov CLI - Orchestration commands
 Refactored for Clean Architecture: No direct DB access, routes through API.
 """
 
-import click
 import json
+
+import click
 
 
 @click.group()

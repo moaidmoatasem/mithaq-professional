@@ -1,5 +1,4 @@
 import pytest
-
 from cherenkov.core.hybrid_orchestrator import (
     CognitiveLoopError,
     ExecutionMode,

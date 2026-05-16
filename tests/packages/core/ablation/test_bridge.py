@@ -1,4 +1,5 @@
-from cherenkov.core.ablation.bridge import AblationBridge, SanitizationError, DropReason
+from cherenkov.core.ablation.bridge import AblationBridge, DropReason, SanitizationError
+
 
 def test_sanitize_success():
     bridge = AblationBridge()
@@ -7,6 +8,7 @@ def test_sanitize_success():
     assert result.sanitized_payload == finding
     assert result.redaction_count == 0
 
+
 def test_sanitize_redacts_credentials():
     bridge = AblationBridge()
     finding = {"key": "AKIAIOSFODNN7EXAMPLE"}
@@ -14,11 +16,12 @@ def test_sanitize_redacts_credentials():
     assert result.sanitized_payload["key"] == "[AWS_KEY_REDACTED]"
     assert result.redaction_count == 1
 
+
 def test_sanitize_rejects_binary():
     bridge = AblationBridge()
     finding = {"data": b"binary"}
     try:
         bridge.sanitize(finding)
-        assert False
+        raise AssertionError()
     except SanitizationError as e:
         assert e.reason == DropReason.BINARY_CONTENT

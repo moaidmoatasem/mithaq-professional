@@ -4,14 +4,13 @@ Test the complete autonomous development team
 """
 
 import pytest
-
 from cherenkov.crews.autonomous_dev_team import AutonomousDevTeam
 
 
 @pytest.mark.integration
 def test_full_dev_team():
     # Define your project
-    PROJECT_DESCRIPTION = """
+    project_description = """
     Create a secure API gateway with:
     1. Rate limiting
     2. JWT authentication
@@ -40,7 +39,7 @@ def test_full_dev_team():
 
     # Run the project
     team = AutonomousDevTeam()
-    result = team.run_project(PROJECT_DESCRIPTION)
+    team.run_project(project_description)
 
     print("\n✅ Development cycle complete!")
     print("📂 Check output/autonomous_project/ for all deliverables")

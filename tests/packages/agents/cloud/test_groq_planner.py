@@ -1,8 +1,8 @@
-import pytest
-from dotenv import load_dotenv
-from unittest.mock import patch, MagicMock
+from unittest.mock import MagicMock, patch
 
+import pytest
 from cherenkov.agents.cloud.strategic_planner import StrategicPlanner, ThreatAnalysisTask
+from dotenv import load_dotenv
 
 load_dotenv()
 

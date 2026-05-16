@@ -25,10 +25,13 @@ class NucleiScanner(BaseScanner):
 
         cmd = [
             "nuclei",
-            "-u", target,
-            "-severity", "critical,high",
+            "-u",
+            target,
+            "-severity",
+            "critical,high",
             "-json",
-            "-timeout", str(int(timeout)),
+            "-timeout",
+            str(int(timeout)),
         ]
 
         try:
@@ -40,7 +43,11 @@ class NucleiScanner(BaseScanner):
             stdout, stderr = await asyncio.wait_for(proc.communicate(), timeout=timeout)
 
             if proc.returncode != 0:
-                logger.warning("nuclei exited with code %d: %s", proc.returncode, stderr.decode(errors="replace"))
+                logger.warning(
+                    "nuclei exited with code %d: %s",
+                    proc.returncode,
+                    stderr.decode(errors="replace"),
+                )
 
             for line in stdout.decode(errors="replace").splitlines():
                 line = line.strip()

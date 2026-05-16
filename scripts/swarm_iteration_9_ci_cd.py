@@ -40,25 +40,25 @@ on:
 jobs:
   test:
     runs-on: ubuntu-latest
-    
+
     steps:
     - uses: actions/checkout@v4
-    
+
     - name: Set up Python
       uses: actions/setup-python@v5
       with:
         python-version: '3.12'
-    
+
     - name: Install dependencies
       run: |
         pip install -r cherenkov-professional/requirements.txt
         pip install pytest pytest-cov
-    
+
     - name: Run tests
       run: |
         cd cherenkov-professional
         PYTHONPATH=src:. pytest tests/ -v --cov=src/cherenkov --cov-report=xml
-    
+
     - name: Upload coverage
       uses: codecov/codecov-action@v3
       with:
@@ -91,22 +91,22 @@ on:
 jobs:
   build:
     runs-on: ubuntu-latest
-    
+
     steps:
     - uses: actions/checkout@v4
-    
+
     - name: Set up Docker Buildx
       uses: docker/setup-buildx-action@v3
-    
+
     - name: Build Docker image
       run: |
         cd cherenkov-professional
         docker build -t cherenkov-autonomous:latest .
-    
+
     - name: Test Docker image
       run: |
         docker run --rm cherenkov-autonomous:latest python --version
-    
+
     - name: Tag image
       if: startsWith(github.ref, 'refs/tags/v')
       run: |
@@ -147,21 +147,21 @@ on:
 jobs:
   autonomous_build:
     runs-on: ubuntu-latest
-    
+
     steps:
     - uses: actions/checkout@v4
       with:
         fetch-depth: 0
-    
+
     - name: Set up Python
       uses: actions/setup-python@v5
       with:
         python-version: '3.12'
-    
+
     - name: Install dependencies
       run: |
         pip install -r cherenkov-professional/requirements.txt
-    
+
     - name: Determine next iteration
       id: next_iter
       run: |
@@ -172,22 +172,22 @@ jobs:
           NEXT=1
         fi
         echo "iteration=$NEXT" >> $GITHUB_OUTPUT
-    
+
     - name: Run autonomous iteration
       run: |
         ITERATION=${{ steps.next_iter.outputs.iteration }}
         echo "🤖 Running autonomous iteration #$ITERATION"
-        
+
         # Create iteration script if needed
         SCRIPT="cherenkov-professional/scripts/swarm_iteration_${ITERATION}_${{ inputs.iteration_type }}.py"
-        
+
         if [ -f "$SCRIPT" ]; then
           PYTHONPATH=. python "$SCRIPT"
         else
           echo "⚠️  No iteration script found at $SCRIPT"
           echo "Creating placeholder for manual review"
         fi
-    
+
     - name: Create Pull Request
       uses: peter-evans/create-pull-request@v5
       with:
@@ -195,7 +195,7 @@ jobs:
         title: '🤖 Autonomous Iteration #${{ steps.next_iter.outputs.iteration }}'
         body: |
           Autonomous iteration completed by AI agents.
-          
+
           Review changes and merge if approved.
         branch: autonomous-iteration-${{ steps.next_iter.outputs.iteration }}
         delete-branch: true

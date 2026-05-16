@@ -195,7 +195,7 @@ async def execute_workflow(request: WorkflowExecuteRequest) -> WorkflowResponse:
             duration=result.duration,
         )
     except Exception as e:
-        raise HTTPException(status_code=500, detail=str(e))
+        raise HTTPException(status_code=500, detail=str(e)) from e
 
 
 @app.get("/workflows")

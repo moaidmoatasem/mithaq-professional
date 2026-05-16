@@ -1,4 +1,4 @@
-﻿import pytest
+import pytest
 from cherenkov.scanners.header_scanner import SimpleScanner
 
 

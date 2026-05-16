@@ -27,7 +27,6 @@ def remove_duplicate_docstrings(text):
     """Remove consecutive duplicate docstrings"""
     lines = text.split("\n")
     result = []
-    prev_line = None
     in_docstring = False
     docstring_lines = []
 
@@ -94,13 +93,13 @@ new_register = '''def register_agent(agent: Any) -> AgentID:
     """
     agent_id = str(uuid.uuid4())
     role = agent.role if hasattr(agent, 'role') else "unknown"
-    
+
     AGENT_REGISTRY[agent_id] = {
         'agent': agent,
         'role': role,
         'registered_at': str(datetime.now())
     }
-    
+
     return AgentID(id=agent_id, role=role)'''
 
 if old_register in cleaned_code:
@@ -118,8 +117,8 @@ print("   - Added proper imports")
 summary = Path("cherenkov-professional/AUTONOMOUS_DEVELOPMENT_SUMMARY.md")
 summary.write_text("""# Autonomous Development Session Summary
 
-**Date:** May 2, 2026 (1:41 AM - 2:00 AM EEST)  
-**Duration:** 19 minutes  
+**Date:** May 2, 2026 (1:41 AM - 2:00 AM EEST)
+**Duration:** 19 minutes
 **Framework:** MicroGPT Swarm Architecture
 
 ## What Was Built
@@ -161,11 +160,11 @@ An autonomous agent swarm that iteratively analyzed, designed, implemented, and 
 
 ## Key Achievements
 
-✅ Fully autonomous development (zero manual coding)  
-✅ Clean, documented, tested code  
-✅ Git commits after each iteration  
-✅ 100% test pass rate  
-✅ RAM-efficient parallel execution  
+✅ Fully autonomous development (zero manual coding)
+✅ Clean, documented, tested code
+✅ Git commits after each iteration
+✅ 100% test pass rate
+✅ RAM-efficient parallel execution
 
 ## Architecture
 

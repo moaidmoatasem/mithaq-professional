@@ -49,7 +49,7 @@ class TestSmartRetrier(unittest.IsolatedAsyncioTestCase):
         self.mock_client.get.side_effect = [httpx.RequestError("Network error"), mock_response]
 
         # Override sleep to speed up test
-        with patch("asyncio.sleep", new_callable=AsyncMock) as mock_sleep:
+        with patch("asyncio.sleep", new_callable=AsyncMock):
             response = await self.retrier.fetch_data("/test")
 
         self.assertEqual(response, mock_response)
@@ -58,7 +58,7 @@ class TestSmartRetrier(unittest.IsolatedAsyncioTestCase):
     async def test_fetch_data_max_retries_reached(self):
         self.mock_client.get.side_effect = httpx.RequestError("Persistent error")
 
-        with patch("asyncio.sleep", new_callable=AsyncMock) as mock_sleep:
+        with patch("asyncio.sleep", new_callable=AsyncMock):
             with self.assertRaisesRegex(Exception, "Max retries reached"):
                 await self.retrier.fetch_data("/test")
 

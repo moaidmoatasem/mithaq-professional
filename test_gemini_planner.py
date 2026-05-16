@@ -1,6 +1,7 @@
+import os
+
 from cherenkov.agents.cloud.strategic_planner import StrategicPlanner, ThreatAnalysisTask
 from dotenv import load_dotenv
-import os
 
 load_dotenv()
 
@@ -21,7 +22,7 @@ task = ThreatAnalysisTask(
         "auth": "OAuth2",
         "database": "PostgreSQL",
     },
-    analysis_scope=["recon", "vulnerability_scanning", "exploit_dev"]
+    analysis_scope=["recon", "vulnerability_scanning", "exploit_dev"],
 )
 
 try:

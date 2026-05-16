@@ -28,8 +28,8 @@ class AutonomousDeveloperCrew:
         tool_developer = Agent(
             role="Security Tool Developer",
             goal="Write Python security tools and vulnerability scanners",
-            backstory="""You are an expert security engineer who writes 
-            automated security testing tools. You write clean, executable 
+            backstory="""You are an expert security engineer who writes
+            automated security testing tools. You write clean, executable
             Python code that finds vulnerabilities. When asked to write code,
             you provide complete, working Python scripts.""",
             llm=local_llm,
@@ -40,9 +40,9 @@ class AutonomousDeveloperCrew:
         exploit_dev = Agent(
             role="Exploit Developer",
             goal="Write proof-of-concept exploits for vulnerabilities",
-            backstory="""You are a penetration tester who writes POC exploits 
-            to demonstrate security vulnerabilities. You write working code 
-            that proves vulnerabilities exist. You always include safety 
+            backstory="""You are a penetration tester who writes POC exploits
+            to demonstrate security vulnerabilities. You write working code
+            that proves vulnerabilities exist. You always include safety
             warnings and ethical use notices.""",
             llm=local_llm,
             allow_code_execution=True,
@@ -52,7 +52,7 @@ class AutonomousDeveloperCrew:
         report_gen = Agent(
             role="Security Report Generator",
             goal="Generate professional security reports from findings",
-            backstory="""You create comprehensive security reports with code 
+            backstory="""You create comprehensive security reports with code
             examples, vulnerability descriptions, and remediation guidance.
             You write detailed markdown reports.""",
             llm=local_llm,
@@ -68,14 +68,14 @@ class AutonomousDeveloperCrew:
 
         scanner_task = Task(
             description=f"""Write a complete Python script that scans for {vulnerability_type}.
-            
+
             Requirements:
             1. Write complete, executable Python code
             2. Include proper error handling
             3. Add detailed comments explaining each part
             4. Include usage examples
             5. Make it production-ready
-            
+
             Provide the COMPLETE code, not just snippets.""",
             expected_output=f"Complete working Python scanner code for {vulnerability_type}",
             agent=tool_dev,
@@ -83,14 +83,14 @@ class AutonomousDeveloperCrew:
 
         exploit_task = Task(
             description=f"""Write a proof-of-concept exploit demonstrating {vulnerability_type}.
-            
+
             Requirements:
             1. Write complete demonstration code
             2. Include safe execution mode (no actual damage)
             3. Add clear warnings about ethical use
             4. Show how the vulnerability can be exploited
             5. Include comments explaining the attack
-            
+
             Provide COMPLETE code that educators can use.""",
             expected_output=f"Complete POC exploit code for {vulnerability_type}",
             agent=exploit_dev,
@@ -99,7 +99,7 @@ class AutonomousDeveloperCrew:
 
         report_task = Task(
             description=f"""Create a comprehensive security report for {vulnerability_type}.
-            
+
             Include in the markdown report:
             1. Executive summary
             2. Technical description of the vulnerability
@@ -107,7 +107,7 @@ class AutonomousDeveloperCrew:
             4. Impact assessment (Critical/High/Medium/Low)
             5. Step-by-step remediation instructions
             6. References and resources
-            
+
             Make it professional and detailed.""",
             expected_output="Comprehensive markdown security report",
             agent=report_gen,

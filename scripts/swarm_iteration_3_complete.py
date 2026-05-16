@@ -29,25 +29,25 @@ def implement_orchestrate_workflow(context: str):
     # Replace the TODO in orchestrate_workflow
     implementation = '''    """
     Execute an AI workflow based on configuration
-    
+
     Args:
         config: Workflow configuration dict
-    
+
     Returns:
         WorkflowResult with execution details
     """
     import time
     start = time.time()
-    
+
     try:
         # TODO: Full implementation with real workflow execution
         # For now, basic validation
         if not config:
             return WorkflowResult(success=False, outputs={}, duration=0, errors=["Empty config"])
-        
+
         # Placeholder workflow execution
         outputs = {'status': 'executed', 'config': config}
-        
+
         return WorkflowResult(
             success=True,
             outputs=outputs,
@@ -88,22 +88,22 @@ def implement_register_agent(context: str):
 
     implementation = '''    """
     Register an AI agent with the orchestrator
-    
+
     Args:
         agent: Agent instance to register
-    
+
     Returns:
         AgentID for the registered agent
     """
     agent_id = str(uuid.uuid4())
     role = agent.role if hasattr(agent, 'role') else "unknown"
-    
+
     AGENT_REGISTRY[agent_id] = {
         'agent': agent,
         'role': role,
         'registered_at': str(datetime.now())
     }
-    
+
     return AgentID(id=agent_id, role=role)'''
 
     code = code.replace(
@@ -127,20 +127,20 @@ def implement_execute_parallel(context: str):
 
     implementation = '''    """
     Execute multiple agents in parallel
-    
+
     Args:
         agents: List of agent instances
         tasks: List of tasks to execute
-    
+
     Returns:
         List of results from each agent
     """
     import threading
     from queue import Queue
-    
+
     results = []
     result_queue = Queue()
-    
+
     def worker(agent, task, index):
         try:
             # Execute agent task
@@ -148,19 +148,19 @@ def implement_execute_parallel(context: str):
             result_queue.put(result)
         except Exception as e:
             result_queue.put({'agent': str(agent), 'index': index, 'success': False, 'error': str(e)})
-    
+
     threads = []
     for i, (agent, task) in enumerate(zip(agents, tasks)):
         thread = threading.Thread(target=worker, args=(agent, task, i))
         threads.append(thread)
         thread.start()
-    
+
     for thread in threads:
         thread.join()
-    
+
     while not result_queue.empty():
         results.append(result_queue.get())
-    
+
     results.sort(key=lambda x: x.get('index', 0))
     return results'''
 
@@ -179,8 +179,8 @@ Tests for Orchestration API
 """
 import pytest
 from cherenkov.orchestration_api import (
-    orchestrate_workflow, 
-    register_agent, 
+    orchestrate_workflow,
+    register_agent,
     execute_parallel,
     WorkflowResult,
     AgentID
@@ -191,7 +191,7 @@ def test_orchestrate_workflow_success():
     """Test successful workflow orchestration"""
     config = {'workflow': 'test', 'agents': ['agent1']}
     result = orchestrate_workflow(config)
-    
+
     assert isinstance(result, WorkflowResult)
     assert result.success is True
     assert result.outputs is not None
@@ -199,7 +199,7 @@ def test_orchestrate_workflow_success():
 def test_orchestrate_workflow_empty_config():
     """Test workflow with empty config"""
     result = orchestrate_workflow({})
-    
+
     assert result.success is False
     assert 'Empty config' in result.errors
 
@@ -207,9 +207,9 @@ def test_register_agent():
     """Test agent registration"""
     mock_agent = Mock()
     mock_agent.role = 'researcher'
-    
+
     agent_id = register_agent(mock_agent)
-    
+
     assert isinstance(agent_id, AgentID)
     assert agent_id.role == 'researcher'
     assert len(agent_id.id) > 0
@@ -218,9 +218,9 @@ def test_execute_parallel():
     """Test parallel agent execution"""
     agents = [Mock(), Mock(), Mock()]
     tasks = ['task1', 'task2', 'task3']
-    
+
     results = execute_parallel(agents, tasks)
-    
+
     assert len(results) == 3
     assert all('success' in r for r in results)
 '''

@@ -1,6 +1,5 @@
-from dotenv import load_dotenv
-
 from cherenkov.core.hybrid_orchestrator import ExecutionMode, HybridOrchestrator
+from dotenv import load_dotenv
 
 load_dotenv()
 

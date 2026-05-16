@@ -5,7 +5,6 @@ Integration tests for workflow orchestration
 from pathlib import Path
 
 import pytest
-
 from cherenkov.orchestration.orchestration_api import orchestrate_workflow
 from cherenkov.orchestration.workflow_parser import WorkflowParser
 

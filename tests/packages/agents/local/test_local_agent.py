@@ -1,4 +1,5 @@
-from unittest.mock import patch, MagicMock
+from unittest.mock import patch
+
 import pytest
 from cherenkov.agents.local.code_analyzer import CodeAnalyzer
 from cherenkov.agents.local.ollama_client import OllamaClient

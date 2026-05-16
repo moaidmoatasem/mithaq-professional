@@ -1,0 +1,6 @@
+name = "cherenkov-professional"
+compatibility_date = "2024-12-01"
+
+# Static-assets worker — no custom script, just serve the MkDocs build output
+[assets]
+directory = "./site"

@@ -3,8 +3,8 @@ Open Redirect Scanner - New Implementation
 Detects open redirect vulnerabilities
 """
 
-from typing import Dict, List
 import logging
+from typing import Dict, List
 from urllib.parse import parse_qs, urlencode, urlparse, urlunparse
 
 import requests
@@ -128,4 +128,4 @@ if __name__ == "__main__":
     logging.basicConfig(level=logging.INFO, format="%(levelname)s: %(message)s")
     if len(sys.argv) > 1:
         result = scan_open_redirect(sys.argv[1])
-        logger.info("\n✅ Scan complete. Found %d open redirect vulnerabilities", result['count'])
+        logger.info("\n✅ Scan complete. Found %d open redirect vulnerabilities", result["count"])

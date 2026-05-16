@@ -144,4 +144,4 @@ if __name__ == "__main__":
     logging.basicConfig(level=logging.INFO, format="%(levelname)s: %(message)s")
     if len(sys.argv) > 1:
         result = scan_xss(sys.argv[1])
-        logger.info("\n✅ Scan complete. Found %d potential XSS vulnerabilities", result['count'])
+        logger.info("\n✅ Scan complete. Found %d potential XSS vulnerabilities", result["count"])

@@ -10,11 +10,11 @@ from typing import List, Optional
 
 import requests
 
-logger = logging.getLogger(__name__)
-
 from cherenkov.core.base_scanner import Finding, ScanResult, Severity
 
 from .header_scanner import SimpleScanner
+
+logger = logging.getLogger(__name__)
 
 
 class FullScanner(SimpleScanner):

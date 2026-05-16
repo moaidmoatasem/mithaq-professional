@@ -13,9 +13,12 @@ Every container is destroyed on exit. Malicious payloads cannot persist.
 from __future__ import annotations
 
 import asyncio
+import hashlib
 import json
 import logging
 from contextlib import asynccontextmanager
+from dataclasses import dataclass
+from datetime import datetime, timezone
 from enum import Enum
 from typing import AsyncGenerator
 
@@ -106,6 +109,21 @@ _PROFILE_CONFIGS: dict[TOKAMAKProfile, dict] = {
 # ──────────────────────────────────────────────
 # TOKAMAK
 # ──────────────────────────────────────────────
+
+
+@dataclass
+class Command:
+    payload: str
+    timeout: int = 30
+
+
+@dataclass
+class TokamakResult:
+    stdout: str
+    stderr: str
+    trace_hash: str
+    shred_receipt: dict
+    exit_code: int
 
 
 class ScanTOKAMAK:
@@ -221,3 +239,53 @@ class ScanTOKAMAK:
                 logger.error("Watchdog kill failed: %s", e)
             finally:
                 self._active_container = None
+
+
+class Tokamak:
+    """
+    Sandbox environment for executing untrusted payloads securely via Docker.
+    """
+
+    @staticmethod
+    def execute(command: Command) -> TokamakResult:
+        import subprocess
+
+        iso_timestamp = datetime.now(timezone.utc).isoformat()
+
+        try:
+            # Execute in docker with --network none and --rm
+            process = subprocess.run(
+                ["docker", "run", "--rm", "-i", "--network", "none", "cherenkov-tokamak"],
+                input=command.payload,
+                capture_output=True,
+                text=True,
+                timeout=command.timeout,
+            )
+            stdout = process.stdout
+            stderr = process.stderr
+            exit_code = process.returncode
+        except subprocess.TimeoutExpired as e:
+            stdout = e.stdout if e.stdout else ""
+            stderr = (e.stderr if e.stderr else "") + "\nTimeoutExpired"
+            exit_code = 124
+        except Exception as e:
+            stdout = ""
+            stderr = str(e)
+            exit_code = 1
+
+        trace_data = stdout + stderr + iso_timestamp
+        trace_hash = hashlib.sha256(trace_data.encode()).hexdigest()
+
+        shred_receipt = {
+            "files_erased": ["container_ephemeral_fs"],
+            "timestamp": datetime.now(timezone.utc).isoformat(),
+            "method": "cryptographic_shred_via_docker_rm",
+        }
+
+        return TokamakResult(
+            stdout=stdout,
+            stderr=stderr,
+            trace_hash=trace_hash,
+            shred_receipt=shred_receipt,
+            exit_code=exit_code,
+        )

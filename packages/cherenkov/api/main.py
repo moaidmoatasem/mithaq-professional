@@ -92,6 +92,12 @@ async def ws_live(websocket: WebSocket) -> None:
 
 # ── /api/v1 router (consumed by the React frontend) ─────────────────────────
 
+
+class SandboxExecuteRequest(BaseModel):
+    payload: str
+    timeout: int = 30
+
+
 v1 = APIRouter(prefix="/api/v1")
 
 
@@ -167,6 +173,33 @@ async def v1_ablation_stats() -> dict:
             "alert_active": False,
         }
     }
+
+
+@v1.post("/sandbox/execute")
+async def v1_sandbox_execute(request: SandboxExecuteRequest) -> dict:
+    """Execute a payload in the Tokamak sandbox."""
+    import asyncio
+
+    from cherenkov.core.tokamak import Command, Tokamak
+
+    cmd = Command(payload=request.payload, timeout=request.timeout)
+
+    # Run synchronously in an executor to avoid blocking the loop
+    result = await asyncio.to_thread(Tokamak.execute, cmd)
+
+    return {
+        "stdout": result.stdout,
+        "stderr": result.stderr,
+        "trace_hash": result.trace_hash,
+        "shred_receipt": result.shred_receipt,
+        "exit_code": result.exit_code,
+    }
+
+
+@v1.get("/sandbox/status")
+async def v1_sandbox_status() -> dict:
+    """Return the status of the Tokamak sandbox."""
+    return {"status": "ready"}
 
 
 @v1.post("/scan")

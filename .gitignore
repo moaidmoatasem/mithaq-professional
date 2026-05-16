@@ -64,3 +64,4 @@ scan_report_*.json
 # Agent session notes (runtime, not source)
 # NOTE: AGENT_MEMORY.md and TODO.md are now tracked — they are multi-agent
 # coordination artifacts, not throwaway session scratchpads.
+build/

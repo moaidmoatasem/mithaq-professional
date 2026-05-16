@@ -23,7 +23,7 @@ print("""
 
 def create_workflow_yaml_example(context: str):
     """Create example workflow YAML files"""
-    examples_dir = Path("cherenkov-professional/examples/workflows")
+    examples_dir = Path("examples/workflows")
     examples_dir.mkdir(parents=True, exist_ok=True)
 
     # Example 1: Simple security scan
@@ -94,7 +94,7 @@ tokamak_standard:
 
 def create_yaml_parser(context: str):
     """Create YAML workflow parser"""
-    parser_file = Path("cherenkov-professional/src/cherenkov/workflow_parser.py")
+    parser_file = Path("packages/cherenkov/orchestration/workflow_parser.py")
 
     parser_code = '''"""
 Workflow YAML Parser
@@ -178,7 +178,7 @@ def load_workflow(workflow_file: str) -> Dict[str, Any]:
 
 def integrate_with_cli(context: str):
     """Update CLI to support workflow files"""
-    cli_file = Path("cherenkov-professional/scripts/cherenkov_cli_orchestrate.py")
+    cli_file = Path("scripts/cherenkov_cli_orchestrate.py")
     code = cli_file.read_text()
 
     # Add workflow file support to orchestrate command
@@ -206,7 +206,7 @@ def orchestrate(config, output):
         else:
             click.echo(f"❌ Workflow failed: {result.errors}")
     
-    except Exception as e:
+    except (ImportError, FileNotFoundError) as e:
         click.echo(f"❌ Error: {e}")'''
 
     # Replace old orchestrate command
@@ -234,19 +234,19 @@ def orchestrate(config):
 
 def create_integration_tests(context: str):
     """Create integration tests for the workflow system"""
-    test_file = Path("cherenkov-professional/tests/test_workflow_integration.py")
+    test_file = Path("tests/integration/test_workflow_integration.py")
 
     test_code = '''"""
 Integration tests for workflow orchestration
 """
 import pytest
 from pathlib import Path
-from cherenkov.workflow_parser import WorkflowParser, load_workflow
-from cherenkov.orchestration_api import orchestrate_workflow
+from cherenkov.orchestration.workflow_parser import WorkflowParser, load_workflow
+from cherenkov.orchestration.orchestration_api import orchestrate_workflow
 
 def test_parse_security_workflow():
     """Test parsing a security scan workflow"""
-    workflow_file = "cherenkov-professional/examples/workflows/security_scan_workflow.yaml"
+    workflow_file = "examples/workflows/security_scan_workflow.yaml"
     
     if not Path(workflow_file).exists():
         pytest.skip("Example workflow not found")
@@ -260,7 +260,7 @@ def test_parse_security_workflow():
 
 def test_parse_parallel_workflow():
     """Test parsing a parallel workflow"""
-    workflow_file = "cherenkov-professional/examples/workflows/parallel_test_workflow.yaml"
+    workflow_file = "examples/workflows/parallel_test_workflow.yaml"
     
     if not Path(workflow_file).exists():
         pytest.skip("Example workflow not found")
@@ -365,10 +365,10 @@ try:
         check=True,
     )
     print("✅ Integration committed!")
-except Exception as e:
+except (subprocess.CalledProcessError, FileNotFoundError) as e:
     print(f"⚠️  Commit issue: {e}")
 
 print("\n🎉 Iteration #5 complete! Workflow system integrated!")
 print("\nTry it:")
-print("  python cherenkov-professional/scripts/cherenkov_cli_orchestrate.py orchestrate \\")
-print("    --config cherenkov-professional/examples/workflows/security_scan_workflow.yaml")
+print("  python scripts/cherenkov_cli_orchestrate.py orchestrate \\")
+print("    --config examples/workflows/security_scan_workflow.yaml")

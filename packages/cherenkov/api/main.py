@@ -407,6 +407,61 @@ async def v1_scan_report_sarif(scan_id: str) -> dict:
     }
 
 
+@v1.get("/reports/{scan_id}/pdf")
+async def v1_scan_report_pdf(
+    scan_id: str, current_user: AuthUser = Depends(get_current_user)
+):
+    """Download PDF security report."""
+    from fastapi.responses import Response
+
+    from cherenkov.compliance.mapper import ComplianceMapper
+    from cherenkov.compliance.reports import PDFReportGenerator
+    from cherenkov.core.base_scanner import Finding, ScanResult, Severity
+    from cherenkov.core.storage.database import get_scan
+
+    scan = get_scan(scan_id)
+    if not scan:
+        raise HTTPException(status_code=404, detail="Scan not found")
+
+    # Map database scan dict to ScanResult model
+    findings = []
+    mapper = ComplianceMapper()
+
+    for f in scan.get("findings", []):
+        findings.append(
+            Finding(
+                title=f.get("title", "Unknown"),
+                severity=Severity(str(f.get("severity", "INFO")).upper()),
+                description=f.get("description", ""),
+                cwe=f.get("cwe", ""),
+                remediation=f.get("remediation", ""),
+            )
+        )
+
+    result = ScanResult(
+        target=scan.get("target", ""),
+        scanner_name="Cherenkov Unified",
+        findings=findings,
+        status="completed",
+    )
+
+    compliance_data = {}
+    for f in findings:
+        if f.cwe:
+            # Flatten the map_all result to list of framework names for simplicity in PDF
+            framework_dict = mapper.map_all(f.cwe)
+            compliance_data[f.cwe] = list(framework_dict.keys())
+
+    generator = PDFReportGenerator(result, compliance_data)
+    pdf_bytes = generator.generate()
+
+    return Response(
+        content=pdf_bytes,
+        media_type="application/pdf",
+        headers={"Content-Disposition": f"attachment; filename=cherenkov_report_{scan_id}.pdf"},
+    )
+
+
 @v1.get("/findings/pending")
 async def v1_get_pending_findings() -> list[dict]:
     """Return a list of all pending findings."""

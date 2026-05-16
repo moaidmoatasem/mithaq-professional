@@ -368,10 +368,25 @@ async def v1_ablation_stats() -> dict:
 
 @v1.post("/sandbox/execute")
 async def v1_sandbox_execute(
+<<<<<<< HEAD
+    request: SandboxExecuteRequest, current_user: AuthUser = Depends(RoleChecker(Role.OPERATOR))
+) -> dict:
+    """Execute a payload in the Tokamak sandbox. Requires OPERATOR role."""
+    import asyncio
+
+    from cherenkov.core.tokamak import Command, Tokamak
+
+    cmd = Command(payload=request.payload, timeout=request.timeout)
+
+    # Run synchronously in an executor to avoid blocking the loop
+    result = await asyncio.to_thread(Tokamak.execute, cmd)
+
+=======
     command: Command, current_user: AuthUser = Depends(RoleChecker(Role.OPERATOR))
 ) -> dict:
     """Execute a payload in the TOKAMAK sandbox. Requires OPERATOR role."""
     result = await asyncio.to_thread(Tokamak.execute, command)
+>>>>>>> origin/main
     return {
         "status": "success",
         "stdout": result.stdout,

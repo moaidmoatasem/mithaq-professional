@@ -21,26 +21,32 @@ from typing import Any, Dict, Literal, Optional, Set
 from urllib.parse import urlparse
 
 import httpx
-from fastapi import FastAPI, HTTPException, WebSocket, WebSocketDisconnect, Depends, status
+from fastapi import Depends, FastAPI, HTTPException, WebSocket, WebSocketDisconnect, status
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import FileResponse
 from fastapi.routing import APIRouter
 from fastapi.staticfiles import StaticFiles
 from pydantic import BaseModel
 
-from cherenkov.core.storage.database import _DB_PATH
+from cherenkov.api.middleware.auth import (
+    Role,
+    RoleChecker,
+    create_access_token,
+    get_current_user,
+    verify_password,
+)
+from cherenkov.api.middleware.auth import (
+    User as AuthUser,
+)
+from cherenkov.core.storage.database import (
+    _DB_PATH,
+    get_audit_log,
+    get_user,
+    save_audit_entry,
+)
 from cherenkov.orchestration.orchestration_api import orchestrate_workflow
 from cherenkov.orchestration.result_persistence import ResultStore
 from cherenkov.orchestration.workflow_parser import load_workflow
-from cherenkov.api.middleware.auth import (
-    Role, 
-    RoleChecker, 
-    get_current_user, 
-    create_access_token, 
-    verify_password,
-    User as AuthUser
-)
-from cherenkov.core.storage.database import get_user, save_user
 
 logger = logging.getLogger(__name__)
 
@@ -139,10 +145,8 @@ async def v1_auth_token(request: AuthRequest) -> dict:
             status_code=status.HTTP_401_UNAUTHORIZED,
             detail="Incorrect username or password",
         )
-    
-    access_token = create_access_token(
-        data={"sub": request.username, "role": user_data["role"]}
-    )
+
+    access_token = create_access_token(data={"sub": request.username, "role": user_data["role"]})
     return {"access_token": access_token, "token_type": "bearer"}
 
 
@@ -150,6 +154,12 @@ async def v1_auth_token(request: AuthRequest) -> dict:
 async def v1_auth_me(current_user: AuthUser = Depends(get_current_user)) -> dict:
     """Return the current authenticated user's profile."""
     return {"username": current_user.username, "role": current_user.role.name}
+
+
+@v1.get("/audit")
+async def v1_audit_log(current_user: AuthUser = Depends(RoleChecker(Role.ADMIN))) -> list[dict]:
+    """Return the CHERENKOV audit log. Requires ADMIN role."""
+    return get_audit_log(100)
 
 
 async def _check_ollama() -> str:
@@ -259,9 +269,19 @@ async def v1_sandbox_status() -> dict:
 
 
 @v1.post("/scan")
-async def v1_scan(request: "ScanRequest") -> dict:
+async def v1_scan(
+    request: "ScanRequest", current_user: AuthUser = Depends(get_current_user)
+) -> dict:
     """Proxy to the core scan engine; broadcasts a live event on completion."""
     result = await _run_scan(request)
+
+    # Audit log
+    save_audit_entry(
+        event_type="SCAN_INITIATED",
+        user_id=current_user.username,
+        details={"target": request.url, "scan_id": result["scan_id"]},
+    )
+
     await _broadcast(
         {
             "type": "scan_complete",
@@ -357,8 +377,7 @@ async def v1_get_pending_findings() -> list[dict]:
 
 @v1.post("/findings/{finding_id}/approve")
 async def v1_approve_finding(
-    finding_id: str, 
-    current_user: AuthUser = Depends(RoleChecker(Role.OPERATOR))
+    finding_id: str, current_user: AuthUser = Depends(RoleChecker(Role.OPERATOR))
 ) -> dict:
     """Approve a finding. Requires OPERATOR role or higher."""
     from cherenkov.core.storage.database import init_db, update_finding_status
@@ -366,6 +385,14 @@ async def v1_approve_finding(
     try:
         init_db()
         update_finding_status(finding_id, "approved", current_user.username)
+
+        # Audit log
+        save_audit_entry(
+            event_type="FINDING_APPROVED",
+            user_id=current_user.username,
+            details={"finding_id": finding_id},
+        )
+
         return {"status": "success", "finding_id": finding_id, "new_status": "approved"}
     except Exception as exc:
         raise HTTPException(status_code=500, detail=f"Failed to approve finding: {exc}") from exc
@@ -373,8 +400,7 @@ async def v1_approve_finding(
 
 @v1.post("/findings/{finding_id}/reject")
 async def v1_reject_finding(
-    finding_id: str, 
-    current_user: AuthUser = Depends(RoleChecker(Role.OPERATOR))
+    finding_id: str, current_user: AuthUser = Depends(RoleChecker(Role.OPERATOR))
 ) -> dict:
     """Reject a finding. Requires OPERATOR role or higher."""
     from cherenkov.core.storage.database import init_db, update_finding_status
@@ -382,68 +408,17 @@ async def v1_reject_finding(
     try:
         init_db()
         update_finding_status(finding_id, "rejected", current_user.username)
+
+        # Audit log
+        save_audit_entry(
+            event_type="FINDING_REJECTED",
+            user_id=current_user.username,
+            details={"finding_id": finding_id},
+        )
+
         return {"status": "success", "finding_id": finding_id, "new_status": "rejected"}
     except Exception as exc:
         raise HTTPException(status_code=500, detail=f"Failed to reject finding: {exc}") from exc
-
-
-@v1.get("/reports/{scan_id}/sarif")
-async def v1_scan_report_sarif(scan_id: str) -> dict:
-    """Return a scan report in SARIF 2.1.0 format."""
-    from cherenkov.core.storage.database import get_scan
-    from cherenkov.compliance.mapper import ComplianceMapper
-
-    scan = get_scan(scan_id)
-    if not scan:
-        raise HTTPException(status_code=404, detail="Scan not found")
-
-    results = []
-    for f in scan.get("findings", []):
-        severity = str(f.get("severity", "")).upper()
-        if severity in ("CRITICAL", "HIGH"):
-            level = "error"
-        elif severity == "MEDIUM":
-            level = "warning"
-        else:
-            level = "note"
-
-        cwe = f.get("cwe")
-        properties = {
-            "scanner": f.get("scanner", "unknown"),
-            "remediation": f.get("remediation", ""),
-        }
-        if cwe:
-            properties["compliance"] = {
-                "OWASP": ComplianceMapper.map(cwe, "OWASP"),
-                "SAMA_CSF": ComplianceMapper.map(cwe, "SAMA_CSF"),
-                "EGY_FIN_CSF": ComplianceMapper.map(cwe, "EGY_FIN_CSF"),
-                "DORA": ComplianceMapper.map(cwe, "DORA"),
-            }
-
-        results.append(
-            {
-                "ruleId": cwe or f.get("type") or "unknown",
-                "level": level,
-                "message": {"text": f.get("description", "No description provided.")},
-                "properties": properties,
-            }
-        )
-
-    return {
-        "version": "2.1.0",
-        "$schema": "https://json.schemastore.org/sarif-2.1.0.json",
-        "runs": [
-            {
-                "tool": {
-                    "driver": {
-                        "name": "Cherenkov Scanner",
-                        "version": "1.1.0",
-                    }
-                },
-                "results": results,
-            }
-        ],
-    }
 
 
 # Serve the static dashboard assets

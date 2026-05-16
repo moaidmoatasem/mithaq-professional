@@ -1,3 +1,4 @@
+import hashlib
 import json
 import logging
 import sqlite3
@@ -44,6 +45,17 @@ CREATE TABLE IF NOT EXISTS users (
     role        INTEGER NOT NULL DEFAULT 1
 );
 CREATE INDEX IF NOT EXISTS idx_users_username ON users(username);
+
+CREATE TABLE IF NOT EXISTS audit_log (
+    id          INTEGER PRIMARY KEY AUTOINCREMENT,
+    timestamp   TEXT    NOT NULL,
+    event_type  TEXT    NOT NULL,
+    user_id     TEXT,
+    details     TEXT    NOT NULL DEFAULT '{}',
+    trace_hash  TEXT    NOT NULL
+);
+CREATE INDEX IF NOT EXISTS idx_audit_timestamp ON audit_log(timestamp);
+CREATE INDEX IF NOT EXISTS idx_audit_event_type ON audit_log(event_type);
 """
 
 
@@ -182,6 +194,41 @@ def get_user(username: str, path: Path = _DB_PATH) -> dict | None:
     with _connect(path) as conn:
         row = conn.execute("SELECT * FROM users WHERE username = ?", (username,)).fetchone()
     return dict(row) if row else None
+
+
+def save_audit_entry(
+    event_type: str, user_id: str | None, details: dict, path: Path = _DB_PATH
+) -> str:
+    now = datetime.now(timezone.utc).isoformat()
+    details_json = json.dumps(details)
+
+    # CHERENKOV Trace: SHA-256 signature for forensic immutability
+    payload = f"{now}|{event_type}|{user_id or 'system'}|{details_json}"
+    trace_hash = hashlib.sha256(payload.encode()).hexdigest()
+
+    with _connect(path) as conn:
+        conn.execute(
+            """
+            INSERT INTO audit_log (timestamp, event_type, user_id, details, trace_hash)
+            VALUES (?, ?, ?, ?, ?)
+            """,
+            (now, event_type, user_id, details_json, trace_hash),
+        )
+    return trace_hash
+
+
+def get_audit_log(limit: int = 100, path: Path = _DB_PATH) -> list[dict]:
+    with _connect(path) as conn:
+        rows = conn.execute(
+            "SELECT * FROM audit_log ORDER BY timestamp DESC LIMIT ?", (limit,)
+        ).fetchall()
+
+    result = []
+    for r in rows:
+        d = dict(r)
+        d["details"] = json.loads(d["details"])
+        result.append(d)
+    return result
 
 
 def _row_to_dict(row: sqlite3.Row) -> dict:

@@ -4,8 +4,10 @@ cherenkov Web Dashboard
 Simple Flask UI for running scans
 """
 
+import os
 from datetime import datetime
 from pathlib import Path
+from urllib.parse import urlparse
 
 from flask import Flask, jsonify, render_template, request
 
@@ -26,25 +28,21 @@ def index():
 @app.route("/api/scan", methods=["POST"])
 def run_scan():
     """Run security scan"""
-    if not request.json:
+    data = request.json
+    if not data:
         return jsonify({"error": "Request body is required"}), 400
+    target_url = data.get("url", "").strip()
 
-    target_url = request.json.get("url")
-
-    if not target_url and target_url is None:
+    if not target_url:
         return jsonify({"error": "URL is required"}), 400
-
     try:
-        from urllib.parse import urlparse
-
         parsed = urlparse(target_url)
+        if parsed.scheme not in ("http", "https"):
+            return jsonify({"error": "Only http/https URLs are supported"}), 400
+        if not parsed.netloc:
+            return jsonify({"error": "Invalid URL: missing hostname"}), 400
     except Exception:
         return jsonify({"error": "Invalid URL format"}), 400
-
-    if parsed.scheme not in ("http", "https"):
-        return jsonify({"error": "Only http/https URLs are supported"}), 400
-    if not parsed.netloc:
-        return jsonify({"error": "Invalid URL: missing hostname"}), 400
 
     # Run scan
     scanner = SimpleScanner(target_url)
@@ -179,21 +177,26 @@ if __name__ == "__main__":
             document.getElementById('loading').style.display = 'none';
         }
         
+        function escapeHtml(str) {
+            const map = {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#039;'};
+            return String(str).replace(/[&<>"']/g, m => map[m]);
+        }
+
         function displayResults(data) {
-            let html = '<h3>Scan Results for ' + data.target + '</h3>';
-            html += '<p>Vulnerabilities found: ' + data.count + '</p>';
-            
+            let html = '<h3>Scan Results for ' + escapeHtml(data.target) + '</h3>';
+            html += '<p>Vulnerabilities found: ' + escapeHtml(String(data.count)) + '</p>';
+
             if (data.vulnerabilities.length > 0) {
                 data.vulnerabilities.forEach(v => {
-                    html += '<div class="vuln ' + v.severity.toLowerCase() + '">';
-                    html += '<strong>' + v.type + '</strong> [' + v.severity + ']<br>';
-                    html += v.description;
+                    html += '<div class="vuln ' + escapeHtml(v.severity.toLowerCase()) + '">';
+                    html += '<strong>' + escapeHtml(v.type) + '</strong> [' + escapeHtml(v.severity) + ']<br>';
+                    html += escapeHtml(v.description);
                     html += '</div>';
                 });
             } else {
-                html += '<p style="color: #00ff88;">✅ No vulnerabilities detected!</p>';
+                html += '<p style="color: #00ff88;">&#x2705; No vulnerabilities detected!</p>';
             }
-            
+
             document.getElementById('results').innerHTML = html;
         }
     </script>
@@ -207,7 +210,11 @@ if __name__ == "__main__":
     print("\n" + "=" * 70)
     print("🚀 cherenkov Web Dashboard Starting...")
     print("=" * 70)
-    print("\n📱 Open in browser: http://localhost:5000")
+    debug = os.getenv("FLASK_DEBUG", "false").lower() == "true"
+    host = os.getenv("FLASK_HOST", "127.0.0.1")
+    port = int(os.getenv("FLASK_PORT", "5000"))
+
+    print(f"\n📱 Open in browser: http://{host}:{port}")
     print("\n✅ Ready to scan!\n")
 
-    app.run(debug=True, host="0.0.0.0", port=5000)
+    app.run(debug=debug, host=host, port=port)

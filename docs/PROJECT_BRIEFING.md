@@ -22,7 +22,7 @@ CHERENKOV is scoped as an air-gapped, sovereign security intelligence stack orga
 
 | Layer | Purpose | Primary documents |
 |-------|---------|---------------------|
-| **TPM / roadmap** | Strategy, phases, milestones | [development/roadmap-detailed.md](development/roadmap-detailed.md), [development/sovereign-roadmap.md](development/sovereign-roadmap.md), [github/RELEASES.md](github/RELEASES.md) |
+| **TPM / roadmap** | Strategy, phases, milestones | [development/roadmap-detailed.md](development/roadmap-detailed.md), [development/sovereign-roadmap.md](development/sovereign-roadmap.md), [development/releases.md](development/releases.md) |
 | **Execution plans** | Sprints and deep phased plan | [development/sprint-plan.md](development/sprint-plan.md) |
 | **Progress timeline** | Gantt-style phased view | [development/roadmap.md](development/roadmap.md) |
 | **Architecture** | System design and diagrams | [architecture/SYSTEM_ARCHITECTURE.md](architecture/SYSTEM_ARCHITECTURE.md), [architecture/HLD_DIAGRAM.md](architecture/HLD_DIAGRAM.md), [architecture/LLD_DIAGRAM.md](architecture/LLD_DIAGRAM.md) |

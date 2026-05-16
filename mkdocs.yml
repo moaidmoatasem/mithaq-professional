@@ -38,6 +38,7 @@ nav:
     - Project Briefing: PROJECT_BRIEFING.md
   - Architecture:
     - architecture/index.md
+    - Architecture Overview: architecture/overview.md
     - The Trident: architecture/trident.md
     - MEISSNER (Shield): architecture/meissner.md
     - ABLATION (Redaction): architecture/ablation.md
@@ -83,6 +84,9 @@ nav:
     - Sprint Plan: development/sprint-plan.md
     - Code Standards: development/code-standards.md
     - Brand Guidelines: development/brand-guidelines.md
+    - Design: development/design.md
+    - Design System: development/design-system.md
+    - Technical Specification: development/technical-specification.md
     - Swarm Orchestrator: development/swarm.md
     - Session Protocol: development/session-protocol.md
     - Roadmap: development/roadmap.md
@@ -93,6 +97,9 @@ nav:
     - Master Plan: development/master-plan.md
     - Premortem: development/premortem.md
     - Sovereign Blueprint: development/sovereign-blueprint.md
+    - Releases: development/releases.md
+    - Newsletter Concept: development/newsletter-concept.md
+    - Wiki Index: development/wiki-index.md
   - Security:
     - security/index.md
     - Vulnerability Disclosure: security/disclosure.md

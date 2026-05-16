@@ -47,4 +47,4 @@ CHERENKOV development is organized into strategic phases aligned with sovereign 
 - CI/CD integration using local GitHub Actions runners
 - Multi-node distributed audits
 
-For more detail, see the [Detailed Roadmap](../pm/ROADMAP.md) and [Sovereign Roadmap](../pm/ROADMAP_FOR_WEB.md).
+For more detail, see the [Detailed Roadmap](roadmap-detailed.md) and [Sovereign Roadmap](sovereign-roadmap.md).

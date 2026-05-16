@@ -6,7 +6,7 @@ We welcome contributions from the community. CHERENKOV follows a strict developm
 
 1. Fork the repository
 2. Create a feature branch: `git checkout -b feature/your-feature`
-3. Make your changes following [code standards](../standards/CODE_STANDARDS.md)
+3. Make your changes following [code standards](code-standards.md)
 4. Run tests: `pytest`
 5. Submit a pull request
 
@@ -23,7 +23,7 @@ test(xss): Add tests for reflected XSS detection
 
 ## Review & Approval
 
-All changes follow the [Development Workflow](../processes/DEVELOPMENT_WORKFLOW.md):
+All changes follow the [Development Workflow](workflow.md):
 
 1. PM defines user story
 2. Architect designs solution
@@ -40,4 +40,4 @@ pip install -e ".[dev]"
 pre-commit install
 ```
 
-See the [Development Workflow](../processes/DEVELOPMENT_WORKFLOW.md) for the complete process, and [Code Standards](../standards/CODE_STANDARDS.md) for style and testing requirements.
+See the [Development Workflow](workflow.md) for the complete process, and [Code Standards](code-standards.md) for style and testing requirements.

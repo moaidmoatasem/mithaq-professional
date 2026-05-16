@@ -34,4 +34,4 @@ class BurhanTrace(BaseModel):
     signature: str        # SHA-256(poc_binary + execution_log)
 ```
 
-For detailed agent communication patterns, see [System Design & State Machine](../pm/SYSTEM_DESIGN.md).
+For detailed agent communication patterns, see [System Design & State Machine](../architecture/system-design.md).

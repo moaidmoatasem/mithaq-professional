@@ -11,15 +11,15 @@ Reader-facing docs are also published at [https://docs.cherenkov-security.com/](
 * [CHERENKOV vs Traditional Scanners](https://github.com/moaidmoatasem/cherenkov-professional/blob/main/README.md)
 
 ## 2. Technical Product Management (TPM)
-* [Product Roadmap](../pm/ROADMAP.md)
-* [System Design (HLD & LLD)](../pm/SYSTEM_DESIGN.md)
-* [Development Plan & Sprints](../pm/DEVELOPMENT_PLAN.md)
-* [Integrations & Feature Approvals](../pm/INTEGRATIONS_AND_APPROVALS.md)
+* [Product Roadmap](../development/roadmap-detailed.md)
+* [System Design (HLD & LLD)](../architecture/system-design.md)
+* [Development Plan & Sprints](../development/sprint-plan.md)
+* [Integrations & Feature Approvals](../development/integrations-approvals.md)
 
 ## 3. Engineering & Architecture
-* [Design Patterns & Best Practices](../pm/DESIGN_PATTERNS_BEST_PRACTICES.md)
-* [Agent State & Governance](../pm/SYSTEM_DESIGN.md#21-agent-state-management)
-* [Human-in-the-Loop (HITL) Enforcement](../pm/SYSTEM_DESIGN.md#22-orchestration-flow)
+* [Design Patterns & Best Practices](../architecture/design-patterns.md)
+* [Agent State & Governance](../architecture/system-design.md#21-agent-state-management)
+* [Human-in-the-Loop (HITL) Enforcement](../architecture/system-design.md#22-orchestration-flow)
 
 ## 4. Contributing
 * [Code of Conduct](https://github.com/moaidmoatasem/cherenkov-professional/blob/main/CODE_OF_CONDUCT.md)

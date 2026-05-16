@@ -42,4 +42,4 @@ class AgentState(BaseModel):
 
 When an agent API fails, the request rate is halved immediately. When requests succeed, the rate increases linearly. This prevents cascading failures when local LLM inference is overwhelmed.
 
-For complete implementation details, see [System Design & State Machine](../pm/SYSTEM_DESIGN.md) and [Design Patterns](../pm/DESIGN_PATTERNS_BEST_PRACTICES.md).
+For complete implementation details, see [System Design & State Machine](../architecture/system-design.md) and [Design Patterns](../architecture/design-patterns.md).

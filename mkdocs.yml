@@ -48,8 +48,8 @@ nav:
     - System Architecture (Detailed): architecture/SYSTEM_ARCHITECTURE.md
     - High-Level Design: architecture/HLD_DIAGRAM.md
     - Low-Level Design: architecture/LLD_DIAGRAM.md
-    - System Design & State Machine: pm/SYSTEM_DESIGN.md
-    - Design Patterns: pm/DESIGN_PATTERNS_BEST_PRACTICES.md
+    - System Design & State Machine: architecture/system-design.md
+    - Design Patterns: architecture/design-patterns.md
   - Scanners:
     - scanners/index.md
     - Validated Scanners: scanners/validated.md
@@ -78,18 +78,17 @@ nav:
   - Development:
     - development/index.md
     - Contributing: development/contributing.md
-    - Development Workflow: processes/DEVELOPMENT_WORKFLOW.md
-    - Sprint Plan: pm/DEVELOPMENT_PLAN.md
-    - Code Standards: standards/CODE_STANDARDS.md
-    - Brand Guidelines: standards/CHERENKOV_BRAND_GUIDELINES.md
+    - Development Workflow: development/workflow.md
+    - Sprint Plan: development/sprint-plan.md
+    - Code Standards: development/code-standards.md
+    - Brand Guidelines: development/brand-guidelines.md
     - Swarm Orchestrator: development/swarm.md
     - Session Protocol: development/session-protocol.md
     - Roadmap: development/roadmap.md
-    - Detailed Roadmap: pm/ROADMAP.md
-    - Sovereign Roadmap: pm/ROADMAP_FOR_WEB.md
-    - Integrations & Approvals: pm/INTEGRATIONS_AND_APPROVALS.md
-  - UI/UX:
-    - UI Requirements: ui/UI_REQUIREMENTS.md
+    - Detailed Roadmap: development/roadmap-detailed.md
+    - Sovereign Roadmap: development/sovereign-roadmap.md
+    - Integrations & Approvals: development/integrations-approvals.md
+    - UI Requirements: development/ui-requirements.md
   - Security:
     - security/index.md
     - Vulnerability Disclosure: security/disclosure.md

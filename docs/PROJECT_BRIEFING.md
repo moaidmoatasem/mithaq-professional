@@ -14,7 +14,7 @@ CHERENKOV is scoped as an air-gapped, sovereign security intelligence stack orga
 | **ABLATION** | Redaction / sanitization when data crosses trust boundaries. |
 | **TOKAMAK** | Isolated validation and cryptographically attributable evidence for findings. |
 
-**Read next:** [Product roadmap](pm/ROADMAP.md) for release phases and goals, then [System architecture](architecture/SYSTEM_ARCHITECTURE.md) for cognitive routing and the Trident model.
+**Read next:** [Product roadmap](development/roadmap-detailed.md) for release phases and goals, then [System architecture](architecture/SYSTEM_ARCHITECTURE.md) for cognitive routing and the Trident model.
 
 ---
 
@@ -22,12 +22,12 @@ CHERENKOV is scoped as an air-gapped, sovereign security intelligence stack orga
 
 | Layer | Purpose | Primary documents |
 |-------|---------|---------------------|
-| **TPM / roadmap** | Strategy, phases, milestones | [pm/ROADMAP.md](pm/ROADMAP.md), [pm/ROADMAP_FOR_WEB.md](pm/ROADMAP_FOR_WEB.md), [github/RELEASES.md](github/RELEASES.md) |
-| **Execution plans** | Sprints and deep phased plan | [pm/DEVELOPMENT_PLAN.md](pm/DEVELOPMENT_PLAN.md), [plan/development_plan.md](plan/development_plan.md) |
-| **Progress timeline** | Gantt-style phased view | [plan/ROADMAP_PROGRESS.md](plan/ROADMAP_PROGRESS.md) |
+| **TPM / roadmap** | Strategy, phases, milestones | [development/roadmap-detailed.md](development/roadmap-detailed.md), [development/sovereign-roadmap.md](development/sovereign-roadmap.md), [github/RELEASES.md](github/RELEASES.md) |
+| **Execution plans** | Sprints and deep phased plan | [development/sprint-plan.md](development/sprint-plan.md) |
+| **Progress timeline** | Gantt-style phased view | [development/roadmap.md](development/roadmap.md) |
 | **Architecture** | System design and diagrams | [architecture/SYSTEM_ARCHITECTURE.md](architecture/SYSTEM_ARCHITECTURE.md), [architecture/HLD_DIAGRAM.md](architecture/HLD_DIAGRAM.md), [architecture/LLD_DIAGRAM.md](architecture/LLD_DIAGRAM.md) |
-| **System design & patterns** | HLD/LLD narrative, patterns | [pm/SYSTEM_DESIGN.md](pm/SYSTEM_DESIGN.md), [pm/DESIGN_PATTERNS_BEST_PRACTICES.md](pm/DESIGN_PATTERNS_BEST_PRACTICES.md) |
-| **Processes** | Engineering workflow | [processes/DEVELOPMENT_WORKFLOW.md](processes/DEVELOPMENT_WORKFLOW.md) |
+| **System design & patterns** | HLD/LLD narrative, patterns | [architecture/system-design.md](architecture/system-design.md), [architecture/design-patterns.md](architecture/design-patterns.md) |
+| **Processes** | Engineering workflow | [development/workflow.md](development/workflow.md) |
 | **Living backlog / status** | Checklists and headline status | [development/roadmap.md](development/roadmap.md) |
 | **Governance / PM rules** | Branches, milestones, labels | Refer to AGENTS.md in repo root |
 | **Product / narrative SSOT** | Sovereign framing | [architecture/index.md](architecture/index.md), [what-is-cherenkov.md](what-is-cherenkov.md) |
@@ -55,7 +55,7 @@ flowchart LR
 
 ### Timeline (from roadmap progress doc)
 
-Synced with [plan/ROADMAP_PROGRESS.md](plan/ROADMAP_PROGRESS.md).
+Synced with [development/roadmap.md](development/roadmap.md).
 
 ```mermaid
 gantt
@@ -84,10 +84,8 @@ Multiple artifacts track “where we are.” They emphasize different lenses; **
 
 | Source | What it measures |
 |--------|------------------|
-| [plan/ROADMAP_PROGRESS.md](plan/ROADMAP_PROGRESS.md) | Calendar-style phases (Week 1–41 style). |
-| [pm/ROADMAP.md](pm/ROADMAP.md) | Product phases aligned to releases **v1.0.0-rc1** through **v2.5.0**. |
-| [development/roadmap.md](development/roadmap.md) | Product phases aligned to releases **v1.0.0-rc1** through **v2.5.0**. |
-| [plan/ROADMAP_PROGRESS.md](plan/ROADMAP_PROGRESS.md) | Calendar-style gantt chart. |
+| [development/roadmap-detailed.md](development/roadmap-detailed.md) | Product phases aligned to releases **v1.0.0-rc1** through **v2.5.0**. |
+| [development/roadmap.md](development/roadmap.md) | Feature roadmap and milestones. |
 
 If status sources diverge, treat that as a signal to **update** in a dedicated docs pass—not as contradictory truth.
 
@@ -99,7 +97,7 @@ These items are **signals for triage**, not an exhaustive audit. Verify in code 
 
 | Theme | Notes | Evidence |
 |-------|--------|----------|
-| **Vision vs codebase gap** | Historical deep review listed few validated scanners vs many generated candidates, scaffold AI integration, persistence gaps, and repo layout debt. | [plan/development_plan.md](plan/development_plan.md) §2 — *dated snapshot; re-validate.* |
+| **Vision vs codebase gap** | Historical deep review listed few validated scanners vs many generated candidates, scaffold AI integration, persistence gaps, and repo layout debt. | [development/sprint-plan.md](development/sprint-plan.md) §2 — *dated snapshot; re-validate.* |
 | **Low coverage bar** | CI allows reporting with `fail_under = 25`. | See `pyproject.toml` in repo root |
 | **Stub / TODO clusters** | Orchestration iterations and dev-crew scaffolding not fully wired. | See repo source tree |
 | **Web entrypoint drift** | Multiple `cherenkov_web` entrypoints exist. | See repo source tree |
@@ -109,7 +107,7 @@ These items are **signals for triage**, not an exhaustive audit. Verify in code 
 
 ## Challenges and risks (short list)
 
-From [pm/ROADMAP.md](pm/ROADMAP.md): delivering **parallel swarm orchestration**, **enterprise HITL/compliance**, **mobile exploitation stack**, and **ecosystem export (SARIF, CI)** while preserving **zero-egress** assurances—each phase increases operational and assurance burden.
+From [development/roadmap-detailed.md](development/roadmap-detailed.md): delivering **parallel swarm orchestration**, **enterprise HITL/compliance**, **mobile exploitation stack**, and **ecosystem export (SARIF, CI)** while preserving **zero-egress** assurances—each phase increases operational and assurance burden.
 
 From the premortem analysis (representative prevention themes):
 

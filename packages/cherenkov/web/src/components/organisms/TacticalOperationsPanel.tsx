@@ -1,5 +1,6 @@
 import { useState, useRef, useEffect } from 'react';
 import { cn, generateTrace } from '@/src/lib/utils';
+import { submitScan } from '@/src/lib/api';
 import { motion, AnimatePresence } from 'motion/react';
 import { CyberButton } from '../atoms/CyberButton';
 import { StatGrid } from '../molecules/StatGrid';
@@ -87,31 +88,47 @@ export function TacticalOperationsPanel() {
   }, [lastEvent]);
 
   const initiateScan = async (data: any) => {
-    const res = await fetch(`http://localhost:8000/api/v1/scan`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(data)
-    });
+    const result = await submitScan({ url: data.target });
     
-    if (!res.ok) {
-      const err = await res.json().catch(() => ({}));
-      if (err.error === 'SSRF_BLOCKED') {
-        throw new Error(err.detail || 'Target resolves to private IP range.');
-      }
-      throw new Error(err.detail || 'Failed to start scan.');
-    }
-    
-    const result = await res.json();
-    setTraceId(result.scan_id || generateTrace().slice(0, 8).toUpperCase());
+    setTraceId(result.scan_id?.slice(0, 8).toUpperCase() || generateTrace().slice(0, 8).toUpperCase());
     setIsExecuting(true);
     setActiveStep(1);
     setContainmentState('MEISSNER_LOCKED');
     setLogs([]);
     setScanProgress(0);
     addLog(`Initiating scan on ${data.target}...`);
-    
-    // In a full implementation we would subscribe to the specific WS topic
-    // if the server requires explicit subscription.
+
+    // Simulate progress since the scan already completed synchronously.
+    // In a full streaming implementation this would come via WebSocket events.
+    let progress = 0;
+    const interval = setInterval(() => {
+      progress += Math.random() * 20 + 10;
+      if (progress >= 100) {
+        progress = 100;
+        clearInterval(interval);
+        setIsExecuting(false);
+        setActiveStep(5);
+        setContainmentState('TRACE_SIGNED');
+        setScanProgress(100);
+        addLog(`Scan complete. ${result.count} vulnerabilities found.`, 'verified');
+        // Emit custom event so ThreatIntelPanel picks up results
+        window.dispatchEvent(new CustomEvent('cherenkov:scan_complete', { detail: result }));
+      } else {
+        setScanProgress(progress);
+        addLog(`Scanning... ${progress.toFixed(0)}%`, 'info');
+      }
+
+      if (progress >= 30 && progress < 60) {
+        setActiveStep(2);
+        setContainmentState('ABLATION_ACTIVE');
+      } else if (progress >= 60 && progress < 90) {
+        setActiveStep(3);
+        setContainmentState('THREAT_DETECTED');
+      } else if (progress >= 90 && progress < 100) {
+        setActiveStep(4);
+        setContainmentState('TOKAMAK_EXECUTING');
+      }
+    }, 600);
   };
 
   useEffect(() => {

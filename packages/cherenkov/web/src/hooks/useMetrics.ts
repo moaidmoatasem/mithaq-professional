@@ -1,6 +1,5 @@
 import { useState, useEffect } from 'react';
-
-const API_BASE = 'http://localhost:8000/api/v1';
+import { API_BASE } from '@/src/lib/api';
 
 export function useHealth(intervalMs = 5000) {
   const [data, setData] = useState<any>(null);

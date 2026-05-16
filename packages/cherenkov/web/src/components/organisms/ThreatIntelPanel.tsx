@@ -1,10 +1,11 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { VulnCard } from '../molecules/VulnCard';
 import { CyberBadge } from '../atoms/CyberBadge';
 import { Hash, Monitor, Copy, Check, X, Download, FileJson, ShieldCheck, Layers, Link as LinkIcon, Trash2 } from 'lucide-react';
 import { cn } from '@/src/lib/utils';
 import { motion, AnimatePresence } from 'motion/react';
 import { CyberButton } from '../atoms/CyberButton';
+import { fetchScanHistory, type ScanResult } from '@/src/lib/api';
 
 interface Threat {
   title: string;
@@ -45,11 +46,54 @@ const MOCK_THREATS: Threat[] = [
   }
 ];
 
+const SEVERITY_SCORES: Record<string, string> = {
+  critical: '9.5', high: '8.0', medium: '5.5', low: '3.0', info: '1.0'
+};
+
+function vulnsToThreats(result: ScanResult): Threat[] {
+  return result.vulnerabilities.map((v) => ({
+    title: v.title,
+    severity: (['critical', 'high', 'medium', 'low'].includes(v.severity) ? v.severity : 'medium') as Threat['severity'],
+    score: SEVERITY_SCORES[v.severity] || '5.0',
+    description: v.description || v.remediation || 'No description available.',
+    scanner: v.scanner,
+    cve: v.cwe || 'N/A',
+    traceId: `TRC_${result.scan_id?.slice(0, 4)}_${result.scan_id?.slice(4, 8)}`
+  }));
+}
+
 export function ThreatIntelPanel() {
   const [target, setTarget] = useState('192.168.1.104');
   const [filter, setFilter] = useState<'ALL' | 'CRITICAL' | 'HIGH' | 'MEDIUM' | 'LOW'>('ALL');
   const [copied, setCopied] = useState(false);
   const [selectedThreat, setSelectedThreat] = useState<Threat | null>(null);
+  const [liveThreats, setLiveThreats] = useState<Threat[]>([]);
+
+  // Listen for scan results broadcast from TacticalOperationsPanel
+  useEffect(() => {
+    const handler = (e: Event) => {
+      const detail = (e as CustomEvent<ScanResult>).detail;
+      if (detail?.vulnerabilities) {
+        setTarget(detail.target);
+        setLiveThreats(vulnsToThreats(detail));
+      }
+    };
+    window.addEventListener('cherenkov:scan_complete', handler);
+    return () => window.removeEventListener('cherenkov:scan_complete', handler);
+  }, []);
+
+  // Also load any historical scan data on mount
+  useEffect(() => {
+    fetchScanHistory().then((scans) => {
+      if (scans.length > 0) {
+        const latest = scans[0];
+        setTarget(latest.target);
+        setLiveThreats(vulnsToThreats(latest));
+      }
+    }).catch(() => {});
+  }, []);
+
+  const displayThreats = liveThreats.length > 0 ? liveThreats : MOCK_THREATS;
 
   const fullHash = "7d2b4f8c1d8e4a9c8f2d1e0c9b8a7f6e5d4c3b2a1f0e9d8c7b6a5f4e3d2c1b0a";
 
@@ -245,7 +289,7 @@ export function ThreatIntelPanel() {
         </div>
 
         <div className="space-y-4 overflow-y-auto custom-scrollbar max-h-[500px] pr-2">
-          {MOCK_THREATS
+          {displayThreats
             .filter(t => filter === 'ALL' || t.severity.toUpperCase() === filter)
             .map((threat, idx) => (
               <VulnCard 

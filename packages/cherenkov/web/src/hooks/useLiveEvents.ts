@@ -6,9 +6,20 @@ let statusListeners = new Set<(connected: boolean) => void>();
 let reconnectTimeout: any;
 let isConnected = false;
 
+function getWsUrl(): string {
+  // In development (Vite on :3000), connect directly to the backend on :8000.
+  // In production (served by FastAPI on :8000), use same-origin WebSocket.
+  const loc = window.location;
+  if (loc.port === '3000') {
+    return `ws://${loc.hostname}:8000/ws/live`;
+  }
+  const proto = loc.protocol === 'https:' ? 'wss:' : 'ws:';
+  return `${proto}//${loc.host}/ws/live`;
+}
+
 function connectWs() {
   if (wsInstance) return;
-  wsInstance = new WebSocket('ws://localhost:8000/ws/live');
+  wsInstance = new WebSocket(getWsUrl());
   
   wsInstance.onopen = () => {
     isConnected = true;

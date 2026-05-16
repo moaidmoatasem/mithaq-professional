@@ -26,7 +26,7 @@ COPY docker-compose.yml /sandbox/docker-compose.yml
 
 # Install dependencies via pyproject.toml (requirements.txt removed — pyproject.toml is canonical)
 COPY pyproject.toml ./
-RUN pip install --no-cache-dir pytest pytest-asyncio pytest-cov httpx python-dotenv pydantic requests cryptography crewai pyyaml typer groq ollama fastapi uvicorn
+RUN pip install --no-cache-dir pytest pytest-asyncio pytest-cov httpx python-dotenv pydantic requests cryptography crewai pyyaml typer groq ollama fastapi uvicorn frida-tools drozer
 
 # Give tokamak_user write access to the entire sandbox
 RUN chown -R tokamak_user:tokamak_user /sandbox

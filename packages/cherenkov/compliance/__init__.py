@@ -1,2 +1,4 @@
 from .mapper import ComplianceMapper
-__all__ = ["ComplianceMapper"]
+from .process_mapper import ProcessMapper
+
+__all__ = ["ComplianceMapper", "ProcessMapper"]

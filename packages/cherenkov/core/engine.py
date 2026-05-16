@@ -1,15 +1,16 @@
-"""Async Scan Engine - Runs scanners concurrently"""
-
 import asyncio
+import logging
 import time
-from typing import Dict, List
+from typing import Callable, Dict, List, Optional
 
 from .base_scanner import ScanResult
 from .registry import ScannerRegistry
 
+logger = logging.getLogger(__name__)
+
 
 class ScanEngine:
-    """Async scan engine for concurrent scanner execution"""
+    """Async scan engine for concurrent scanner execution with progress tracking"""
 
     def __init__(self, registry: ScannerRegistry):
         self.registry = registry
@@ -18,15 +19,32 @@ class ScanEngine:
     async def scan_single(
         self, scanner_name: str, target: str, timeout: float = 10.0
     ) -> ScanResult:
-        """Run single scanner"""
-        scanner_class = self.registry.get_scanner(scanner_name)
-        scanner = scanner_class(scanner_class.__name__, "")
+        """Run single scanner with isolated timeout and error handling"""
+        try:
+            scanner_class = self.registry.get_scanner(scanner_name)
+            scanner = scanner_class(scanner_class.__name__, "")
 
-        start_time = time.time()
-        result = await scanner.scan(target, timeout)
-        result.duration_ms = (time.time() - start_time) * 1000
-
-        return result
+            start_time = time.time()
+            # Wrap in wait_for as a safety layer above the scanner's own timeout logic
+            result = await asyncio.wait_for(scanner.scan(target, timeout), timeout=timeout + 2)
+            result.duration_ms = (time.time() - start_time) * 1000
+            return result
+        except asyncio.TimeoutError:
+            logger.warning("Scanner %s timed out on %s", scanner_name, target)
+            return ScanResult(
+                target=target,
+                scanner_name=scanner_name,
+                status="timeout",
+                findings=[],
+            )
+        except Exception as exc:
+            logger.error("Scanner %s failed: %s", scanner_name, exc)
+            return ScanResult(
+                target=target,
+                scanner_name=scanner_name,
+                status="failed",
+                findings=[],
+            )
 
     async def scan_all(
         self,
@@ -34,8 +52,9 @@ class ScanEngine:
         scanners: List[str] = None,
         timeout: float = 10.0,
         max_concurrent: int = 10,
+        on_progress: Optional[Callable[[str, ScanResult], None]] = None,
     ) -> Dict[str, ScanResult]:
-        """Run all scanners concurrently"""
+        """Run all scanners concurrently with concurrency limiting and progress updates"""
         if scanners is None:
             scanners = self.registry.list_scanners()
 
@@ -43,21 +62,16 @@ class ScanEngine:
 
         async def scan_with_semaphore(scanner_name: str) -> ScanResult:
             async with semaphore:
-                return await self.scan_single(scanner_name, target, timeout)
+                result = await self.scan_single(scanner_name, target, timeout)
+                if on_progress:
+                    # Execute callback if provided (e.g. for WebSocket broadcasts)
+                    if asyncio.iscoroutinefunction(on_progress):
+                        await on_progress(scanner_name, result)
+                    else:
+                        on_progress(scanner_name, result)
+                return result
 
         tasks = [scan_with_semaphore(s) for s in scanners]
-        results = await asyncio.gather(*tasks, return_exceptions=True)
+        results = await asyncio.gather(*tasks, return_exceptions=False)
 
-        scan_results = {}
-        for scanner_name, result in zip(scanners, results, strict=False):
-            if isinstance(result, Exception):
-                scan_results[scanner_name] = ScanResult(
-                    target=target,
-                    scanner_name=scanner_name,
-                    status="failed",
-                    findings=[],
-                )
-            else:
-                scan_results[scanner_name] = result
-
-        return scan_results
+        return {s: r for s, r in zip(scanners, results, strict=False)}

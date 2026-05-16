@@ -49,3 +49,6 @@ repo_context_*.md
 
 # Portal app
 cherenkov-portal/
+
+# Claude Code session data
+.claude/

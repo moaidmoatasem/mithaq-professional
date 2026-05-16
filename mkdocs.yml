@@ -35,6 +35,7 @@ nav:
     - index.md
     - Quick Start: quickstart.md
     - What is CHERENKOV?: what-is-cherenkov.md
+    - Project Briefing: PROJECT_BRIEFING.md
   - Architecture:
     - architecture/index.md
     - The Trident: architecture/trident.md
@@ -44,6 +45,11 @@ nav:
     - Cognitive Swarm: architecture/swarm.md
     - Data Tiers: architecture/data-tiers.md
     - Adaptive Learning: architecture/adaptive-learning.md
+    - System Architecture (Detailed): architecture/SYSTEM_ARCHITECTURE.md
+    - High-Level Design: architecture/HLD_DIAGRAM.md
+    - Low-Level Design: architecture/LLD_DIAGRAM.md
+    - System Design & State Machine: pm/SYSTEM_DESIGN.md
+    - Design Patterns: pm/DESIGN_PATTERNS_BEST_PRACTICES.md
   - Scanners:
     - scanners/index.md
     - Validated Scanners: scanners/validated.md
@@ -72,9 +78,18 @@ nav:
   - Development:
     - development/index.md
     - Contributing: development/contributing.md
+    - Development Workflow: processes/DEVELOPMENT_WORKFLOW.md
+    - Sprint Plan: pm/DEVELOPMENT_PLAN.md
+    - Code Standards: standards/CODE_STANDARDS.md
+    - Brand Guidelines: standards/CHERENKOV_BRAND_GUIDELINES.md
     - Swarm Orchestrator: development/swarm.md
     - Session Protocol: development/session-protocol.md
     - Roadmap: development/roadmap.md
+    - Detailed Roadmap: pm/ROADMAP.md
+    - Sovereign Roadmap: pm/ROADMAP_FOR_WEB.md
+    - Integrations & Approvals: pm/INTEGRATIONS_AND_APPROVALS.md
+  - UI/UX:
+    - UI Requirements: ui/UI_REQUIREMENTS.md
   - Security:
     - security/index.md
     - Vulnerability Disclosure: security/disclosure.md

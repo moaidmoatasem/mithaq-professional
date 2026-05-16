@@ -112,8 +112,6 @@ class SandboxExecuteRequest(BaseModel):
 v1 = APIRouter(prefix="/api/v1")
 
 
-
-
 async def _check_ollama() -> str:
     try:
         async with httpx.AsyncClient(timeout=1.0) as c:

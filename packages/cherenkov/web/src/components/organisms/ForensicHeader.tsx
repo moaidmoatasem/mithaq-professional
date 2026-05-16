@@ -4,7 +4,7 @@ import { PulseDot } from '../atoms/PulseDot';
 import { CyberBadge } from '../atoms/CyberBadge';
 import { cn } from '@/src/lib/utils';
 import { AlertTriangle } from 'lucide-react';
-import { useHealth, useAblationStats } from '@/src/hooks/useMetrics';
+import { useHealth, useAblationStats, usePendingApprovals } from '@/src/hooks/useMetrics';
 import { useLiveEvents } from '@/src/hooks/useLiveEvents';
 
 type MeissnerStatus = 'LOCKED' | 'PERMEABLE' | 'BREACH';
@@ -15,12 +15,22 @@ export function ForensicHeader() {
   const { data: healthData } = useHealth(5000);
   const { data: ablationData } = useAblationStats(10000);
   const { lastEvent } = useLiveEvents();
+  const { data: pendingApprovals } = usePendingApprovals(5000);
+  const [pendingCount, setPendingCount] = useState(0);
 
   const [wsMeissner, setWsMeissner] = useState<string | null>(null);
 
   useEffect(() => {
+    if (pendingApprovals) {
+      setPendingCount(pendingApprovals.length);
+    }
+  }, [pendingApprovals]);
+
+  useEffect(() => {
     if (lastEvent?.event === 'circuit_breaker') {
       setWsMeissner(lastEvent.state);
+    } else if (lastEvent?.event === 'finding_discovered') {
+      setPendingCount(prev => prev + 1);
     }
   }, [lastEvent]);
 
@@ -71,6 +81,26 @@ export function ForensicHeader() {
 
       {/* System Status Indicators */}
       <div className="flex items-center gap-6">
+        {/* HITL Approvals Status */}
+        <div className="flex items-center gap-3">
+          {pendingCount > 0 && (
+            <div className="flex h-6 w-6 items-center justify-center rounded-full bg-sev-critical/20 border border-sev-critical animate-pulse text-[10px] font-bold text-sev-critical">
+              {pendingCount}
+            </div>
+          )}
+          <div className="flex flex-col">
+             <span className="text-[8px] font-mono text-fg3 uppercase">HITL_Gate</span>
+             <span className={cn(
+               "text-[9px] font-bold font-mono tracking-widest uppercase",
+               pendingCount > 0 ? "text-sev-critical" : "text-hud-mint"
+             )}>
+               {pendingCount > 0 ? 'PENDING' : 'CLEAR'}
+             </span>
+          </div>
+        </div>
+
+        <div className="w-px h-6 bg-white/10" />
+
         {/* MEISSNER Status */}
         <div className="flex items-center gap-3">
           <div className="flex items-center gap-2">

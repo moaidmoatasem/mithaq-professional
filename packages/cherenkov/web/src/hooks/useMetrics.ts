@@ -102,3 +102,36 @@ export function useQueueDepth(intervalMs = 5000) {
 
   return { history, current };
 }
+
+export function usePendingApprovals(intervalMs = 5000) {
+  const [data, setData] = useState<any[]>([]);
+  const [error, setError] = useState<Error | null>(null);
+
+  useEffect(() => {
+    let mounted = true;
+    const fetchApprovals = async () => {
+      try {
+        const res = await fetch(`${API_BASE}/findings/pending`);
+        if (!res.ok) throw new Error('Failed to fetch pending approvals');
+        const json = await res.json();
+        if (mounted) {
+          setData(json);
+          setError(null);
+        }
+      } catch (err) {
+        if (mounted) {
+          setError(err instanceof Error ? err : new Error('Unknown error'));
+        }
+      }
+    };
+
+    fetchApprovals();
+    const int = setInterval(fetchApprovals, intervalMs);
+    return () => {
+      mounted = false;
+      clearInterval(int);
+    };
+  }, [intervalMs]);
+
+  return { data, error };
+}

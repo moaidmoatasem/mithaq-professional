@@ -6,6 +6,7 @@ import { cn } from '@/src/lib/utils';
 import { motion, AnimatePresence } from 'motion/react';
 import { CyberButton } from '../atoms/CyberButton';
 import { fetchScanHistory, type ScanResult } from '@/src/lib/api';
+import { PendingApprovalsPanel } from './PendingApprovalsPanel';
 
 interface Threat {
   title: string;
@@ -266,6 +267,8 @@ export function ThreatIntelPanel() {
            style={{ caretColor: '#2b7fff' }}
          />
       </div>
+
+      <PendingApprovalsPanel />
 
       {/* Vulnerability List Section */}
       <div className="flex-1 flex flex-col gap-4">

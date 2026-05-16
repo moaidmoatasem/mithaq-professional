@@ -1,0 +1,23 @@
+{
+  "$schema": "https://opencode.ai/config.json",
+
+  // ── Instructions ────────────────────────────────────────────────────────
+  "instructions": [
+    ".agents/context.md"
+  ],
+
+  // ── Model preference order ───────────────────────────────────────────────
+  // OpenCode uses the first available. Add your preferred provider key in env.
+  "autoshare": false,
+  "autoapprove": false,
+
+  // ── Project rules ────────────────────────────────────────────────────────
+  // These are injected into every session automatically.
+  "rules": {
+    "pre_commit_python": "ruff format packages/ && ruff check packages/ --ignore W,S,B",
+    "pre_commit_ts":     "cd packages/cherenkov/web && npm run lint && npx vite build",
+    "test_command":      "pytest -m 'not (integration or ai_generated)' --tb=short",
+    "branch_pattern":    "feat/<issue>-<slug> | fix/<issue>-<slug>",
+    "pr_body_required":  "Closes #<issue>"
+  }
+}

@@ -1,0 +1,90 @@
+name: CHERENKOV
+version: 2.0.0
+schema: v1
+
+# ── Models ───────────────────────────────────────────────────────────────────
+models:
+  - name: Qwen2.5-Coder 7B          # primary: code gen + edits
+    provider: ollama
+    model: qwen2.5-coder:7b
+    roles: [chat, edit, apply]
+
+  - name: Qwen2.5-Coder 1.5B        # autocomplete: fast, lightweight
+    provider: ollama
+    model: qwen2.5-coder:1.5b-base
+    roles: [autocomplete]
+
+  - name: Nomic Embed                # semantic search over codebase
+    provider: ollama
+    model: nomic-embed-text:latest
+    roles: [embed]
+
+# ── Context Providers ────────────────────────────────────────────────────────
+context:
+  - provider: code                   # @code — include highlighted code
+  - provider: docs                   # @docs — project docs
+  - provider: diff                   # @diff — current git diff
+  - provider: terminal               # @terminal — last terminal output
+  - provider: problems               # @problems — IDE diagnostic errors
+  - provider: folder                 # @folder — directory tree
+  - provider: codebase               # @codebase — full repo semantic search
+    params:
+      nRetrieve: 20
+      nFinal: 5
+
+  - provider: file                   # @file — specific file by name
+  - provider: url                    # @url — fetch a URL (issues, docs)
+    params:
+      baseUrl: https://github.com/moaidmoatasem/cherenkov-professional
+
+# ── Slash Commands ────────────────────────────────────────────────────────────
+slashCommands:
+  - name: issue
+    description: "Start work on a GitHub issue. Usage: /issue 174"
+    prompt: |
+      Read .agents/context.md for project rules.
+      Read .agents/tasks/issue-{{{ input }}}.md for the exact task.
+      Create branch feat/{{{ input }}}-<slug>, implement, run verify commands,
+      open a PR with "Closes #{{{ input }}}".
+
+  - name: graduate
+    description: "Graduate an autonomous scanner to BaseScanner. Usage: /graduate xxe_scanner"
+    prompt: |
+      Read packages/cherenkov/core/base_scanner.py for the contract.
+      Read packages/cherenkov/autonomous_generated/scanners/{{{ input }}}.py.
+      Refactor to inherit BaseScanner. Write tests/unit/test_{{{ input }}}.py.
+      Register in packages/cherenkov/core/registry.py.
+      Verify: ruff format packages/ && pytest tests/unit/test_{{{ input }}}.py -v
+
+  - name: scan-add
+    description: "Add a new scanner from scratch. Usage: /scan-add sql_injection"
+    prompt: |
+      Read packages/cherenkov/core/base_scanner.py.
+      Create packages/cherenkov/scanners/{{{ input }}}.py inheriting BaseScanner.
+      Implement async scan() targeting HTTP vulnerabilities.
+      No outbound calls beyond target URL (MEISSNER rule).
+      Write tests/unit/test_{{{ input }}}.py with mocked httpx.
+
+  - name: fix
+    description: "Fix a failing test or lint error"
+    prompt: |
+      @problems @diff
+      Fix the errors shown. Run ruff format packages/ after changes.
+      Keep changes minimal — one commit per logical fix.
+
+  - name: status
+    description: "Show project status and next tasks"
+    prompt: |
+      Read STATUS.md, TODO.md, and AGENT_MEMORY.md.
+      Summarize: what sprint we're on, what's done, what's next.
+      List the top 3 unblocked tasks from TODO.md.
+
+# ── Rules (always applied) ────────────────────────────────────────────────────
+rules:
+  - Read AGENT_MEMORY.md before every coding task
+  - Never import from src.cherenkov — always from cherenkov
+  - Never hardcode localhost:8000 in frontend — use API_BASE from @/src/lib/api.ts
+  - Run ruff format packages/ before every Python commit
+  - Run cd packages/cherenkov/web && npm run lint before every TS commit
+  - Branch naming — feat/<issue>-<slug> or fix/<issue>-<slug>
+  - Every PR must contain "Closes #<issue>" in the body

@@ -79,3 +79,6 @@ echo "Stop services: docker-compose down"
 echo ""
 echo "================================================================"
 
+
+sudo docker run --rm -d -p 8090:8080 webgoat/goat-and-wolf
+echo "WebGoat running at localhost:8090 for false-positive validation"

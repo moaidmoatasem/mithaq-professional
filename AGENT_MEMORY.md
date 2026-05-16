@@ -48,3 +48,32 @@
 - `autonomous_generated/` contains many broken/duplicate files from early swarm generation — do not refactor without reading first.
 - `src/cherenkov/` (old path) may still exist in some legacy scripts — do not use; canonical path is `packages/cherenkov/`.
 - `pytest_output.txt` and `scan_report_*.json` are gitignored runtime files — do not commit.
+
+
+### Jules Path & Import Rules
+- The canonical package path is `packages/cherenkov/` not `src/`.
+- All imports must be from `cherenkov.*` not `src.cherenkov.*` or `packages.cherenkov.*`.
+
+### TOKAMAK PoC Execution
+- TOKAMAK PoC execution is the highest priority unbuilt feature.
+- No HIGH/CRITICAL finding should appear in any report without TOKAMAK confirmation.
+- Sandbox profile: `kalilinux/kali-rolling`, `network_mode=none`, `read_only=true`.
+
+### LATTICE Bridge
+- LATTICE bridge is not wired. Qdrant is running but nothing embeds findings into it.
+- The three functions needed: `embed_and_store(trace)`, `query_similar_targets(target)`, `label_false_positive(finding_id)`.
+- Use `sentence-transformers all-MiniLM-L6-v2` for embeddings.
+
+### Execution Context
+- DVWA runs at `localhost:80`. Always available for scanner validation.
+- Qdrant runs at `localhost:6333`. Always available for LATTICE operations.
+- Ollama runs at `localhost:11434` with `llama3.2:3b` pulled.
+- PYTHONPATH must include `packages/` directory.
+- Use `docker exec -i` (not `-it`) for CI/CD commands.
+
+### Agent Tasks Workflow
+- Single task only: [specific task].
+- Read `CLAUDE.md` first. Do not read other files unless necessary.
+- Export `PYTHONPATH=$PYTHONPATH:$(pwd)/packages` before running any python command.
+- Commit with conventional commit message when done.
+- Report: what changed, what tests passed, any blockers.

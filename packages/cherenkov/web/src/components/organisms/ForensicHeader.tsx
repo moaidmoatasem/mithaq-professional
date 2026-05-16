@@ -3,9 +3,10 @@ import { CherenkovLogo } from '../atoms/Logo';
 import { PulseDot } from '../atoms/PulseDot';
 import { CyberBadge } from '../atoms/CyberBadge';
 import { cn } from '@/src/lib/utils';
-import { AlertTriangle } from 'lucide-react';
+import { AlertTriangle, LogOut } from 'lucide-react';
 import { useHealth, useAblationStats, usePendingApprovals } from '@/src/hooks/useMetrics';
 import { useLiveEvents } from '@/src/hooks/useLiveEvents';
+import { logout } from '@/src/lib/api';
 
 type MeissnerStatus = 'LOCKED' | 'PERMEABLE' | 'BREACH';
 type AblationStatus = 'SYNCED' | 'ACTIVE' | 'FAILED';
@@ -137,6 +138,16 @@ export function ForensicHeader() {
               />
            </div>
         </div>
+      </div>
+
+      <div className="flex items-center gap-2 ml-4 pl-4 border-l border-white/10">
+        <button 
+          onClick={logout}
+          className="p-2 rounded-md text-fg3 hover:text-sev-critical hover:bg-sev-critical/10 transition-all group"
+          title="Terminate Session"
+        >
+          <LogOut size={16} className="group-hover:scale-110 transition-transform" />
+        </button>
       </div>
     </header>
   );

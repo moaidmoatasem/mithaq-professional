@@ -36,6 +36,14 @@ CREATE TABLE IF NOT EXISTS findings_pending (
     scan_id     TEXT
 );
 CREATE INDEX IF NOT EXISTS idx_findings_pending_status ON findings_pending(status);
+
+CREATE TABLE IF NOT EXISTS users (
+    id          INTEGER PRIMARY KEY AUTOINCREMENT,
+    username    TEXT    NOT NULL UNIQUE,
+    password    TEXT    NOT NULL,
+    role        INTEGER NOT NULL DEFAULT 1
+);
+CREATE INDEX IF NOT EXISTS idx_users_username ON users(username);
 """
 
 
@@ -160,6 +168,20 @@ def update_finding_status(
             (status, operator_id, now, finding_id),
         )
         conn.commit()
+
+
+def save_user(username: str, hashed_password: str, role: int, path: Path = _DB_PATH) -> None:
+    with _connect(path) as conn:
+        conn.execute(
+            "INSERT OR REPLACE INTO users (username, password, role) VALUES (?, ?, ?)",
+            (username, hashed_password, role),
+        )
+
+
+def get_user(username: str, path: Path = _DB_PATH) -> dict | None:
+    with _connect(path) as conn:
+        row = conn.execute("SELECT * FROM users WHERE username = ?", (username,)).fetchone()
+    return dict(row) if row else None
 
 
 def _row_to_dict(row: sqlite3.Row) -> dict:

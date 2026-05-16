@@ -52,3 +52,15 @@ cherenkov-portal/
 
 # Claude Code session data
 .claude/
+
+# Python build artifacts
+packages/cherenkov_core.egg-info/
+*.egg-info/
+
+# Test / scan runtime output
+pytest_output.txt
+scan_report_*.json
+
+# Agent session notes (runtime, not source)
+AGENT_MEMORY.md
+TODO.md

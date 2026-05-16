@@ -125,12 +125,12 @@ def status_report(args):
     print("=" * 60)
     r = j(gh(["milestone", "list", "--json", "title,dueDate,openIssues,closedIssues"]))
     if r:
-        print("\n── Milestones ──")
+        print("\n-- Milestones --")
         for m in r:
             print(
                 f"  {m['title']:25} {m['closedIssues']}/{m['openIssues'] + m['closedIssues']} Due: {m.get('dueDate', 'N/A')[:10]}"
             )
-    print("\n── Open PRs ──")
+    print("\n-- Open PRs --")
     r = j(gh(["pr", "list", "--state", "open", "--json", "number,title,author", "--limit", "10"]))
     if r:
         for p in r:
@@ -178,6 +178,7 @@ def generate_changelog(args):
 
 
 def main():
+    global REPO
     p = argparse.ArgumentParser(description="CHERENKOV GitHub PM CLI")
     p.add_argument("--repo", default=REPO)
     s = p.add_subparsers(dest="cmd")
@@ -229,7 +230,6 @@ def main():
     if not args.cmd:
         p.print_help()
         return
-    global REPO
     if args.repo:
         REPO = args.repo
     {

@@ -1,0 +1,193 @@
+@import url('https://fonts.googleapis.com/css2?family=Syne:wght@400;500;600;700;800&family=Space+Mono:wght@400;700&family=IBM+Plex+Sans:wght@400;500;600;700&family=IBM+Plex+Sans+Arabic:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&family=JetBrains+Mono:wght@400;500;700&display=swap');
+@import "tailwindcss";
+
+@theme {
+  /* Cherenkov Brand Tokens */
+  --color-obsidian: #0B0D0F;
+  --color-obsidian-2: #111318;
+  --color-obsidian-3: #1A1E26;
+  --color-cobalt: #2F5F8A;
+  --color-cobalt-light: #4A8BBF;
+  --color-bismuth: #7B4BFF;
+  --color-bismuth-dim: #4A2FAA;
+  --color-electric: #00A3FF;
+  --color-electric-dim: #005580;
+  --color-gold: #C9A84C;
+  --color-gold-dim: #6B5520;
+
+  /* Semantic */
+  --color-status-confirmed: #00D084;
+  --color-status-probable: #F59E0B;
+  --color-status-unverified: #6B7280;
+  --color-status-discarded: #374151;
+  --color-sev-critical: #FF3B5C;
+  --color-sev-high: #FF6B35;
+  --color-sev-medium: #F59E0B;
+  --color-sev-low: #3B82F6;
+  --color-info: #6B7280;
+
+  /* Node Colors */
+  --color-node-tensor: #4A8BBF;
+  --color-node-kinetic: #7B4BFF;
+  --color-node-aegis: #F59E0B;
+  --color-node-lattice: #00D084;
+  --color-node-tokamak: #C9A84C;
+
+  /* Legacy Colors mapping where needed */
+  --color-cherenkov-accent: #2b7fff;
+  --color-hud-cyan: #00e5ff;
+  --color-hud-amber: #ffb020;
+  --color-hud-mint: #00ff88;
+  --color-bg-canvas: #0B0D0F;     /* Using obsidian */
+  --color-bg-surface: #111318;    /* Using obsidian-2 */
+  --color-bg-elevated: #1A1E26;   /* Using obsidian-3 */
+
+  --color-fg1: #F0F1F5;
+  --color-fg2: #A1A1AA;
+  --color-fg3: #71717A;
+  --color-soft: #94A3B8;
+
+  --font-display: "Syne", sans-serif;
+  --font-mono: "Space Mono", "IBM Plex Mono", "JetBrains Mono", monospace;
+  --font-sans: "IBM Plex Sans", "IBM Plex Sans Arabic", ui-sans-serif, system-ui;
+  --font-serif: "Playfair Display", serif;
+
+  --animate-scanline: scanline 8s linear infinite;
+  --animate-glitch: glitch-precise 4s linear infinite;
+  --animate-reactor: reactor-pulse 3s infinite ease-in-out;
+  --animate-core: core-glow 2s infinite ease-in-out;
+  --animate-data: data-flicker 3s infinite ease-in-out;
+}
+
+@keyframes reactor-pulse {
+  0%, 100% { stroke-opacity: 0.6; stroke-width: 6; }
+  50% { stroke-opacity: 1; stroke-width: 7.5; }
+}
+
+@keyframes core-glow {
+  0%, 100% { filter: drop-shadow(0 0 4px #00E0FF); opacity: 0.8; transform: scale(1); }
+  50% { filter: drop-shadow(0 0 16px #00E0FF); opacity: 1; transform: scale(1.05); }
+}
+
+@keyframes data-flicker {
+  0%, 100% { opacity: 0.3; }
+  50% { opacity: 1; }
+}
+
+@keyframes glitch-precise {
+  0%, 90%, 100% { transform: translate(0); opacity: 1; }
+  91% { transform: translate(-1px, 0.5px); opacity: 0.9; }
+  92% { transform: translate(1px, -0.5px); opacity: 1; }
+  93% { transform: translate(-0.5px, -1px); opacity: 0.9; }
+  94% { transform: translate(0); opacity: 1; }
+}
+
+@layer base {
+  body {
+    @apply bg-bg-canvas text-fg1 font-sans selection:bg-cherenkov-accent selection:text-white antialiased overflow-x-hidden;
+    background: radial-gradient(circle at 50% 50%, #15181b 0%, #0A0A0A 100%);
+  }
+}
+
+@layer components {
+  .ch-reactor-shield {
+    @apply animate-reactor;
+    stroke-opacity: 0.6;
+    stroke-width: 6;
+  }
+
+  .ch-core-reveal {
+    @apply animate-core;
+    transform-origin: 55px 50px;
+  }
+
+  .ch-data-point {
+    @apply animate-data;
+  }
+
+  .fx-grid {
+    background-image: linear-gradient(rgba(18,16,16,0) 50%,rgba(0,0,0,0.1) 50%),
+                      linear-gradient(90deg,rgba(43,127,255,0.03),rgba(0,229,255,0.03));
+    background-size: 100% 4px, 4px 100%;
+  }
+
+  .fx-march {
+    stroke-dasharray: 4 4;
+    animation: march 1s linear infinite;
+  }
+
+  @keyframes march {
+    from { stroke-dashoffset: 8; }
+    to { stroke-dashoffset: 0; }
+  }
+
+  .fx-sweep {
+    position: relative;
+    overflow: hidden;
+  }
+
+  .fx-sweep::after {
+    content: "";
+    position: absolute;
+    top: -100%;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(to bottom, transparent, rgba(0, 229, 255, 0.05), transparent);
+    animation: sweep 3s linear infinite;
+    pointer-events: none;
+  }
+
+  @keyframes sweep {
+    0% { transform: translateY(0); }
+    100% { transform: translateY(200%); }
+  }
+
+  .fx-pulse {
+    animation: pulse-ring 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+  }
+
+  @keyframes pulse-ring {
+    0%, 100% { opacity: 1; transform: scale(1); }
+    50% { opacity: .5; transform: scale(1.1); }
+  }
+
+  .neon {
+    text-shadow: 0 0 5px currentColor, 0 0 10px currentColor;
+  }
+
+  .neon-soft {
+    text-shadow: 0 0 2px currentColor;
+  }
+
+  .hud-bracket {
+    position: relative;
+  }
+
+  .hud-bracket::before, .hud-bracket::after {
+    content: "";
+    position: absolute;
+    width: 8px;
+    height: 8px;
+    border-color: var(--color-hud-cyan);
+    opacity: 0.5;
+  }
+
+  .hud-bracket::before {
+    top: 0; left: 0;
+    border-top: 1px solid; border-left: 1px solid;
+  }
+
+  .hud-bracket::after {
+    bottom: 0; right: 0;
+    border-bottom: 1px solid; border-right: 1px solid;
+  }
+
+  .chamfered {
+    clip-path: polygon(0 0, calc(100% - 10px) 0, 100% 10px, 100% 100%, 10px 100%, 0 calc(100% - 10px));
+  }
+
+  .panel-border {
+    @apply border border-hud-cyan/20;
+  }
+}

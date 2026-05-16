@@ -16,6 +16,20 @@ class ScannerRegistry:
         self._registry: Dict[str, Type[BaseScanner]] = {}
         self._load_scanners()
 
+        # Explicitly import and register new scanners per requirements
+        from cherenkov.scanners.file_upload_scanner import FileUploadScanner
+        from cherenkov.scanners.path_traversal_scanner import PathTraversalScanner
+        from cherenkov.scanners.xxe_scanner import XXEScanner
+
+        self.register(XXEScanner)
+        self.register(PathTraversalScanner)
+        self.register(FileUploadScanner)
+
+    def register(self, scanner_class: Type[BaseScanner]):
+        """Manually register a scanner class"""
+        scanner_name = scanner_class.__name__.replace("Scanner", "").lower()
+        self._registry[scanner_name] = scanner_class
+
     def _load_scanners(self):
         """Auto-discover scanners using importlib"""
         package = importlib.import_module(self.scanners_path)

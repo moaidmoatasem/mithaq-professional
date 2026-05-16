@@ -43,3 +43,9 @@ package-lock.json
 
 # AI ingestion context files
 repo_context_*.md
+
+# VSCode extension binaries
+.vscode/*.vsix
+
+# Portal app
+cherenkov-portal/

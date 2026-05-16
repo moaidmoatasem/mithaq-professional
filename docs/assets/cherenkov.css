@@ -1,0 +1,29 @@
+/* CHERENKOV Custom Styles */
+:root {
+  --md-primary-fg-color: #0B0D0F;
+  --md-primary-fg-color--light: #2F5F8A;
+  --md-primary-fg-color--dark: #07080A;
+  --md-accent-fg-color: #00A3FF;
+  --md-accent-fg-color--transparent: rgba(0, 163, 255, 0.1);
+}
+
+.md-header {
+  background-color: var(--md-primary-fg-color);
+}
+
+.md-tabs {
+  background-color: var(--md-primary-fg-color--dark);
+}
+
+h1, h2, h3, h4, h5, h6 {
+  font-weight: 800;
+}
+
+.md-button--primary {
+  box-shadow: 0 0 10px rgba(0, 163, 255, 0.3);
+  transition: box-shadow 0.3s ease;
+}
+
+.md-button--primary:hover {
+  box-shadow: 0 0 15px rgba(0, 163, 255, 0.6);
+}

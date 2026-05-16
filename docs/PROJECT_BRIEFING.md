@@ -25,13 +25,13 @@ CHERENKOV is scoped as an air-gapped, sovereign security intelligence stack orga
 | **TPM / roadmap** | Strategy, phases, milestones | [pm/ROADMAP.md](pm/ROADMAP.md), [pm/ROADMAP_FOR_WEB.md](pm/ROADMAP_FOR_WEB.md), [github/RELEASES.md](github/RELEASES.md) |
 | **Execution plans** | Sprints and deep phased plan | [pm/DEVELOPMENT_PLAN.md](pm/DEVELOPMENT_PLAN.md), [plan/development_plan.md](plan/development_plan.md) |
 | **Progress timeline** | Gantt-style phased view | [plan/ROADMAP_PROGRESS.md](plan/ROADMAP_PROGRESS.md) |
-| **Architecture** | System design and diagrams | [architecture/SYSTEM_ARCHITECTURE.md](architecture/SYSTEM_ARCHITECTURE.md), [architecture/HLD_DIAGRAM.md](architecture/HLD_DIAGRAM.md), [architecture/LLD_DIAGRAM.md](architecture/LLD_DIAGRAM.md), [../ARCHITECTURE.md](../ARCHITECTURE.md) |
+| **Architecture** | System design and diagrams | [architecture/SYSTEM_ARCHITECTURE.md](architecture/SYSTEM_ARCHITECTURE.md), [architecture/HLD_DIAGRAM.md](architecture/HLD_DIAGRAM.md), [architecture/LLD_DIAGRAM.md](architecture/LLD_DIAGRAM.md) |
 | **System design & patterns** | HLD/LLD narrative, patterns | [pm/SYSTEM_DESIGN.md](pm/SYSTEM_DESIGN.md), [pm/DESIGN_PATTERNS_BEST_PRACTICES.md](pm/DESIGN_PATTERNS_BEST_PRACTICES.md) |
 | **Processes** | Engineering workflow | [processes/DEVELOPMENT_WORKFLOW.md](processes/DEVELOPMENT_WORKFLOW.md) |
-| **Living backlog / status** | Checklists and headline status | [../TODO.md](../TODO.md), [../STATUS.md](../STATUS.md) |
-| **Governance / PM rules** | Branches, milestones, labels | [../AGENTS.md](../AGENTS.md) |
-| **Product / narrative SSOT** | Sovereign framing | [../CHERENKOV_SSOT.md](../CHERENKOV_SSOT.md), [../CHERENKOV_SOVEREIGN_BLUEPRINT.md](../CHERENKOV_SOVEREIGN_BLUEPRINT.md) |
-| **Risk exercise** | Prospective failure modes | [../CHERENKOV_PREMORTEM.md](../CHERENKOV_PREMORTEM.md) |
+| **Living backlog / status** | Checklists and headline status | [development/roadmap.md](development/roadmap.md) |
+| **Governance / PM rules** | Branches, milestones, labels | Refer to AGENTS.md in repo root |
+| **Product / narrative SSOT** | Sovereign framing | [architecture/index.md](architecture/index.md), [what-is-cherenkov.md](what-is-cherenkov.md) |
+| **Risk exercise** | Prospective failure modes | See challenges and risks below |
 | **Published site** | Reader-facing docs (may trail repo) | [docs.cherenkov-security.com](https://docs.cherenkov-security.com/) |
 
 ```mermaid
@@ -86,11 +86,10 @@ Multiple artifacts track “where we are.” They emphasize different lenses; **
 |--------|------------------|
 | [plan/ROADMAP_PROGRESS.md](plan/ROADMAP_PROGRESS.md) | Calendar-style phases (Week 1–41 style). |
 | [pm/ROADMAP.md](pm/ROADMAP.md) | Product phases aligned to releases **v1.0.0-rc1** through **v2.5.0**. |
-| [AGENTS.md](../AGENTS.md) | Official **milestones** (`v1.0.0-rc1` … `v2.5.0`) for issue/PR linkage. |
-| [TODO.md](../TODO.md) | Checkbox backlog (phases, PM setup, next actions). |
-| [STATUS.md](../STATUS.md) | Short operational headline and roadmap bullets. |
+| [development/roadmap.md](development/roadmap.md) | Product phases aligned to releases **v1.0.0-rc1** through **v2.5.0**. |
+| [plan/ROADMAP_PROGRESS.md](plan/ROADMAP_PROGRESS.md) | Calendar-style gantt chart. |
 
-If [TODO.md](../TODO.md) and [STATUS.md](../STATUS.md) diverge (e.g. tests or phase labels), treat that as a signal to **update one or both** in a dedicated docs pass—not as contradictory truth.
+If status sources diverge, treat that as a signal to **update** in a dedicated docs pass—not as contradictory truth.
 
 ---
 
@@ -101,10 +100,10 @@ These items are **signals for triage**, not an exhaustive audit. Verify in code 
 | Theme | Notes | Evidence |
 |-------|--------|----------|
 | **Vision vs codebase gap** | Historical deep review listed few validated scanners vs many generated candidates, scaffold AI integration, persistence gaps, and repo layout debt. | [plan/development_plan.md](plan/development_plan.md) §2 — *dated snapshot; re-validate.* |
-| **Low coverage bar** | CI allows reporting with `fail_under = 25`. | [pyproject.toml](../pyproject.toml) `[tool.coverage.report]` |
-| **Stub / TODO clusters** | Orchestration iterations and dev-crew scaffolding not fully wired. | [packages/cherenkov/dev_crew/scanner_generator.py](../packages/cherenkov/dev_crew/scanner_generator.py), [packages/cherenkov/orchestration/ai_workflows_orchestrator.py](../packages/cherenkov/orchestration/ai_workflows_orchestrator.py), [scripts/](../scripts/) swarm iteration scripts |
-| **Web entrypoint drift** | Multiple `cherenkov_web` entrypoints exist; behaviour (e.g. `debug`, `host`) may differ by path. Root [cherenkov_web.py](../cherenkov_web.py) calls `app.run(debug=True, host="0.0.0.0", port=5000)`; env-gated variants exist under `scripts/` and `src/`. **Reconcile or deprecate** after grep/usage audit. |
-| **Governance vs implementation** | Policy and architecture docs may outpace enforced controls in code (see risks). | [CHERENKOV_PREMORTEM.md](../CHERENKOV_PREMORTEM.md) |
+| **Low coverage bar** | CI allows reporting with `fail_under = 25`. | See `pyproject.toml` in repo root |
+| **Stub / TODO clusters** | Orchestration iterations and dev-crew scaffolding not fully wired. | See repo source tree |
+| **Web entrypoint drift** | Multiple `cherenkov_web` entrypoints exist. | See repo source tree |
+| **Governance vs implementation** | Policy and architecture docs may outpace enforced controls in code (see risks). | See architecture docs |
 
 ---
 
@@ -112,7 +111,7 @@ These items are **signals for triage**, not an exhaustive audit. Verify in code 
 
 From [pm/ROADMAP.md](pm/ROADMAP.md): delivering **parallel swarm orchestration**, **enterprise HITL/compliance**, **mobile exploitation stack**, and **ecosystem export (SARIF, CI)** while preserving **zero-egress** assurances—each phase increases operational and assurance burden.
 
-From [CHERENKOV_PREMORTEM.md](../CHERENKOV_PREMORTEM.md) summary (representative prevention themes):
+From the premortem analysis (representative prevention themes):
 
 | Failure mode | Preventive theme |
 |--------------|------------------|

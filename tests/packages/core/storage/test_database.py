@@ -45,3 +45,9 @@ def test_prune_old_scans_removes_stale_rows(db):
     assert deleted == 1
     assert get_scan("old-scan", path=db) is None
     assert get_scan("new-scan", path=db) is not None
+
+
+def test_get_scan_missing_record(db):
+    # Ensure that getting a scan that doesn't exist returns None
+    result = get_scan("non-existent-scan", path=db)
+    assert result is None

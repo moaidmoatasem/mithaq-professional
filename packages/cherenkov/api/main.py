@@ -159,6 +159,8 @@ async def v1_auth_me(current_user: AuthUser = Depends(get_current_user)) -> dict
 @v1.get("/audit")
 async def v1_audit_log(current_user: AuthUser = Depends(RoleChecker(Role.ADMIN))) -> list[dict]:
     """Return the CHERENKOV audit log. Requires ADMIN role."""
+    from cherenkov.core.storage.database import get_audit_log
+
     return get_audit_log(100)
 
 

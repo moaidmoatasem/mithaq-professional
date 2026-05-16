@@ -507,6 +507,20 @@ class Meissner(CircuitBreaker):
         super()._transition_to_open()
         self.fail_closed()
 
+        # Broadcast the state change
+        try:
+            from cherenkov.api.main import _broadcast
+
+            loop = asyncio.get_running_loop()
+            loop.create_task(
+                _broadcast(
+                    {"type": "circuit_breaker", "state": "OPEN", "reason": "threshold_exceeded"}
+                )
+            )
+        except (ImportError, RuntimeError):
+            # E.g. no event loop running, ignore
+            pass
+
     def _transition_to_closed(self) -> None:
         """Transition to CLOSED and restore network connectivity."""
         super()._transition_to_closed()

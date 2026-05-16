@@ -5,6 +5,7 @@ sys.path.insert(0, os.path.join(os.path.dirname(__file__), "..", "packages"))
 
 import pytest
 
+
 def pytest_runtest_setup(item):
     """Skip integration tests if using dummy API keys."""
     if "integration" in [mark.name for mark in item.iter_markers()]:

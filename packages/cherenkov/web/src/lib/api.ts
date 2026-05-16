@@ -5,10 +5,19 @@
  * In production builds, the static files are served by the FastAPI backend itself.
  */
 
-// In development, Vite proxies /api -> http://localhost:8000/api
+// In development, Vite proxies /api and /ws to http://127.0.0.1:8000.
 // In production, same-origin requests work directly.
 export const API_BASE = '/api/v1';
-export const WS_BASE = `ws://${window.location.hostname}:8000`;
+
+/**
+ * Derive the correct WebSocket base URL from the current origin.
+ * Vite's proxy forwards /ws → ws://127.0.0.1:8000 in dev,
+ * so we always use same-origin (no hard-coded port).
+ */
+export function getWsUrl(path: string = '/ws/live'): string {
+  const proto = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
+  return `${proto}//${window.location.host}${path}`;
+}
 
 export interface ScanRequestPayload {
   url: string;

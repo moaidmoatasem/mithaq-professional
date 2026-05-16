@@ -296,6 +296,50 @@ async def v1_scan(
     return result
 
 
+@v1.get("/reports/{scan_id}/sarif")
+async def v1_scan_report_sarif(scan_id: str) -> dict:
+    """Emit SARIF 2.1.0 JSON for a completed scan."""
+    from cherenkov.compliance import ComplianceMapper
+    from cherenkov.core.storage.database import get_scan
+
+    scan = get_scan(scan_id)
+    if not scan:
+        raise HTTPException(status_code=404, detail="Scan not found")
+
+    mapper = ComplianceMapper()
+    results = []
+
+    for finding in scan.get("findings", []):
+        cwe = finding.get("cwe", "CWE-Unknown")
+        compliance_tags = mapper.map_all(cwe)
+
+        # Format tags as strings for SARIF property bag
+        tags = []
+        for framework, controls in compliance_tags.items():
+            for control in controls:
+                tags.append(f"{framework}:{control}")
+
+        results.append(
+            {
+                "ruleId": finding.get("id", "finding-unknown"),
+                "message": {"text": finding.get("title", "No title")},
+                "level": finding.get("severity", "none").lower(),
+                "properties": {"cwe": cwe, "compliance": tags},
+            }
+        )
+
+    return {
+        "$schema": "https://schemastore.org/schemas/json/sarif-2.1.0.json",
+        "version": "2.1.0",
+        "runs": [
+            {
+                "tool": {"driver": {"name": "Cherenkov Scanner", "version": "1.1.0"}},
+                "results": results,
+            }
+        ],
+    }
+
+
 @v1.get("/scans/history")
 async def v1_scan_history() -> list[dict]:
     """Return recent scan results for the ThreatIntelPanel sidebar."""

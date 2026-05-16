@@ -45,6 +45,7 @@ from cherenkov.core.storage.database import (
     get_user,
     save_audit_entry,
 )
+from cherenkov.core.tokamak import Command, Tokamak
 from cherenkov.orchestration.orchestration_api import orchestrate_workflow
 from cherenkov.orchestration.result_persistence import ResultStore
 from cherenkov.orchestration.workflow_parser import load_workflow
@@ -243,30 +244,26 @@ async def v1_ablation_stats() -> dict:
 
 
 @v1.post("/sandbox/execute")
-async def v1_sandbox_execute(request: SandboxExecuteRequest) -> dict:
-    """Execute a payload in the Tokamak sandbox."""
-    import asyncio
-
-    from cherenkov.core.tokamak import Command, Tokamak
-
-    cmd = Command(payload=request.payload, timeout=request.timeout)
-
-    # Run synchronously in an executor to avoid blocking the loop
-    result = await asyncio.to_thread(Tokamak.execute, cmd)
-
+async def v1_sandbox_execute(
+    command: Command, current_user: AuthUser = Depends(RoleChecker(Role.OPERATOR))
+) -> dict:
+    """Execute a payload in the TOKAMAK sandbox. Requires OPERATOR role."""
+    result = await asyncio.to_thread(Tokamak.execute, command)
     return {
+        "status": "success",
         "stdout": result.stdout,
         "stderr": result.stderr,
         "trace_hash": result.trace_hash,
         "shred_receipt": result.shred_receipt,
         "exit_code": result.exit_code,
+        "duration_ms": result.duration_ms,
     }
 
 
 @v1.get("/sandbox/status")
-async def v1_sandbox_status() -> dict:
-    """Return the status of the Tokamak sandbox."""
-    return {"status": "ready"}
+async def v1_sandbox_status(current_user: AuthUser = Depends(get_current_user)) -> dict:
+    """Return the status of the TOKAMAK sandbox."""
+    return {"status": "operational", "containers_active": 0}
 
 
 @v1.post("/scan")
@@ -398,7 +395,6 @@ async def v1_scan_report_pdf(scan_id: str) -> FileResponse:
             "<b>Compliance Frameworks:</b> OWASP Top 10, SAMA CSF, EGY-FIN CSF, DORA",
             styles["Normal"],
         )
-    )
     )
     elements.append(Spacer(1, 0.3 * inch))
 

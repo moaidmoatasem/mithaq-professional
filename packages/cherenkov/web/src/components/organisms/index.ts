@@ -6,5 +6,6 @@ export * from './NodeStatusRow';
 export * from './AblationMeter';
 export * from './QueueDepthSparkline';
 export * from './NewScanForm';
+export * from './AssistantWidget';
 
 

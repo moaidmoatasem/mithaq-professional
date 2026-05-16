@@ -3,7 +3,7 @@ import { MainLayout } from './components/templates/MainLayout';
 import { ForensicHeader } from './components/organisms/ForensicHeader';
 import { TacticalOperationsPanel } from './components/organisms/TacticalOperationsPanel';
 import { ThreatIntelPanel } from './components/organisms/ThreatIntelPanel';
-import { LogoKit } from './components/organisms';
+import { LogoKit, AssistantWidget } from './components/organisms';
 import { AnimatePresence } from 'motion/react';
 
 export default function App() {
@@ -24,6 +24,9 @@ export default function App() {
 
       {/* Global LogoKit Trigger Keyboard Shortcut */}
       <LogoKitTrigger onTrigger={() => setShowLogoKit(true)} />
+
+      {/* AI Studio Assistant Integration */}
+      <AssistantWidget />
     </>
   );
 }

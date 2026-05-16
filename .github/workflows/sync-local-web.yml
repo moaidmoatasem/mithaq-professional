@@ -1,0 +1,69 @@
+name: Sync Web Frontend → cherenkov-local-web
+
+# Fires on every push to main that touches the React frontend
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'packages/cherenkov/web/src/**'
+      - 'packages/cherenkov/web/index.html'
+      - 'packages/cherenkov/web/vite.config.ts'
+      - 'packages/cherenkov/web/package.json'
+      - 'packages/cherenkov/web/tsconfig*.json'
+
+env:
+  FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
+  SRC_DIR: packages/cherenkov/web
+
+jobs:
+  sync-to-local-web:
+    name: Mirror frontend to cherenkov-local-web
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout cherenkov-professional (source)
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 1
+
+      - name: Checkout cherenkov-local-web (target)
+        uses: actions/checkout@v4
+        with:
+          repository: moaidmoatasem/cherenkov-local-web
+          token: ${{ secrets.SYNC_PAT }}
+          path: _local_web
+          fetch-depth: 1
+
+      # Overwrite src/ with the canonical source from cherenkov-professional
+      - name: Sync src/ directory
+        run: |
+          rsync -av --delete \
+            $SRC_DIR/src/ \
+            _local_web/src/
+
+      # Also sync root-level config files if they changed
+      - name: Sync root config files
+        run: |
+          for f in index.html vite.config.ts tsconfig.json tsconfig.app.json tsconfig.node.json; do
+            if [ -f "$SRC_DIR/$f" ]; then
+              cp "$SRC_DIR/$f" "_local_web/$f"
+              echo "Synced $f"
+            fi
+          done
+
+      - name: Commit and push to cherenkov-local-web
+        working-directory: _local_web
+        env:
+          COMMIT_SHA: ${{ github.sha }}
+          COMMIT_MSG: ${{ github.event.head_commit.message }}
+        run: |
+          git config user.name  "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add -A
+          if git diff --cached --quiet; then
+            echo "No frontend changes to sync."
+          else
+            git commit -m "sync(web): ${COMMIT_MSG} (from cherenkov-professional@${COMMIT_SHA:0:7})"
+            git push
+            echo "Synced to cherenkov-local-web ✓"
+          fi

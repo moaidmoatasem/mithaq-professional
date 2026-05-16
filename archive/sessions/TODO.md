@@ -33,8 +33,8 @@ Issues: #21, #22, #23, #24, #25, #88, #89, #90, #91, #102
 - [ ] #88 HTTP Client for Groq/Gemini
 - [ ] #89 APKTool Wrapper for Mobile Scanning
 - [ ] #90 Androguard Integration
-- [ ] #91 Replace print() with logging in scanners
-- [ ] #102 Wire CI Pipeline (lint, typecheck, test)
+- [x] #91 Replace print() with logging in scanners
+- [x] #102 Wire CI Pipeline (lint, typecheck, test)
 
 ## v1.5.0 — Enterprise Validation & HITL (Milestone 6)
 Issues: #93, #94, #95, #96
@@ -66,5 +66,5 @@ Issues: #100, #101
 - [x] AGENTS.md updated with PM lifecycle
 
 ## Technical Debt / Quick Wins
-- [ ] #91 Replace `print()` calls in scanners with logging
-- [ ] #102 Wire CI pipeline (GitHub Actions: lint, typecheck, test)
+- [x] #91 Replace `print()` calls in scanners with logging
+- [x] #102 Wire CI pipeline (GitHub Actions: lint, typecheck, test)

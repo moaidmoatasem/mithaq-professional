@@ -54,7 +54,7 @@ services:
     restart: unless-stopped
     command: tail -f /dev/null
 
-  # Web Dashboard
+  # Web Dashboard — now served by FastAPI (Flask retired)
   dashboard:
     build:
       context: .
@@ -64,11 +64,12 @@ services:
       - scanner
       - ollama
     ports:
-      - "5000:5000"
+      - "8000:8000"
     volumes:
       - ./output:/app/output
     environment:
-      - FLASK_ENV=production
+      - cherenkov_API_HOST=0.0.0.0
+      - cherenkov_API_PORT=8000
       - OLLAMA_BASE_URL=http://ollama:11434
     networks:
       - cherenkov-net
@@ -78,7 +79,7 @@ services:
           cpus: '1'
           memory: 512M
     restart: unless-stopped
-    command: python cherenkov_web.py
+    command: uvicorn cherenkov.api.main:app --host 0.0.0.0 --port 8000
 
   # Redis Cache (for scan results)
   redis:
@@ -108,6 +109,20 @@ services:
     networks:
       - cherenkov-net
     restart: unless-stopped
+
+  # Kali TOKAMAK (air-gapped ephemeral PoC container)
+  tokamak:
+    image: kalilinux/kali-rolling
+    container_name: cherenkov-tokamak
+    network_mode: none
+    read_only: true
+    tmpfs:
+      - /tmp
+    cap_drop:
+      - ALL
+    security_opt:
+      - no-new-privileges
+    restart: "no"
 
 networks:
   cherenkov-net:

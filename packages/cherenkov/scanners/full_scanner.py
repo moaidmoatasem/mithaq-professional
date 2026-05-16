@@ -4,6 +4,7 @@ Enhanced cherenkov Scanner with more checks
 """
 
 import asyncio
+import logging
 from datetime import datetime
 from typing import List, Optional
 
@@ -12,6 +13,8 @@ import requests
 from cherenkov.core.base_scanner import Finding, ScanResult, Severity
 
 from .header_scanner import SimpleScanner
+
+logger = logging.getLogger(__name__)
 
 
 class FullScanner(SimpleScanner):
@@ -27,7 +30,7 @@ class FullScanner(SimpleScanner):
 
     def scan_cors(self, findings_list: List[Finding]):
         """Check CORS configuration"""
-        print("\n[*] Checking CORS configuration")
+        logger.info("[*] Checking CORS configuration")
 
         try:
             headers = {"Origin": "https://evil.com"}
@@ -52,17 +55,17 @@ class FullScanner(SimpleScanner):
                             remediation="Restrict CORS to trusted origins only.",
                         )
                     )
-                    print("  [!] CORS allows ANY origin (*)")
+                    logger.warning("  [!] CORS allows ANY origin (*)")
                 else:
-                    print(f"  [✓] CORS configured: {origin}")
+                    logger.info("  [✓] CORS configured: %s", origin)
             else:
-                print("  [✓] CORS not enabled")
+                logger.info("  [✓] CORS not enabled")
         except Exception as e:
-            print(f"  [!] Error: {e}")
+            logger.error("  [!] Error: %s", e)
 
     def scan_cookies(self, findings_list: List[Finding]):
         """Check cookie security"""
-        print("\n[*] Checking cookie security")
+        logger.info("[*] Checking cookie security")
 
         try:
             response = requests.get(self.target, timeout=10)
@@ -86,7 +89,7 @@ class FullScanner(SimpleScanner):
                             remediation="Add the Secure flag to cookies.",
                         )
                     )
-                    print("  [!] Cookies missing Secure flag")
+                    logger.warning("  [!] Cookies missing Secure flag")
 
                 if "HttpOnly" not in cookies:
                     vuln = {
@@ -104,18 +107,18 @@ class FullScanner(SimpleScanner):
                             remediation="Add the HttpOnly flag to cookies.",
                         )
                     )
-                    print("  [!] Cookies missing HttpOnly flag")
+                    logger.warning("  [!] Cookies missing HttpOnly flag")
 
                 if "SameSite" not in cookies:
-                    print("  [!] Cookies missing SameSite attribute")
+                    logger.warning("  [!] Cookies missing SameSite attribute")
             else:
-                print("  [✓] No cookies set")
+                logger.info("  [✓] No cookies set")
         except Exception as e:
-            print(f"  [!] Error: {e}")
+            logger.error("  [!] Error: %s", e)
 
     def scan_server_info(self, findings_list: List[Finding]):
         """Check for information disclosure"""
-        print("\n[*] Checking for information disclosure")
+        logger.info("[*] Checking for information disclosure")
 
         try:
             response = requests.get(self.target, timeout=10)
@@ -137,9 +140,9 @@ class FullScanner(SimpleScanner):
                         remediation="Remove or obfuscate the Server header.",
                     )
                 )
-                print(f"  [!] Server header exposed: {server}")
+                logger.warning("  [!] Server header exposed: %s", server)
             else:
-                print("  [✓] Server header hidden")
+                logger.info("  [✓] Server header hidden")
 
             if "X-Powered-By" in response.headers:
                 powered = response.headers["X-Powered-By"]
@@ -158,11 +161,11 @@ class FullScanner(SimpleScanner):
                         remediation="Remove or obfuscate the X-Powered-By header.",
                     )
                 )
-                print(f"  [!] X-Powered-By exposed: {powered}")
+                logger.warning("  [!] X-Powered-By exposed: %s", powered)
             else:
-                print("  [✓] X-Powered-By header hidden")
+                logger.info("  [✓] X-Powered-By header hidden")
         except Exception as e:
-            print(f"  [!] Error: {e}")
+            logger.error("  [!] Error: %s", e)
 
     async def scan(self, target: str, timeout: float = 10.0) -> ScanResult:
         """Implement BaseScanner async scan method"""
@@ -196,9 +199,9 @@ class FullScanner(SimpleScanner):
 
     def run(self):
         """Run all scans including new ones"""
-        print("=" * 70)
-        print("🔍 cherenkov FULL SECURITY SCANNER")
-        print("=" * 70)
+        logger.info("=" * 70)
+        logger.info("🔍 cherenkov FULL SECURITY SCANNER")
+        logger.info("=" * 70)
 
         findings = []
         self.scan_security_headers(findings)

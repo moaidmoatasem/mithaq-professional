@@ -31,8 +31,7 @@ class SlackDiscordConnector:
         self.slack_enabled = False
         self.discord_enabled = False
 
-    @staticmethod
-    def parse_integrations(environ):
+    def parse_integrations(self, environ):
         """
         PARSES the integration configurations specified in environment variables.
 
@@ -44,12 +43,12 @@ class SlackDiscordConnector:
 
         """
         # Check for SLACK_API_TOKEN configuration
-        slack_configured = "SLACK_API_TOKEN" in os.environ and os.environ["SLACK_API_TOKEN"] != ""
-        self.slpack_enabled = slack_configured
+        slack_configured = "SLACK_API_TOKEN" in environ and environ["SLACK_API_TOKEN"] != ""
+        self.slack_enabled = slack_configured
 
         # Check for DISCORD_WEBHOOK_URL configuration
         discord_configured = (
-            "DISCORD_WEBHOOK_URL" in os.environ and os.environ["DISCORD_WEBHOOK_URL"] != ""
+            "DISCORD_WEBHOOK_URL" in environ and environ["DISCORD_WEBHOOK_URL"] != ""
         )
         self.discord_enabled = discord_configured
 
@@ -64,10 +63,10 @@ class SlackDiscordConnector:
             A boolean indicating if at least one integration is enabled.
 
         """
-        # Initialize parse_integraions for env vars and update internal state
+        # Initialize parse_integrations for env vars and update internal state
         self.parse_integrations(os.environ)
 
-        return self.slpack_enabled or self.discord_enabled
+        return self.slack_enabled or self.discord_enabled
 
     def check_status(self):
         """

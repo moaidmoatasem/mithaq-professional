@@ -3,11 +3,14 @@ XSS Scanner - Refined Version
 Detects Cross-Site Scripting vulnerabilities
 """
 
+import logging
 import re
 from typing import Dict, List
 from urllib.parse import parse_qs, urlencode, urlparse, urlunparse
 
 import requests
+
+logger = logging.getLogger(__name__)
 
 
 class XSSScanner:
@@ -29,14 +32,14 @@ class XSSScanner:
 
     def scan_reflected_xss(self) -> List[Dict]:
         """Test for reflected XSS in URL parameters"""
-        print(f"[*] Scanning for reflected XSS: {self.target}")
+        logger.info("[*] Scanning for reflected XSS: %s", self.target)
 
         try:
             parsed = urlparse(self.target)
             params = parse_qs(parsed.query)
 
             if not params:
-                print("  [!] No parameters found to test")
+                logger.info("  [!] No parameters found to test")
                 return []
 
             # Test each parameter with XSS payloads
@@ -58,15 +61,15 @@ class XSSScanner:
                                 "description": f"XSS payload reflected in parameter: {param_name}",
                             }
                             self.vulnerabilities.append(vuln)
-                            print(f"  [!] FOUND XSS in parameter: {param_name}")
+                            logger.warning("  [!] FOUND XSS in parameter: %s", param_name)
                             break  # One payload is enough per parameter
 
                     except requests.RequestException as e:
-                        print(f"  [!] Request failed: {e}")
+                        logger.error("  [!] Request failed: %s", e)
                         continue
 
         except Exception as e:
-            print(f"  [!] Error: {e}")
+            logger.error("  [!] Error: %s", e)
 
         return self.vulnerabilities
 
@@ -83,7 +86,7 @@ class XSSScanner:
 
     def scan_dom_xss(self) -> List[Dict]:
         """Check for DOM-based XSS indicators"""
-        print("[*] Checking for DOM XSS indicators")
+        logger.info("[*] Checking for DOM XSS indicators")
 
         try:
             response = requests.get(self.target, timeout=10)
@@ -106,18 +109,18 @@ class XSSScanner:
                         "description": f"Dangerous JavaScript pattern found: {pattern}",
                     }
                     self.vulnerabilities.append(vuln)
-                    print(f"  [!] Found dangerous pattern: {pattern}")
+                    logger.warning("  [!] Found dangerous pattern: %s", pattern)
 
         except Exception as e:
-            print(f"  [!] Error: {e}")
+            logger.error("  [!] Error: %s", e)
 
         return self.vulnerabilities
 
     def run(self) -> Dict:
         """Run all XSS scans"""
-        print("\n" + "=" * 70)
-        print("🔍 XSS VULNERABILITY SCANNER")
-        print("=" * 70)
+        logger.info("\n" + "=" * 70)
+        logger.info("🔍 XSS VULNERABILITY SCANNER")
+        logger.info("=" * 70)
 
         self.scan_reflected_xss()
         self.scan_dom_xss()
@@ -138,6 +141,7 @@ def scan_xss(url: str) -> Dict:
 if __name__ == "__main__":
     import sys
 
+    logging.basicConfig(level=logging.INFO, format="%(levelname)s: %(message)s")
     if len(sys.argv) > 1:
         result = scan_xss(sys.argv[1])
-        print(f"\n✅ Scan complete. Found {result['count']} potential XSS vulnerabilities")
+        logger.info("\n✅ Scan complete. Found %d potential XSS vulnerabilities", result["count"])

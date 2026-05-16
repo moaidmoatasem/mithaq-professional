@@ -36,7 +36,7 @@
 | Milestone | Issues | Status |
 |---|---|---|
 | v1.0.0-rc1 — Sovereign Foundation | #16-#20 | 2 done, 3 in progress |
-| v1.1.0 — Swarm Concurrency | #21-#25, #88-#91, #102 | 10 open |
+| v1.1.0 — Swarm Concurrency | #21-#25, #88-#91, #102 | 2 done, 8 open |
 | v1.5.0 — Enterprise Validation & HITL | #93-#96 | 4 open |
 | v2.0.0 — Mobile Triad | #97-#99 | 3 open |
 | v2.5.0 — Ecosystem Integration | #100-#101 | 2 open |
@@ -66,6 +66,8 @@ packages/cherenkov/
 ## Next Steps
 - [x] Complete v1.0.0-rc1 issues (#18 Sanitization Bridge, #19 Trace Schema, #20 Trace Recorder)
 - [x] v1.0.0-rc1 Sovereign Foundation is now COMPLETE.
-- [ ] Start v1.1.0 backlog (HTTP client, mobile scanners, CI pipeline)
+- [ ] Start v1.1.0 backlog (HTTP client, mobile scanners)
+- [x] Wire CI Pipeline (lint, typecheck, test) (#102)
+- [x] Replace print() with logging in scanners (#91)
 
 **Status:** READY FOR DEVELOPMENT

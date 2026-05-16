@@ -1,7 +1,12 @@
 import json
+import logging
 import sqlite3
 from datetime import datetime, timedelta, timezone
 from pathlib import Path
+
+from cherenkov.core.exceptions import StorageError
+
+logger = logging.getLogger(__name__)
 
 _DB_PATH = Path.home() / ".cherenkov" / "results.db"
 
@@ -45,17 +50,22 @@ def save_scan(
     finished_at: str | None = None,
     path: Path = _DB_PATH,
 ) -> None:
+    # WORM enforcement: scan records are forensic evidence and must never be overwritten.
+    # Raise StorageError if a record with this scan_id already exists.
     now = datetime.now(timezone.utc).isoformat()
     with _connect(path) as conn:
+        existing = conn.execute("SELECT 1 FROM scans WHERE scan_id = ?", (scan_id,)).fetchone()
+        if existing is not None:
+            logger.error(
+                "WORM violation: attempted overwrite of immutable scan record scan_id=%s", scan_id
+            )
+            raise StorageError(
+                f"WORM violation: scan record '{scan_id}' already exists and cannot be overwritten."
+            )
         conn.execute(
             """
             INSERT INTO scans (scan_id, target, started_at, finished_at, status, findings, meta)
             VALUES (?, ?, ?, ?, ?, ?, ?)
-            ON CONFLICT(scan_id) DO UPDATE SET
-                finished_at = excluded.finished_at,
-                status      = excluded.status,
-                findings    = excluded.findings,
-                meta        = excluded.meta
             """,
             (
                 scan_id,

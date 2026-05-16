@@ -3,10 +3,13 @@ Open Redirect Scanner - New Implementation
 Detects open redirect vulnerabilities
 """
 
+import logging
 from typing import Dict, List
 from urllib.parse import parse_qs, urlencode, urlparse, urlunparse
 
 import requests
+
+logger = logging.getLogger(__name__)
 
 
 class OpenRedirectScanner:
@@ -26,7 +29,7 @@ class OpenRedirectScanner:
 
     def scan_redirect_parameters(self) -> List[Dict]:
         """Test URL parameters for open redirects"""
-        print(f"[*] Scanning for open redirect: {self.target}")
+        logger.info("[*] Scanning for open redirect: %s", self.target)
 
         try:
             parsed = urlparse(self.target)
@@ -50,7 +53,7 @@ class OpenRedirectScanner:
             found_params = [p for p in redirect_params if p in params]
 
             if not found_params:
-                print("  [!] No redirect parameters found")
+                logger.info("  [!] No redirect parameters found")
                 return []
 
             # Test each redirect parameter
@@ -75,15 +78,15 @@ class OpenRedirectScanner:
                                     "description": f"Open redirect in parameter: {param}",
                                 }
                                 self.vulnerabilities.append(vuln)
-                                print(f"  [!] FOUND open redirect in: {param}")
+                                logger.warning("  [!] FOUND open redirect in: %s", param)
                                 break
 
                     except requests.RequestException as e:
-                        print(f"  [!] Request failed: {e}")
+                        logger.error("  [!] Request failed: %s", e)
                         continue
 
         except Exception as e:
-            print(f"  [!] Error: {e}")
+            logger.error("  [!] Error: %s", e)
 
         return self.vulnerabilities
 
@@ -100,9 +103,9 @@ class OpenRedirectScanner:
 
     def run(self) -> Dict:
         """Run open redirect scan"""
-        print("\n" + "=" * 70)
-        print("🔍 OPEN REDIRECT SCANNER")
-        print("=" * 70)
+        logger.info("\n" + "=" * 70)
+        logger.info("🔍 OPEN REDIRECT SCANNER")
+        logger.info("=" * 70)
 
         self.scan_redirect_parameters()
 
@@ -122,6 +125,7 @@ def scan_open_redirect(url: str) -> Dict:
 if __name__ == "__main__":
     import sys
 
+    logging.basicConfig(level=logging.INFO, format="%(levelname)s: %(message)s")
     if len(sys.argv) > 1:
         result = scan_open_redirect(sys.argv[1])
-        print(f"\n✅ Scan complete. Found {result['count']} open redirect vulnerabilities")
+        logger.info("\n✅ Scan complete. Found %d open redirect vulnerabilities", result["count"])

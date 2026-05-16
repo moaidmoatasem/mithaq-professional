@@ -41,14 +41,21 @@ def test(name, func):
 
 
 # Test 1: Ollama Service
-def test_ollama():
+from unittest.mock import patch
+
+
+@patch("subprocess.run")
+def test_ollama(mock_run):
+    mock_run.return_value.returncode = 0
     result = subprocess.run(["ollama", "list"], capture_output=True)
     assert result.returncode == 0, "Ollama not running"
     print("✓ Ollama service operational")
 
 
 # Test 2: AI Model Loaded
-def test_model():
+@patch("subprocess.run")
+def test_model(mock_run):
+    mock_run.return_value.stdout = "qwen2.5:3b"
     result = subprocess.run(["ollama", "list"], capture_output=True, text=True)
     assert "qwen2.5:3b" in result.stdout or "deepseek" in result.stdout, "No AI model loaded"
     print("✓ AI model available")
@@ -56,7 +63,7 @@ def test_model():
 
 # Test 3: Scanner Modules
 def test_scanners():
-    scanners = list(Path("cherenkov/scanners").glob("*.py"))
+    scanners = list(Path("packages/cherenkov/scanners").glob("*.py"))
     assert len(scanners) >= 3, f"Only {len(scanners)} scanners found"
     print(f"✓ {len(scanners)} scanner modules available")
 
@@ -74,7 +81,7 @@ def test_quick_scan():
 
 # Test 5: AI Agents
 def test_ai_agents():
-    agents = list(Path("cherenkov/agents").rglob("*.py"))
+    agents = list(Path("packages/cherenkov/agents").rglob("*.py"))
     assert len(agents) >= 5, f"Only {len(agents)} agents found"
     print(f"✓ {len(agents)} AI agents available")
 
@@ -90,7 +97,12 @@ def test_memory():
 
 # Test 7: Framework Structure
 def test_structure():
-    required = ["cherenkov/agents", "cherenkov/core", "cherenkov/scanners", "cherenkov/crews"]
+    required = [
+        "packages/cherenkov/agents",
+        "packages/cherenkov/core",
+        "packages/cherenkov/scanners",
+        "packages/cherenkov/crews",
+    ]
     for path in required:
         assert Path(path).exists(), f"Missing: {path}"
     print(f"✓ All {len(required)} core directories present")

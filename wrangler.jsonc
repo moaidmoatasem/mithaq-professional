@@ -1,7 +1,7 @@
 {
-  "$schema": "node_modules/wrangler/config-schema.json",
+  "$schema": "https://unpkg.com/wrangler@3/config-schema.json",
   "name": "cherenkov-professional",
-  "compatibility_date": "2026-05-08",
+  "compatibility_date": "2026-05-13",
   "observability": {
     "enabled": true
   },

@@ -88,7 +88,16 @@ class AblationTelemetry:
 
 _PATTERNS: list[tuple[str, re.Pattern, str]] = [
     ("aws_key", re.compile(r"AKIA[0-9A-Z]{16}"), "[AWS_KEY_REDACTED]"),
-    ("aws_sec", re.compile(r"[0-9a-zA-Z/+]{40}"), "[AWS_SECRET_REDACTED]"),
+    # Narrowed: require context keyword before the 40-char secret value.
+    # The previous bare r"[0-9a-zA-Z/+]{40}" matched SHA hashes, base64 chunks,
+    # and other innocuous alphanumeric sequences, causing ~68% false-drop rate.
+    (
+        "aws_sec",
+        re.compile(
+            r"(?i)(aws_secret_access_key|aws_secret|secret_access_key)\s*[:=]\s*[0-9a-zA-Z/+]{40}"
+        ),
+        "[AWS_SECRET_REDACTED]",
+    ),
     (
         "generic_key",
         re.compile(r"(?i)(api[_-]?key|secret|token)\s*[:=]\s*\S+"),

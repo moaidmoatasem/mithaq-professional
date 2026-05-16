@@ -21,6 +21,11 @@ if ! command -v docker-compose &> /dev/null && ! docker compose version &> /dev/
     exit 1
 fi
 
+DOCKER_COMPOSE_CMD="docker compose"
+if command -v docker-compose &> /dev/null; then
+    DOCKER_COMPOSE_CMD="docker-compose"
+fi
+
 echo "✅ Docker Compose found"
 echo ""
 
@@ -29,20 +34,26 @@ mkdir -p results
 
 # Start all services
 echo "🐳 Starting all cherenkov NEXUS services..."
-docker-compose up -d
+$DOCKER_COMPOSE_CMD up -d
 
 echo ""
 echo "⏳ Waiting for services to start (30 seconds)..."
 sleep 30
 
+# Find the Ollama container name dynamically based on docker-compose project name
+OLLAMA_CONTAINER=$($DOCKER_COMPOSE_CMD ps -q ollama 2>/dev/null || echo "cherenkov-ollama")
+if [ -z "$OLLAMA_CONTAINER" ]; then
+    OLLAMA_CONTAINER="cherenkov-ollama"
+fi
+
 # Download AI models
 echo ""
 echo "📥 Downloading AI models (this may take 5-10 minutes)..."
 echo "   Model 1: DeepSeek-R1 1.5B (fast, efficient)..."
-docker exec cherenkov-ollama ollama pull deepseek-r1:1.5b
+docker exec $OLLAMA_CONTAINER ollama pull deepseek-r1:1.5b || echo "Failed to pull DeepSeek-R1. Please check if ollama is running."
 
 echo "   Model 2: Qwen 2.5 3B (better reasoning)..."
-docker exec cherenkov-ollama ollama pull qwen2.5:3b
+docker exec $OLLAMA_CONTAINER ollama pull qwen2.5:3b || echo "Failed to pull Qwen 2.5 3B. Please check if ollama is running."
 
 echo ""
 echo "================================================================"

@@ -1,0 +1,270 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>CHERENKOV — The Forensic Reveal</title>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    :root {
+      --obsidian:  #0B0D0F;
+      --cobalt:    #2F5F8A;
+      --bismuth:   #7B4BFF;
+      --electric:  #00A3FF;
+      --surface:   #131619;
+      --surface2:  #1C2026;
+      --border:    #2A2F38;
+      --text:      #C8D4E0;
+      --dim:       #5A6578;
+      --critical:  #FF3B3B;
+      --high:      #FF8C00;
+      --medium:    #FFD600;
+      --low:       #00E5A0;
+      --info:      #00A3FF;
+    }
+    body {
+      background: var(--obsidian);
+      color: var(--text);
+      font-family: 'Courier New', monospace;
+      min-height: 100vh;
+      padding: 2rem 1rem;
+    }
+    header {
+      text-align: center;
+      margin-bottom: 2.5rem;
+      border-bottom: 1px solid var(--border);
+      padding-bottom: 1.5rem;
+    }
+    header h1 {
+      font-size: 1.8rem;
+      letter-spacing: 0.3em;
+      color: var(--electric);
+      text-transform: uppercase;
+    }
+    header p { color: var(--dim); font-size: 0.8rem; margin-top: 0.4rem; letter-spacing: 0.15em; }
+    .card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 4px;
+      padding: 1.5rem;
+      max-width: 900px;
+      margin: 0 auto 1.5rem auto;
+    }
+    .card h2 {
+      font-size: 0.75rem;
+      letter-spacing: 0.2em;
+      text-transform: uppercase;
+      color: var(--cobalt);
+      margin-bottom: 1rem;
+    }
+    .scan-row { display: flex; gap: 0.75rem; align-items: center; }
+    #url-input {
+      flex: 1;
+      background: var(--surface2);
+      border: 1px solid var(--border);
+      color: var(--text);
+      padding: 0.6rem 0.9rem;
+      font-family: inherit;
+      font-size: 0.9rem;
+      border-radius: 3px;
+      outline: none;
+    }
+    #url-input:focus { border-color: var(--electric); }
+    button {
+      background: var(--bismuth);
+      color: #fff;
+      border: none;
+      padding: 0.6rem 1.4rem;
+      font-family: inherit;
+      font-size: 0.85rem;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      border-radius: 3px;
+      cursor: pointer;
+      white-space: nowrap;
+    }
+    button:hover { background: #6a3de8; }
+    button:disabled { opacity: 0.45; cursor: not-allowed; }
+    #status-bar {
+      font-size: 0.75rem;
+      color: var(--dim);
+      margin-top: 0.75rem;
+      min-height: 1rem;
+    }
+    #status-bar.running { color: var(--electric); }
+    #status-bar.error   { color: var(--critical); }
+    #results-card { display: none; }
+    .meta-row {
+      display: flex;
+      gap: 2rem;
+      margin-bottom: 1rem;
+      font-size: 0.78rem;
+      color: var(--dim);
+    }
+    .meta-row span b { color: var(--text); }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 0.82rem;
+    }
+    th {
+      text-align: left;
+      padding: 0.5rem 0.75rem;
+      font-size: 0.68rem;
+      letter-spacing: 0.15em;
+      text-transform: uppercase;
+      color: var(--dim);
+      border-bottom: 1px solid var(--border);
+    }
+    td {
+      padding: 0.6rem 0.75rem;
+      border-bottom: 1px solid var(--border);
+      vertical-align: top;
+    }
+    tr:last-child td { border-bottom: none; }
+    .sev {
+      display: inline-block;
+      padding: 0.15rem 0.5rem;
+      border-radius: 2px;
+      font-size: 0.7rem;
+      font-weight: bold;
+      letter-spacing: 0.05em;
+    }
+    .sev.CRITICAL { background: var(--critical);  color: #fff; }
+    .sev.HIGH     { background: var(--high);      color: #000; }
+    .sev.MEDIUM   { background: var(--medium);    color: #000; }
+    .sev.LOW      { background: var(--low);       color: #000; }
+    .sev.INFO     { background: var(--info);      color: #fff; }
+    .empty-state {
+      text-align: center;
+      padding: 2rem;
+      color: var(--low);
+      font-size: 0.85rem;
+      letter-spacing: 0.1em;
+    }
+    .trace-id {
+      font-size: 0.7rem;
+      color: var(--dim);
+      margin-top: 1rem;
+      text-align: right;
+      letter-spacing: 0.05em;
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <h1>&#x25C6; CHERENKOV</h1>
+    <p>THE FORENSIC REVEAL &nbsp;|&nbsp; SOVEREIGN SECURITY</p>
+  </header>
+
+  <div class="card">
+    <h2>&#x25B6; Illuminate Target</h2>
+    <div class="scan-row">
+      <input id="url-input" type="text" placeholder="https://target.example.com" autocomplete="off" />
+      <button id="scan-btn" onclick="startScan()">Illuminate</button>
+    </div>
+    <div id="status-bar"></div>
+  </div>
+
+  <div class="card" id="results-card">
+    <h2>&#x25C8; Cherenkov Trace</h2>
+    <div class="meta-row" id="meta-row"></div>
+    <div id="results-body"></div>
+    <div class="trace-id" id="trace-id"></div>
+  </div>
+
+  <script>
+    /* escapeHtml — all server data MUST pass through this before innerHTML */
+    function escapeHtml(s) {
+      if (s === null || s === undefined) return '';
+      return String(s)
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;')
+        .replace(/'/g, '&#039;');
+    }
+
+    async function startScan() {
+      const urlInput = document.getElementById('url-input');
+      const btn      = document.getElementById('scan-btn');
+      const statusEl = document.getElementById('status-bar');
+      const url = urlInput.value.trim();
+
+      if (!url) { statusEl.textContent = 'Enter a target URL first.'; return; }
+
+      btn.disabled = true;
+      statusEl.className = 'running';
+      statusEl.textContent = '⟳ Illuminating target — standby...';
+      document.getElementById('results-card').style.display = 'none';
+
+      try {
+        const resp = await fetch('/api/scan', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ url }),
+        });
+
+        if (!resp.ok) {
+          const err = await resp.json().catch(() => ({ detail: resp.statusText }));
+          throw new Error(err.detail || resp.statusText);
+        }
+
+        const data = await resp.json();
+        renderTrace(data);
+        statusEl.className = '';
+        statusEl.textContent = '';
+      } catch (err) {
+        statusEl.className = 'error';
+        statusEl.textContent = '✖ ' + escapeHtml(String(err));
+      } finally {
+        btn.disabled = false;
+      }
+    }
+
+    function renderTrace(data) {
+      const card    = document.getElementById('results-card');
+      const metaEl  = document.getElementById('meta-row');
+      const bodyEl  = document.getElementById('results-body');
+      const traceEl = document.getElementById('trace-id');
+
+      const vulns = Array.isArray(data.vulnerabilities) ? data.vulnerabilities : [];
+
+      metaEl.innerHTML =
+        '<span>Target: <b>' + escapeHtml(data.target) + '</b></span>' +
+        '<span>Anomalies: <b>' + escapeHtml(vulns.length) + '</b></span>' +
+        '<span>Timestamp: <b>' + escapeHtml(data.timestamp || '') + '</b></span>';
+
+      if (vulns.length === 0) {
+        bodyEl.innerHTML = '<div class="empty-state">&#x2714; No anomalies isolated.</div>';
+      } else {
+        let rows = '';
+        vulns.forEach(v => {
+          const sev = escapeHtml(v.severity || 'INFO').toUpperCase();
+          rows +=
+            '<tr>' +
+            '<td><span class="sev ' + sev + '">' + sev + '</span></td>' +
+            '<td>' + escapeHtml(v.type || v.title || '') + '</td>' +
+            '<td>' + escapeHtml(v.description || '') + '</td>' +
+            '</tr>';
+        });
+        bodyEl.innerHTML =
+          '<table>' +
+          '<thead><tr><th>Severity</th><th>Anomaly</th><th>Description</th></tr></thead>' +
+          '<tbody>' + rows + '</tbody>' +
+          '</table>';
+      }
+
+      traceEl.textContent = 'scan_id: ' + (data.scan_id || '—');
+      card.style.display = 'block';
+    }
+
+    /* Allow Enter key to trigger scan */
+    document.addEventListener('DOMContentLoaded', () => {
+      document.getElementById('url-input').addEventListener('keydown', e => {
+        if (e.key === 'Enter') startScan();
+      });
+    });
+  </script>
+</body>
+</html>

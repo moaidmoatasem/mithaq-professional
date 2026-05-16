@@ -10,7 +10,7 @@
 ## 🚀 Features Completed
 
 ### Repository Alignment & Rebranding
-- [x] Renamed repository from `mithaq-professional` to `cherenkov-professional` (Local files updated, manual folder rename instructed).
+- [x] Repository fully rebranded to `cherenkov-professional` (Local files updated, manual folder rename instructed).
 - [x] Global string replacement in `CITATION.cff`, `Dockerfile`, `.env.example`, and metadata files.
 - [x] Aligned documentation terminology (MEISSNER, ABLATION, TOKAMAK).
 
@@ -39,7 +39,7 @@
 ## 🎯 Technical Highlights
 - **Seamless Provider Switching**: The orchestrator can now switch between Groq (Llama 3.3) and Gemini (1.5 Flash) with a simple config change.
 - **Fail-Closed Logic**: Maintained strict data redaction (ABLATION) and zero-egress verification (MEISSNER) during refactoring.
-- **Atomic Renaming**: Successfully purged "Mithaq/Daqiq" legacy names from core execution paths.
+- **Atomic Renaming**: Successfully purged all legacy brand names from core execution paths.
 
 ---
 

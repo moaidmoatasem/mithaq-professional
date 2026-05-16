@@ -1,0 +1,14 @@
+{
+    "python.defaultInterpreterPath": "C:\\Users\\moaid\\cherenkov-professional\\.venv\\Scripts\\python.exe",
+    "python.terminal.activateEnvironment": true,
+    "python.terminal.activateEnvInCurrentTerminal": true,
+    "python.experiments.optOutFrom": [
+        "pythonUVEnvCreation",
+        "PythonEnvTools"
+    ],
+    "python.createEnvironment.trigger": "off",
+    "[python]": {
+        "editor.defaultFormatter": "ms-python.black-formatter",
+        "editor.formatOnSave": true
+    }
+}

@@ -50,6 +50,7 @@ nav:
     - Low-Level Design: architecture/LLD_DIAGRAM.md
     - System Design & State Machine: architecture/system-design.md
     - Design Patterns: architecture/design-patterns.md
+    - SSOT: architecture/ssot.md
   - Scanners:
     - scanners/index.md
     - Validated Scanners: scanners/validated.md
@@ -89,6 +90,9 @@ nav:
     - Sovereign Roadmap: development/sovereign-roadmap.md
     - Integrations & Approvals: development/integrations-approvals.md
     - UI Requirements: development/ui-requirements.md
+    - Master Plan: development/master-plan.md
+    - Premortem: development/premortem.md
+    - Sovereign Blueprint: development/sovereign-blueprint.md
   - Security:
     - security/index.md
     - Vulnerability Disclosure: security/disclosure.md

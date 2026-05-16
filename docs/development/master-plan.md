@@ -22,5 +22,5 @@ Cloud receives only abstract breadcrumbs. All sensitive data stays local.
 - Sanitizer with HMAC signing
 - 80% test coverage requirement
 
-See TODO.md for complete roadmap.
+See [Roadmap](roadmap.md) for the full project plan and [Detailed Roadmap](roadmap-detailed.md) for phase-by-phase milestones.
 

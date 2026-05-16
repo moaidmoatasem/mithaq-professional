@@ -1,30 +1,44 @@
-# CHERENKOV CODEOWNERS - Auto-assign reviewers based on file areas
+# CHERENKOV CODEOWNERS
+# Every PR requires review from the principal owner (@moaidmoatasem).
+# Module-level entries allow AI agents / future contributors to know who owns what.
+
+# ── Global fallback ──────────────────────────────────────────────────────────
 * @moaidmoatasem
 
+# ── Architecture + docs ──────────────────────────────────────────────────────
 ARCHITECTURE.md @moaidmoatasem
-docs/architecture/ @moaidmoatasem
 CHERENKOV_SSOT.md @moaidmoatasem
-src/cherenkov/scanners/ @moaidmoatasem
-src/cherenkov/orchestrator/ @moaidmoatasem
-src/cherenkov/dev_crew/ @moaidmoatasem
-src/cherenkov/core/ @moaidmoatasem
-src/cherenkov/schemas/ @moaidmoatasem
-src/cherenkov/api/ @moaidmoatasem
-src/cherenkov/web/ @moaidmoatasem
-cherenkov-portal/ @moaidmoatasem
-cherenkov-frontend/ @moaidmoatasem
+CLAUDE.md @moaidmoatasem
+docs/ @moaidmoatasem
+*.md @moaidmoatasem
+
+# ── CI / repo meta ───────────────────────────────────────────────────────────
 .github/ @moaidmoatasem
-.github/workflows/ @moaidmoatasem
+
+# ── Monorepo: Python packages (packages/cherenkov/) ─────────────────────────
+packages/cherenkov/core/ @moaidmoatasem
+packages/cherenkov/orchestration/ @moaidmoatasem
+packages/cherenkov/scanners/ @moaidmoatasem
+packages/cherenkov/api/ @moaidmoatasem
+
+# ── Monorepo: React frontend (packages/cherenkov/web/) ──────────────────────
+packages/cherenkov/web/ @moaidmoatasem
+packages/cherenkov/web/src/lib/ @moaidmoatasem
+packages/cherenkov/web/src/hooks/ @moaidmoatasem
+packages/cherenkov/web/src/components/ @moaidmoatasem
+
+# ── Deploy / infra ───────────────────────────────────────────────────────────
 Dockerfile* @moaidmoatasem
 docker-compose* @moaidmoatasem
 deploy/ @moaidmoatasem
-docs/ @moaidmoatasem
-*.md @moaidmoatasem
+
+# ── Python project config ────────────────────────────────────────────────────
 pyproject.toml @moaidmoatasem
 requirements*.txt @moaidmoatasem
 .env.example @moaidmoatasem
+
+# ── Scripts / tests ──────────────────────────────────────────────────────────
 scripts/ @moaidmoatasem
 tools/ @moaidmoatasem
 tests/ @moaidmoatasem
 SECURITY.md @moaidmoatasem
-CODE_OF_CONDUCT.md @moaidmoatasem

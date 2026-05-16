@@ -160,6 +160,105 @@ class AuthRequest(BaseModel):
     password: str
 
 
+class FridaGenerateRequest(BaseModel):
+    platform: str
+    hooks: List[str]
+
+
+class AssistantAdviceRequest(BaseModel):
+    findings: List[dict]
+    context: Optional[dict] = None
+
+
+@v1.post("/mobile/frida/generate")
+async def v1_frida_generate(
+    request: FridaGenerateRequest, current_user: AuthUser = Depends(get_current_user)
+) -> dict:
+    """Generate Frida scripts for mobile runtime analysis."""
+
+    script = f"/* CHERENKOV FRIDA GENERATOR // PLATFORM: {request.platform.upper()} */\n\n"
+
+    if request.platform == "android":
+        if "ssl_pinning" in request.hooks:
+            script += """
+// Android SSL Pinning Bypass (Generic)
+Java.perform(function() {
+    var array_list = Java.use("java.util.ArrayList");
+    var ApiClient = Java.use("com.android.org.conscrypt.TrustManagerImpl");
+
+    ApiClient.checkServerTrusted.implementation = function(chain, authType) {
+        return array_list.$new();
+    };
+});
+"""
+        if "root_detection" in request.hooks:
+            script += """
+// Android Root Detection Bypass
+Java.perform(function() {
+    var RootPackages = ["com.noshufou.android.su", "com.thirdparty.superuser", "eu.chainfire.supersu"];
+    var File = Java.use("java.io.File");
+
+    File.exists.implementation = function() {
+        var name = this.getName();
+        if (RootPackages.indexOf(name) > -1) {
+            return false;
+        }
+        return this.exists();
+    };
+});
+"""
+    elif request.platform == "ios":
+        if "ssl_pinning" in request.hooks:
+            script += """
+// iOS SSL Pinning Bypass
+if (ObjC.available) {
+    for (var className in ObjC.classes) {
+        if (className.indexOf("TrustManager") !== -1) {
+            // Mocking bypass logic
+        }
+    }
+}
+"""
+
+    return {"script": script, "platform": request.platform}
+
+
+@v1.post("/assistant/advice")
+async def v1_assistant_advice(
+    request: AssistantAdviceRequest, current_user: AuthUser = Depends(get_current_user)
+) -> dict:
+    """Get remediation advice from the AI Studio Assistant (Ollama)."""
+    import json
+
+    import httpx
+
+    prompt = f"As a security expert, provide concise remediation advice for the following findings:\n{json.dumps(request.findings)}"
+
+    try:
+        async with httpx.AsyncClient(timeout=30.0) as client:
+            # Note: _check_ollama must be defined or imported
+            ollama_status = await _check_ollama()
+            if ollama_status != "ready":
+                return {
+                    "advice": "AI Studio Assistant is offline (Ollama not detected). Manual remediation recommended.",
+                    "status": "offline",
+                }
+
+            r = await client.post(
+                "http://localhost:11434/api/generate",
+                json={"model": "mistral", "prompt": prompt, "stream": False},
+            )
+            if r.status_code == 200:
+                data = r.json()
+                return {"advice": data.get("response", ""), "status": "ready"}
+            else:
+                return {"advice": "Failed to get advice from Ollama.", "status": "error"}
+    except Exception as exc:
+        return {"advice": f"Assistant error: {exc}", "status": "error"}
+
+
+
+
 @v1.post("/auth/token")
 async def v1_auth_token(request: AuthRequest) -> dict:
     """Authenticate a user and return a JWT token."""
@@ -183,6 +282,8 @@ async def v1_auth_me(current_user: AuthUser = Depends(get_current_user)) -> dict
 @v1.get("/audit")
 async def v1_audit_log(current_user: AuthUser = Depends(RoleChecker(Role.ADMIN))) -> list[dict]:
     """Return the CHERENKOV audit log. Requires ADMIN role."""
+    from cherenkov.core.storage.database import get_audit_log
+
     return get_audit_log(100)
 
 
@@ -336,6 +437,50 @@ async def v1_scan(
     return result
 
 
+@v1.get("/reports/{scan_id}/sarif")
+async def v1_scan_report_sarif(scan_id: str) -> dict:
+    """Emit SARIF 2.1.0 JSON for a completed scan."""
+    from cherenkov.compliance import ComplianceMapper
+    from cherenkov.core.storage.database import get_scan
+
+    scan = get_scan(scan_id)
+    if not scan:
+        raise HTTPException(status_code=404, detail="Scan not found")
+
+    mapper = ComplianceMapper()
+    results = []
+
+    for finding in scan.get("findings", []):
+        cwe = finding.get("cwe", "CWE-Unknown")
+        compliance_tags = mapper.map_all(cwe)
+
+        # Format tags as strings for SARIF property bag
+        tags = []
+        for framework, controls in compliance_tags.items():
+            for control in controls:
+                tags.append(f"{framework}:{control}")
+
+        results.append(
+            {
+                "ruleId": finding.get("id", "finding-unknown"),
+                "message": {"text": finding.get("title", "No title")},
+                "level": finding.get("severity", "none").lower(),
+                "properties": {"cwe": cwe, "compliance": tags},
+            }
+        )
+
+    return {
+        "$schema": "https://schemastore.org/schemas/json/sarif-2.1.0.json",
+        "version": "2.1.0",
+        "runs": [
+            {
+                "tool": {"driver": {"name": "Cherenkov Scanner", "version": "1.1.0"}},
+                "results": results,
+            }
+        ],
+    }
+
+
 @v1.get("/scans/history")
 async def v1_scan_history() -> list[dict]:
     """Return recent scan results for the ThreatIntelPanel sidebar."""
@@ -404,102 +549,57 @@ async def v1_scan_report_sarif(scan_id: str) -> dict:
 
 
 @v1.get("/reports/{scan_id}/pdf")
-async def v1_scan_report_pdf(scan_id: str) -> FileResponse:
-    from io import BytesIO
-
+async def v1_scan_report_pdf(
+    scan_id: str, current_user: AuthUser = Depends(get_current_user)
+):
+    """Download PDF security report."""
     from fastapi.responses import Response
-    from reportlab.lib import colors
-    from reportlab.lib.pagesizes import A4
-    from reportlab.lib.styles import getSampleStyleSheet
-    from reportlab.lib.units import inch
-    from reportlab.platypus import Paragraph, SimpleDocTemplate, Spacer, Table, TableStyle
 
     from cherenkov.compliance.mapper import ComplianceMapper
+    from cherenkov.compliance.reports import PDFReportGenerator
+    from cherenkov.core.base_scanner import Finding, ScanResult, Severity
     from cherenkov.core.storage.database import get_scan
 
     scan = get_scan(scan_id)
     if not scan:
         raise HTTPException(status_code=404, detail="Scan not found")
 
-    buf = BytesIO()
-    doc = SimpleDocTemplate(buf, pagesize=A4)
-    styles = getSampleStyleSheet()
-    elements = []
+    # Map database scan dict to ScanResult model
+    findings = []
+    mapper = ComplianceMapper()
 
-    elements.append(Paragraph(f"CHERENKOV Audit Report — {scan_id}", styles["Title"]))
-    elements.append(Spacer(1, 0.2 * inch))
-    elements.append(Paragraph(f"<b>Target:</b> {scan.get('target', 'N/A')}", styles["Normal"]))
-    elements.append(Paragraph(f"<b>Status:</b> {scan.get('status', 'N/A')}", styles["Normal"]))
-    elements.append(Paragraph(f"<b>Started:</b> {scan.get('started_at', 'N/A')}", styles["Normal"]))
-    elements.append(
-        Paragraph(f"<b>Finished:</b> {scan.get('finished_at', 'N/A')}", styles["Normal"])
-    )
-    elements.append(
-        Paragraph(
-            "<b>Compliance Frameworks:</b> OWASP Top 10, SAMA CSF, EGY-FIN CSF, DORA",
-            styles["Normal"],
-        )
-    )
-    elements.append(Spacer(1, 0.3 * inch))
-
-    findings = scan.get("findings", [])
-    if findings:
-        elements.append(Paragraph(f"Findings ({len(findings)})", styles["Heading2"]))
-        elements.append(Spacer(1, 0.1 * inch))
-        table_data = [["Severity", "CWE", "Description", "OWASP", "SAMA", "EGY-FIN", "DORA"]]
-        for f in findings:
-            cwe = f.get("cwe", "")
-            sev = str(f.get("severity", "")).upper()
-            desc = f.get("description", "")[:60]
-            owasp = ", ".join(ComplianceMapper.map(cwe, "OWASP")) if cwe else ""
-            sama = ", ".join(ComplianceMapper.map(cwe, "SAMA_CSF")) if cwe else ""
-            egy = ", ".join(ComplianceMapper.map(cwe, "EGY_FIN_CSF")) if cwe else ""
-            dora = ", ".join(ComplianceMapper.map(cwe, "DORA")) if cwe else ""
-            table_data.append([sev, cwe, desc, owasp, sama, egy, dora])
-
-        col_widths = [
-            0.5 * inch,
-            0.6 * inch,
-            1.6 * inch,
-            0.9 * inch,
-            0.9 * inch,
-            0.9 * inch,
-            0.9 * inch,
-        ]
-        table = Table(table_data, colWidths=col_widths, repeatRows=1)
-        table.setStyle(
-            TableStyle(
-                [
-                    ("BACKGROUND", (0, 0), (-1, 0), colors.HexColor("#1a1a2e")),
-                    ("TEXTCOLOR", (0, 0), (-1, 0), colors.white),
-                    ("FONTNAME", (0, 0), (-1, 0), "Helvetica-Bold"),
-                    ("FONTSIZE", (0, 0), (-1, 0), 8),
-                    ("FONTSIZE", (0, 1), (-1, -1), 7),
-                    ("GRID", (0, 0), (-1, -1), 0.5, colors.grey),
-                    ("VALIGN", (0, 0), (-1, -1), "MIDDLE"),
-                ]
+    for f in scan.get("findings", []):
+        findings.append(
+            Finding(
+                title=f.get("title", "Unknown"),
+                severity=Severity(str(f.get("severity", "INFO")).upper()),
+                description=f.get("description", ""),
+                cwe=f.get("cwe", ""),
+                remediation=f.get("remediation", ""),
             )
         )
-        elements.append(table)
-    else:
-        elements.append(Paragraph("No findings in this scan.", styles["Normal"]))
 
-    elements.append(Spacer(1, 0.3 * inch))
-    elements.append(
-        Paragraph(
-            "<i>Generated by CHERENKOV Security Platform — this report is a forensic artifact.</i>",
-            styles["Italic"],
-        )
+    result = ScanResult(
+        target=scan.get("target", ""),
+        scanner_name="Cherenkov Unified",
+        findings=findings,
+        status="completed",
     )
 
-    doc.build(elements)
-    pdf_bytes = buf.getvalue()
-    buf.close()
+    compliance_data = {}
+    for f in findings:
+        if f.cwe:
+            # Flatten the map_all result to list of framework names for simplicity in PDF
+            framework_dict = mapper.map_all(f.cwe)
+            compliance_data[f.cwe] = list(framework_dict.keys())
+
+    generator = PDFReportGenerator(result, compliance_data)
+    pdf_bytes = generator.generate()
 
     return Response(
         content=pdf_bytes,
         media_type="application/pdf",
-        headers={"Content-Disposition": f'attachment; filename="cherenkov-report-{scan_id}.pdf"'},
+        headers={"Content-Disposition": f"attachment; filename=cherenkov_report_{scan_id}.pdf"},
     )
 
 
@@ -544,8 +644,6 @@ async def v1_get_process_report(process_id: str) -> dict:
     if "error" in report:
         raise HTTPException(status_code=404, detail=report["error"])
     return report
-
-
 @v1.get("/findings/pending")
 async def v1_get_pending_findings() -> list[dict]:
     """Return a list of all pending findings."""

@@ -2,6 +2,7 @@ import hashlib
 import json
 import logging
 import sqlite3
+from contextlib import closing
 from datetime import datetime, timedelta, timezone
 from pathlib import Path
 
@@ -86,8 +87,9 @@ def _connect(path: Path = _DB_PATH) -> sqlite3.Connection:
 
 def init_db(path: Path = _DB_PATH) -> None:
     path.parent.mkdir(parents=True, exist_ok=True)
-    with _connect(path) as conn:
-        conn.executescript(_DDL)
+    with closing(_connect(path)) as conn:
+        with conn:
+            conn.executescript(_DDL)
 
 
 def save_scan(
@@ -103,34 +105,35 @@ def save_scan(
     # WORM enforcement: scan records are forensic evidence and must never be overwritten.
     # Raise StorageError if a record with this scan_id already exists.
     now = datetime.now(timezone.utc).isoformat()
-    with _connect(path) as conn:
-        existing = conn.execute("SELECT 1 FROM scans WHERE scan_id = ?", (scan_id,)).fetchone()
-        if existing is not None:
-            logger.error(
-                "WORM violation: attempted overwrite of immutable scan record scan_id=%s", scan_id
+    with closing(_connect(path)) as conn:
+        with conn:
+            existing = conn.execute("SELECT 1 FROM scans WHERE scan_id = ?", (scan_id,)).fetchone()
+            if existing is not None:
+                logger.error(
+                    "WORM violation: attempted overwrite of immutable scan record scan_id=%s", scan_id
+                )
+                raise StorageError(
+                    f"WORM violation: scan record '{scan_id}' already exists and cannot be overwritten."
+                )
+            conn.execute(
+                """
+                INSERT INTO scans (scan_id, target, started_at, finished_at, status, findings, meta)
+                VALUES (?, ?, ?, ?, ?, ?, ?)
+                """,
+                (
+                    scan_id,
+                    target,
+                    started_at or now,
+                    finished_at or now,
+                    status,
+                    json.dumps(findings),
+                    json.dumps(meta or {}),
+                ),
             )
-            raise StorageError(
-                f"WORM violation: scan record '{scan_id}' already exists and cannot be overwritten."
-            )
-        conn.execute(
-            """
-            INSERT INTO scans (scan_id, target, started_at, finished_at, status, findings, meta)
-            VALUES (?, ?, ?, ?, ?, ?, ?)
-            """,
-            (
-                scan_id,
-                target,
-                started_at or now,
-                finished_at or now,
-                status,
-                json.dumps(findings),
-                json.dumps(meta or {}),
-            ),
-        )
 
 
 def get_scan(scan_id: str, path: Path = _DB_PATH) -> dict | None:
-    with _connect(path) as conn:
+    with closing(_connect(path)) as conn:
         row = conn.execute("SELECT * FROM scans WHERE scan_id = ?", (scan_id,)).fetchone()
     if row is None:
         return None
@@ -147,9 +150,10 @@ def list_scans(limit: int = 20, path: Path = _DB_PATH) -> list[dict]:
 
 def prune_old_scans(days: int = 90, path: Path = _DB_PATH) -> int:
     cutoff = (datetime.now(timezone.utc) - timedelta(days=days)).isoformat()
-    with _connect(path) as conn:
-        cur = conn.execute("DELETE FROM scans WHERE started_at < ?", (cutoff,))
-        return cur.rowcount
+    with closing(_connect(path)) as conn:
+        with conn:
+            cur = conn.execute("DELETE FROM scans WHERE started_at < ?", (cutoff,))
+            return cur.rowcount
 
 
 def save_pending_finding(
@@ -161,20 +165,20 @@ def save_pending_finding(
     path: Path = None,
 ) -> None:
     path = path or _DB_PATH
-    with _connect(path) as conn:
-        conn.execute(
-            """
-            INSERT OR IGNORE INTO findings_pending (finding_id, severity, scanner, title, scan_id)
-            VALUES (?, ?, ?, ?, ?)
-            """,
-            (finding_id, severity, scanner, title, scan_id),
-        )
-        conn.commit()
+    with closing(_connect(path)) as conn:
+        with conn:
+            conn.execute(
+                """
+                INSERT OR IGNORE INTO findings_pending (finding_id, severity, scanner, title, scan_id)
+                VALUES (?, ?, ?, ?, ?)
+                """,
+                (finding_id, severity, scanner, title, scan_id),
+            )
 
 
 def get_pending_findings(path: Path = None) -> list[dict]:
     path = path or _DB_PATH
-    with _connect(path) as conn:
+    with closing(_connect(path)) as conn:
         rows = conn.execute("SELECT * FROM findings_pending WHERE status = 'pending'").fetchall()
     return [dict(r) for r in rows]
 
@@ -187,28 +191,29 @@ def update_finding_status(
 ) -> None:
     path = path or _DB_PATH
     now = datetime.now(timezone.utc).isoformat() if status == "approved" else None
-    with _connect(path) as conn:
-        conn.execute(
-            """
-            UPDATE findings_pending
-            SET status = ?, operator_id = ?, approved_at = ?
-            WHERE finding_id = ?
-            """,
-            (status, operator_id, now, finding_id),
-        )
-        conn.commit()
+    with closing(_connect(path)) as conn:
+        with conn:
+            conn.execute(
+                """
+                UPDATE findings_pending
+                SET status = ?, operator_id = ?, approved_at = ?
+                WHERE finding_id = ?
+                """,
+                (status, operator_id, now, finding_id),
+            )
 
 
 def save_user(username: str, hashed_password: str, role: int, path: Path = _DB_PATH) -> None:
-    with _connect(path) as conn:
-        conn.execute(
-            "INSERT OR REPLACE INTO users (username, password, role) VALUES (?, ?, ?)",
-            (username, hashed_password, role),
-        )
+    with closing(_connect(path)) as conn:
+        with conn:
+            conn.execute(
+                "INSERT OR REPLACE INTO users (username, password, role) VALUES (?, ?, ?)",
+                (username, hashed_password, role),
+            )
 
 
 def get_user(username: str, path: Path = _DB_PATH) -> dict | None:
-    with _connect(path) as conn:
+    with closing(_connect(path)) as conn:
         row = conn.execute("SELECT * FROM users WHERE username = ?", (username,)).fetchone()
     return dict(row) if row else None
 
@@ -223,19 +228,20 @@ def save_audit_entry(
     payload = f"{now}|{event_type}|{user_id or 'system'}|{details_json}"
     trace_hash = hashlib.sha256(payload.encode()).hexdigest()
 
-    with _connect(path) as conn:
-        conn.execute(
-            """
-            INSERT INTO audit_log (timestamp, event_type, user_id, details, trace_hash)
-            VALUES (?, ?, ?, ?, ?)
-            """,
-            (now, event_type, user_id, details_json, trace_hash),
-        )
+    with closing(_connect(path)) as conn:
+        with conn:
+            conn.execute(
+                """
+                INSERT INTO audit_log (timestamp, event_type, user_id, details, trace_hash)
+                VALUES (?, ?, ?, ?, ?)
+                """,
+                (now, event_type, user_id, details_json, trace_hash),
+            )
     return trace_hash
 
 
 def get_audit_log(limit: int = 100, path: Path = _DB_PATH) -> list[dict]:
-    with _connect(path) as conn:
+    with closing(_connect(path)) as conn:
         rows = conn.execute(
             "SELECT * FROM audit_log ORDER BY timestamp DESC LIMIT ?", (limit,)
         ).fetchall()

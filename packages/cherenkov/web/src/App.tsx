@@ -5,11 +5,23 @@ import { ForensicHeader } from './components/organisms/ForensicHeader';
 import { TacticalOperationsPanel } from './components/organisms/TacticalOperationsPanel';
 import { ThreatIntelPanel } from './components/organisms/ThreatIntelPanel';
 import { LogoKit, AssistantWidget } from './components/organisms';
+import { MobileDashboard } from './components/templates/MobileDashboard';
 import { AnimatePresence } from 'motion/react';
 
 export default function App() {
   const [token, setToken] = useState<string | null>(sessionStorage.getItem('cherenkov_token'));
   const [showLogoKit, setShowLogoKit] = useState(false);
+  const [activeDashboard, setActiveDashboard] = useState<'C2' | 'MOBILE'>('C2');
+
+  useEffect(() => {
+    const handler = (e: any) => {
+      if (e.detail?.dashboard) {
+        setActiveDashboard(e.detail.dashboard);
+      }
+    };
+    window.addEventListener('cherenkov:switch_dashboard', handler);
+    return () => window.removeEventListener('cherenkov:switch_dashboard', handler);
+  }, []);
 
   if (!token) {
     return <LoginPage onLoginSuccess={setToken} />;
@@ -17,11 +29,15 @@ export default function App() {
 
   return (
     <>
-      <MainLayout 
-        header={<ForensicHeader />}
-        content={<TacticalOperationsPanel />}
-        sidebar={<ThreatIntelPanel />}
-      />
+      {activeDashboard === 'MOBILE' ? (
+        <MobileDashboard />
+      ) : (
+        <MainLayout 
+          header={<ForensicHeader />}
+          content={<TacticalOperationsPanel />}
+          sidebar={<ThreatIntelPanel />}
+        />
+      )}
 
       {/* Legacy LogoKit Support (updated check) */}
       <AnimatePresence>

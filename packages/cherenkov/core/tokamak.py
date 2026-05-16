@@ -116,6 +116,7 @@ class Command:
     payload: str
     scanner_name: str = ""
     timeout: int = 30
+    profile: TOKAMAKProfile = TOKAMAKProfile.STANDARD
 
 
 @dataclass
@@ -268,16 +269,20 @@ class Tokamak:
 
             host_tmpdir = tmpdir.replace("\\", "/")
 
+            cfg = _PROFILE_CONFIGS.get(command.profile, _PROFILE_CONFIGS[TOKAMAKProfile.STANDARD])
+            image = cfg["image"]
+            network = cfg["network_mode"]
+
             process = subprocess.run(
                 [
                     "docker",
                     "run",
                     "--rm",
                     "--network",
-                    "none",
+                    network,
                     "-v",
                     f"{host_tmpdir}:/workspace",
-                    "cherenkov-tokamak",
+                    image,
                     "sh",
                     "/workspace/payload.sh",
                 ],
@@ -341,3 +346,19 @@ class Tokamak:
             exit_code=exit_code,
             duration_ms=duration_ms,
         )
+
+    @staticmethod
+    def run_drozer_poc(target_package: str, module: str) -> TokamakResult:
+        """Helper to run a Drozer module against a package."""
+        payload = f"drozer console connect --command 'run {module} {target_package}'"
+        cmd = Command(payload=payload, profile=TOKAMAKProfile.MOBILE)
+        return Tokamak.execute(cmd)
+
+    @staticmethod
+    def run_frida_hook(target_package: str, hook_js: str) -> TokamakResult:
+        """Helper to run a Frida hook against a package."""
+        payload = (
+            f"echo '{hook_js}' > hook.js && frida -U -f {target_package} -l hook.js --no-pause"
+        )
+        cmd = Command(payload=payload, profile=TOKAMAKProfile.MOBILE)
+        return Tokamak.execute(cmd)

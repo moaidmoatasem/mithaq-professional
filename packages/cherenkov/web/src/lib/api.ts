@@ -148,3 +148,14 @@ export async function rejectFinding(id: string): Promise<void> {
     throw new Error(`Failed to reject finding ${id}`);
   }
 }
+
+/**
+ * Fetch the CHERENKOV audit log (Admin only)
+ */
+export async function fetchAuditLog(): Promise<any[]> {
+  const res = await fetch(`${API_BASE}/audit`, {
+    headers: getAuthHeader()
+  });
+  if (!res.ok) return [];
+  return res.json();
+}

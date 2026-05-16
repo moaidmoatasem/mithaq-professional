@@ -270,11 +270,16 @@ class Tokamak:
 
             process = subprocess.run(
                 [
-                    "docker", "run", "--rm",
-                    "--network", "none",
-                    "-v", f"{host_tmpdir}:/workspace",
+                    "docker",
+                    "run",
+                    "--rm",
+                    "--network",
+                    "none",
+                    "-v",
+                    f"{host_tmpdir}:/workspace",
                     "cherenkov-tokamak",
-                    "sh", "/workspace/payload.sh",
+                    "sh",
+                    "/workspace/payload.sh",
                 ],
                 capture_output=True,
                 text=True,

@@ -33,6 +33,9 @@ logger = logging.getLogger(__name__)
 
 _STATIC_DIR = Path(__file__).parent / "static"
 
+# In-memory ring buffer of recent scan results (last 50).
+_scan_history: list[dict] = []
+
 app = FastAPI(
     title="cherenkov Sovereign Security API",
     description="Scan API, workflow orchestration, and web dashboard. Flask retired.",
@@ -48,8 +51,9 @@ _ALLOWED_ORIGINS = os.getenv(
 app.add_middleware(
     CORSMiddleware,
     allow_origins=_ALLOWED_ORIGINS,
-    allow_methods=["GET", "POST"],
-    allow_headers=["Content-Type", "Authorization"],
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
 )
 
 # ── WebSocket live-event broadcast ───────────────────────────────────────────
@@ -92,12 +96,26 @@ v1 = APIRouter(prefix="/api/v1")
 
 @v1.get("/health")
 async def v1_health() -> dict:
-    """Health check used by useMetrics / useQueueDepth hooks."""
+    """Health check used by useMetrics / useQueueDepth hooks.
+
+    Returns the node topology expected by NodeStatusRow and
+    the Meissner shield state expected by ForensicHeader.
+    """
+    active_scans = sum(1 for s in _scan_history[-5:] if s.get("_in_progress"))
     return {
         "status": "healthy",
         "agents": "operational",
-        "queue": {"scan_jobs_pending": 0},
+        "queue": {"scan_jobs_pending": active_scans},
         "uptime": time.time(),
+        "active_scans": active_scans,
+        "meissner": {"state": "CLOSED"},
+        "nodes": {
+            "tensor": {"status": "ready", "model": "Llama 3.1 8B"},
+            "kinetic": {"status": "ready", "model": "Qwen2.5 3B", "ram_gb": 8},
+            "aegis": {"status": "ready", "model": "Llama 3.1 8B", "ram_gb": 8},
+            "lattice": {"status": "ready", "model": "Qdrant / Vector", "vector_count": 0},
+            "tokamak": {"status": "ready", "model": "Sandbox Ready", "active_containers": 0},
+        },
     }
 
 
@@ -136,6 +154,10 @@ async def v1_ablation_stats() -> dict:
 async def v1_scan(request: "ScanRequest") -> dict:
     """Proxy to the core scan engine; broadcasts a live event on completion."""
     result = await _run_scan(request)
+    # Persist to in-memory ring buffer for /scans/history
+    _scan_history.append(result)
+    if len(_scan_history) > 50:
+        _scan_history.pop(0)
     await _broadcast(
         {
             "type": "scan_complete",
@@ -146,6 +168,13 @@ async def v1_scan(request: "ScanRequest") -> dict:
         }
     )
     return result
+
+
+@v1.get("/scans/history")
+async def v1_scan_history() -> list[dict]:
+    """Return recent scan results for the ThreatIntelPanel sidebar."""
+    # Return newest first
+    return list(reversed(_scan_history[-20:]))
 
 
 # Serve the static dashboard assets

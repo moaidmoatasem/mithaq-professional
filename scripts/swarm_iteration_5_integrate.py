@@ -206,7 +206,7 @@ def orchestrate(config, output):
         else:
             click.echo(f"❌ Workflow failed: {result.errors}")
     
-    except Exception as e:
+    except (ImportError, FileNotFoundError) as e:
         click.echo(f"❌ Error: {e}")'''
 
     # Replace old orchestrate command
@@ -365,7 +365,7 @@ try:
         check=True,
     )
     print("✅ Integration committed!")
-except Exception as e:
+except (subprocess.CalledProcessError, FileNotFoundError) as e:
     print(f"⚠️  Commit issue: {e}")
 
 print("\n🎉 Iteration #5 complete! Workflow system integrated!")

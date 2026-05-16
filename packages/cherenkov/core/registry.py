@@ -18,12 +18,16 @@ class ScannerRegistry:
 
         # Explicitly import and register new scanners per requirements
         from cherenkov.scanners.file_upload_scanner import FileUploadScanner
+        from cherenkov.scanners.mobile.android_scanner import AndroidScanner
+        from cherenkov.scanners.mobile.ios_scanner import IOSScanner
         from cherenkov.scanners.path_traversal_scanner import PathTraversalScanner
         from cherenkov.scanners.xxe_scanner import XXEScanner
 
         self.register(XXEScanner)
         self.register(PathTraversalScanner)
         self.register(FileUploadScanner)
+        self.register(AndroidScanner)
+        self.register(IOSScanner)
 
         # Register Mobile Scanners
         from cherenkov.scanners.mobile.ipa_scanner import IPAScanner

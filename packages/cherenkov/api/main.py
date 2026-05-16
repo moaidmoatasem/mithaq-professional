@@ -731,6 +731,44 @@ class WorkflowExecuteRequest(BaseModel):
     config: Optional[Dict[str, Any]] = None
 
 
+class AssistantAdviceRequest(BaseModel):
+    findings: List[dict]
+    context: Optional[dict] = None
+
+
+@v1.post("/assistant/advice")
+async def v1_assistant_advice(
+    request: AssistantAdviceRequest, current_user: AuthUser = Depends(get_current_user)
+) -> dict:
+    """Get remediation advice from the AI Studio Assistant (Ollama)."""
+    import json
+
+    import httpx
+
+    prompt = f"As a security expert, provide concise remediation advice for the following findings:\n{json.dumps(request.findings)}"
+
+    try:
+        async with httpx.AsyncClient(timeout=30.0) as client:
+            ollama_status = await _check_ollama()
+            if ollama_status != "ready":
+                return {
+                    "advice": "AI Studio Assistant is offline (Ollama not detected). Manual remediation recommended.",
+                    "status": "offline",
+                }
+
+            r = await client.post(
+                "http://localhost:11434/api/generate",
+                json={"model": "mistral", "prompt": prompt, "stream": False},
+            )
+            if r.status_code == 200:
+                data = r.json()
+                return {"advice": data.get("response", ""), "status": "ready"}
+            else:
+                return {"advice": "Failed to get advice from Ollama.", "status": "error"}
+    except Exception as exc:
+        return {"advice": f"Assistant error: {exc}", "status": "error"}
+
+
 class WorkflowResponse(BaseModel):
     success: bool
     workflow: str

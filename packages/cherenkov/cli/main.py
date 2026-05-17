@@ -49,11 +49,7 @@ def _write_pdf(chk_id: str, target: str, findings: list[dict], anchor: dict) -> 
     from cherenkov.core.base_scanner import Finding, ScanResult, Severity
 
     mapper = ComplianceMapper()
-    compliance_data = {
-        f["cwe"]: mapper.map_all(f["cwe"])
-        for f in findings
-        if f.get("cwe")
-    }
+    compliance_data = {f["cwe"]: mapper.map_all(f["cwe"]) for f in findings if f.get("cwe")}
 
     scan_findings = []
     for f in findings:
@@ -84,7 +80,9 @@ def scan(
     target: str = typer.Argument(..., help="Target URL or host to scan"),
     output: OutputFormat = typer.Option(OutputFormat.table, "--output", "-o", help="Output format"),
     rps: float = typer.Option(5.0, "--rps", help="Requests per second cap"),
-    pdf: bool = typer.Option(False, "--pdf", "-p", help="Generate signed PDF report to ~/.cherenkov/traces/"),
+    pdf: bool = typer.Option(
+        False, "--pdf", "-p", help="Generate signed PDF report to ~/.cherenkov/traces/"
+    ),
 ) -> None:
     """Run all registered scanners against TARGET."""
     import uuid
@@ -125,7 +123,9 @@ def scan(
 
     # Sign findings — SHA-256 + best-effort RFC 3161 timestamp
     anchor = sign_trace(json.dumps(findings, sort_keys=True))
-    tsa_note = "RFC 3161 ✓" if anchor.get("tsa_status") == "ok" else f"TSA {anchor.get('tsa_status')}"
+    tsa_note = (
+        "RFC 3161 ✓" if anchor.get("tsa_status") == "ok" else f"TSA {anchor.get('tsa_status')}"
+    )
     console.print(f"[dim]sha256: {anchor['sha256'][:16]}…  {tsa_note}[/dim]")
 
     finished = datetime.now(timezone.utc).isoformat()
@@ -133,16 +133,28 @@ def scan(
         scan_id,
         target,
         findings,
-        meta={"chk_id": chk_id, "rps": rps, "scanners_run": list(scan_results.keys()), "anchor": anchor},
+        meta={
+            "chk_id": chk_id,
+            "rps": rps,
+            "scanners_run": list(scan_results.keys()),
+            "anchor": anchor,
+        },
         started_at=started,
         finished_at=finished,
     )
 
     if output == OutputFormat.json:
-        console.print_json(json.dumps({
-            "scan_id": scan_id, "chk_id": chk_id, "target": target,
-            "findings": findings, "anchor": anchor,
-        }))
+        console.print_json(
+            json.dumps(
+                {
+                    "scan_id": scan_id,
+                    "chk_id": chk_id,
+                    "target": target,
+                    "findings": findings,
+                    "anchor": anchor,
+                }
+            )
+        )
     elif output == OutputFormat.sarif:
         sarif_results = [
             {
@@ -155,13 +167,19 @@ def scan(
         sarif = {
             "version": "2.1.0",
             "$schema": "https://json.schemastore.org/sarif-2.1.0.json",
-            "runs": [{"tool": {"driver": {"name": "cherenkov", "rules": []}}, "results": sarif_results}],
+            "runs": [
+                {"tool": {"driver": {"name": "cherenkov", "rules": []}}, "results": sarif_results}
+            ],
         }
         console.print_json(json.dumps(sarif))
     else:
-        t = Table("Finding", "Severity", "CWE", "Scanner", title=f"Cherenkov Trace {chk_id} — {target}")
+        t = Table(
+            "Finding", "Severity", "CWE", "Scanner", title=f"Cherenkov Trace {chk_id} — {target}"
+        )
         for f in findings:
-            t.add_row(f.get("title", ""), f.get("severity", ""), f.get("cwe", ""), f.get("scanner", ""))
+            t.add_row(
+                f.get("title", ""), f.get("severity", ""), f.get("cwe", ""), f.get("scanner", "")
+            )
         console.print(t if findings else "[green]No anomalies isolated.[/green]")
 
     if pdf:
@@ -184,7 +202,14 @@ def history(
     t = Table("chk_id", "scan_id", "target", "status", "started_at", "findings #")
     for r in rows:
         chk_id = r.get("meta", {}).get("chk_id", "—")
-        t.add_row(chk_id, r["scan_id"][:8] + "…", r["target"], r["status"], r["started_at"], str(len(r["findings"])))
+        t.add_row(
+            chk_id,
+            r["scan_id"][:8] + "…",
+            r["target"],
+            r["status"],
+            r["started_at"],
+            str(len(r["findings"])),
+        )
     console.print(t)
 
 

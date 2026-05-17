@@ -16,18 +16,12 @@ class ScannerRegistry:
         self._registry: Dict[str, Type[BaseScanner]] = {}
         self._load_scanners()
 
-        # Explicitly import and register new scanners per requirements
-        from cherenkov.scanners.file_upload_scanner import FileUploadScanner
-        from cherenkov.scanners.mobile.android_scanner import AndroidScanner
-        from cherenkov.scanners.mobile.ios_scanner import IOSScanner
+        # Explicitly register graduated scanners (unimplemented ones stay in _load_scanners auto-discovery)
         from cherenkov.scanners.path_traversal_scanner import PathTraversalScanner
         from cherenkov.scanners.xxe_scanner import XXEScanner
 
         self.register(XXEScanner)
         self.register(PathTraversalScanner)
-        self.register(FileUploadScanner)
-        self.register(AndroidScanner)
-        self.register(IOSScanner)
 
     def register(self, scanner_class: Type[BaseScanner]):
         """Manually register a scanner class"""

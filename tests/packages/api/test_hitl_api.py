@@ -1,9 +1,18 @@
 import uuid
+
 import pytest
 from fastapi.testclient import TestClient
 
+pytestmark = pytest.mark.ai_generated
+
 from cherenkov.api.main import app
-from cherenkov.core.storage.database import init_db, _connect, _DB_PATH, save_pending_finding, update_finding_status
+from cherenkov.core.storage.database import (
+    _DB_PATH,
+    _connect,
+    init_db,
+    save_pending_finding,
+    update_finding_status,
+)
 
 
 @pytest.fixture(autouse=True)
@@ -16,6 +25,7 @@ def setup_db(tmp_path, monkeypatch):
     # Because FastAPI might use the original default kwargs for init_db,
     # we need to ensure the module-level variable is changed or default args are overridden.
     import cherenkov.core.storage.database as db
+
     original_db_path = db._DB_PATH
     db._DB_PATH = db_path
 
@@ -34,15 +44,18 @@ def setup_db(tmp_path, monkeypatch):
 
     # cleanup not strictly necessary as tmp_path is managed, but good practice
 
+
 @pytest.fixture
 def client(setup_db):
     # Depending on setup_db to ensure DB is initialized
     return TestClient(app)
 
+
 def test_get_pending_findings_empty(client):
     response = client.get("/api/v1/findings/pending")
     assert response.status_code == 200
     assert response.json() == []
+
 
 def test_approve_reject_finding(client, setup_db):
     finding_id = str(uuid.uuid4())
@@ -56,7 +69,9 @@ def test_approve_reject_finding(client, setup_db):
     assert data[0]["status"] == "pending"
 
     # Approve
-    response = client.post(f"/api/v1/findings/{finding_id}/approve", params={"operator_id": "op_123"})
+    response = client.post(
+        f"/api/v1/findings/{finding_id}/approve", params={"operator_id": "op_123"}
+    )
     assert response.status_code == 200
     assert response.json()["new_status"] == "approved"
 
@@ -66,40 +81,69 @@ def test_approve_reject_finding(client, setup_db):
 
     # Check status in db
     with _connect(setup_db) as conn:
-        row = conn.execute("SELECT status, operator_id, approved_at FROM findings_pending WHERE finding_id = ?", (finding_id,)).fetchone()
+        row = conn.execute(
+            "SELECT status, operator_id, approved_at FROM findings_pending WHERE finding_id = ?",
+            (finding_id,),
+        ).fetchone()
         assert row is not None
         assert row["status"] == "approved"
         assert row["operator_id"] == "op_123"
         assert row["approved_at"] is not None
 
     # Reject
-    response = client.post(f"/api/v1/findings/{finding_id}/reject", params={"operator_id": "op_456"})
+    response = client.post(
+        f"/api/v1/findings/{finding_id}/reject", params={"operator_id": "op_456"}
+    )
     assert response.status_code == 200
     assert response.json()["new_status"] == "rejected"
 
     # Check status in db
     with _connect(setup_db) as conn:
-        row = conn.execute("SELECT status, operator_id, approved_at FROM findings_pending WHERE finding_id = ?", (finding_id,)).fetchone()
+        row = conn.execute(
+            "SELECT status, operator_id, approved_at FROM findings_pending WHERE finding_id = ?",
+            (finding_id,),
+        ).fetchone()
         assert row is not None
         assert row["status"] == "rejected"
         assert row["operator_id"] == "op_456"
         assert row["approved_at"] is None
 
+
 def test_run_scan_hitl_integration(client, monkeypatch):
     class MockScanEngine:
         def __init__(self, registry):
             pass
+
         async def scan_all(self, url, timeout=10.0):
-            from cherenkov.core.base_scanner import ScanResult, Finding, Severity
+            from cherenkov.core.base_scanner import Finding, ScanResult, Severity
+
             return {
                 "TestScanner": ScanResult(
                     target=url,
                     scanner_name="TestScanner",
                     findings=[
-                        Finding(title="Crit", severity=Severity.CRITICAL, description="desc", cwe="cwe", remediation="fix"),
-                        Finding(title="High", severity=Severity.HIGH, description="desc", cwe="cwe", remediation="fix"),
-                        Finding(title="Low", severity=Severity.LOW, description="desc", cwe="cwe", remediation="fix"),
-                    ]
+                        Finding(
+                            title="Crit",
+                            severity=Severity.CRITICAL,
+                            description="desc",
+                            cwe="cwe",
+                            remediation="fix",
+                        ),
+                        Finding(
+                            title="High",
+                            severity=Severity.HIGH,
+                            description="desc",
+                            cwe="cwe",
+                            remediation="fix",
+                        ),
+                        Finding(
+                            title="Low",
+                            severity=Severity.LOW,
+                            description="desc",
+                            cwe="cwe",
+                            remediation="fix",
+                        ),
+                    ],
                 )
             }
 

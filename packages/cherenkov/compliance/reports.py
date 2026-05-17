@@ -9,10 +9,10 @@ from cherenkov.core.base_scanner import ScanResult
 
 _SEVERITY_COLOURS: Dict[str, tuple] = {
     "CRITICAL": (180, 0, 0),
-    "HIGH":     (220, 60, 0),
-    "MEDIUM":   (220, 150, 0),
-    "LOW":      (30, 120, 30),
-    "INFO":     (60, 60, 180),
+    "HIGH": (220, 60, 0),
+    "MEDIUM": (220, 150, 0),
+    "LOW": (30, 120, 30),
+    "INFO": (60, 60, 180),
 }
 
 
@@ -73,11 +73,11 @@ class PDFReportGenerator:
 
         ts = datetime.now(timezone.utc).strftime("%Y-%m-%d %H:%M UTC")
         meta = [
-            ("Trace ID",  self.chk_id),
-            ("Target",    self.result.target),
-            ("Status",    self.result.status),
+            ("Trace ID", self.chk_id),
+            ("Target", self.result.target),
+            ("Status", self.result.status),
             ("Generated", ts),
-            ("Findings",  str(len(self.result.findings))),
+            ("Findings", str(len(self.result.findings))),
         ]
         for label, value in meta:
             self.pdf.set_font("helvetica", "B", 10)
@@ -145,7 +145,8 @@ class PDFReportGenerator:
             if tsa_status == "unavailable":
                 self.pdf.set_font("helvetica", "I", 8)
                 self.pdf.multi_cell(
-                    0, 4,
+                    0,
+                    4,
                     "Note: TSA call skipped (air-gapped node). SHA-256 anchor is binding. "
                     "Trusted timestamp can be added post-scan via an online node.",
                 )

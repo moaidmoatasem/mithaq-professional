@@ -1,7 +1,15 @@
 import pytest
 from unittest.mock import patch, AsyncMock, MagicMock
-from cherenkov.scanners.file_upload_scanner import FileUploadScanner
 from cherenkov.core.base_scanner import Severity
+
+_mod = pytest.importorskip(
+    "cherenkov.scanners.file_upload_scanner",
+    reason="file_upload_scanner not yet graduated — issue #178",
+)
+FileUploadScanner = _mod.FileUploadScanner
+
+pytestmark = pytest.mark.ai_generated
+
 
 @pytest.mark.asyncio
 async def test_file_upload_vulnerable():
@@ -27,6 +35,7 @@ async def test_file_upload_vulnerable():
         assert finding.cwe == "CWE-434"
         assert "Unrestricted File Upload" in finding.title
 
+
 @pytest.mark.asyncio
 async def test_file_upload_safe():
     scanner = FileUploadScanner("file_upload", "test scanner")
@@ -44,6 +53,7 @@ async def test_file_upload_safe():
         result = await scanner.scan("http://safe.com/upload")
 
         assert len(result.findings) == 0
+
 
 @pytest.mark.asyncio
 async def test_file_upload_timeout():

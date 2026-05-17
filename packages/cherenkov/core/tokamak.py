@@ -16,7 +16,6 @@ import asyncio
 import hashlib
 import json
 import logging
-import subprocess
 from contextlib import asynccontextmanager
 from dataclasses import dataclass
 from datetime import datetime, timezone

@@ -21,6 +21,7 @@ _TSA_TIMEOUT = 5.0
 
 # ── DER helpers ───────────────────────────────────────────────────────────────
 
+
 def _encode_length(n: int) -> bytes:
     if n < 0x80:
         return bytes([n])
@@ -44,12 +45,13 @@ def _build_tsa_request(message_hash: bytes) -> bytes:
     nonce = _tlv(0x02, nonce_val)
 
     cert_req = bytes.fromhex("0101ff")  # BOOLEAN TRUE — ask TSA to include its cert
-    version = bytes.fromhex("020101")   # INTEGER 1
+    version = bytes.fromhex("020101")  # INTEGER 1
 
     return _tlv(0x30, version + msg_imprint + nonce + cert_req)
 
 
 # ── Public API ────────────────────────────────────────────────────────────────
+
 
 def sign_trace(findings_payload: str) -> Dict[str, str]:
     """

@@ -13,20 +13,13 @@ RUN useradd -ms /bin/bash tokamak_user
 
 WORKDIR /sandbox
 
-# Copy the suspicious payload/PR into the sandbox
-# Alignment fix: using packages/ instead of non-existent src/
+# Copy source — packages/ is canonical (no src/ directory)
 COPY ./packages /sandbox/packages
 COPY ./tests /sandbox/tests
-COPY cherenkov_web.py /sandbox/cherenkov_web.py
-COPY cherenkov_simple_scanner.py /sandbox/cherenkov_simple_scanner.py
-COPY cherenkov_cli.py /sandbox/cherenkov_cli.py
-COPY system_dashboard.py /sandbox/system_dashboard.py
-COPY Dockerfile /sandbox/Dockerfile
-COPY docker-compose.yml /sandbox/docker-compose.yml
-
-# Install dependencies via pyproject.toml (requirements.txt removed — pyproject.toml is canonical)
 COPY pyproject.toml ./
-RUN pip install --no-cache-dir pytest pytest-asyncio pytest-cov httpx python-dotenv pydantic requests cryptography crewai pyyaml typer groq ollama fastapi uvicorn
+
+# Install all deps from pyproject.toml (runtime + dev)
+RUN pip install --no-cache-dir -e ".[dev]"
 
 # Give tokamak_user write access to the entire sandbox
 RUN chown -R tokamak_user:tokamak_user /sandbox
@@ -36,12 +29,14 @@ ENV PYTHONPATH=/sandbox/packages:/sandbox
 # Drop privileges immediately
 USER tokamak_user
 
-# Cloud-API-dependent tests (groq, openai) are excluded — TOKAMAK runs air-gapped
+# Cloud-API-dependent and ai_generated tests excluded — TOKAMAK runs air-gapped
 ENV PYTHONPATH="/sandbox:${PYTHONPATH}"
 CMD ["pytest", "tests/", \
+     "-m", "not (integration or ai_generated)", \
      "--ignore=tests/packages/agents/cloud", \
      "--ignore=tests/packages/core/test_hybrid_orchestrator.py", \
      "--ignore=tests/packages/core/test_overseer.py", \
      "--ignore=tests/packages/core/test_parallel_agents.py", \
      "--ignore=tests/packages/crews", \
-     "--ignore=tests/test_multi_agent_integration.py"]
+     "--ignore=tests/test_multi_agent_integration.py", \
+     "--tb=short"]

@@ -229,6 +229,7 @@ class CircuitBreaker:
             return
         try:
             from cherenkov.core.storage.database import init_db, save_cb_state
+
             init_db()
             save_cb_state(
                 self.config.name,
@@ -662,12 +663,18 @@ class CircuitBreakerRegistry:
                 # Restore state that survived the last process restart
                 try:
                     from cherenkov.core.storage.database import load_cb_state
+
                     saved = load_cb_state(name)
                     if saved and saved["state"] in (s.value for s in CircuitState):
                         breaker._state = CircuitState(saved["state"])
                         breaker._failure_count = saved["failure_count"]
                         breaker._last_failure_time = saved["last_failure_time"]
-                        logger.info("CB '%s' restored to %s (failures=%d)", name, saved["state"], saved["failure_count"])
+                        logger.info(
+                            "CB '%s' restored to %s (failures=%d)",
+                            name,
+                            saved["state"],
+                            saved["failure_count"],
+                        )
                 except Exception as exc:
                     logger.debug("CB state restore skipped for '%s': %s", name, exc)
                 self._breakers[name] = breaker

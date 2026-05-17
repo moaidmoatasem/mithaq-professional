@@ -43,12 +43,16 @@ CHERENKOV operates on a mathematically provable "Trident of Truth": it finds vul
 
 | Item | Status |
 |---|---|
-| Security baseline | ✅ v0.1.1-security |
-| Core architecture (11 files) | ✅ Phase 2 complete |
-| P0 security fixes | ✅ PR #143 merged |
-| Validated scanners | 🟡 5 of 50 target |
-| TOKAMAK PoC execution | ⬜ Phase 4 |
-| Cairo pilot | ⬜ Phase 6 |
+| Core architecture (BaseScanner, MEISSNER, ABLATION) | ✅ Phase 1 complete |
+| FastAPI server + WebSocket hub | ✅ `api/main.py` |
+| React HUD dashboard | ✅ `web/src/` |
+| CI pipeline (ruff, pytest, bandit) | ✅ `.github/workflows/` |
+| TOKAMAK Docker sandbox | 🔴 P0 — [#222](https://github.com/moaidmoatasem/cherenkov-professional/issues/222) |
+| Real health metrics | 🔴 P0 — [#221](https://github.com/moaidmoatasem/cherenkov-professional/issues/221) |
+| LATTICE adaptive memory | 🔴 P0 — [#224](https://github.com/moaidmoatasem/cherenkov-professional/issues/224) |
+| Validated scanners | 🟡 5 of 20 target |
+| EGY-FIN CSF compliance reports | ⬜ Phase 3 |
+| Cairo pilot | ⬜ Phase 4+ |
 
 ---
 

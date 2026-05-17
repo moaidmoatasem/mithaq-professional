@@ -22,7 +22,7 @@ def _use_temp_db(tmp_path: Path) -> None:
 
 @pytest.fixture(autouse=True)
 def _override_auth():
-    async def mock_user(authorization=None) -> User:
+    async def mock_user() -> User:
         return User(username="test_operator", role=Role.OPERATOR)
 
     from cherenkov.api.middleware.auth import get_current_user

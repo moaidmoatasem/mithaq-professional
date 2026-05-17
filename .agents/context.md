@@ -64,13 +64,23 @@ const url = 'http://localhost:8000/api/v1/...'
 
 ## Active Issues → task files
 
-| Issue | File | Status |
+**P0 — Pick these first. Phase 2 is blocked until they are done.**
+
+| Issue | File | Priority |
 |---|---|---|
-| [#174](https://github.com/moaidmoatasem/cherenkov-professional/issues/174) | `.agents/tasks/issue-174.md` | open |
-| [#175](https://github.com/moaidmoatasem/cherenkov-professional/issues/175) | `.agents/tasks/issue-175.md` | open |
-| [#176](https://github.com/moaidmoatasem/cherenkov-professional/issues/176) | `.agents/tasks/issue-176.md` | open |
-| [#177](https://github.com/moaidmoatasem/cherenkov-professional/issues/177) | `.agents/tasks/issue-177.md` | open |
-| [#178](https://github.com/moaidmoatasem/cherenkov-professional/issues/178) | `.agents/tasks/issue-178.md` | open |
+| [#222](https://github.com/moaidmoatasem/cherenkov-professional/issues/222) | `.agents/tasks/issue-222.md` | 🔴 P0 — TOKAMAK Docker sandbox |
+| [#221](https://github.com/moaidmoatasem/cherenkov-professional/issues/221) | `.agents/tasks/issue-221.md` | 🔴 P0 — Real health metrics |
+| [#224](https://github.com/moaidmoatasem/cherenkov-professional/issues/224) | `.agents/tasks/issue-224.md` | 🔴 P0 — LATTICE Qdrant wiring |
+| [#223](https://github.com/moaidmoatasem/cherenkov-professional/issues/223) | `.agents/tasks/issue-223.md` | 🔴 P0 — Root cleanup |
+
+**Phase 2 remaining (after P0):**
+
+| Issue | File | Priority |
+|---|---|---|
+| [#177](https://github.com/moaidmoatasem/cherenkov-professional/issues/177) | `.agents/tasks/issue-177.md` | P1 — SQLite persistence |
+| [#178](https://github.com/moaidmoatasem/cherenkov-professional/issues/178) | `.agents/tasks/issue-178.md` | P1 — Scanner graduation |
+
+**Do NOT pick up Phase 3/4 issues (#183–#190) until Phase 2 P0 items above are closed.**
 
 ## How to pick up a task
 

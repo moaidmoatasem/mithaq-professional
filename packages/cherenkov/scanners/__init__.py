@@ -1,6 +1,5 @@
 """cherenkov Scanners Module"""
 
-from .file_upload_scanner import FileUploadScanner
 from .header_scanner import SimpleScanner
 from .http_methods import HTTPMethodsScanner
 from .path_traversal_scanner import PathTraversalScanner
@@ -17,5 +16,4 @@ __all__ = [
     "NucleiScanner",
     "XXEScanner",
     "PathTraversalScanner",
-    "FileUploadScanner",
 ]

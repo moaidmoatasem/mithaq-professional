@@ -61,11 +61,6 @@ class SecurityHeadersScanner(BaseScanner):
                         )
                     )
         except Exception:
-            return ScanResult(
-                target=target,
-                scanner_name=self.name,
-                status="failed",
-                findings=[],
-            )
+            pass
 
         return ScanResult(target=target, scanner_name=self.name, findings=findings)

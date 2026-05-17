@@ -101,7 +101,8 @@ def save_scan(
             existing = conn.execute("SELECT 1 FROM scans WHERE scan_id = ?", (scan_id,)).fetchone()
             if existing is not None:
                 logger.error(
-                    "WORM violation: attempted overwrite of immutable scan record scan_id=%s", scan_id
+                    "WORM violation: attempted overwrite of immutable scan record scan_id=%s",
+                    scan_id,
                 )
                 raise StorageError(
                     f"WORM violation: scan record '{scan_id}' already exists and cannot be overwritten."

@@ -20,7 +20,13 @@ class FileUploadScanner(BaseScanner):
                     try:
                         r = await client.post(
                             url,
-                            files={"file": ("chk_probe.php", b"<?php echo 1; ?>", "application/octet-stream")},
+                            files={
+                                "file": (
+                                    "chk_probe.php",
+                                    b"<?php echo 1; ?>",
+                                    "application/octet-stream",
+                                )
+                            },
                         )
                         if r.status_code not in (404, 405, 403, 401, 301, 302):
                             findings.append(

@@ -26,9 +26,11 @@ def test_tokamak_execute_success():
         assert "docker" in cmd_args
         assert "run" in cmd_args
         assert "--network" in cmd_args
-        assert "none" in cmd_args
+        # STANDARD profile uses cherenkov-internal (not none)
+        assert "cherenkov-internal" in cmd_args
         assert "-v" in cmd_args
-        assert "cherenkov-tokamak" in cmd_args
+        # STANDARD profile uses python:3.11-slim (not cherenkov-tokamak)
+        assert "python:3.11-slim" in cmd_args
         assert "sh" in cmd_args
         assert "/workspace/payload.sh" in cmd_args
 

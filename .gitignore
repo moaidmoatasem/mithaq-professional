@@ -27,6 +27,9 @@ agent_state/
 workflow_checkpoints/
 workflow_results/
 
+# Qdrant runtime data (local vector DB state — not config)
+qdrant/
+
 # MkDocs build output
 site/
 
@@ -61,6 +64,7 @@ packages/cherenkov_core.egg-info/
 # Test / scan runtime output
 pytest_output.txt
 scan_report_*.json
+validation_results.json
 
 # Agent session notes (runtime, not source)
 # NOTE: AGENT_MEMORY.md and TODO.md are now tracked — they are multi-agent

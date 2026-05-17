@@ -148,6 +148,52 @@ def prune_old_scans(days: int = 90, path: Path = _DB_PATH) -> int:
             return cur.rowcount
 
 
+def erase_target_data(target: str, path: Path = _DB_PATH) -> dict:
+    """Right-to-erasure: remove all scan findings for a target URL.
+
+    Deletes the findings payload from scans and purges related audit_log
+    entries that reference the target. The scan_id row itself is retained
+    (status + timestamps only) so the forensic chain-of-custody is intact
+    but no personal data remains. Returns an erasure receipt.
+
+    Law 151/2020 Art. 15 compliance: call this when a data subject or the
+    bank's DPO requests erasure of data collected during a scan engagement.
+    """
+    now = datetime.now(timezone.utc).isoformat()
+    erased_scans = 0
+    erased_audit = 0
+
+    with closing(_connect(path)) as conn:
+        with conn:
+            # Null out findings payload; preserve scan_id + timestamps for audit chain
+            cur = conn.execute(
+                "UPDATE scans SET findings = '[]', meta = '{}', status = 'erased' "
+                "WHERE target = ? AND status != 'erased'",
+                (target,),
+            )
+            erased_scans = cur.rowcount
+
+            # Remove audit_log entries whose details reference this target
+            cur = conn.execute(
+                "DELETE FROM audit_log WHERE details LIKE ?",
+                (f'%"target": "{target}"%',),
+            )
+            erased_audit = cur.rowcount
+
+    receipt_payload = f"{now}|erase_target_data|{target}|scans={erased_scans}|audit={erased_audit}"
+    trace_hash = hashlib.sha256(receipt_payload.encode()).hexdigest()
+
+    return {
+        "target": target,
+        "erased_at": now,
+        "scans_cleared": erased_scans,
+        "audit_entries_removed": erased_audit,
+        "trace_hash": trace_hash,
+        "method": "findings_nulled+audit_purged",
+        "retained": "scan_id, started_at, finished_at, status=erased",
+    }
+
+
 def save_pending_finding(
     finding_id: str,
     severity: str,

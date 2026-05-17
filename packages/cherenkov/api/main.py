@@ -21,14 +21,15 @@ from typing import Any, Dict, List, Literal, Optional, Set
 from urllib.parse import urlparse
 
 import httpx
-from fastapi import Depends, FastAPI, HTTPException, WebSocket, WebSocketDisconnect, status
+from fastapi import Depends, FastAPI, HTTPException, Request, WebSocket, WebSocketDisconnect, status
 from fastapi.middleware.cors import CORSMiddleware
-from fastapi.responses import FileResponse, JSONResponse
+from fastapi.responses import FileResponse
 from fastapi.routing import APIRouter
 from fastapi.staticfiles import StaticFiles
 from pydantic import BaseModel
-from starlette.middleware.base import BaseHTTPMiddleware
-from starlette.requests import Request as StarletteRequest
+from slowapi import Limiter, _rate_limit_exceeded_handler
+from slowapi.errors import RateLimitExceeded
+from slowapi.util import get_remote_address
 
 from cherenkov.api.middleware.auth import (
     Role,
@@ -42,6 +43,7 @@ from cherenkov.api.middleware.auth import (
 )
 from cherenkov.core.storage.database import (
     _DB_PATH,
+    erase_target_data,
     get_audit_log,
     get_user,
     save_audit_entry,
@@ -55,42 +57,14 @@ logger = logging.getLogger(__name__)
 
 _STATIC_DIR = Path(__file__).parent / "static"
 
-# ── Rate limiting (token bucket, per-IP, no external deps) ───────────────────
+# Rate limits are intentionally conservative — scanning is CPU/GPU-heavy and
+# an unbounded queue would exhaust the local Ollama instance.
+_SCAN_RATE = os.getenv("CHERENKOV_SCAN_RATE_LIMIT", "20/minute")
+_WORKFLOW_RATE = os.getenv("CHERENKOV_WORKFLOW_RATE_LIMIT", "10/minute")
 
-_SCAN_RATE_LIMIT = int(os.getenv("CHERENKOV_SCAN_RPM", "10"))  # requests per minute per IP
+limiter = Limiter(key_func=get_remote_address)
 
-
-class _ScanRateLimiter(BaseHTTPMiddleware):
-    """Sliding-window rate limiter for /api/*/scan endpoints."""
-
-    def __init__(self, app, rpm: int = _SCAN_RATE_LIMIT):
-        super().__init__(app)
-        self._rpm = rpm
-        self._window: dict[str, list[float]] = {}
-        self._lock = asyncio.Lock()
-
-    async def dispatch(self, request: StarletteRequest, call_next):
-        if "/scan" not in request.url.path or request.method != "POST":
-            return await call_next(request)
-
-        client_ip = request.client.host if request.client else "unknown"
-        now = time.time()
-        window_start = now - 60.0
-
-        async with self._lock:
-            hits = self._window.get(client_ip, [])
-            hits = [t for t in hits if t > window_start]
-            if len(hits) >= self._rpm:
-                return JSONResponse(
-                    status_code=429,
-                    content={
-                        "detail": f"Rate limit exceeded: {self._rpm} scan requests/min per IP."
-                    },
-                )
-            hits.append(now)
-            self._window[client_ip] = hits
-
-        return await call_next(request)
+_START_TIME = time.time()
 
 
 @asynccontextmanager
@@ -112,6 +86,8 @@ app = FastAPI(
     lifespan=lifespan,
 )
 
+app.state.limiter = limiter
+app.add_exception_handler(RateLimitExceeded, _rate_limit_exceeded_handler)
 
 # Include localhost:3000 (React dev server) alongside the API host origins
 _ALLOWED_ORIGINS = os.getenv(
@@ -119,7 +95,6 @@ _ALLOWED_ORIGINS = os.getenv(
     "http://localhost:8000,http://127.0.0.1:8000,http://localhost:3000,http://127.0.0.1:3000",
 ).split(",")
 
-app.add_middleware(_ScanRateLimiter)
 app.add_middleware(
     CORSMiddleware,
     allow_origins=_ALLOWED_ORIGINS,
@@ -297,8 +272,41 @@ async def v1_auth_me(current_user: AuthUser = Depends(get_current_user)) -> dict
 @v1.get("/audit")
 async def v1_audit_log(current_user: AuthUser = Depends(RoleChecker(Role.ADMIN))) -> list[dict]:
     """Return the CHERENKOV audit log. Requires ADMIN role."""
-
     return get_audit_log(100)
+
+
+class EraseTargetRequest(BaseModel):
+    target: str
+    attested_by: str  # name of the operator authorizing erasure
+    reason: str = "data_subject_request"
+
+
+@v1.delete("/data/target")
+async def v1_erase_target(
+    request: EraseTargetRequest,
+    current_user: AuthUser = Depends(RoleChecker(Role.ADMIN)),
+) -> dict:
+    """Right-to-erasure endpoint (Law 151/2020 Art. 15).
+
+    Nulls all finding payloads for the given target URL and purges
+    related audit entries. Returns a signed erasure receipt.
+    Requires ADMIN role.
+    """
+    receipt = await asyncio.to_thread(erase_target_data, request.target)
+    receipt["attested_by"] = request.attested_by
+    receipt["reason"] = request.reason
+
+    save_audit_entry(
+        event_type="DATA_ERASURE",
+        user_id=current_user.username,
+        details={
+            "target": request.target,
+            "attested_by": request.attested_by,
+            "reason": request.reason,
+            "trace_hash": receipt["trace_hash"],
+        },
+    )
+    return receipt
 
 
 async def _check_ollama() -> str:
@@ -318,6 +326,32 @@ def _get_active_scans_count() -> int:
         return 0
 
 
+async def _get_qdrant_vector_count() -> int:
+    try:
+        async with httpx.AsyncClient(timeout=1.0) as c:
+            r = await c.get("http://localhost:6333/collections/cherenkov_findings")
+            if r.status_code == 200:
+                return r.json().get("result", {}).get("vectors_count", 0) or 0
+    except Exception:
+        pass
+    return 0
+
+
+def _get_tokamak_container_count() -> int:
+    try:
+        import subprocess
+
+        result = subprocess.run(
+            ["docker", "ps", "--filter", "label=cherenkov.tokamak=true", "--format", "{{.ID}}"],
+            capture_output=True,
+            text=True,
+            timeout=2,
+        )
+        return len([ln for ln in result.stdout.strip().splitlines() if ln])
+    except Exception:
+        return 0
+
+
 @v1.get("/health")
 async def v1_health() -> dict:
     """Health check used by useMetrics / useQueueDepth hooks.
@@ -328,23 +362,34 @@ async def v1_health() -> dict:
     from cherenkov.core.circuit_breaker import meissner_hub
 
     active_scans = _get_active_scans_count()
-
-    ollama_status = await _check_ollama()
+    ollama_status, vector_count, container_count = await asyncio.gather(
+        _check_ollama(),
+        _get_qdrant_vector_count(),
+        asyncio.to_thread(_get_tokamak_container_count),
+    )
     meissner_state = meissner_hub.state.value.upper()
 
     return {
         "status": "healthy",
         "agents": "operational",
         "queue": {"scan_jobs_pending": active_scans},
-        "uptime": time.time(),
+        "uptime_seconds": round(time.time() - _START_TIME),
         "active_scans": active_scans,
         "meissner": {"state": meissner_state},
         "nodes": {
             "tensor": {"status": ollama_status, "model": "Llama 3.1 8B"},
             "kinetic": {"status": ollama_status, "model": "Qwen2.5 3B", "ram_gb": 8},
             "aegis": {"status": ollama_status, "model": "Llama 3.1 8B", "ram_gb": 8},
-            "lattice": {"status": "ready", "model": "Qdrant / Vector", "vector_count": 0},
-            "tokamak": {"status": "ready", "model": "Sandbox Ready", "active_containers": 0},
+            "lattice": {
+                "status": "ready",
+                "model": "Qdrant / Vector",
+                "vector_count": vector_count,
+            },
+            "tokamak": {
+                "status": "ready",
+                "model": "Sandbox Ready",
+                "active_containers": container_count,
+            },
         },
     }
 
@@ -402,8 +447,11 @@ async def v1_sandbox_status() -> dict:
 
 
 @v1.post("/scan")
+@limiter.limit(_SCAN_RATE)
 async def v1_scan(
-    request: "ScanRequest", current_user: AuthUser = Depends(get_current_user)
+    http_request: Request,
+    request: "ScanRequest",
+    current_user: AuthUser = Depends(get_current_user),
 ) -> dict:
     """Proxy to the core scan engine; broadcasts a live event on completion."""
     result = await _run_scan(request)
@@ -839,7 +887,8 @@ async def _run_scan(request: "ScanRequest") -> dict:
 
 
 @app.post("/api/scan")
-async def scan_target(request: ScanRequest) -> dict:
+@limiter.limit(_SCAN_RATE)
+async def scan_target(http_request: Request, request: ScanRequest) -> dict:
     """Run all registered scanners against a target URL."""
     return await _run_scan(request)
 
@@ -849,11 +898,14 @@ async def scan_target(request: ScanRequest) -> dict:
 
 @app.get("/health")
 async def health() -> dict:
-    return {"status": "healthy", "agents": "operational", "queue": {"scan_jobs_pending": 0}}
+    return await v1_health()
 
 
 @app.post("/workflows/execute", response_model=WorkflowResponse)
-async def execute_workflow(request: WorkflowExecuteRequest) -> WorkflowResponse:
+@limiter.limit(_WORKFLOW_RATE)
+async def execute_workflow(
+    http_request: Request, request: WorkflowExecuteRequest
+) -> WorkflowResponse:
     """Execute a workflow by name or config"""
     try:
         # Load workflow config

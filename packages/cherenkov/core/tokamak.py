@@ -116,6 +116,7 @@ class Command:
     payload: str
     scanner_name: str = ""
     timeout: int = 30
+    profile: TOKAMAKProfile = TOKAMAKProfile.STANDARD
 
 
 @dataclass
@@ -260,6 +261,8 @@ class Tokamak:
         tmpdir = None
         payload_path = None
 
+        cfg = _PROFILE_CONFIGS[command.profile]
+
         try:
             tmpdir = tempfile.mkdtemp(prefix="tokamak_")
             payload_path = os.path.join(tmpdir, "payload.sh")
@@ -274,10 +277,12 @@ class Tokamak:
                     "run",
                     "--rm",
                     "--network",
-                    "none",
+                    cfg["network_mode"],
                     "-v",
                     f"{host_tmpdir}:/workspace",
-                    "cherenkov-tokamak",
+                    "--label",
+                    "cherenkov.tokamak=true",
+                    cfg["image"],
                     "sh",
                     "/workspace/payload.sh",
                 ],
@@ -335,6 +340,10 @@ class Tokamak:
             "files_erased": shredded_files if shredded_files else ["payload.sh"],
             "timestamp": datetime.now(timezone.utc).isoformat(),
             "method": "overwrite+truncate",
+            "trace_hash": trace_hash,
+            "attested_by": None,  # populated by operator at submission time
+            "license_number": None,  # licensed security professional ref (CBE requirement)
+            "standard": "ISO 27001 Annex A.8.3",
         }
 
         return TokamakResult(

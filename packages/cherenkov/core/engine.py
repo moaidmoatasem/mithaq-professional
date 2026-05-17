@@ -1,5 +1,7 @@
 """Async Scan Engine - Runs scanners concurrently"""
 
+from __future__ import annotations
+
 import asyncio
 import logging
 import time
@@ -10,6 +12,25 @@ from .base_scanner import ScanResult
 from .registry import ScannerRegistry
 
 logger = logging.getLogger(__name__)
+
+
+async def _lattice_store(result: ScanResult) -> None:
+    try:
+        from cherenkov.ai.lattice import embed_and_store
+
+        await embed_and_store(result)
+    except Exception as exc:
+        logger.debug("LATTICE store skipped: %s", exc)
+
+
+async def _lattice_context(target: str) -> list[dict]:
+    try:
+        from cherenkov.ai.lattice import query_similar_targets
+
+        return await query_similar_targets(target, k=5)
+    except Exception as exc:
+        logger.debug("LATTICE context skipped: %s", exc)
+    return []
 
 
 class ScanEngine:
@@ -66,6 +87,11 @@ class ScanEngine:
         if scanners is None:
             scanners = self.registry.list_scanners()
 
+        # Seed TENSOR with similar past findings before scanning
+        lattice_context = await _lattice_context(target)
+        if lattice_context:
+            logger.info("LATTICE: seeding TENSOR with %d past findings", len(lattice_context))
+
         semaphore = asyncio.Semaphore(max_concurrent)
 
         async def scan_with_semaphore(scanner_name: str) -> ScanResult:
@@ -83,6 +109,7 @@ class ScanEngine:
                     result = await breaker.execute_async(
                         self.scan_single, scanner_name, target, timeout, raise_on_failure=True
                     )
+                    asyncio.ensure_future(_lattice_store(result))
                     if on_progress:
                         if asyncio.iscoroutinefunction(on_progress):
                             await on_progress(scanner_name, result)

@@ -1,6 +1,6 @@
 [project]
 name = "cherenkov-core"
-version = "0.1.1"
+version = "1.1.0"
 description = "cherenkov Security Framework - Precision in Sovereignty"
 authors = [
     {name = "Moaid EL-Moatasem Bellah"}
@@ -19,6 +19,7 @@ dependencies = [
     "cryptography>=41.0.0",
     "pyyaml>=6.0.0",
     "packaging>=23.0",
+    "slowapi>=0.1.9",
 ]
 
 [tool.setuptools.packages.find]

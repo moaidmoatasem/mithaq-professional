@@ -17,7 +17,7 @@ import uuid
 from contextlib import asynccontextmanager
 from datetime import datetime, timezone
 from pathlib import Path
-from typing import Any, Dict, Literal, Optional, Set
+from typing import Any, Dict, List, Literal, Optional, Set
 from urllib.parse import urlparse
 
 import httpx
@@ -38,29 +38,17 @@ from cherenkov.api.middleware.auth import (
 from cherenkov.api.middleware.auth import (
     User as AuthUser,
 )
-from cherenkov.core.base_scanner import ScanResult
 from cherenkov.core.storage.database import (
     _DB_PATH,
     get_audit_log,
     get_user,
     save_audit_entry,
 )
-from cherenkov.core.tokamak import Command, Tokamak
 from cherenkov.orchestration.orchestration_api import orchestrate_workflow
 from cherenkov.orchestration.result_persistence import ResultStore
 from cherenkov.orchestration.workflow_parser import load_workflow
-from cherenkov.core.siem import SIEMForwarder
-from cherenkov.core.mesh import MeshManager
-from cherenkov.core.storage.lattice import LatticeBridge
-from cherenkov.threat_modeling import DFDGenerator, ThreatDragonExporter, TMBOMExporter, MermaidExporter
-from cherenkov.threat_modeling.schemas import ThreatModel, Diagram, DFDItem, DFDItemType, Threat, Severity, Control, ControlStatus, Risk
 
 logger = logging.getLogger(__name__)
-
-# Enterprise Integrations
-siem = SIEMForwarder({"enabled": True, "mode": "syslog", "host": "127.0.0.1", "port": 514})
-mesh = MeshManager()
-lattice = LatticeBridge()
 
 _STATIC_DIR = Path(__file__).parent / "static"
 
@@ -74,18 +62,6 @@ async def lifespan(app: FastAPI):
             _broadcast({"type": "circuit_breaker", "state": "OPEN", "reason": "threshold_exceeded"})
         )
     )
-    meissner_hub.on_close(
-        lambda: asyncio.create_task(
-            _broadcast({"type": "circuit_breaker", "state": "CLOSED", "reason": "recovery_successful"})
-        )
-    )
-    meissner_hub.on_half_open(
-        lambda: asyncio.create_task(
-            _broadcast({"type": "circuit_breaker", "state": "HALF_OPEN", "reason": "testing_recovery"})
-        )
-    )
-    # Initialize LATTICE collection
-    asyncio.create_task(lattice.init_collection())
     yield
 
 
@@ -257,8 +233,6 @@ async def v1_assistant_advice(
         return {"advice": f"Assistant error: {exc}", "status": "error"}
 
 
-
-
 @v1.post("/auth/token")
 async def v1_auth_token(request: AuthRequest) -> dict:
     """Authenticate a user and return a JWT token."""
@@ -282,7 +256,6 @@ async def v1_auth_me(current_user: AuthUser = Depends(get_current_user)) -> dict
 @v1.get("/audit")
 async def v1_audit_log(current_user: AuthUser = Depends(RoleChecker(Role.ADMIN))) -> list[dict]:
     """Return the CHERENKOV audit log. Requires ADMIN role."""
-    from cherenkov.core.storage.database import get_audit_log
 
     return get_audit_log(100)
 
@@ -373,42 +346,18 @@ async def v1_sandbox_execute(
     """Execute a payload in the TOKAMAK sandbox. Requires OPERATOR role."""
     result = await asyncio.to_thread(Tokamak.execute, command)
     return {
-        "status": "success",
         "stdout": result.stdout,
         "stderr": result.stderr,
         "trace_hash": result.trace_hash,
         "shred_receipt": result.shred_receipt,
         "exit_code": result.exit_code,
-        "duration_ms": result.duration_ms,
     }
 
 
 @v1.get("/sandbox/status")
-async def v1_sandbox_status(current_user: AuthUser = Depends(get_current_user)) -> dict:
-    """Return the status of the TOKAMAK sandbox."""
-    return {"status": "operational", "containers_active": 0}
-
-
-@v1.get("/mesh/nodes")
-async def v1_mesh_nodes(current_user: AuthUser = Depends(RoleChecker(Role.ADMIN))) -> list[dict]:
-    """Return list of active mesh nodes. Requires ADMIN."""
-    return mesh.get_active_nodes()
-
-
-@v1.post("/mesh/register")
-async def v1_mesh_register(node_id: str, host: str, role: str = "worker") -> dict:
-    """Register a new node in the mesh."""
-    mesh.register_node(node_id, host, role)
-    return {"status": "registered", "node_id": node_id}
-
-
-@v1.post("/mobile/scan")
-async def v1_mobile_scan(
-    request: ScanRequest, current_user: AuthUser = Depends(get_current_user)
-) -> dict:
-    """Specialized mobile binary analysis; triggers IPA/APK forensic scanners."""
-    # For now, we reuse _run_scan but could add mobile-specific logic here
-    return await _run_scan(request)
+async def v1_sandbox_status() -> dict:
+    """Return the status of the Tokamak sandbox."""
+    return {"status": "ready"}
 
 
 @v1.post("/scan")
@@ -437,6 +386,12 @@ async def v1_scan(
     return result
 
 
+@v1.get("/scans/history")
+async def v1_scan_history() -> list[dict]:
+    """Return recent scan results for the ThreatIntelPanel sidebar."""
+    from cherenkov.core.storage.database import list_scans
+
+    return list_scans(20)
 
 @v1.get("/reports/{scan_id}/sarif")
 async def v1_scan_report_sarif(scan_id: str) -> dict:
@@ -498,7 +453,6 @@ async def v1_scan_report_sarif(scan_id: str) -> dict:
 
 
 @v1.get("/reports/{scan_id}/pdf")
-
 async def v1_scan_report_pdf(
     scan_id: str, current_user: AuthUser = Depends(get_current_user)
 ):
@@ -594,6 +548,7 @@ async def v1_get_process_report(process_id: str) -> dict:
     if "error" in report:
         raise HTTPException(status_code=404, detail=report["error"])
     return report
+
 
 @v1.get("/findings/pending")
 async def v1_get_pending_findings() -> list[dict]:
@@ -773,33 +728,25 @@ async def _run_scan(request: "ScanRequest") -> dict:
     scan_id = str(uuid.uuid4())
     started = datetime.now(timezone.utc).isoformat()
 
-    async def on_progress(scanner_name: str, result: ScanResult):
-        await _broadcast(
-            {
-                "type": "scan_progress",
-                "scan_id": scan_id,
-                "scanner": scanner_name,
-                "status": result.status,
-                "findings_count": len(result.findings),
-            }
-        )
-
     try:
         registry = ScannerRegistry()
-        total_scanners = len(registry.list_scanners())
-
-        await _broadcast(
-            {
-                "type": "scan_started",
-                "scan_id": scan_id,
-                "target": request.url,
-                "total_scanners": total_scanners,
-                "timestamp": started,
-            }
-        )
-
         engine = ScanEngine(registry)
-        scan_results = await engine.scan_all(request.url, timeout=10.0, on_progress=on_progress)
+
+        async def on_scan_progress(scanner_name: str, status: str, result: Any):
+            # Wrap the websocket broadcast in a task
+            asyncio.get_running_loop().create_task(
+                _broadcast(
+                    {
+                        "type": "scan_progress",
+                        "scanner": scanner_name,
+                        "status": status,
+                    }
+                )
+            )
+
+        scan_results = await engine.scan_all(
+            request.url, timeout=10.0, progress_callback=on_scan_progress
+        )
     except Exception as exc:
         logger.error("ScanEngine failed for %s: %s", request.url, exc)
         raise HTTPException(status_code=500, detail=f"Scan execution failed: {exc}") from exc
@@ -857,16 +804,6 @@ async def _run_scan(request: "ScanRequest") -> dict:
                     )
                 )
 
-                # SIEM Forwarding
-                asyncio.create_task(siem.forward_finding(v, {"target": request.url, "scan_id": scan_id, "timestamp": finished}))
-
-                # LATTICE Embedding
-                asyncio.create_task(lattice.embed_and_store(
-                    finding_id=finding_id,
-                    content=f"{v['title']}: {v['description']}",
-                    metadata={"target": request.url, "scanner": v["scanner"], "severity": v["severity"]}
-                ))
-
     except Exception as exc:
         logger.error("Failed to persist scan %s: %s", scan_id, exc)
 
@@ -880,186 +817,6 @@ async def _run_scan(request: "ScanRequest") -> dict:
         "vulnerabilities": vulnerabilities,
         "count": len(vulnerabilities),
     }
-
-
-# ── Threat Modeling API ──────────────────────────────────────────────────────
-
-
-class ThreatModelGenerateRequest(BaseModel):
-    description: str
-    owner: str = "Security Team"
-    architecture_pattern: str = "web_app"
-
-
-@v1.post("/threat-model/generate")
-async def v1_threat_model_generate(
-    request: ThreatModelGenerateRequest,
-    current_user: AuthUser = Depends(get_current_user),
-) -> dict:
-    """Generate a complete threat model (DFD + STRIDE) from a system description.
-
-    Uses template-based generation with optional LLM enrichment via Ollama.
-    Returns the model summary and available export formats.
-    """
-    import json
-
-    from cherenkov.agents.local.ollama_client import OllamaClient
-
-    llm = OllamaClient() if OllamaClient().is_available() else None
-    generator = DFDGenerator(llm_client=llm)
-
-    model = generator.generate(
-        system_description=request.description,
-        architecture_pattern=request.architecture_pattern,
-        owner=request.owner,
-    )
-
-    model_id = str(uuid.uuid4())
-
-    td_exporter = ThreatDragonExporter(model)
-    td_json = td_exporter.export()
-
-    tmbom_exporter = TMBOMExporter(model)
-    tmbom_json = tmbom_exporter.export()
-
-    mermaid_exporter = MermaidExporter(model)
-    mermaid_dfd = mermaid_exporter.export_flowchart()
-
-    from cherenkov.core.storage.database import save_threat_model
-
-    save_threat_model(
-        model_id=model_id,
-        title=model.title,
-        owner=model.owner,
-        description=model.description,
-        version=model.version,
-        model_json=json.dumps({
-            "diagrams": [
-                {
-                    "title": d.title,
-                    "type": d.diagram_type,
-                    "item_count": len(d.items),
-                    "threat_count": len(d.threats),
-                }
-                for d in model.diagrams
-            ],
-            "control_count": len(model.controls),
-            "risk_count": len(model.risks),
-        }),
-        threat_dragon_json=json.dumps(td_json),
-        tmbom_json=json.dumps(tmbom_json),
-        mermaid_dfd=mermaid_dfd,
-    )
-
-    asyncio.create_task(
-        _broadcast({
-            "type": "threat_model_generated",
-            "model_id": model_id,
-            "title": model.title,
-            "threat_count": sum(len(d.threats) for d in model.diagrams),
-        })
-    )
-
-    return {
-        "model_id": model_id,
-        "title": model.title,
-        "description": model.description[:200],
-        "owner": model.owner,
-        "version": model.version,
-        "diagrams": [
-            {
-                "title": d.title,
-                "type": d.diagram_type,
-                "items": len(d.items),
-                "threats": len(d.threats),
-            }
-            for d in model.diagrams
-        ],
-        "controls": len(model.controls),
-        "risks": len(model.risks),
-        "exports": {
-            "threat_dragon": f"/api/v1/threat-model/{model_id}/export/threat-dragon",
-            "tmbom": f"/api/v1/threat-model/{model_id}/export/tmbom",
-            "mermaid": f"/api/v1/threat-model/{model_id}/export/dfd",
-        },
-    }
-
-
-@v1.get("/threat-model/{model_id}")
-async def v1_get_threat_model(
-    model_id: str,
-    current_user: AuthUser = Depends(get_current_user),
-) -> dict:
-    """Retrieve a stored threat model by ID."""
-    from cherenkov.core.storage.database import get_threat_model
-
-    tm = get_threat_model(model_id)
-    if not tm:
-        raise HTTPException(status_code=404, detail="Threat model not found")
-    return {
-        "model_id": tm["model_id"],
-        "title": tm["title"],
-        "owner": tm["owner"],
-        "description": tm["description"],
-        "version": tm["version"],
-        "created_at": tm["created_at"],
-        "summary": json.loads(tm["model_json"]),
-    }
-
-
-@v1.get("/threat-model/{model_id}/export/threat-dragon")
-async def v1_export_threat_dragon(
-    model_id: str,
-    current_user: AuthUser = Depends(get_current_user),
-) -> dict:
-    """Export threat model as OWASP Threat Dragon v2 JSON."""
-    from cherenkov.core.storage.database import get_threat_model
-
-    tm = get_threat_model(model_id)
-    if not tm:
-        raise HTTPException(status_code=404, detail="Threat model not found")
-    return json.loads(tm["threat_dragon_json"])
-
-
-@v1.get("/threat-model/{model_id}/export/tmbom")
-async def v1_export_tmbom(
-    model_id: str,
-    current_user: AuthUser = Depends(get_current_user),
-) -> dict:
-    """Export threat model as OWASP TM-BOM (CycloneDX ECMA-424 format)."""
-    from cherenkov.core.storage.database import get_threat_model
-
-    tm = get_threat_model(model_id)
-    if not tm:
-        raise HTTPException(status_code=404, detail="Threat model not found")
-    return json.loads(tm["tmbom_json"])
-
-
-@v1.get("/threat-model/{model_id}/export/dfd")
-async def v1_export_dfd(
-    model_id: str,
-    current_user: AuthUser = Depends(get_current_user),
-) -> dict:
-    """Export threat model DFD as a Mermaid.js flowchart."""
-    from cherenkov.core.storage.database import get_threat_model
-
-    tm = get_threat_model(model_id)
-    if not tm:
-        raise HTTPException(status_code=404, detail="Threat model not found")
-    return {
-        "format": "mermaid",
-        "diagram": tm["mermaid_dfd"],
-    }
-
-
-@v1.get("/threat-model/list")
-async def v1_list_threat_models(
-    current_user: AuthUser = Depends(get_current_user),
-) -> list[dict]:
-    """List all stored threat models."""
-    from cherenkov.core.storage.database import list_threat_models
-
-    return list_threat_models(20)
 
 
 # ── Legacy scan + health endpoints (keep for backwards compat) ───────────────

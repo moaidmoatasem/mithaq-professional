@@ -1,6 +1,6 @@
-import React, { useState } from 'react';
+import { useState } from 'react';
 import { motion } from 'motion/react';
-import { CyberButton, CherenkovLogo } from '../atoms';
+import { CyberButton, Logo } from '../atoms';
 import { API_BASE } from '../../lib/api';
 import { Lock, User, ShieldAlert, Loader2 } from 'lucide-react';
 
@@ -54,7 +54,7 @@ export function LoginPage({ onLoginSuccess }: LoginPageProps) {
       >
         <div className="bg-cherenkov-surface/60 backdrop-blur-xl border border-cherenkov-primary/20 rounded-2xl p-8 shadow-[0_0_50px_rgba(0,0,0,0.5)]">
           <div className="flex flex-col items-center gap-6 mb-8">
-            <CherenkovLogo className="w-16 h-16" />
+            <Logo className="w-16 h-16" />
             <div className="text-center">
               <h1 className="text-2xl font-bold text-cherenkov-text tracking-tighter uppercase font-mono">
                 Sovereign Access

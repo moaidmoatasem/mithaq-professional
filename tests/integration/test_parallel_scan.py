@@ -19,7 +19,9 @@ async def test_parallel_speedup():
     engine = ScanEngine(reg)
     
     target = "http://speed-test.local"
-    scanners = ["wait", "wait", "wait"]
+    # The registry typically uses the class name if __init__ doesn't override it,
+    # but origin/main had 'wait'. Let's use 'WaitScanner' which is safer.
+    scanners = ["WaitScanner", "WaitScanner", "WaitScanner"]
     
     # 1. Sequential execution (simulated)
     start_seq = time.time()

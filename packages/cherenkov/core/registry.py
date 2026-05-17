@@ -29,20 +29,6 @@ class ScannerRegistry:
         self.register(AndroidScanner)
         self.register(IOSScanner)
 
-        # Register Mobile Scanners
-        from cherenkov.scanners.mobile.ipa_scanner import IPAScanner
-        from cherenkov.scanners.mobile.ats_scanner import ATSScanner
-        from cherenkov.scanners.mobile.binary_scanner import BinaryScanner
-
-        self.register(IPAScanner)
-        self.register(ATSScanner)
-        self.register(BinaryScanner)
-
-        # Register Threat Model Scanner
-        from cherenkov.threat_modeling.threat_model_scanner import ThreatModelScanner
-
-        self.register(ThreatModelScanner)
-
     def register(self, scanner_class: Type[BaseScanner]):
         """Manually register a scanner class"""
         scanner_name = scanner_class.__name__.replace("Scanner", "").lower()

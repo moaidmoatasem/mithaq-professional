@@ -38,8 +38,6 @@ export function TacticalOperationsPanel() {
   
   const [showNewScan, setShowNewScan] = useState(false);
   const [scanProgress, setScanProgress] = useState(0);
-  const [totalScanners, setTotalScanners] = useState(0);
-  const [completedScanners, setCompletedScanners] = useState(0);
 
   const { lastEvent, connected } = useLiveEvents();
 
@@ -52,42 +50,19 @@ export function TacticalOperationsPanel() {
     if (!lastEvent) return;
     
     switch (lastEvent.event) {
-      case 'scan_started':
-        setTotalScanners(lastEvent.total_scanners);
-        setCompletedScanners(0);
-        setScanProgress(0);
-        addLog(`Scan started: ${lastEvent.total_scanners} scanners engaged.`, 'info');
-        setIsExecuting(true);
-        setActiveStep(1);
-        setContainmentState('MEISSNER_LOCKED');
-        break;
       case 'scan_progress':
-        setCompletedScanners(prev => {
-          const next = prev + 1;
-          const progress = totalScanners > 0 ? (next / totalScanners) * 100 : 0;
-          setScanProgress(progress);
-          
-          if (progress >= 30 && progress < 60) {
-            setActiveStep(2);
-            setContainmentState('ABLATION_ACTIVE');
-          } else if (progress >= 60 && progress < 90) {
-            setActiveStep(3);
-            setContainmentState('THREAT_DETECTED');
-          } else if (progress >= 90 && progress < 100) {
-            setActiveStep(4);
-            setContainmentState('TOKAMAK_EXECUTING');
-          }
-          
-          return next;
-        });
-        addLog(`[${lastEvent.scanner}] Completed. Findings: ${lastEvent.findings_count}`, 'info');
-        break;
-      case 'scan_complete':
-        setIsExecuting(false);
-        setActiveStep(5);
-        setContainmentState('TRACE_SIGNED');
-        setScanProgress(100);
-        addLog(`Operation Complete. ${lastEvent.count} vulnerabilities confirmed.`, 'verified');
+        setScanProgress(lastEvent.progress || 0);
+        addLog(`[${lastEvent.current_scanner}] Progress: ${lastEvent.progress}%`, 'info');
+        if (lastEvent.progress > 0 && activeStep < 3) {
+          setActiveStep(3);
+          setContainmentState('THREAT_DETECTED');
+        }
+        if (lastEvent.progress === 100) {
+          setIsExecuting(false);
+          setActiveStep(5);
+          setContainmentState('TRACE_SIGNED');
+          addLog('Scan Complete.', 'verified');
+        }
         break;
       case 'circuit_breaker':
         addLog(`Meissner Circuit: ${lastEvent.state} - ${lastEvent.reason}`, 'alert');
@@ -114,7 +89,6 @@ export function TacticalOperationsPanel() {
   }, [lastEvent]);
 
   const initiateScan = async (data: any) => {
-    // Audit log and API call will trigger WS events
     const result = await submitScan({ url: data.target });
     
     setTraceId(result.scan_id?.slice(0, 8).toUpperCase() || generateTrace().slice(0, 8).toUpperCase());

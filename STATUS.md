@@ -9,25 +9,23 @@
 | TypeScript (web) | ✅ Zero errors |
 | Vite build | ✅ Clean (414 kB JS, 54 kB CSS) |
 
-## Current Phase: Phase 5 — Enterprise Integration (Hidden Nebula)
-**Target:** v1.5.0 | **Timeline:** Q2 2026
+## Current Phase: Phase 2 — Swarm Optimization & Parallelism
+**Target:** v1.1.0 | **Timeline:** Q2 2026
 
 ### Sprint Progress
 | Sprint | Goal | Status |
 |---|---|---|
 | Sprint 1 — BaseScanner | Uniform scanner interface | ✅ Done — `packages/cherenkov/core/base_scanner.py` |
 | Sprint 2 — Parallel Orchestration | asyncio + AIMD circuit breakers | ✅ Done — `circuit_breaker.py`, `ai_workflows_orchestrator.py` |
-| Sprint 3 — TOKAMAK Sandbox | Docker isolation + PoC execution | ✅ Done — tokamak.py with Command pattern, SHA-256 signing, shred receipt |
-| Sprint 4 — HITL & Mobile | API pause gate + UI approval flow + Mobile Dashboard | ✅ Done — Mobile Dashboard, IPA/ATS scanners, HITL approval gate |
-| Sprint 5 — Enterprise & LATTICE | SIEM + Mesh + LATTICE Vector Bridge | ✅ Done — SIEM forwarding, Mesh coordination, Vector Intelligence indexing |
+| Sprint 3 — TOKAMAK Sandbox | Docker isolation + PoC execution | 🔄 In Progress — `core/tokamak.py` exists, Docker wire-up pending |
+| Sprint 4 — HITL Workflows | API pause gate + UI approval flow | ⏳ Not started |
+| Sprint 5 — Compliance & Reporting | SAMA/EGY-FIN mapping + PDF/SARIF | ⏳ Not started |
 
 ## Active Work
 - **Frontend dashboard** (`packages/cherenkov/web/`) — React 19 / Vite / Tailwind v4, live scan results, WebSocket events ✅
 - **FastAPI backend** (`packages/cherenkov/api/main.py`) — `/api/v1/*` routes, `/ws/live` WebSocket, scan history ✅
-- **Compliance module** (`packages/cherenkov/compliance/`) — 19 CWE → OWASP/SAMA/EGY-FIN/DORA mappings, SARIF + PDF export ✅
-- **HITL workflows** — approve/reject endpoints, pending findings, audit vault ✅
-- **TOKAMAK sandbox** — Docker execution with Command pattern, SHA-256 signing, shred receipt ✅
 - **Scanner graduation** — promoting `autonomous_generated/scanners/` into `packages/cherenkov/scanners/` under `BaseScanner` contract
+- **TOKAMAK Docker** — `Dockerfile.tokamak` + `core/tokamak.py` need `Command` pattern + sandbox network isolation
 
 ## Agent Coordination
 | Agent | Domain | Channel |

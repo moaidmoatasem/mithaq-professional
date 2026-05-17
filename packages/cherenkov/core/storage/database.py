@@ -57,23 +57,6 @@ CREATE TABLE IF NOT EXISTS audit_log (
 );
 CREATE INDEX IF NOT EXISTS idx_audit_timestamp ON audit_log(timestamp);
 CREATE INDEX IF NOT EXISTS idx_audit_event_type ON audit_log(event_type);
-
-CREATE TABLE IF NOT EXISTS threat_models (
-    id          INTEGER PRIMARY KEY AUTOINCREMENT,
-    model_id    TEXT    NOT NULL UNIQUE,
-    title       TEXT    NOT NULL,
-    owner       TEXT    NOT NULL DEFAULT '',
-    description TEXT    NOT NULL DEFAULT '',
-    version     TEXT    NOT NULL DEFAULT '1.0.0',
-    model_json  TEXT    NOT NULL DEFAULT '{}',
-    threat_dragon_json TEXT NOT NULL DEFAULT '{}',
-    tmbom_json  TEXT    NOT NULL DEFAULT '{}',
-    mermaid_dfd TEXT    NOT NULL DEFAULT '',
-    created_at  TEXT    NOT NULL DEFAULT (datetime('now')),
-    updated_at  TEXT    NOT NULL DEFAULT (datetime('now'))
-);
-CREATE INDEX IF NOT EXISTS idx_threat_models_created ON threat_models(created_at);
-CREATE INDEX IF NOT EXISTS idx_threat_models_title  ON threat_models(title);
 """
 
 
@@ -252,51 +235,6 @@ def get_audit_log(limit: int = 100, path: Path = _DB_PATH) -> list[dict]:
         d["details"] = json.loads(d["details"])
         result.append(d)
     return result
-
-
-def save_threat_model(
-    model_id: str,
-    title: str,
-    owner: str,
-    description: str,
-    version: str,
-    model_json: str,
-    threat_dragon_json: str = "",
-    tmbom_json: str = "",
-    mermaid_dfd: str = "",
-    path: Path = _DB_PATH,
-) -> None:
-    with _connect(path) as conn:
-        conn.execute(
-            """
-            INSERT OR REPLACE INTO threat_models
-                (model_id, title, owner, description, version, model_json,
-                 threat_dragon_json, tmbom_json, mermaid_dfd)
-            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
-            """,
-            (model_id, title, owner, description, version,
-             model_json, threat_dragon_json, tmbom_json, mermaid_dfd),
-        )
-
-
-def get_threat_model(model_id: str, path: Path = _DB_PATH) -> dict | None:
-    with _connect(path) as conn:
-        row = conn.execute(
-            "SELECT * FROM threat_models WHERE model_id = ?", (model_id,)
-        ).fetchone()
-    if row is None:
-        return None
-    return dict(row)
-
-
-def list_threat_models(limit: int = 20, path: Path = _DB_PATH) -> list[dict]:
-    with _connect(path) as conn:
-        rows = conn.execute(
-            "SELECT model_id, title, owner, version, description, created_at "
-            "FROM threat_models ORDER BY created_at DESC LIMIT ?",
-            (limit,),
-        ).fetchall()
-    return [dict(r) for r in rows]
 
 
 def _row_to_dict(row: sqlite3.Row) -> dict:

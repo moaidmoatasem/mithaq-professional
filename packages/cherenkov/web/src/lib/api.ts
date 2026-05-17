@@ -72,6 +72,18 @@ export interface HealthResponse {
   active_scans: number;
 }
 
+export interface FindingApproval {
+  id?: number;
+  finding_id: string;
+  severity: string;
+  scanner: string;
+  title: string;
+  status: 'pending' | 'approved' | 'rejected';
+  operator_id?: string | null;
+  approved_at?: string | null;
+  scan_id?: string | null;
+}
+
 export interface NodeInfo {
   status: 'ready' | 'busy' | 'offline';
   model?: string;
@@ -115,7 +127,7 @@ export async function fetchScanHistory(): Promise<ScanResult[]> {
 /**
  * Fetch pending approvals (HITL gate)
  */
-export async function fetchPendingApprovals(): Promise<Vulnerability[]> {
+export async function fetchPendingApprovals(): Promise<FindingApproval[]> {
   const res = await fetch(`${API_BASE}/findings/pending`, {
     headers: getAuthHeader()
   });

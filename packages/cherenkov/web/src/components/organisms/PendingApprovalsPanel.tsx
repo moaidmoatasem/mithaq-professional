@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { usePendingApprovals } from '@/src/hooks/useMetrics';
 import { approveFinding, rejectFinding } from '@/src/lib/api';
+import type { FindingApproval } from '@/src/lib/api';
 import { CyberBadge } from '../atoms/CyberBadge';
 import { CyberButton } from '../atoms/CyberButton';
 import { ShieldAlert, Check, X } from 'lucide-react';
@@ -48,7 +49,7 @@ export function PendingApprovalsPanel() {
         <span className="text-[10px] font-mono text-hud-amber uppercase tracking-[0.2em]">Pending_HITL_Approvals</span>
       </div>
       <AnimatePresence>
-        {pendingFindings.map((finding: any) => (
+        {pendingFindings.map((finding: FindingApproval) => (
           <motion.div
             key={finding.id}
             initial={{ opacity: 0, height: 0 }}
@@ -70,16 +71,16 @@ export function PendingApprovalsPanel() {
               <CyberButton 
                 variant="primary" 
                 className="flex-1 py-1 text-[9px]"
-                disabled={loading === finding.id}
-                onClick={() => handleApprove(finding.id)}
+                disabled={loading === finding.finding_id}
+                onClick={() => handleApprove(finding.finding_id)}
               >
                 <Check size={12} className="mr-1" /> Approve
               </CyberButton>
               <CyberButton 
                 variant="danger" 
                 className="flex-1 py-1 text-[9px]"
-                disabled={loading === finding.id}
-                onClick={() => handleReject(finding.id)}
+                disabled={loading === finding.finding_id}
+                onClick={() => handleReject(finding.finding_id)}
               >
                 <X size={12} className="mr-1" /> Reject
               </CyberButton>

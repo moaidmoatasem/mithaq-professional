@@ -8,6 +8,5 @@ export * from './QueueDepthSparkline';
 export * from './NewScanForm';
 export * from './AssistantWidget';
 export * from './PendingApprovalsPanel';
-export * from './MobileTargetForm';
-export * from './MobileResultsPanel';
 export * from './SIEMConfigPanel';
+export * from './MobileTriagePanel';

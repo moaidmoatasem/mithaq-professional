@@ -116,35 +116,72 @@ app.add_middleware(
 
 # ── WebSocket live-event broadcast ───────────────────────────────────────────
 
-_ws_clients: Set[WebSocket] = set()
+_ws_clients: Dict[WebSocket, Set[str]] = {}
 
 
 async def _broadcast(event: dict) -> None:
     """Push a JSON event to every connected WebSocket client."""
     dead: Set[WebSocket] = set()
     payload = json.dumps(event)
-    for ws in list(_ws_clients):
+
+    event_type = event.get("type")
+    scan_id = event.get("scan_id")
+
+    for ws, subscriptions in list(_ws_clients.items()):
+        # If it's a scan_progress event and it specifies a scan_id, filter by subscriptions.
+        # If the client isn't subscribed to any scans, we broadcast it anyway (backwards compatible),
+        # or we could strictly filter. The requirement implies filtering based on subscription.
+        # Let's broadcast unless they explicitly missed the subscription, but the safer approach:
+        if event_type == "scan_progress" and scan_id and scan_id not in subscriptions:
+            # If they have subscriptions but this scan_id isn't one of them, skip.
+            # If they have NO subscriptions, we still send it to be safe (dashboard might need it all).
+            # But normally, if subscriptions exist, we filter.
+            if subscriptions:
+                continue
+
         try:
             await ws.send_text(payload)
         except Exception:
             dead.add(ws)
-    _ws_clients.difference_update(dead)
+
+    for ws in dead:
+        _ws_clients.pop(ws, None)
+
+
+async def _health_pulse_loop(websocket: WebSocket) -> None:
+    try:
+        while True:
+            await asyncio.sleep(5)
+            await websocket.send_text(json.dumps({"type": "health_pulse"}))
+    except Exception:
+        pass
 
 
 @app.websocket("/ws/live")
 async def ws_live(websocket: WebSocket) -> None:
     """Live event stream for the CHERENKOV web dashboard."""
     await websocket.accept()
-    _ws_clients.add(websocket)
+    _ws_clients[websocket] = set()
+
+    pulse_task = asyncio.create_task(_health_pulse_loop(websocket))
+
     try:
         while True:
-            # Keep-alive: echo any client ping, otherwise just wait
-            await asyncio.sleep(30)
-            await websocket.send_text(json.dumps({"type": "ping"}))
+            data = await websocket.receive_json()
+            command = data.get("command")
+            scan_id = data.get("scan_id")
+
+            if command == "subscribe_scan" and scan_id:
+                _ws_clients[websocket].add(scan_id)
+            elif command == "unsubscribe_scan" and scan_id:
+                _ws_clients[websocket].discard(scan_id)
     except WebSocketDisconnect:
         pass
+    except Exception:
+        pass
     finally:
-        _ws_clients.discard(websocket)
+        pulse_task.cancel()
+        _ws_clients.pop(websocket, None)
 
 
 # ── /api/v1 router (consumed by the React frontend) ─────────────────────────

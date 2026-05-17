@@ -1,147 +1,108 @@
-"""
-XSS Scanner - Refined Version
-Detects Cross-Site Scripting vulnerabilities
-"""
+"""XSS Scanner — detects reflected and DOM-based XSS vulnerabilities (CWE-79)"""
 
-import logging
 import re
-from typing import Dict, List
+import time
+from typing import List
 from urllib.parse import parse_qs, urlencode, urlparse, urlunparse
 
-import requests
+import httpx
 
-logger = logging.getLogger(__name__)
+from cherenkov.core.base_scanner import BaseScanner, Finding, ScanResult, Severity
 
 
-class XSSScanner:
-    """Production XSS vulnerability scanner"""
+class XSSScanner(BaseScanner):
+    """Detects reflected XSS in URL parameters and DOM XSS sink indicators."""
 
-    # Common XSS payloads for testing
     XSS_PAYLOADS = [
         '<script>alert("XSS")</script>',
-        '<img src=x onerror=alert("XSS")>',
-        '"><script>alert(String.fromCharCode(88,83,83))</script>',
-        '<svg/onload=alert("XSS")>',
-        'javascript:alert("XSS")',
-        "<iframe src=\"javascript:alert('XSS')\">",
+        '<img src=x onerror=alert(1)>',
+        '"><svg/onload=alert(1)>',
     ]
 
-    def __init__(self, target_url: str):
-        self.target = target_url
-        self.vulnerabilities = []
+    DOM_PATTERNS = [
+        r"document\.write\(",
+        r"innerHTML\s*=",
+        r"eval\(",
+        r"\.location\s*=",
+    ]
 
-    def scan_reflected_xss(self) -> List[Dict]:
-        """Test for reflected XSS in URL parameters"""
-        logger.info("[*] Scanning for reflected XSS: %s", self.target)
+    def __init__(self, name: str = "", description: str = ""):
+        super().__init__(
+            name or "xss",
+            description or "Detects reflected and DOM-based XSS vulnerabilities (CWE-79)",
+        )
 
-        try:
-            parsed = urlparse(self.target)
-            params = parse_qs(parsed.query)
-
-            if not params:
-                logger.info("  [!] No parameters found to test")
-                return []
-
-            # Test each parameter with XSS payloads
-            for param_name in params.keys():
-                for payload in self.XSS_PAYLOADS:
-                    test_url = self._inject_payload(self.target, param_name, payload)
-
-                    try:
-                        response = requests.get(test_url, timeout=10)
-
-                        # Check if payload is reflected in response
-                        if payload in response.text:
-                            vuln = {
-                                "type": "Reflected XSS",
-                                "severity": "High",
-                                "parameter": param_name,
-                                "payload": payload,
-                                "url": test_url,
-                                "description": f"XSS payload reflected in parameter: {param_name}",
-                            }
-                            self.vulnerabilities.append(vuln)
-                            logger.warning("  [!] FOUND XSS in parameter: %s", param_name)
-                            break  # One payload is enough per parameter
-
-                    except requests.RequestException as e:
-                        logger.error("  [!] Request failed: %s", e)
-                        continue
-
-        except Exception as e:
-            logger.error("  [!] Error: %s", e)
-
-        return self.vulnerabilities
-
-    def _inject_payload(self, url: str, param: str, payload: str) -> str:
-        """Inject XSS payload into URL parameter"""
-        parsed = urlparse(url)
-        params = parse_qs(parsed.query)
-        params[param] = [payload]
-
-        new_query = urlencode(params, doseq=True)
-        new_parsed = parsed._replace(query=new_query)
-
-        return urlunparse(new_parsed)
-
-    def scan_dom_xss(self) -> List[Dict]:
-        """Check for DOM-based XSS indicators"""
-        logger.info("[*] Checking for DOM XSS indicators")
+    async def scan(self, target: str, timeout: float = 10.0) -> ScanResult:
+        start = time.time()
+        findings: List[Finding] = []
 
         try:
-            response = requests.get(self.target, timeout=10)
-            content = response.text
+            async with httpx.AsyncClient(
+                timeout=timeout, verify=False, follow_redirects=True
+            ) as client:
+                parsed = urlparse(target)
+                params = parse_qs(parsed.query)
 
-            # Look for dangerous JavaScript patterns
-            dangerous_patterns = [
-                r"document\.write\(",
-                r"innerHTML\s*=",
-                r"eval\(",
-                r"\.location\s*=",
-            ]
+                # 1. Reflected XSS — inject payloads into each URL parameter
+                for param_name in params:
+                    for payload in self.XSS_PAYLOADS:
+                        new_params = dict(params)
+                        new_params[param_name] = [payload]
+                        test_url = urlunparse(
+                            parsed._replace(query=urlencode(new_params, doseq=True))
+                        )
+                        try:
+                            resp = await client.get(test_url)
+                            if payload in resp.text:
+                                findings.append(
+                                    Finding(
+                                        title="Reflected XSS",
+                                        severity=Severity.HIGH,
+                                        description=(
+                                            f"Payload reflected unescaped in parameter "
+                                            f"'{param_name}'. Payload: {payload[:60]}"
+                                        ),
+                                        cwe="CWE-79",
+                                        remediation=(
+                                            "HTML-encode all user-supplied input before rendering. "
+                                            "Implement a strict Content-Security-Policy."
+                                        ),
+                                    )
+                                )
+                                break  # one confirmed payload per parameter is sufficient
+                        except (httpx.RequestError, httpx.TimeoutException):
+                            continue
 
-            for pattern in dangerous_patterns:
-                if re.search(pattern, content, re.IGNORECASE):
-                    vuln = {
-                        "type": "Potential DOM XSS",
-                        "severity": "Medium",
-                        "pattern": pattern,
-                        "description": f"Dangerous JavaScript pattern found: {pattern}",
-                    }
-                    self.vulnerabilities.append(vuln)
-                    logger.warning("  [!] Found dangerous pattern: %s", pattern)
+                # 2. DOM XSS indicators — fetch base page once
+                try:
+                    base_resp = await client.get(target)
+                    for pattern in self.DOM_PATTERNS:
+                        if re.search(pattern, base_resp.text, re.IGNORECASE):
+                            findings.append(
+                                Finding(
+                                    title="Potential DOM XSS Sink",
+                                    severity=Severity.MEDIUM,
+                                    description=(
+                                        f"Dangerous JavaScript pattern detected: {pattern}"
+                                    ),
+                                    cwe="CWE-79",
+                                    remediation=(
+                                        "Avoid dangerous sinks (innerHTML, eval, document.write). "
+                                        "Use textContent or DOMPurify for untrusted data."
+                                    ),
+                                )
+                            )
+                except (httpx.RequestError, httpx.TimeoutException):
+                    pass
 
-        except Exception as e:
-            logger.error("  [!] Error: %s", e)
+        except (httpx.RequestError, httpx.TimeoutException):
+            pass
 
-        return self.vulnerabilities
-
-    def run(self) -> Dict:
-        """Run all XSS scans"""
-        logger.info("\n" + "=" * 70)
-        logger.info("🔍 XSS VULNERABILITY SCANNER")
-        logger.info("=" * 70)
-
-        self.scan_reflected_xss()
-        self.scan_dom_xss()
-
-        return {
-            "target": self.target,
-            "vulnerabilities": self.vulnerabilities,
-            "count": len(self.vulnerabilities),
-        }
-
-
-def scan_xss(url: str) -> Dict:
-    """Quick scan function"""
-    scanner = XSSScanner(url)
-    return scanner.run()
-
-
-if __name__ == "__main__":
-    import sys
-
-    logging.basicConfig(level=logging.INFO, format="%(levelname)s: %(message)s")
-    if len(sys.argv) > 1:
-        result = scan_xss(sys.argv[1])
-        logger.info("\n✅ Scan complete. Found %d potential XSS vulnerabilities", result["count"])
+        duration_ms = (time.time() - start) * 1000
+        return ScanResult(
+            target=target,
+            scanner_name=self.name,
+            findings=findings,
+            duration_ms=duration_ms,
+            status="completed",
+        )

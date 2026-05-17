@@ -16,12 +16,17 @@ class ScannerRegistry:
         self._registry: Dict[str, Type[BaseScanner]] = {}
         self._load_scanners()
 
-        # Explicitly register graduated scanners (unimplemented ones stay in _load_scanners auto-discovery)
         from cherenkov.scanners.path_traversal_scanner import PathTraversalScanner
+        from cherenkov.scanners.refined.csrf_scanner import CSRFScanner
+        from cherenkov.scanners.refined.open_redirect_scanner import OpenRedirectScanner
+        from cherenkov.scanners.refined.xss_scanner import XSSScanner
         from cherenkov.scanners.xxe_scanner import XXEScanner
 
         self.register(XXEScanner)
         self.register(PathTraversalScanner)
+        self.register(CSRFScanner)
+        self.register(XSSScanner)
+        self.register(OpenRedirectScanner)
 
     def register(self, scanner_class: Type[BaseScanner]):
         """Manually register a scanner class"""
@@ -32,7 +37,7 @@ class ScannerRegistry:
         """Auto-discover scanners using importlib"""
         package = importlib.import_module(self.scanners_path)
         for _, name, ispkg in pkgutil.iter_modules(package.__path__, package.__name__ + "."):
-            if not ispkg:  # Only modules, not packages
+            if not ispkg:
                 try:
                     module = importlib.import_module(name)
                     for attr_name in dir(module):
@@ -45,7 +50,7 @@ class ScannerRegistry:
                             scanner_name = attr.__name__.replace("Scanner", "").lower()
                             self._registry[scanner_name] = attr
                 except ImportError:
-                    continue  # Skip broken scanners
+                    continue
 
     def list_scanners(self) -> List[str]:
         """List all available scanners"""

@@ -246,65 +246,6 @@ async def v1_scan_history() -> list[dict]:
     return list_scans(20)
 
 
-@v1.get("/reports/{scan_id}/sarif")
-async def v1_scan_report_sarif(scan_id: str) -> dict:
-    """Return a scan report in SARIF 2.1.0 format."""
-    from cherenkov.compliance.mapper import ComplianceMapper
-    from cherenkov.core.storage.database import get_scan
-
-    scan = get_scan(scan_id)
-    if not scan:
-        raise HTTPException(status_code=404, detail="Scan not found")
-
-    results = []
-    for f in scan.get("findings", []):
-        severity = str(f.get("severity", "")).upper()
-        if severity in ("CRITICAL", "HIGH"):
-            level = "error"
-        elif severity == "MEDIUM":
-            level = "warning"
-        else:
-            level = "note"
-
-        cwe = f.get("cwe")
-        properties = {
-            "scanner": f.get("scanner", "unknown"),
-            "remediation": f.get("remediation", ""),
-        }
-        if cwe:
-            properties["compliance"] = {
-                "OWASP": ComplianceMapper.map(cwe, "OWASP"),
-                "SAMA_CSF": ComplianceMapper.map(cwe, "SAMA_CSF"),
-                "EGY_FIN_CSF": ComplianceMapper.map(cwe, "EGY_FIN_CSF"),
-                "DORA": ComplianceMapper.map(cwe, "DORA"),
-            }
-
-        results.append(
-            {
-                "ruleId": cwe or f.get("type") or "unknown",
-                "level": level,
-                "message": {"text": f.get("description", "No description provided.")},
-                "properties": properties,
-            }
-        )
-
-    return {
-        "version": "2.1.0",
-        "$schema": "https://json.schemastore.org/sarif-2.1.0.json",
-        "runs": [
-            {
-                "tool": {
-                    "driver": {
-                        "name": "Cherenkov Scanner",
-                        "version": "1.1.0",
-                    }
-                },
-                "results": results,
-            }
-        ],
-    }
-
-
 @v1.get("/findings/pending")
 async def v1_get_pending_findings() -> list[dict]:
     """Return a list of all pending findings."""
@@ -348,8 +289,8 @@ async def v1_reject_finding(finding_id: str, operator_id: Optional[str] = None) 
 @v1.get("/reports/{scan_id}/sarif")
 async def v1_scan_report_sarif(scan_id: str) -> dict:
     """Return a scan report in SARIF 2.1.0 format."""
-    from cherenkov.core.storage.database import get_scan
     from cherenkov.compliance.mapper import ComplianceMapper
+    from cherenkov.core.storage.database import get_scan
 
     scan = get_scan(scan_id)
     if not scan:

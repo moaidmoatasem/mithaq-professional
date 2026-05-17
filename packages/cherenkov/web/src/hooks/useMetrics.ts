@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import { API_BASE } from '@/src/lib/api';
+import type { FindingApproval } from '@/src/lib/api';
 
 export function useHealth(intervalMs = 5000) {
   const [data, setData] = useState<any>(null);
@@ -104,7 +105,7 @@ export function useQueueDepth(intervalMs = 5000) {
 }
 
 export function usePendingApprovals(intervalMs = 5000) {
-  const [data, setData] = useState<any[]>([]);
+  const [data, setData] = useState<FindingApproval[]>([]);
   const [error, setError] = useState<Error | null>(null);
 
   useEffect(() => {

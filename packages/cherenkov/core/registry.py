@@ -18,12 +18,30 @@ class ScannerRegistry:
 
         # Explicitly import and register new scanners per requirements
         from cherenkov.scanners.file_upload_scanner import FileUploadScanner
+        from cherenkov.scanners.mobile.android_scanner import AndroidScanner
+        from cherenkov.scanners.mobile.ios_scanner import IOSScanner
         from cherenkov.scanners.path_traversal_scanner import PathTraversalScanner
         from cherenkov.scanners.xxe_scanner import XXEScanner
 
         self.register(XXEScanner)
         self.register(PathTraversalScanner)
         self.register(FileUploadScanner)
+        self.register(AndroidScanner)
+        self.register(IOSScanner)
+
+        # Register Mobile Scanners
+        from cherenkov.scanners.mobile.ipa_scanner import IPAScanner
+        from cherenkov.scanners.mobile.ats_scanner import ATSScanner
+        from cherenkov.scanners.mobile.binary_scanner import BinaryScanner
+
+        self.register(IPAScanner)
+        self.register(ATSScanner)
+        self.register(BinaryScanner)
+
+        # Register Threat Model Scanner
+        from cherenkov.threat_modeling.threat_model_scanner import ThreatModelScanner
+
+        self.register(ThreatModelScanner)
 
     def register(self, scanner_class: Type[BaseScanner]):
         """Manually register a scanner class"""

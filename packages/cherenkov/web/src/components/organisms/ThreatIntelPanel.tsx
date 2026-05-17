@@ -133,6 +133,22 @@ export function ThreatIntelPanel() {
 
   return (
     <div className="flex flex-col gap-6 h-full relative">
+      {/* Dashboard Switcher */}
+      <div className="bg-bg-surface p-1 border border-white/5 flex gap-1">
+        <button 
+          onClick={() => window.dispatchEvent(new CustomEvent('cherenkov:switch_dashboard', { detail: { dashboard: 'C2' } }))}
+          className="flex-1 py-2 text-[9px] font-mono uppercase tracking-widest transition-all hover:bg-white/5"
+        >
+          C2_HUB
+        </button>
+        <button 
+          onClick={() => window.dispatchEvent(new CustomEvent('cherenkov:switch_dashboard', { detail: { dashboard: 'MOBILE' } }))}
+          className="flex-1 py-2 text-[9px] font-mono uppercase tracking-widest transition-all hover:bg-white/5 border-l border-white/5"
+        >
+          MOBILE_TRIAGE
+        </button>
+      </div>
+
       <AnimatePresence>
         {selectedThreat && (
           <div className="fixed inset-0 z-[500] flex items-center justify-center p-4 bg-black/80 backdrop-blur-md">

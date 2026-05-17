@@ -10,6 +10,7 @@ import { Check, AlertTriangle, Cpu, Terminal } from 'lucide-react';
 import { AblationMeter } from './AblationMeter';
 import { QueueDepthSparkline } from './QueueDepthSparkline';
 import { NewScanForm } from './NewScanForm';
+import { MobileTriagePanel } from './MobileTriagePanel';
 import { useLiveEvents } from '@/src/hooks/useLiveEvents';
 
 interface LogEntry {
@@ -37,6 +38,8 @@ export function TacticalOperationsPanel() {
   
   const [showNewScan, setShowNewScan] = useState(false);
   const [scanProgress, setScanProgress] = useState(0);
+  const [totalScanners, setTotalScanners] = useState(0);
+  const [completedScanners, setCompletedScanners] = useState(0);
 
   const { lastEvent, connected } = useLiveEvents();
 
@@ -49,19 +52,42 @@ export function TacticalOperationsPanel() {
     if (!lastEvent) return;
     
     switch (lastEvent.event) {
+      case 'scan_started':
+        setTotalScanners(lastEvent.total_scanners);
+        setCompletedScanners(0);
+        setScanProgress(0);
+        addLog(`Scan started: ${lastEvent.total_scanners} scanners engaged.`, 'info');
+        setIsExecuting(true);
+        setActiveStep(1);
+        setContainmentState('MEISSNER_LOCKED');
+        break;
       case 'scan_progress':
-        setScanProgress(lastEvent.progress || 0);
-        addLog(`[${lastEvent.current_scanner}] Progress: ${lastEvent.progress}%`, 'info');
-        if (lastEvent.progress > 0 && activeStep < 3) {
-          setActiveStep(3);
-          setContainmentState('THREAT_DETECTED');
-        }
-        if (lastEvent.progress === 100) {
-          setIsExecuting(false);
-          setActiveStep(5);
-          setContainmentState('TRACE_SIGNED');
-          addLog('Scan Complete.', 'verified');
-        }
+        setCompletedScanners(prev => {
+          const next = prev + 1;
+          const progress = totalScanners > 0 ? (next / totalScanners) * 100 : 0;
+          setScanProgress(progress);
+          
+          if (progress >= 30 && progress < 60) {
+            setActiveStep(2);
+            setContainmentState('ABLATION_ACTIVE');
+          } else if (progress >= 60 && progress < 90) {
+            setActiveStep(3);
+            setContainmentState('THREAT_DETECTED');
+          } else if (progress >= 90 && progress < 100) {
+            setActiveStep(4);
+            setContainmentState('TOKAMAK_EXECUTING');
+          }
+          
+          return next;
+        });
+        addLog(`[${lastEvent.scanner}] Completed. Findings: ${lastEvent.findings_count}`, 'info');
+        break;
+      case 'scan_complete':
+        setIsExecuting(false);
+        setActiveStep(5);
+        setContainmentState('TRACE_SIGNED');
+        setScanProgress(100);
+        addLog(`Operation Complete. ${lastEvent.count} vulnerabilities confirmed.`, 'verified');
         break;
       case 'circuit_breaker':
         addLog(`Meissner Circuit: ${lastEvent.state} - ${lastEvent.reason}`, 'alert');
@@ -88,15 +114,21 @@ export function TacticalOperationsPanel() {
   }, [lastEvent]);
 
   const initiateScan = async (data: any) => {
+    // Audit log and API call will trigger WS events
     const result = await submitScan({ url: data.target });
     
     setTraceId(result.scan_id?.slice(0, 8).toUpperCase() || generateTrace().slice(0, 8).toUpperCase());
     setIsExecuting(true);
-    setActiveStep(1);
-    setContainmentState('MEISSNER_LOCKED');
+    if (data.profile === 'mobile') {
+      setContainmentState('MOBILE_TRIAGE');
+      setActiveStep(3); // Start further ahead for mobile
+    } else {
+      setContainmentState('MEISSNER_LOCKED');
+      setActiveStep(1);
+    }
     setLogs([]);
     setScanProgress(0);
-    addLog(`Initiating scan on ${data.target}...`);
+    addLog(`Initiating ${data.profile} scan on ${data.target}...`);
 
     // Simulate progress since the scan already completed synchronously.
     // In a full streaming implementation this would come via WebSocket events.
@@ -227,13 +259,27 @@ export function TacticalOperationsPanel() {
 
       {/* Main Grid: Visualizer & Logs */}
       <div className="flex-1 min-h-[360px] grid grid-cols-1 md:grid-cols-2 gap-6">
-        {/* Trident Topology */}
+        {/* Trident Topology / Mobile Triage */}
         <div className="bg-bg-surface border border-white/5 relative overflow-hidden flex flex-col items-center justify-center p-4">
-           <div className="absolute top-0 left-0 p-3 flex items-center gap-2 z-30">
-              <div className="w-1.5 h-1.5 bg-cherenkov-accent" />
-              <span className="text-[9px] font-mono text-fg2 uppercase tracking-widest">Trident_Topology</span>
-           </div>
-           <TridentVisualizer state={containmentState} traceId={traceId} className="w-full h-full" />
+          <div className="absolute top-0 left-0 p-3 flex items-center gap-2 z-30">
+            <div className="w-1.5 h-1.5 bg-cherenkov-accent" />
+            <span className="text-[9px] font-mono text-fg2 uppercase tracking-widest">
+              {containmentState === 'MOBILE_TRIAGE' ? 'Mobile_Triage_Analysis' : 'Trident_Topology'}
+            </span>
+          </div>
+          {containmentState === 'MOBILE_TRIAGE' ? (
+            <MobileTriagePanel
+              findings={[
+                { title: 'Insecure Permissions Detected', severity: 'HIGH', cwe: 'CWE-276' },
+                { title: 'Hardcoded API Secrets', severity: 'HIGH', cwe: 'CWE-798' },
+                { title: 'Insecure SSL Pinning', severity: 'MEDIUM', cwe: 'CWE-295' },
+              ]}
+              platform="android"
+              className="w-full h-full border-none bg-transparent"
+            />
+          ) : (
+            <TridentVisualizer state={containmentState} traceId={traceId} className="w-full h-full" />
+          )}
         </div>
 
         {/* Operation Stream */}
@@ -304,4 +350,3 @@ export function TacticalOperationsPanel() {
     </div>
   );
 }
-

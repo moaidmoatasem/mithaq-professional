@@ -1,0 +1,36 @@
+name: Cherenkov Security Scan
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+  workflow_dispatch:
+    inputs:
+      target:
+        description: 'Target URL to scan'
+        required: true
+        default: 'http://localhost:8080'
+
+jobs:
+  scan:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - name: Install dependencies
+        run: |
+          pip install -e .
+      - name: Run Cherenkov Scan
+        run: |
+          # Use local server if target not provided
+          TARGET="${{ github.event.inputs.target || 'http://localhost' }}"
+          python -m cherenkov.cli.main scan "$TARGET" --output sarif > results.sarif
+      - name: Upload SARIF results
+        uses: github/codeql-action/upload-sarif@v3
+        if: always()
+        with:
+          sarif_file: results.sarif

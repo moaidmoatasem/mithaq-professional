@@ -16,17 +16,24 @@ class ScannerRegistry:
         self._registry: Dict[str, Type[BaseScanner]] = {}
         self._load_scanners()
 
+        # Explicitly import and register graduated scanners
+        from cherenkov.scanners.file_upload_scanner import FileUploadScanner
+        from cherenkov.scanners.mobile.android_scanner import AndroidScanner
+        from cherenkov.scanners.mobile.ios_scanner import IOSScanner
         from cherenkov.scanners.path_traversal_scanner import PathTraversalScanner
-        from cherenkov.scanners.refined.csrf_scanner import CSRFScanner
-        from cherenkov.scanners.refined.open_redirect_scanner import OpenRedirectScanner
-        from cherenkov.scanners.refined.xss_scanner import XSSScanner
+        from cherenkov.scanners.sql_injection_scanner import SQLInjectionScanner
+        from cherenkov.scanners.ssrf_scanner import SSRFScanner
+        from cherenkov.scanners.xss_scanner import XSSScanner
         from cherenkov.scanners.xxe_scanner import XXEScanner
 
         self.register(XXEScanner)
-        self.register(PathTraversalScanner)
-        self.register(CSRFScanner)
         self.register(XSSScanner)
-        self.register(OpenRedirectScanner)
+        self.register(PathTraversalScanner)
+        self.register(FileUploadScanner)
+        self.register(SQLInjectionScanner)
+        self.register(SSRFScanner)
+        self.register(AndroidScanner)
+        self.register(IOSScanner)
 
     def register(self, scanner_class: Type[BaseScanner]):
         """Manually register a scanner class"""
@@ -37,7 +44,7 @@ class ScannerRegistry:
         """Auto-discover scanners using importlib"""
         package = importlib.import_module(self.scanners_path)
         for _, name, ispkg in pkgutil.iter_modules(package.__path__, package.__name__ + "."):
-            if not ispkg:
+            if not ispkg:  # Only modules, not packages
                 try:
                     module = importlib.import_module(name)
                     for attr_name in dir(module):
@@ -50,7 +57,7 @@ class ScannerRegistry:
                             scanner_name = attr.__name__.replace("Scanner", "").lower()
                             self._registry[scanner_name] = attr
                 except ImportError:
-                    continue
+                    continue  # Skip broken scanners
 
     def list_scanners(self) -> List[str]:
         """List all available scanners"""

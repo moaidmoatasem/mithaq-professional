@@ -1,81 +1,63 @@
 # CHERENKOV Project Status
-**Last updated:** 2026-05-17
-
----
-
-## P0 Blockers — Must fix before any demo
-
-| Issue | Item | Impact |
-|---|---|---|
-| [#222](https://github.com/moaidmoatasem/cherenkov-professional/issues/222) | TOKAMAK never executes a real PoC | Core value prop broken |
-| [#221](https://github.com/moaidmoatasem/cherenkov-professional/issues/221) | `/api/v1/health` returns hardcoded data | HUD shows fake data |
-| [#224](https://github.com/moaidmoatasem/cherenkov-professional/issues/224) | LATTICE not wired — Qdrant zero vectors | Adaptive learning inactive |
-| [#223](https://github.com/moaidmoatasem/cherenkov-professional/issues/223) | Root directory — 50+ dev artifacts | First impression is chaos |
-
----
 
 ## Build Health
-
 | Check | Status |
 |---|---|
-| Tests | ✅ 68 passed, 7 skipped |
+| Tests | ✅ 146 passed, 36 skipped, 2 xfailed, 0 failures |
 | Ruff lint | ✅ Passing |
 | Ruff format | ✅ Passing |
-| TypeScript | ✅ Zero errors |
-| Vite build | ✅ 414 kB JS, 54 kB CSS |
+| TypeScript (web) | ✅ Zero errors |
+| Vite build | ✅ Clean (414 kB JS, 54 kB CSS) |
 
----
+## Current Phase: Phase 2 — Swarm Optimization & Parallelism
+**Target:** v1.1.0 | **Timeline:** Q2 2026
 
-## Phase Progress
-
-### Phase 1 — Foundation ✅ Complete
-BaseScanner, MEISSNER, ABLATION, SQLite WAL, FastAPI, React HUD, CI.
-
-### Phase 2 — Swarm Optimization 🔴 P0 Blocked (v1.1.0, Q2 2026)
-
+### Sprint Progress
 | Sprint | Goal | Status |
 |---|---|---|
-| 2A — TOKAMAK Docker | Docker isolation + PoC execution + shred receipt | 🔴 Stub only — issue #222 |
-| 2B — Backend Hardening | Real health metrics, SQLite persistence, WS circuit breaker | 🔴 Health hardcoded — issue #221 |
-| 2C — Scanner Graduation | 5 scanners → BaseScanner contract, ScannerRegistry | 🟡 Partial |
-| 2D — Parallel Orchestration | asyncio gather, timeout isolation, WS progress events | ✅ Done (PR #208) |
+| Sprint 1 — BaseScanner | Uniform scanner interface | ✅ Done |
+| Sprint 2 — Parallel Orchestration | asyncio + AIMD circuit breakers | ✅ Done |
+| Sprint 3 — TOKAMAK Sandbox | Docker isolation + PoC execution | ✅ Done — kali-rolling image, hardening flags, exec_run PoC |
+| Sprint 4 — HITL Workflows | API pause gate + operator approval | ✅ Done — approve/reject/pending endpoints + SQLite WAL |
+| Sprint 5 — Compliance & Reporting | SAMA/EGY-FIN mapping + PDF/SARIF | ✅ Done — 11 CWEs mapped, SARIF + PDF endpoints |
+| Scanner Graduation | 6 production scanners under BaseScanner | ✅ Done — XXE, XSS, PathTraversal, FileUpload, SQLi, SSRF |
 
-### Phase 3 — Production Hardening ⏳ Q3 2026
-HITL approval gate, EGY-FIN compliance mapper, WORM audit vault, RBAC.
-**Blocked by Phase 2 completion.**
+### Phase 2 Wiring (completed)
+- **LATTICE vector store** — Qdrant + sentence-transformers; every finding indexed, FP auto-labelled, `/api/v1/lattice/similar` query endpoint
+- **Rate limiting** — slowapi, 30 req/min on `/api/v1/scan`
+- **Health endpoint** — live Ollama check, real Meissner state, TOKAMAK container count, LATTICE vector count
+- **TOKAMAK hardening** — `--cap-drop=ALL --security-opt=no-new-privileges --read-only`, `exec_run` payload injection
+- **Test ordering fix** — removed global `sys.modules["pydantic"] = MagicMock()` from `test_registry.py`
+- **BackgroundTasks migration** — replaced `asyncio.create_task(to_thread(...))` with FastAPI `BackgroundTasks`
 
-### Phase 4+ — Mobile, CI/CD, Mesh ⏳ Q4 2026+
-Not started. No open issues. Phase 2 must be complete first.
+## Active Scanners (registered in ScannerRegistry)
+| Scanner | CWE | Severity | SAMA CSF | EGY-FIN CSF |
+|---|---|---|---|---|
+| XXEScanner | CWE-611 | HIGH | 3.3.7 | PR.DS-2 |
+| XSSScanner | CWE-79 | HIGH | 3.3.5 | PR.AC-4 |
+| PathTraversalScanner | CWE-22 | HIGH | 3.2.1 | PR.AC-1 |
+| FileUploadScanner | CWE-434 | HIGH | 3.3.10 | PR.DS-3 |
+| SQLInjectionScanner | CWE-89 | CRITICAL | 3.3.6 | PR.DS-5 |
+| SSRFScanner | CWE-918 | HIGH | 3.3.9 | PR.AC-5 |
+| AndroidScanner | — | varies | — | — |
+| IOSScanner | — | varies | — | — |
 
----
-
-## Open Issues
-
-| # | Priority | Title |
-|---|---|---|
-| [#221](https://github.com/moaidmoatasem/cherenkov-professional/issues/221) | P0 🔴 | `/api/v1/health` — wire real metrics |
-| [#222](https://github.com/moaidmoatasem/cherenkov-professional/issues/222) | P0 🔴 | TOKAMAK — Docker sandbox not wired |
-| [#223](https://github.com/moaidmoatasem/cherenkov-professional/issues/223) | P0 🔴 | Root directory cleanup |
-| [#224](https://github.com/moaidmoatasem/cherenkov-professional/issues/224) | P0 🔴 | LATTICE — Qdrant not wired |
-| [#186](https://github.com/moaidmoatasem/cherenkov-professional/issues/186) | P1 | SSO / RBAC Portal (Phase 3) |
-
----
+## Backlog (Phase 3 / v1.5.0)
+- [ ] HITL UI — `PendingApprovalsPanel` badge count in `ForensicHeader` (Antigravity domain)
+- [ ] Auth token fixture for `tests/packages/api/test_hitl_api.py` (2 xfail tests)
+- [ ] Branch protection on `main` — require PR + CI pass
+- [ ] `autonomous_generated/` cleanup — remove broken/duplicate files
+- [ ] CSRF scanner (CWE-352) — next graduation candidate
+- [ ] Open Redirect scanner (CWE-601) — next graduation candidate
 
 ## Agent Coordination
-
-| Agent | Domain | Status |
+| Agent | Domain | Channel |
 |---|---|---|
-| Claude Code (local) | Architecture, P0 fixes, issue creation | Active |
-| Jules (Google) | Backend Python — TOKAMAK, LATTICE | Configured via `GEMINI.md` |
-| Continue.dev | Local scanner graduation | Configured via `.continue/config.yaml` |
-| OpenCode | General backend tasks | Configured via `opencode.jsonc` |
-| Claude GitHub | Code review on PRs | `@claude` in issues/PRs |
-| Autonomous Pipeline | Scanner generation | `scripts/autonomous_roadmap_executor.py` |
-
-Agent tasks: `.agents/tasks/issue-N.md` — read `.agents/context.md` first.
-
----
+| Google Antigravity | Frontend React/Vite | localhost:3000 preview |
+| Claude (GitHub Actions) | Code review, issue work | `@claude` in issues/PRs |
+| Continue.dev (Qwen 3.5) | Local autonomous coding | `.continue/agents/` |
+| Autonomous Pipeline | Scanner generation | `scripts/autonomous_roadmap_executor.py` daily |
+| Claude Code (local) | Architecture, agentic coordination | This terminal |
 
 ## Module Ownership
-
-See `.github/CODEOWNERS` and `AGENTS.md` for full domain ownership map.
+See `.github/CODEOWNERS` for full ownership map.

@@ -21,7 +21,16 @@ from typing import Any, Dict, List, Literal, Optional, Set
 from urllib.parse import urlparse
 
 import httpx
-from fastapi import Depends, FastAPI, HTTPException, Request, WebSocket, WebSocketDisconnect, status
+from fastapi import (
+    BackgroundTasks,
+    Depends,
+    FastAPI,
+    HTTPException,
+    Request,
+    WebSocket,
+    WebSocketDisconnect,
+    status,
+)
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import FileResponse
 from fastapi.routing import APIRouter
@@ -59,10 +68,12 @@ _STATIC_DIR = Path(__file__).parent / "static"
 
 # Rate limits are intentionally conservative — scanning is CPU/GPU-heavy and
 # an unbounded queue would exhaust the local Ollama instance.
-_SCAN_RATE = os.getenv("CHERENKOV_SCAN_RATE_LIMIT", "20/minute")
+_SCAN_RATE = os.getenv("CHERENKOV_SCAN_RATE_LIMIT", "30/minute")
 _WORKFLOW_RATE = os.getenv("CHERENKOV_WORKFLOW_RATE_LIMIT", "10/minute")
 
 limiter = Limiter(key_func=get_remote_address)
+# Keep _limiter as alias so decorator references below stay consistent
+_limiter = limiter
 
 _START_TIME = time.time()
 
@@ -85,7 +96,6 @@ app = FastAPI(
     version="1.1.0",
     lifespan=lifespan,
 )
-
 app.state.limiter = limiter
 app.add_exception_handler(RateLimitExceeded, _rate_limit_exceeded_handler)
 
@@ -338,11 +348,12 @@ async def _get_qdrant_vector_count() -> int:
 
 
 def _get_tokamak_container_count() -> int:
+    """Return count of running TOKAMAK containers (label=cherenkov.role=tokamak)."""
     try:
         import subprocess
 
         result = subprocess.run(
-            ["docker", "ps", "--filter", "label=cherenkov.tokamak=true", "--format", "{{.ID}}"],
+            ["docker", "ps", "--filter", "label=cherenkov.role=tokamak", "--format", "{{.ID}}"],
             capture_output=True,
             text=True,
             timeout=2,
@@ -368,6 +379,7 @@ async def v1_health() -> dict:
         asyncio.to_thread(_get_tokamak_container_count),
     )
     meissner_state = meissner_hub.state.value.upper()
+    lattice_status = "ready" if vector_count >= 0 else "offline"
 
     return {
         "status": "healthy",
@@ -381,7 +393,7 @@ async def v1_health() -> dict:
             "kinetic": {"status": ollama_status, "model": "Qwen2.5 3B", "ram_gb": 8},
             "aegis": {"status": ollama_status, "model": "Llama 3.1 8B", "ram_gb": 8},
             "lattice": {
-                "status": "ready",
+                "status": lattice_status,
                 "model": "Qdrant / Vector",
                 "vector_count": vector_count,
             },
@@ -449,18 +461,22 @@ async def v1_sandbox_status() -> dict:
 @v1.post("/scan")
 @limiter.limit(_SCAN_RATE)
 async def v1_scan(
-    http_request: Request,
-    request: "ScanRequest",
+    request: Request,
+    scan_request: "ScanRequest",
+    background_tasks: BackgroundTasks,
     current_user: AuthUser = Depends(get_current_user),
 ) -> dict:
-    """Proxy to the core scan engine; broadcasts a live event on completion."""
-    result = await _run_scan(request)
+    """Proxy to the core scan engine; broadcasts a live event on completion.
+
+    Rate-limited to 30 requests/minute per IP to protect Ollama from exhaustion.
+    """
+    result = await _run_scan(scan_request, background_tasks)
 
     # Audit log
     save_audit_entry(
         event_type="SCAN_INITIATED",
         user_id=current_user.username,
-        details={"target": request.url, "scan_id": result["scan_id"]},
+        details={"target": scan_request.url, "scan_id": result["scan_id"]},
     )
 
     await _broadcast(
@@ -677,9 +693,16 @@ async def v1_approve_finding(
 
 @v1.post("/findings/{finding_id}/reject")
 async def v1_reject_finding(
-    finding_id: str, current_user: AuthUser = Depends(RoleChecker(Role.OPERATOR))
+    finding_id: str,
+    background_tasks: BackgroundTasks,
+    current_user: AuthUser = Depends(RoleChecker(Role.OPERATOR)),
 ) -> dict:
-    """Reject a finding. Requires OPERATOR role or higher."""
+    """Reject a finding (marks it as false positive). Requires OPERATOR role or higher.
+
+    Side-effect: labels the finding in LATTICE so future scans de-rank it
+    automatically via cosine similarity scoring.
+    """
+    from cherenkov.core.lattice_bridge import label_false_positive
     from cherenkov.core.storage.database import init_db, update_finding_status
 
     try:
@@ -692,6 +715,9 @@ async def v1_reject_finding(
             user_id=current_user.username,
             details={"finding_id": finding_id},
         )
+
+        # Mark as false positive in LATTICE — runs after response, avoids event-loop leakage
+        background_tasks.add_task(label_false_positive, finding_id)
 
         return {"status": "success", "finding_id": finding_id, "new_status": "rejected"}
     except Exception as exc:
@@ -762,7 +788,7 @@ _active_scan_targets: set[str] = set()
 _active_scan_lock = asyncio.Lock()
 
 
-async def _run_scan(request: "ScanRequest") -> dict:
+async def _run_scan(request: "ScanRequest", background_tasks: Optional[BackgroundTasks] = None) -> dict:
     """Core scan logic shared by /api/scan and /api/v1/scan."""
     from cherenkov.core.engine import ScanEngine
     from cherenkov.core.registry import ScannerRegistry
@@ -837,11 +863,45 @@ async def _run_scan(request: "ScanRequest") -> dict:
             finished_at=finished,
         )
 
+        from cherenkov.core.lattice_bridge import embed_and_store
         from cherenkov.core.storage.database import save_pending_finding
 
         for v in vulnerabilities:
+            finding_id = str(uuid.uuid4())
+
+            # Index every finding in LATTICE for similarity recall and FP learning.
+            # Use BackgroundTasks so the work runs after response delivery and
+            # doesn't leak asyncio tasks into subsequent test event loops.
+            if background_tasks is not None:
+                background_tasks.add_task(
+                    embed_and_store,
+                    finding_id,
+                    v["title"],
+                    v.get("description", ""),
+                    request.url,
+                    v["scanner"],
+                    v["severity"],
+                    v.get("cwe", ""),
+                )
+            else:
+                # Fallback for callers that don't supply background_tasks
+                try:
+                    asyncio.get_running_loop().create_task(
+                        asyncio.to_thread(
+                            embed_and_store,
+                            finding_id,
+                            v["title"],
+                            v.get("description", ""),
+                            request.url,
+                            v["scanner"],
+                            v["severity"],
+                            v.get("cwe", ""),
+                        )
+                    )
+                except RuntimeError:
+                    pass  # No running loop — skip indexing in this context
+
             if v["severity"] in ("CRITICAL", "HIGH"):
-                finding_id = str(uuid.uuid4())
                 save_pending_finding(
                     finding_id=finding_id,
                     severity=v["severity"],
@@ -849,24 +909,27 @@ async def _run_scan(request: "ScanRequest") -> dict:
                     title=v["title"],
                     scan_id=scan_id,
                 )
-
-                # We need to await the broadcast event, but broadcast relies on asyncio loop running.
-                # Since _run_scan is async, we can await it directly.
-                asyncio.create_task(
-                    _broadcast(
-                        {
-                            "type": "finding_discovered",
-                            "finding_id": finding_id,
-                            "severity": v["severity"],
-                        }
+                try:
+                    asyncio.get_running_loop().create_task(
+                        _broadcast(
+                            {
+                                "type": "finding_discovered",
+                                "finding_id": finding_id,
+                                "severity": v["severity"],
+                            }
+                        )
                     )
-                )
+                except RuntimeError:
+                    pass  # No running loop — skip WebSocket broadcast in this context
 
     except Exception as exc:
         logger.error("Failed to persist scan %s: %s", scan_id, exc)
 
     # Trigger SIEM forwarding
-    asyncio.create_task(_forward_to_siem(vulnerabilities, request.url))
+    try:
+        asyncio.get_running_loop().create_task(_forward_to_siem(vulnerabilities, request.url))
+    except RuntimeError:
+        pass  # No running loop — skip SIEM forwarding in this context
 
     result = {
         "scan_id": scan_id,
@@ -888,9 +951,9 @@ async def _run_scan(request: "ScanRequest") -> dict:
 
 @app.post("/api/scan")
 @limiter.limit(_SCAN_RATE)
-async def scan_target(http_request: Request, request: ScanRequest) -> dict:
+async def scan_target(request: Request, scan_request: ScanRequest) -> dict:
     """Run all registered scanners against a target URL."""
-    return await _run_scan(request)
+    return await _run_scan(scan_request)
 
 
 # ── Health ───────────────────────────────────────────────────────────────────
@@ -898,6 +961,7 @@ async def scan_target(http_request: Request, request: ScanRequest) -> dict:
 
 @app.get("/health")
 async def health() -> dict:
+    """Legacy health endpoint — delegates to /api/v1/health for live data."""
     return await v1_health()
 
 
@@ -959,6 +1023,63 @@ async def get_results(workflow_name: str) -> dict:
     if result:
         return result
     raise HTTPException(status_code=404, detail="No results found")
+
+
+class LatticeQueryRequest(BaseModel):
+    title: str
+    description: str = ""
+    top_k: int = 5
+    exclude_false_positives: bool = True
+
+
+@v1.post("/lattice/similar")
+async def v1_lattice_similar(
+    request: LatticeQueryRequest,
+    current_user: AuthUser = Depends(get_current_user),
+) -> dict:
+    """
+    Query LATTICE for past findings similar to the supplied title + description.
+
+    Used by the dashboard and autonomous agents to surface precedent before
+    escalating a new finding.  Excludes false-positives by default.
+    """
+    from cherenkov.core.lattice_bridge import query_similar_targets
+
+    results = await asyncio.to_thread(
+        query_similar_targets,
+        request.title,
+        request.description,
+        request.top_k,
+        request.exclude_false_positives,
+    )
+
+    return {
+        "results": [
+            {
+                "id": r.id,
+                "score": round(r.score, 4),
+                "title": r.title,
+                "target": r.target,
+                "scanner": r.scanner,
+                "is_false_positive": r.is_false_positive,
+            }
+            for r in results
+        ],
+        "count": len(results),
+    }
+
+
+@v1.get("/lattice/stats")
+async def v1_lattice_stats(current_user: AuthUser = Depends(get_current_user)) -> dict:
+    """Return LATTICE vector store statistics."""
+    from cherenkov.core.lattice_bridge import vector_count
+
+    count = await asyncio.to_thread(vector_count)
+    return {
+        "vector_count": count,
+        "collection": "cherenkov_findings",
+        "status": "ready" if count >= 0 else "offline",
+    }
 
 
 @v1.get("/mesh/nodes")

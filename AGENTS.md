@@ -11,7 +11,7 @@ This file is read by every AI agent working on this repo. Follow it precisely.
 | **Antigravity (Google IDE)** | Gravity preview, local dev | `packages/cherenkov/web/` frontend | `feat/web-*` |
 | **Claude (GitHub Actions)** | `@claude` in issues/PRs | Code review, targeted fixes, issue work | `claude/*` |
 | **Claude Code (local)** | Terminal sessions | Architecture, agentic coordination, multi-file refactors | `claude/*` |
-| **Continue.dev (Qwen 3.5)** | VS Code / IDE | Autonomous coding, scanner graduation | `auto-dev/*` |
+| **OpenCode** | Terminal, any model | Autonomous coding, scanner graduation | `auto-dev/*` |
 | **Jules (Google)** | `@jules` in issues | Autonomous issue implementation, branch + PR | `jules/*` |
 | **Autonomous Pipeline** | Daily cron 2AM UTC | Scanner generation (`autonomous_roadmap_executor.py`) | `auto-dev/<run>` |
 
@@ -63,17 +63,17 @@ This file is read by every AI agent working on this repo. Follow it precisely.
 
 ---
 
-## 4. Continue.dev / Local Autonomous Agent — Scanner Graduation
+## 4. OpenCode — Scanner Graduation
 
-**Your domain**: `packages/cherenkov/scanners/` and `packages/cherenkov/core/`
+**Domain**: `packages/cherenkov/scanners/` and `packages/cherenkov/core/`
 
-**Current priority** (Sprint 3 backlog):
-1. Pick one scanner from `packages/cherenkov/autonomous_generated/scanners/` that has a real scan implementation
-2. Refactor it to inherit `BaseScanner` (from `packages/cherenkov/core/base_scanner.py`)
-3. Add `async def scan(self, target: str, timeout: float = 10.0) -> ScanResult`
-4. Write a unit test in `tests/unit/test_<scanner_name>.py`
-5. Register it in `packages/cherenkov/core/registry.py`
-6. Open a PR: branch `feat/<N>-graduate-<scanner_name>`
+**Tool**: `opencode` (terminal, any model)
+
+**Process**:
+1. Pick candidate from `packages/cherenkov/autonomous_generated/scanners/`
+2. Refactor to inherit `BaseScanner`
+3. Add `async def scan()`, unit test, register in `registry.py`
+4. PR: `feat/<N>-graduate-<scanner_name>`
 
 **Code standards**:
 - Strong typing (PEP 484). Use `from __future__ import annotations` where needed.

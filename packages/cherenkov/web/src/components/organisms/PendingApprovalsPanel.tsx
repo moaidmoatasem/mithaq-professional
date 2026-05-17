@@ -71,16 +71,16 @@ export function PendingApprovalsPanel() {
               <CyberButton 
                 variant="primary" 
                 className="flex-1 py-1 text-[9px]"
-                disabled={loading === finding.id}
-                onClick={() => handleApprove(finding.id)}
+                disabled={loading === finding.finding_id}
+                onClick={() => handleApprove(finding.finding_id)}
               >
                 <Check size={12} className="mr-1" /> Approve
               </CyberButton>
               <CyberButton 
                 variant="danger" 
                 className="flex-1 py-1 text-[9px]"
-                disabled={loading === finding.id}
-                onClick={() => handleReject(finding.id)}
+                disabled={loading === finding.finding_id}
+                onClick={() => handleReject(finding.finding_id)}
               >
                 <X size={12} className="mr-1" /> Reject
               </CyberButton>

@@ -23,9 +23,11 @@ from urllib.parse import urlparse
 import httpx
 from fastapi import Depends, FastAPI, HTTPException, WebSocket, WebSocketDisconnect, status
 from fastapi.middleware.cors import CORSMiddleware
-from fastapi.responses import FileResponse
+from fastapi.responses import FileResponse, JSONResponse
 from fastapi.routing import APIRouter
 from fastapi.staticfiles import StaticFiles
+from starlette.middleware.base import BaseHTTPMiddleware
+from starlette.requests import Request as StarletteRequest
 from pydantic import BaseModel
 
 from cherenkov.api.middleware.auth import (
@@ -51,6 +53,41 @@ from cherenkov.orchestration.workflow_parser import load_workflow
 logger = logging.getLogger(__name__)
 
 _STATIC_DIR = Path(__file__).parent / "static"
+
+# ── Rate limiting (token bucket, per-IP, no external deps) ───────────────────
+
+_SCAN_RATE_LIMIT = int(os.getenv("CHERENKOV_SCAN_RPM", "10"))  # requests per minute per IP
+
+
+class _ScanRateLimiter(BaseHTTPMiddleware):
+    """Sliding-window rate limiter for /api/*/scan endpoints."""
+
+    def __init__(self, app, rpm: int = _SCAN_RATE_LIMIT):
+        super().__init__(app)
+        self._rpm = rpm
+        self._window: dict[str, list[float]] = {}
+        self._lock = asyncio.Lock()
+
+    async def dispatch(self, request: StarletteRequest, call_next):
+        if "/scan" not in request.url.path or request.method != "POST":
+            return await call_next(request)
+
+        client_ip = (request.client.host if request.client else "unknown")
+        now = time.time()
+        window_start = now - 60.0
+
+        async with self._lock:
+            hits = self._window.get(client_ip, [])
+            hits = [t for t in hits if t > window_start]
+            if len(hits) >= self._rpm:
+                return JSONResponse(
+                    status_code=429,
+                    content={"detail": f"Rate limit exceeded: {self._rpm} scan requests/min per IP."},
+                )
+            hits.append(now)
+            self._window[client_ip] = hits
+
+        return await call_next(request)
 
 
 @asynccontextmanager
@@ -79,6 +116,7 @@ _ALLOWED_ORIGINS = os.getenv(
     "http://localhost:8000,http://127.0.0.1:8000,http://localhost:3000,http://127.0.0.1:3000",
 ).split(",")
 
+app.add_middleware(_ScanRateLimiter)
 app.add_middleware(
     CORSMiddleware,
     allow_origins=_ALLOWED_ORIGINS,
@@ -709,6 +747,10 @@ async def _forward_to_siem(vulnerabilities: list[dict], target: str):
         logger.debug("Forwarded finding to local SIEM: %s", v["title"])
 
 
+_active_scan_targets: set[str] = set()
+_active_scan_lock = asyncio.Lock()
+
+
 async def _run_scan(request: "ScanRequest") -> dict:
     """Core scan logic shared by /api/scan and /api/v1/scan."""
     from cherenkov.core.engine import ScanEngine
@@ -725,6 +767,16 @@ async def _run_scan(request: "ScanRequest") -> dict:
     if not parsed.netloc:
         raise HTTPException(status_code=400, detail="Invalid URL: missing hostname")
 
+    # Deduplication: reject concurrent scans of the same target
+    normalised_target = request.url.rstrip("/").lower()
+    async with _active_scan_lock:
+        if normalised_target in _active_scan_targets:
+            raise HTTPException(
+                status_code=409,
+                detail=f"A scan of '{request.url}' is already in progress. Wait for it to complete.",
+            )
+        _active_scan_targets.add(normalised_target)
+
     scan_id = str(uuid.uuid4())
     started = datetime.now(timezone.utc).isoformat()
 
@@ -732,23 +784,18 @@ async def _run_scan(request: "ScanRequest") -> dict:
         registry = ScannerRegistry()
         engine = ScanEngine(registry)
 
-        async def on_scan_progress(scanner_name: str, status: str, result: Any):
-            # Wrap the websocket broadcast in a task
+        async def on_scan_progress(scanner_name: str, result: Any):
             asyncio.get_running_loop().create_task(
-                _broadcast(
-                    {
-                        "type": "scan_progress",
-                        "scanner": scanner_name,
-                        "status": status,
-                    }
-                )
+                _broadcast({"type": "scan_progress", "scanner": scanner_name})
             )
 
         scan_results = await engine.scan_all(
-            request.url, timeout=10.0, progress_callback=on_scan_progress
+            request.url, timeout=10.0, on_progress=on_scan_progress
         )
     except Exception as exc:
         logger.error("ScanEngine failed for %s: %s", request.url, exc)
+        async with _active_scan_lock:
+            _active_scan_targets.discard(normalised_target)
         raise HTTPException(status_code=500, detail=f"Scan execution failed: {exc}") from exc
 
     vulnerabilities: list[dict] = []
@@ -810,13 +857,19 @@ async def _run_scan(request: "ScanRequest") -> dict:
     # Trigger SIEM forwarding
     asyncio.create_task(_forward_to_siem(vulnerabilities, request.url))
 
-    return {
+    result = {
         "scan_id": scan_id,
         "target": request.url,
         "timestamp": finished,
         "vulnerabilities": vulnerabilities,
         "count": len(vulnerabilities),
     }
+
+    # Release dedup lock
+    async with _active_scan_lock:
+        _active_scan_targets.discard(normalised_target)
+
+    return result
 
 
 # ── Legacy scan + health endpoints (keep for backwards compat) ───────────────

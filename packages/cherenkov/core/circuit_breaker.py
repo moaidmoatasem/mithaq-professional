@@ -223,6 +223,22 @@ class CircuitBreaker:
             if self._slow_call_count >= self.config.slow_call_failure_threshold:
                 self._transition_to_open()
 
+    def _persist(self) -> None:
+        """Best-effort SQLite persistence of current state (called outside lock)."""
+        if self.config.name == "default":
+            return
+        try:
+            from cherenkov.core.storage.database import init_db, save_cb_state
+            init_db()
+            save_cb_state(
+                self.config.name,
+                self._state.value,
+                self._failure_count,
+                self._last_failure_time,
+            )
+        except Exception as exc:
+            logger.debug("CB state persist skipped: %s", exc)
+
     def _transition_to_open(self) -> None:
         """Transition from CLOSED/HALF_OPEN to OPEN state."""
         old_state = self._state
@@ -236,6 +252,7 @@ class CircuitBreaker:
             f"Circuit '{self.config.name}' transitioned from {old_state.value} to OPEN "
             f"(failures={self._failure_count})"
         )
+        self._persist()
 
         for callback in self._on_open_callbacks:
             try:
@@ -251,6 +268,7 @@ class CircuitBreaker:
         self._failure_count = 0
 
         logger.info(f"Circuit '{self.config.name}' transitioned to HALF_OPEN (testing recovery)")
+        self._persist()
 
         for callback in self._on_half_open_callbacks:
             try:
@@ -268,6 +286,7 @@ class CircuitBreaker:
         self._metrics.circuit_closings += 1
 
         logger.info(f"Circuit '{self.config.name}' transitioned to CLOSED (recovery successful)")
+        self._persist()
 
         for callback in self._on_close_callbacks:
             try:
@@ -635,11 +654,23 @@ class CircuitBreakerRegistry:
         name: str,
         config: Optional[CircuitBreakerConfig] = None,
     ) -> CircuitBreaker:
-        """Get an existing circuit breaker or create a new one."""
+        """Get an existing circuit breaker or create one, restoring persisted state."""
         with self._lock:
             if name not in self._breakers:
                 use_config = config or CircuitBreakerConfig(name=name)
-                self._breakers[name] = CircuitBreaker(use_config)
+                breaker = CircuitBreaker(use_config)
+                # Restore state that survived the last process restart
+                try:
+                    from cherenkov.core.storage.database import load_cb_state
+                    saved = load_cb_state(name)
+                    if saved and saved["state"] in (s.value for s in CircuitState):
+                        breaker._state = CircuitState(saved["state"])
+                        breaker._failure_count = saved["failure_count"]
+                        breaker._last_failure_time = saved["last_failure_time"]
+                        logger.info("CB '%s' restored to %s (failures=%d)", name, saved["state"], saved["failure_count"])
+                except Exception as exc:
+                    logger.debug("CB state restore skipped for '%s': %s", name, exc)
+                self._breakers[name] = breaker
             return self._breakers[name]
 
     def register(self, name: str, breaker: CircuitBreaker) -> None:

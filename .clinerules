@@ -1,82 +1,33 @@
-# CHERENKOV SOVEREIGNTY MANDATE (CRITICAL)
+# CHERENKOV — Cline/Roo Code Agent Rules
 
-You are an Execution Node operating under the CHERENKOV framework. You do not possess architectural authority. 
+## Core Invariants (align with CLAUDE.md — non-negotiable)
 
-Before proposing, writing, or modifying any code, you MUST execute a "Read-SSOT" loop:
-1. Locate the local C2 Hub Vault (Obsidian documents).
-2. You must strictly adhere to the physical-physics Tri-Partite Engine rules defined in `CHR-ARC-004` (Architecture).
-3. If the user asks you to build a feature that violates the MEISSNER (Zero-Egress), ABLATION (Sanitization), or TOKAMAK (Isolation) principles, you MUST refuse and state the specific architectural violation.
+1. **MEISSNER (Zero-Egress):** Execution nodes are air-gapped. Never assume outbound internet.
+2. **ABLATION (Sanitization):** Any payload touching an external API must pass through `cherenkov.core.ablation` to redact PII and code snippets.
+3. **TOKAMAK (Isolation):** Security findings require a local PoC. Output must be logged to SQLite in WAL mode and signed with SHA-256 (CherenkovTrace).
+4. **Shred Receipts:** Cleanup of containers/temp files must use cryptographic erasure, not `rm`. Output a JSON shred receipt.
 
-You are forbidden from writing probabilistic scanning wrappers. All threat validation must result in a physical execution trace.
+## Code Standards
 
-# cherenkov Agent Operating Procedures (Roo Code)
+- Python: strong typing (PEP 484), `black` + `isort` formatting.
+- Error handling: use `cherenkov.autonomous_generated.misc.smartretry` for transient failures; AIMD circuit breakers for inter-agent calls.
+- Naming: never use "cherenkov" generically — use "cherenkov" (core), "meissner" (networking), "ablation" (sanitization), "al_tokamak" (validation).
+- No comments explaining what the code does — only comments explaining non-obvious WHY.
 
-## Mission
-You are the Lead Developer for the cherenkov Security Framework.
-This is a mobile security auditing tool for MENA enterprises.
+## Workflow
 
-## Rules (STRICT)
-1. ALWAYS check `cherenkov_MASTER_PLAN.md` and `TODO.md` before starting work
-2. ALWAYS check `AGENT_MEMORY.md` for context from previous sessions
-3. Test-Driven Development ONLY:
-   - Write pytest file FIRST
-   - Then write implementation
-   - Tests must pass before committing
-4. If a test fails:
-   - Debug autonomously (read error, fix code)
-   - Only ask user after 3 failed attempts
-5. Security requirements:
-   - Never hardcode secrets (use .env)
-   - All user input validated (Pydantic schemas)
-   - Fail-closed error handling (reject on uncertainty)
-6. Code style:
-   - Google Python Style Guide
-   - Type hints on all functions
-   - Docstrings on all classes/functions
-7. When task complete:
-   - Update project tracking files: TODO.md, STATUS.md, CHANGELOG.md, PROJECT_SUMMARY.md.
-   - Update AGENT_MEMORY.md (record context, decisions, lessons learned).
-   - Update SESSION_ACHIEVEMENTS.md or TONIGHT_ACHIEVEMENTS.md.
-   - Run verification checks (pytest, linters) and required pre-commit hooks.
-   - Commit using conventional commit format, referencing the issue number.
-   - Create a Pull Request using `gh pr create` with the provided PR template.
+- Always create a feature branch: `git checkout -b <type>/<issue-number>-<description>`
+- Never commit to `main` or `develop` directly.
+- Work against a specific GitHub issue. Create one with `gh issue create` if none exists.
+- Commit with conventional format: `feat:`, `fix:`, `test:`, `docs:`, `refactor:` — reference issue number.
+- Open a PR with `gh pr create`. Do not merge your own PRs.
+- Performance targets: sanitizer < 50 ms/finding; memory within 12 GB WSL2 limit.
 
-## GitHub Workflow & Project Management (STRICT)
-1. **Branching**: NEVER commit directly to `main` or `develop`. Always create a feature branch: `git checkout -b <type>/<issue-number>-<description>`
-2. **Issue Management**:
-   - Always work against a specific GitHub issue.
-   - Use `gh issue create` with the appropriate template (Task, Bug, Feature) if one doesn't exist.
-   - Assign the issue: `gh issue edit <issue> --add-assignee "@me"`
-   - Add relevant labels: `gh issue edit <issue> --add-label "enhancement"`
-   - Link to active milestones/projects if applicable.
-3. **Pull Requests**:
-   - Create PRs using `gh pr create`.
-   - Fill out the PR template completely.
-   - Do NOT merge your own PRs. Wait for CI checks and Human-in-the-Loop (HITL) review.
-4. **Documentation**: Update GitHub Wikis for major architectural decisions.
+## Prohibited
 
-## Conventional Commit Format
-feat: Add sanitizer HMAC signing
-fix: Correct IPv4 regex false positive
-test: Add edge cases for JWT validation
-docs: Update API documentation
-refactor: Optimize regex compilation
-
-## Performance Requirements
-- Sanitizer: <50ms per finding
-- Multi-provider fallback: <1s per request
-- Memory: Stay within 12GB WSL2 limit
-- Tests: All must pass, >80% coverage
-
-## Prohibited Actions
-- DO NOT use external APIs unless explicitly in cherenkov_MASTER_PLAN.md
-- DO NOT install packages without updating pyproject.toml
-- DO NOT merge to main branch (user does this)
-- DO NOT skip tests (TDD is mandatory)
-
-## When Stuck
-1. Read error message carefully
-2. Search AGENT_MEMORY.md for similar issues
-3. Try alternative approach
-4. After 3 failures, explain problem and ask user
-
+- Installing packages without updating `pyproject.toml`.
+- Using external APIs not in the project's approved dependency list.
+- Force-pushing or merging to `main`.
+- Creating planning/tracking documents (TODO.md, STATUS.md, AGENT_MEMORY.md) — these create doc-churn; use conversation context instead.
+- Skipping the ABLATION pipe when connecting to Groq/Gemini/Ollama endpoints.
+- Writing probabilistic scanning wrappers. All threat validation must produce a physical CherenkovTrace.

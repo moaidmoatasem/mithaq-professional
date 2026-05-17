@@ -57,6 +57,14 @@ CREATE TABLE IF NOT EXISTS audit_log (
 );
 CREATE INDEX IF NOT EXISTS idx_audit_timestamp ON audit_log(timestamp);
 CREATE INDEX IF NOT EXISTS idx_audit_event_type ON audit_log(event_type);
+
+CREATE TABLE IF NOT EXISTS circuit_breaker_state (
+    key              TEXT    PRIMARY KEY,
+    state            TEXT    NOT NULL DEFAULT 'closed',
+    failure_count    INTEGER NOT NULL DEFAULT 0,
+    last_failure_time REAL,
+    updated_at       TEXT    NOT NULL
+);
 """
 
 
@@ -235,6 +243,44 @@ def get_audit_log(limit: int = 100, path: Path = _DB_PATH) -> list[dict]:
         d["details"] = json.loads(d["details"])
         result.append(d)
     return result
+
+
+def save_cb_state(
+    key: str,
+    state: str,
+    failure_count: int,
+    last_failure_time: float | None,
+    path: Path = _DB_PATH,
+) -> None:
+    """Upsert circuit breaker state so it survives process restarts."""
+    now = datetime.now(timezone.utc).isoformat()
+    with closing(_connect(path)) as conn:
+        with conn:
+            conn.execute(
+                """
+                INSERT INTO circuit_breaker_state (key, state, failure_count, last_failure_time, updated_at)
+                VALUES (?, ?, ?, ?, ?)
+                ON CONFLICT(key) DO UPDATE SET
+                    state = excluded.state,
+                    failure_count = excluded.failure_count,
+                    last_failure_time = excluded.last_failure_time,
+                    updated_at = excluded.updated_at
+                """,
+                (key, state, failure_count, last_failure_time, now),
+            )
+
+
+def load_cb_state(key: str, path: Path = _DB_PATH) -> dict | None:
+    """Return persisted circuit breaker state dict or None if not found."""
+    try:
+        with closing(_connect(path)) as conn:
+            row = conn.execute(
+                "SELECT state, failure_count, last_failure_time FROM circuit_breaker_state WHERE key = ?",
+                (key,),
+            ).fetchone()
+        return dict(row) if row else None
+    except Exception:
+        return None
 
 
 def _row_to_dict(row: sqlite3.Row) -> dict:

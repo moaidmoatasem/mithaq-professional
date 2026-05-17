@@ -15,7 +15,7 @@ class XSSScanner(BaseScanner):
 
     XSS_PAYLOADS = [
         '<script>alert("XSS")</script>',
-        '<img src=x onerror=alert(1)>',
+        "<img src=x onerror=alert(1)>",
         '"><svg/onload=alert(1)>',
     ]
 

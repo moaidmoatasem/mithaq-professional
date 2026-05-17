@@ -38,8 +38,7 @@ class CSRFScanner(BaseScanner):
             forms = re.findall(r"<form[^>]*>", content, re.IGNORECASE)
             if forms:
                 has_csrf = any(
-                    re.search(p, content, re.IGNORECASE)
-                    for p in self.CSRF_TOKEN_PATTERNS
+                    re.search(p, content, re.IGNORECASE) for p in self.CSRF_TOKEN_PATTERNS
                 )
                 if not has_csrf:
                     findings.append(
@@ -70,9 +69,7 @@ class CSRFScanner(BaseScanner):
                             "weakening CSRF defenses."
                         ),
                         cwe="CWE-352",
-                        remediation=(
-                            "Set SameSite=Lax or SameSite=Strict on all session cookies."
-                        ),
+                        remediation=("Set SameSite=Lax or SameSite=Strict on all session cookies."),
                     )
                 )
 

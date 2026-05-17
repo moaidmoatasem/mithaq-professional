@@ -13,8 +13,16 @@ class OpenRedirectScanner(BaseScanner):
     """Detects unvalidated open redirect vulnerabilities in URL parameters."""
 
     REDIRECT_PARAMS = [
-        "url", "redirect", "next", "return", "returnTo",
-        "goto", "target", "destination", "redir", "redirect_uri",
+        "url",
+        "redirect",
+        "next",
+        "return",
+        "returnTo",
+        "goto",
+        "target",
+        "destination",
+        "redir",
+        "redirect_uri",
     ]
 
     # Canary domains — if the response Location header contains these, redirect is open

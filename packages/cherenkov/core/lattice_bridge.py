@@ -223,7 +223,6 @@ def label_false_positive(finding_id: str) -> bool:
         return False
 
     try:
-
         client.set_payload(
             collection_name=_COLLECTION,
             payload={"is_false_positive": True},

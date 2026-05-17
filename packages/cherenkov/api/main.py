@@ -793,7 +793,9 @@ _active_scan_targets: set[str] = set()
 _active_scan_lock = asyncio.Lock()
 
 
-async def _run_scan(request: "ScanRequest", background_tasks: Optional[BackgroundTasks] = None) -> dict:
+async def _run_scan(
+    request: "ScanRequest", background_tasks: Optional[BackgroundTasks] = None
+) -> dict:
     """Core scan logic shared by /api/scan and /api/v1/scan."""
     from cherenkov.core.engine import ScanEngine
     from cherenkov.core.registry import ScannerRegistry

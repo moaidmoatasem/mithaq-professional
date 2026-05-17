@@ -26,6 +26,8 @@ CHERENKOV operates on a mathematically provable "Trident of Truth": it finds vul
 
 ---
 
+> **Alpha Software** — 5 validated scanners. Core architecture complete. TOKAMAK PoC execution and LATTICE adaptive learning are planned for Phase 4–5. See the [honest roadmap](https://docs.cherenkov-security.com/development/roadmap/).
+
 ## 🎯 At a Glance
 
 | | |
@@ -86,8 +88,12 @@ cd cherenkov-professional
 # 2. Configure environment
 cp .env.example .env
 
-# 3. Start the stack
-docker-compose -f deploy/docker-compose.yml up
+# 3. Start all services
+docker-compose -f deploy/docker-compose.yml up -d
+ollama pull qwen2.5-coder:3b
+
+# 4. Run your first scan (against DVWA included in compose)
+cherenkov scan http://localhost/dvwa --output table
 ```
 
 ## ⚖️ Licensing & The Ethical Open-Core
@@ -112,5 +118,5 @@ We refuse to utilize the "SSO Wall of Shame." Core security features (SSO, RBAC,
 
 ---
 <p align="center">
-  <sub>CHERENKOV v1.0 · Phase 1 Enforced · MTH-9941-R</sub>
+  <sub>CHERENKOV v0.1.1 · Phase 2 In Progress · MIT Licensed</sub>
 </p>

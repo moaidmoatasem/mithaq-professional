@@ -2,7 +2,7 @@
 
 CHERENKOV development is organized into strategic phases aligned with sovereign security standards and enterprise readiness.
 
-## Phase 1: Foundation & Sovereignization (Current)
+## Phase 1: Foundation & Sovereignization (Complete)
 
 **Goal:** Establish the Trident of Truth architecture. **Version 1.0.0-rc1**
 
@@ -12,7 +12,7 @@ CHERENKOV development is organized into strategic phases aligned with sovereign 
 - Core architecture, base scanner plugin system, SHA-256 trace signing
 - Security baseline
 
-## Phase 2: Swarm Optimization & Parallelism
+## Phase 2: Swarm Optimization & Parallelism (In Progress)
 
 **Goal:** Enable fully concurrent AI agent orchestration. **Version 1.1.0**
 
@@ -22,7 +22,7 @@ CHERENKOV development is organized into strategic phases aligned with sovereign 
 - AIMD circuit breakers for robust LLM inference
 - High-fidelity tactical dashboard
 
-## Phase 3: Production Hardening, Compliance & HITL
+## Phase 3: Production Hardening, Compliance & HITL (Not Started — requires Phase 2 complete)
 
 **Goal:** Enterprise-grade sovereign security with legally binding evidence. **Version 1.5.0**
 

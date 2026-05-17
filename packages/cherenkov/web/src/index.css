@@ -15,6 +15,14 @@
   --color-gold: #C9A84C;
   --color-gold-dim: #6B5520;
 
+  /* Legacy & Semantic Mapping */
+  --color-cherenkov-primary: var(--color-electric);
+  --color-cherenkov-accent: var(--color-bismuth);
+  --color-cherenkov-background: var(--color-obsidian);
+  --color-cherenkov-surface: var(--color-obsidian-2);
+  --color-cherenkov-text: var(--color-fg1);
+  --color-cherenkov-muted: var(--color-fg3);
+
   /* Semantic */
   --color-status-confirmed: #00D084;
   --color-status-probable: #F59E0B;
@@ -34,7 +42,6 @@
   --color-node-tokamak: #C9A84C;
 
   /* Legacy Colors mapping where needed */
-  --color-cherenkov-accent: #2b7fff;
   --color-hud-cyan: #00e5ff;
   --color-hud-amber: #ffb020;
   --color-hud-mint: #00ff88;

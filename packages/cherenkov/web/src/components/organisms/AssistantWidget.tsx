@@ -4,40 +4,11 @@ import { CyberButton } from '../atoms';
 import { MessageSquare, X, Send, Bot, User, Loader2 } from 'lucide-react';
 import { cn } from '@/src/lib/utils';
 
-// API key is read from the environment — set VITE_GEMINI_API_KEY in .env
-const API_KEY = import.meta.env.VITE_GEMINI_API_KEY as string | undefined;
-const MODEL = 'gemini-2.0-flash';
-
-const SYSTEM_PROMPT = `You are the CHERENKOV AI Security Assistant — a sovereign, zero-egress AI agent integrated into the Cherenkov security operations dashboard. 
-You assist security analysts with:
-- Interpreting scan findings (XSS, SQLi, SSRF, path traversal, file upload, XXE, etc.)
-- Explaining severity ratings (CRITICAL / HIGH / MEDIUM / LOW)
-- Recommending remediation steps
-- Mapping findings to compliance frameworks (OWASP, SAMA CSF, EGY_FIN_CSF, DORA)
-- Answering questions about the HITL (Human-in-the-Loop) approval workflow
-Keep responses concise, technical, and actionable. Never suggest sending data to external services.`;
+const SYSTEM_PROMPT = `You are the CHERENKOV AI Security Assistant — a sovereign, zero-egress AI agent integrated into the Cherenkov security operations dashboard.`;
 
 interface Message {
   role: 'user' | 'assistant';
   content: string;
-}
-
-// Lazy-load the Gemini SDK to avoid import errors when key is absent
-async function createSession() {
-  if (!API_KEY) throw new Error('VITE_GEMINI_API_KEY is not set');
-  const { GoogleGenAI } = await import('@google/genai');
-  const ai = new GoogleGenAI({ apiKey: API_KEY });
-  return ai.chats.create({
-    model: MODEL,
-    config: { systemInstruction: SYSTEM_PROMPT },
-  });
-}
-
-// Singleton chat session per page load
-let _chatPromise: ReturnType<typeof createSession> | null = null;
-function getChat() {
-  if (!_chatPromise) _chatPromise = createSession();
-  return _chatPromise;
 }
 
 export function AssistantWidget() {
@@ -72,10 +43,25 @@ export function AssistantWidget() {
     setError(null);
 
     try {
-      const chat = await getChat();
-      const response = await chat.sendMessage({ message: text });
-      const reply = response.text ?? 'No response received.';
-      setMessages((prev) => [...prev, { role: 'assistant', content: reply }]);
+      const token = sessionStorage.getItem('cherenkov_token');
+      const res = await fetch(`${API_BASE}/assistant/advice`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify({
+          findings: [], // In a real scenario, we'd pass current findings
+          context: { query: text },
+        }),
+      });
+
+      if (!res.ok) throw new Error('Assistant API error');
+      const data = await res.json();
+      setMessages((prev) => [
+        ...prev,
+        { role: 'assistant', content: data.advice || 'No advice received.' },
+      ]);
     } catch (err) {
       const msg = err instanceof Error ? err.message : 'Unknown error';
       setError(msg);
@@ -122,12 +108,10 @@ export function AssistantWidget() {
               </button>
             </div>
 
-            {/* No-key warning */}
-            {!API_KEY && (
-              <div className="px-3 py-2 bg-sev-critical/10 border-b border-sev-critical/20 text-[10px] text-sev-critical font-mono">
-                ⚠ Set VITE_GEMINI_API_KEY in .env to enable AI responses
-              </div>
-            )}
+            {/* Zero-Egress Banner */}
+            <div className="px-3 py-2 bg-hud-cyan/10 border-b border-hud-cyan/20 text-[10px] text-hud-cyan font-mono">
+              🛡 MEISSNER AIR-GAP PROTECTED // LOCAL OLLAMA ACTIVE
+            </div>
 
             {/* Messages */}
             <div className="flex-1 overflow-y-auto p-4 space-y-4 scrollbar-thin scrollbar-track-transparent scrollbar-thumb-cherenkov-primary/20">
@@ -188,20 +172,19 @@ export function AssistantWidget() {
                   value={input}
                   onChange={(e) => setInput(e.target.value)}
                   onKeyDown={handleKeyDown}
-                  disabled={!API_KEY}
-                  placeholder={API_KEY ? 'Ask about vulnerabilities, findings...' : 'API key not set'}
-                  className="flex-1 bg-transparent text-xs text-cherenkov-text placeholder:text-cherenkov-muted outline-none font-mono disabled:opacity-40"
+                  placeholder="Ask about vulnerabilities, findings..."
+                  className="flex-1 bg-transparent text-xs text-cherenkov-text placeholder:text-cherenkov-muted outline-none font-mono"
                 />
                 <button
                   onClick={handleSend}
-                  disabled={!input.trim() || loading || !API_KEY}
+                  disabled={!input.trim() || loading}
                   className="text-cherenkov-primary hover:text-cherenkov-primary/80 disabled:opacity-30 transition-colors shrink-0"
                 >
                   <Send className="w-4 h-4" />
                 </button>
               </div>
               <p className="text-[9px] text-cherenkov-muted/50 font-mono mt-1.5 text-center">
-                Powered by Gemini · Zero-Egress Mode
+                Powered by Local Ollama · Zero-Egress Mode
               </p>
             </div>
           </motion.div>

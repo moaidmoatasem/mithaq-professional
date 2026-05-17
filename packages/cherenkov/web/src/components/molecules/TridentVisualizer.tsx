@@ -2,7 +2,7 @@ import { motion } from 'motion/react';
 import { cn } from '@/src/lib/utils';
 import { ShieldCheck } from 'lucide-react';
 
-export type ContainmentState = 'MONITORING' | 'THREAT_DETECTED' | 'MEISSNER_LOCKED' | 'ABLATION_ACTIVE' | 'TOKAMAK_EXECUTING' | 'TRACE_SIGNED';
+export type ContainmentState = 'MONITORING' | 'THREAT_DETECTED' | 'MEISSNER_LOCKED' | 'ABLATION_ACTIVE' | 'TOKAMAK_EXECUTING' | 'TRACE_SIGNED' | 'MOBILE_TRIAGE';
 
 interface VisualizerProps {
   state: ContainmentState;

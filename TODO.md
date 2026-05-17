@@ -1,5 +1,12 @@
 # CHERENKOV TODO — Phase 2 Active Sprint
 
+## Sprint 2: Orchestration Hardening [DONE ✅]
+- [x] `ScanEngine.scan_all()` — true asyncio gather across all registered scanners (#182)
+- [x] Per-scanner timeout isolation (one scanner failure doesn't kill others) (#182)
+- [x] Broadcast `scan_progress` WS events per scanner completion (#182)
+- [x] Integration test: parallel scan finishes faster than sequential (#182)
+- [x] Target-level circuit breaker (Meissner) integration (#182)
+
 ## Sprint 3: TOKAMAK Execution Sandbox [DONE ✅]
 - [x] Wire `core/tokamak.py` to `Dockerfile.tokamak` — pass sandbox a `Command` payload, return signed JSON receipt
 - [x] Implement cryptographic erasure ("shred receipt") after sandbox teardown per CLAUDE.md invariant
@@ -11,7 +18,7 @@
 - [x] `GET /api/v1/findings/pending` — list findings awaiting approval
 - [x] `POST /api/v1/findings/{id}/reject` — reject finding with operator audit
 - [x] Store pending state in SQLite (WAL mode) so restarts don't lose pending approvals
-- [ ] Frontend: `PendingApprovalsPanel` organism — badge count in `ForensicHeader`, full list in sidebar
+- [x] Frontend: `PendingApprovalsPanel` organism — badge count in `ForensicHeader`, full list in sidebar
 
 ## Sprint 5: Compliance & Reporting [DONE ✅]
 - [x] Build `packages/cherenkov/compliance/` mapper: CWE/CVE → SAMA CSF / EGY-FIN CSF / DORA / OWASP Top 10 (19 CWEs)
@@ -47,7 +54,7 @@
 - [ ] Register them in `ScannerRegistry` so they run on every `/api/v1/scan`
 
 ## Agentic Infrastructure [DONE ✅]
-- [x] `AGENTS.md` — agent roles, branching rules, label taxonomy
+- [x] `AGENTS.md` — agent roles, branching roles, label taxonomy
 - [x] `CODEOWNERS` — updated to `packages/cherenkov/*` layout
 - [x] `claude.yml` — @claude GitHub Actions integration
 - [x] `autonomous-dev.yml` — daily scanner generation pipeline

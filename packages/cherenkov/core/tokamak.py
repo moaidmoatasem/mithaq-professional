@@ -16,6 +16,7 @@ import asyncio
 import hashlib
 import json
 import logging
+import subprocess
 from contextlib import asynccontextmanager
 from dataclasses import dataclass
 from datetime import datetime, timezone
@@ -331,6 +332,10 @@ class Tokamak:
                 os.rmdir(tmpdir)
             except Exception:
                 pass
+        try:
+            os.rmdir(tmpdir)
+        except Exception:
+            pass
 
         shred_receipt = {
             "files_erased": shredded_files if shredded_files else ["payload.sh"],

@@ -65,6 +65,7 @@ from cherenkov.orchestration.workflow_parser import load_workflow
 logger = logging.getLogger(__name__)
 
 _STATIC_DIR = Path(__file__).parent / "static"
+_WEB_DIST_DIR = Path(__file__).parent.parent / "web" / "dist"
 
 # Rate limits are intentionally conservative — scanning is CPU/GPU-heavy and
 # an unbounded queue would exhaust the local Ollama instance.
@@ -727,6 +728,10 @@ async def v1_reject_finding(
 # Serve the static dashboard assets
 if _STATIC_DIR.exists():
     app.mount("/static", StaticFiles(directory=str(_STATIC_DIR)), name="static")
+
+# Serve the React dashboard at /app/ (html=True enables SPA fallback to index.html)
+if _WEB_DIST_DIR.exists():
+    app.mount("/app", StaticFiles(directory=str(_WEB_DIST_DIR), html=True), name="web")
 
 
 # ── Models ──────────────────────────────────────────────────────────────────

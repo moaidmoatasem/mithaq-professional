@@ -3,8 +3,7 @@ import { motion, AnimatePresence } from 'motion/react';
 import { CyberButton } from '../atoms';
 import { MessageSquare, X, Send, Bot, User, Loader2 } from 'lucide-react';
 import { cn } from '@/src/lib/utils';
-
-const SYSTEM_PROMPT = `You are the CHERENKOV AI Security Assistant — a sovereign, zero-egress AI agent integrated into the Cherenkov security operations dashboard.`;
+import { API_BASE } from '@/src/lib/api';
 
 interface Message {
   role: 'user' | 'assistant';

@@ -359,8 +359,17 @@ async def v1_erase_target(
 
 async def _check_ollama() -> str:
     try:
-        async with httpx.AsyncClient(timeout=1.0) as c:
+        async with httpx.AsyncClient(timeout=3.0) as c:
             r = await c.get("http://localhost:11434/api/tags")
+            return "ready" if r.status_code == 200 else "offline"
+    except Exception:
+        return "offline"
+
+
+async def _check_qdrant() -> str:
+    try:
+        async with httpx.AsyncClient(timeout=2.0) as c:
+            r = await c.get("http://localhost:6333/health")
             return "ready" if r.status_code == 200 else "offline"
     except Exception:
         return "offline"
@@ -408,30 +417,29 @@ async def v1_health() -> dict:
     Returns the node topology expected by NodeStatusRow and
     the Meissner shield state expected by ForensicHeader.
     """
-    from cherenkov.core.circuit_breaker import meissner_hub
+
+    from cherenkov.core.storage.database import db_stats
 
     active_scans = _get_active_scans_count()
-    ollama_status, vector_count, container_count = await asyncio.gather(
+    ollama_status, qdrant_status, vector_count, container_count = await asyncio.gather(
         _check_ollama(),
+        _check_qdrant(),
         _get_qdrant_vector_count(),
         asyncio.to_thread(_get_tokamak_container_count),
     )
-    meissner_state = meissner_hub.state.value.upper()
-    lattice_status = "ready" if vector_count >= 0 else "offline"
 
     return {
         "status": "healthy",
-        "agents": "operational",
+        "version": "1.1.0",
+        "timestamp": datetime.now(timezone.utc).isoformat(),
+        "storage": db_stats(),
         "queue": {"scan_jobs_pending": active_scans},
-        "uptime_seconds": round(time.time() - _START_TIME),
-        "active_scans": active_scans,
-        "meissner": {"state": meissner_state},
         "nodes": {
             "tensor": {"status": ollama_status, "model": "Llama 3.1 8B"},
             "kinetic": {"status": ollama_status, "model": "Qwen2.5 3B", "ram_gb": 8},
             "aegis": {"status": ollama_status, "model": "Llama 3.1 8B", "ram_gb": 8},
             "lattice": {
-                "status": lattice_status,
+                "status": qdrant_status,
                 "model": "Qdrant / Vector",
                 "vector_count": vector_count,
             },

@@ -76,6 +76,12 @@ def _connect(path: Path = _DB_PATH) -> sqlite3.Connection:
     return conn
 
 
+def db_stats(path: Path = _DB_PATH) -> dict:
+    """Return SQLite storage statistics."""
+    size = path.stat().st_size if path.exists() else 0
+    return {"size_bytes": size}
+
+
 def init_db(path: Path = _DB_PATH) -> None:
     path.parent.mkdir(parents=True, exist_ok=True)
     with closing(_connect(path)) as conn:

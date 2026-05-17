@@ -12,14 +12,14 @@ This file is read by every AI agent working on this repo. Follow it precisely.
 | **Claude (GitHub Actions)** | `@claude` in issues/PRs | Code review, targeted fixes, issue work | `claude/*` |
 | **Claude Code (local)** | Terminal sessions | Architecture, agentic coordination, multi-file refactors | `claude/*` |
 | **Continue.dev (Qwen 3.5)** | VS Code / IDE | Autonomous coding, scanner graduation | `auto-dev/*` |
+| **Jules (Google)** | `@jules` in issues | Autonomous issue implementation, branch + PR | `jules/*` |
 | **Autonomous Pipeline** | Daily cron 2AM UTC | Scanner generation (`autonomous_roadmap_executor.py`) | `auto-dev/<run>` |
 
 ---
 
 ## 1. Branching Rules (NON-NEGOTIABLE)
 
-- **NEVER commit directly to `main`.** All changes go through a branch + PR.
-- **Exception**: Agentic state files (`STATUS.md`, `TODO.md`, `AGENT_MEMORY.md`) may be committed to main by the coordinating Claude Code session only when no feature work is included.
+- **NEVER commit directly to `main`.** All changes go through a branch + PR. No exceptions.
 - Branch naming: `<type>/<issue-number>-<short-description>`
   - Types: `feat`, `fix`, `refactor`, `docs`, `test`, `chore`
   - Example: `feat/42-tokamak-docker-sandbox`
@@ -112,10 +112,10 @@ Every issue and PR MUST have at least one of each:
 | **AI** | `ai:generated`, `ai:autonomous` (if AI-authored) |
 
 ### Milestones
-- `v1.1.0` — Swarm Concurrency (current — Phase 2)
-- `v1.5.0` — Enterprise Validation & HITL (Phase 3)
-- `v2.0.0` — Mobile Triage (Phase 4)
-- `v2.5.0` — Ecosystem Integration (Phase 5)
+- `v0.1.1-cherenkov` — Phase 1/2: Core scaffolding + 6 graduated scanners (current, 146 tests passing)
+- `v1.0.0` — Phase 3: TOKAMAK forensics + HITL workflow
+- `v1.5.0` — Phase 4: Enterprise Validation
+- `v2.0.0` — Phase 5: Mobile Triage / Ecosystem Integration
 
 ### Issue Commands (in comments)
 ```

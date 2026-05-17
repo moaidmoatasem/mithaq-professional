@@ -70,3 +70,4 @@ validation_results.json
 # NOTE: AGENT_MEMORY.md and TODO.md are now tracked — they are multi-agent
 # coordination artifacts, not throwaway session scratchpads.
 build/
+site/

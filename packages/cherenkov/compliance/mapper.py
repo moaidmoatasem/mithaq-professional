@@ -2,7 +2,7 @@ from __future__ import annotations
 
 FRAMEWORKS = {
     "egyfincsf": "EGY-FIN CSF (CBE Egypt)",
-    "samacsf": "SAMA CSF (Saudi Arabia)",
+    "samacsf": "SAMA CSF",
     "dora": "DORA (EU)",
     "owasp_top10": "OWASP Top 10",
 }

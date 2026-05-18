@@ -1,0 +1,12 @@
+Report: 200 passing, 9 failing.
+
+Failures:
+1. tests/integration/test_complete_system.py::test_cli - AssertionError on execution result
+2. tests/integration/test_complete_system.py::test_docker - AssertionError on docker exec result
+3. tests/integration/test_parallel_scan.py::test_parallel_speedup - Value error related to parallel scan performance
+4. tests/integration/test_production_ready.py::test_quick_scan - AssertionError in quick scan execution
+5. tests/packages/core/test_parallel_agents.py::test_parallel_agents - ConnectionError: Failed to connect to OpenAI API
+6. tests/packages/crews/test_autonomous_developers.py::test_autonomous_developers - ConnectionError: Failed to connect to OpenAI API
+7. tests/packages/crews/test_autonomous_simple.py::test_autonomous_simple - ConnectionError: Failed to connect to OpenAI API
+8. tests/packages/crews/test_full_autonomous_crew.py::test_full_autonomous_crew - ConnectionError: Failed to connect to OpenAI API
+9. tests/packages/crews/test_full_dev_team.py::test_full_dev_team - ConnectionError: Failed to connect to OpenAI API

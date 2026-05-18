@@ -84,13 +84,9 @@ async def lifespan(app: FastAPI):
     from cherenkov.core.circuit_breaker import meissner_hub
     from cherenkov.core.storage.database import get_user, init_db, save_user
 
-    # Initialize database
     init_db()
-
-    # Auto-provision default admin user if it doesn't exist
     if not get_user("admin"):
-        hashed = hash_password("admin")
-        save_user("admin", hashed, Role.ADMIN)
+        save_user("admin", hash_password("admin"), Role.ADMIN)
 
     meissner_hub.on_open(
         lambda: asyncio.create_task(
@@ -128,6 +124,28 @@ app.add_middleware(
 _ws_clients: Set[WebSocket] = set()
 
 
+@app.websocket("/ws/live")
+async def ws_live(websocket: WebSocket) -> None:
+    """Live event stream for the CHERENKOV web dashboard."""
+    await websocket.accept()
+    _ws_clients.add(websocket)
+    try:
+        while True:
+            await websocket.send_json(
+                {
+                    "event": "health_pulse",
+                    "timestamp": datetime.now(timezone.utc).isoformat(),
+                    "queue_depth": 0,
+                    "active_scans": len(_active_scan_targets),
+                }
+            )
+            await asyncio.sleep(5)
+    except WebSocketDisconnect:
+        pass
+    finally:
+        _ws_clients.discard(websocket)
+
+
 async def _broadcast(event: dict) -> None:
     """Push a JSON event to every connected WebSocket client."""
     dead: Set[WebSocket] = set()
@@ -138,24 +156,6 @@ async def _broadcast(event: dict) -> None:
         except Exception:
             dead.add(ws)
     _ws_clients.difference_update(dead)
-
-
-@app.websocket("/ws/live")
-async def ws_live(websocket: WebSocket):
-    await websocket.accept()
-    try:
-        while True:
-            await websocket.send_json(
-                {
-                    "event": "health_pulse",
-                    "timestamp": datetime.now(timezone.utc).isoformat(),
-                    "queue_depth": 0,
-                    "active_scans": 0,
-                }
-            )
-            await asyncio.sleep(5)
-    except WebSocketDisconnect:
-        pass
 
 
 # ── /api/v1 router (consumed by the React frontend) ─────────────────────────

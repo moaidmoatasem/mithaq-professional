@@ -31,7 +31,7 @@ def test_tokamak_execute_success():
         assert "-v" in cmd_args
         assert "sh" in cmd_args
         assert "/workspace/payload.sh" in cmd_args
-        
+
         assert kwargs["timeout"] == 5
         assert kwargs["capture_output"] is True
         assert kwargs["text"] is True
@@ -43,6 +43,7 @@ def test_tokamak_execute_success():
         assert len(result.trace_hash) == 64
         assert "files_erased" in result.shred_receipt
         assert result.shred_receipt["method"] == "overwrite+truncate"
+
 
 def test_tokamak_execute_timeout():
     cmd = Command(payload="sleep 10", scanner_name="slow", timeout=1)
@@ -60,6 +61,7 @@ def test_tokamak_execute_timeout():
         assert "TimeoutExpired" in result.stderr
         assert len(result.trace_hash) == 64
 
+
 def test_tokamak_execute_exception():
     cmd = Command(payload="bad", scanner_name="crash", timeout=5)
 
@@ -72,9 +74,10 @@ def test_tokamak_execute_exception():
         assert "Docker not found" in result.stderr
         assert len(result.trace_hash) == 64
 
+
 def test_tokamak_signing_and_receipt():
     cmd = Command(payload="echo hello", scanner_name="test_scanner")
-    
+
     with patch("subprocess.run") as mock_run:
         mock_process = MagicMock()
         mock_process.stdout = "hello\n"
@@ -96,12 +99,14 @@ def test_tokamak_signing_and_receipt():
         assert isinstance(result.duration_ms, float)
         assert result.duration_ms >= 0
 
+
 def test_tokamak_image_env_override():
     """TOKAMAK_IMAGE env var overrides the default kali image."""
     cmd = Command(payload="echo 'test'", scanner_name="test_scanner", timeout=5)
 
-    with patch("subprocess.run") as mock_run, patch.dict(
-        os.environ, {"TOKAMAK_IMAGE": "custom-image:latest"}
+    with (
+        patch("subprocess.run") as mock_run,
+        patch.dict(os.environ, {"TOKAMAK_IMAGE": "custom-image:latest"}),
     ):
         mock_run.return_value = MagicMock(stdout="", stderr="", returncode=0)
         Tokamak.execute(cmd)
@@ -110,9 +115,7 @@ def test_tokamak_image_env_override():
         assert "custom-image:latest" in args
 
     # Default image when env var is unset
-    with patch("subprocess.run") as mock_run, patch.dict(
-        os.environ, {}, clear=False
-    ):
+    with patch("subprocess.run") as mock_run, patch.dict(os.environ, {}, clear=False):
         os.environ.pop("TOKAMAK_IMAGE", None)
         mock_run.return_value = MagicMock(stdout="", stderr="", returncode=0)
         Tokamak.execute(cmd)

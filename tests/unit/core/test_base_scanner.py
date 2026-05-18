@@ -6,6 +6,7 @@ def test_base_scanner_cannot_instantiate_directly():
     with pytest.raises(TypeError):
         BaseScanner()
 
+
 def test_base_scanner_implementation():
     class TestScanner(BaseScanner):
         async def scan(self, target: str, timeout: float = 10.0) -> ScanResult:
@@ -16,6 +17,7 @@ def test_base_scanner_implementation():
     assert scanner.description == "TestScanner scanner"
     assert scanner.version == "1.0.0"
 
+
 @pytest.mark.asyncio
 async def test_scan_result():
     class TestScanner(BaseScanner):
@@ -25,13 +27,10 @@ async def test_scan_result():
                 severity=Severity.HIGH,
                 description="A test finding",
                 cwe="CWE-79",
-                remediation="Fix it"
+                remediation="Fix it",
             )
             return ScanResult(
-                target=target,
-                scanner_name=self.name,
-                findings=[finding],
-                duration_ms=100.0
+                target=target, scanner_name=self.name, findings=[finding], duration_ms=100.0
             )
 
     scanner = TestScanner()
@@ -43,6 +42,7 @@ async def test_scan_result():
     assert result.findings[0].severity == Severity.HIGH
     assert result.duration_ms == 100.0
     assert result.status == "completed"
+
 
 from unittest.mock import MagicMock, patch
 

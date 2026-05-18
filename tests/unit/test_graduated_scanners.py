@@ -16,6 +16,7 @@ from cherenkov.scanners.refined.xss_scanner import XSSScanner
 # Helpers
 # ---------------------------------------------------------------------------
 
+
 def _mock_http_response(
     status_code: int = 200,
     text: str = "",
@@ -41,6 +42,7 @@ def _make_async_client_mock(get_response: AsyncMock) -> MagicMock:
 # ---------------------------------------------------------------------------
 # CSRFScanner
 # ---------------------------------------------------------------------------
+
 
 class TestCSRFScanner:
     def setup_method(self):
@@ -134,6 +136,7 @@ class TestCSRFScanner:
 # XSSScanner
 # ---------------------------------------------------------------------------
 
+
 class TestXSSScanner:
     def setup_method(self):
         self.scanner = XSSScanner()
@@ -206,9 +209,7 @@ class TestXSSScanner:
     @pytest.mark.asyncio
     async def test_handles_request_error_gracefully(self):
         mock_client = AsyncMock()
-        mock_client.__aenter__ = AsyncMock(
-            side_effect=httpx.RequestError("connection refused")
-        )
+        mock_client.__aenter__ = AsyncMock(side_effect=httpx.RequestError("connection refused"))
         mock_client.__aexit__ = AsyncMock(return_value=False)
 
         with patch(
@@ -226,6 +227,7 @@ class TestXSSScanner:
 # ---------------------------------------------------------------------------
 # OpenRedirectScanner
 # ---------------------------------------------------------------------------
+
 
 class TestOpenRedirectScanner:
     def setup_method(self):

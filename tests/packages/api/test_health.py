@@ -6,7 +6,9 @@ from httpx import RequestError, Response
 
 
 class MockAsyncClient:
-    def __init__(self, ollama_status=200, qdrant_status=200, qdrant_vector_count=0, raise_error=False):
+    def __init__(
+        self, ollama_status=200, qdrant_status=200, qdrant_vector_count=0, raise_error=False
+    ):
         self.ollama_status = ollama_status
         self.qdrant_status = qdrant_status
         self.qdrant_vector_count = qdrant_vector_count
@@ -29,20 +31,24 @@ class MockAsyncClient:
             return Response(200, json={"result": {"vectors_count": self.qdrant_vector_count}})
         return Response(404)
 
+
 @pytest.fixture
 def mock_db_stats():
     with patch("cherenkov.core.storage.database.db_stats", return_value={"size_bytes": 1024}):
         yield
+
 
 @pytest.fixture
 def mock_active_scans():
     with patch("cherenkov.api.main._get_active_scans_count", return_value=2):
         yield
 
+
 @pytest.fixture
 def mock_tokamak_count():
     with patch("cherenkov.api.main._get_tokamak_container_count", return_value=1):
         yield
+
 
 @pytest.mark.asyncio
 async def test_health_healthy(mock_db_stats, mock_active_scans, mock_tokamak_count):
@@ -63,6 +69,7 @@ async def test_health_healthy(mock_db_stats, mock_active_scans, mock_tokamak_cou
         assert nodes["tokamak"]["status"] == "ready"
         assert nodes["tokamak"]["active_containers"] == 1
 
+
 @pytest.mark.asyncio
 async def test_health_ollama_offline(mock_db_stats, mock_active_scans, mock_tokamak_count):
     with patch("httpx.AsyncClient", return_value=MockAsyncClient(ollama_status=500)):
@@ -72,12 +79,14 @@ async def test_health_ollama_offline(mock_db_stats, mock_active_scans, mock_toka
         assert res["nodes"]["aegis"]["status"] == "offline"
         assert res["nodes"]["lattice"]["status"] == "ready"
 
+
 @pytest.mark.asyncio
 async def test_health_qdrant_offline(mock_db_stats, mock_active_scans, mock_tokamak_count):
     with patch("httpx.AsyncClient", return_value=MockAsyncClient(qdrant_status=500)):
         res = await v1_health()
         assert res["nodes"]["tensor"]["status"] == "ready"
         assert res["nodes"]["lattice"]["status"] == "offline"
+
 
 @pytest.mark.asyncio
 async def test_health_http_error(mock_db_stats, mock_active_scans, mock_tokamak_count):

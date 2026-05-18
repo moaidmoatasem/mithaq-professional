@@ -21,9 +21,14 @@ async def test_file_upload_vulnerable():
     mock_response.text = "File uploaded successfully: test_shell.php"
 
     class MockClient:
-        async def __aenter__(self): return self
-        async def __aexit__(self, *args): pass
-        async def post(self, *args, **kwargs): return mock_response
+        async def __aenter__(self):
+            return self
+
+        async def __aexit__(self, *args):
+            pass
+
+        async def post(self, *args, **kwargs):
+            return mock_response
 
     with patch("httpx.AsyncClient", return_value=MockClient()):
         result = await scanner.scan("http://vulnerable.com/upload")
@@ -46,9 +51,14 @@ async def test_file_upload_safe():
     mock_response.text = "File type not allowed"
 
     class MockClient:
-        async def __aenter__(self): return self
-        async def __aexit__(self, *args): pass
-        async def post(self, *args, **kwargs): return mock_response
+        async def __aenter__(self):
+            return self
+
+        async def __aexit__(self, *args):
+            pass
+
+        async def post(self, *args, **kwargs):
+            return mock_response
 
     with patch("httpx.AsyncClient", return_value=MockClient()):
         result = await scanner.scan("http://safe.com/upload")
@@ -61,6 +71,7 @@ async def test_file_upload_timeout():
     scanner = FileUploadScanner("file_upload", "test scanner")
 
     import httpx
+
     with patch("httpx.AsyncClient", side_effect=httpx.RequestError("Error", request=MagicMock())):
         result = await scanner.scan("http://timeout.com/upload")
 

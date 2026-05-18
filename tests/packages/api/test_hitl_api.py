@@ -57,7 +57,9 @@ def test_get_pending_findings_empty(client):
     assert response.json() == []
 
 
-@pytest.mark.xfail(reason="Predates JWT auth middleware; needs token fixture — Sprint 4", strict=True)
+@pytest.mark.xfail(
+    reason="Predates JWT auth middleware; needs token fixture — Sprint 4", strict=True
+)
 def test_approve_reject_finding(client, setup_db):
     finding_id = str(uuid.uuid4())
     save_pending_finding(finding_id, "CRITICAL", "TestScanner", "Test Title")
@@ -110,7 +112,9 @@ def test_approve_reject_finding(client, setup_db):
         assert row["approved_at"] is None
 
 
-@pytest.mark.xfail(reason="Predates JWT auth middleware; needs token fixture — Sprint 4", strict=True)
+@pytest.mark.xfail(
+    reason="Predates JWT auth middleware; needs token fixture — Sprint 4", strict=True
+)
 def test_run_scan_hitl_integration(client, monkeypatch):
     class MockScanEngine:
         def __init__(self, registry):

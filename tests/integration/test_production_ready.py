@@ -69,6 +69,7 @@ def test_scanners():
 
 
 # Test 4: Run Quick Scan
+@pytest.mark.skip(reason='cherenkov_simple_scanner.py deleted')
 def test_quick_scan():
     result = subprocess.run(
         ["python", "cherenkov_simple_scanner.py", "https://example.com"],

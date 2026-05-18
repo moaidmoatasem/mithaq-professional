@@ -1,7 +1,9 @@
+from unittest.mock import AsyncMock, MagicMock, patch
+
 import pytest
-from unittest.mock import patch, AsyncMock, MagicMock
-from cherenkov.scanners.xxe_scanner import XXEScanner
 from cherenkov.core.base_scanner import Severity
+from cherenkov.scanners.xxe_scanner import XXEScanner
+
 
 @pytest.mark.asyncio
 async def test_xxe_scanner_vulnerable():

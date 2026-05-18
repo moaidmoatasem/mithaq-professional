@@ -1,7 +1,9 @@
+from unittest.mock import MagicMock, patch
+
 import pytest
-from unittest.mock import patch, MagicMock
-from httpx import Response, RequestError
 from cherenkov.api.main import v1_health
+from httpx import RequestError, Response
+
 
 class MockAsyncClient:
     def __init__(self, ollama_status=200, qdrant_status=200, qdrant_vector_count=0, raise_error=False):

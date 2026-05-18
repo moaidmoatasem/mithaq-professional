@@ -3,7 +3,6 @@
 from unittest.mock import AsyncMock, MagicMock, patch
 
 import pytest
-
 from cherenkov.core.base_scanner import Finding, ScanResult, Severity
 
 

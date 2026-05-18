@@ -1,8 +1,10 @@
-import pytest
 import json
 from unittest.mock import patch
-from fastapi.testclient import TestClient
+
+import pytest
 from cherenkov.api.main import app
+from fastapi.testclient import TestClient
+
 
 def test_websocket_live(monkeypatch):
     import cherenkov.api.main as main_module
@@ -11,7 +13,6 @@ def test_websocket_live(monkeypatch):
     # TestClient doesn't cancel background tasks immediately if they are created with asyncio.create_task and don't exit.
 
     # Let's mock the _health_pulse_loop so it only sends 2 pulses then exits, preventing hangs.
-    original_pulse_loop = main_module._health_pulse_loop
 
     async def mock_pulse_loop(websocket):
         for _ in range(3):

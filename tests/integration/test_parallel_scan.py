@@ -1,9 +1,11 @@
 import asyncio
-import pytest
 import time
+
+import pytest
+from cherenkov.core.base_scanner import BaseScanner, ScanResult
 from cherenkov.core.engine import ScanEngine
 from cherenkov.core.registry import ScannerRegistry
-from cherenkov.core.base_scanner import BaseScanner, ScanResult
+
 
 class WaitScanner(BaseScanner):
     async def scan(self, target: str, timeout: float = 10.0) -> ScanResult:

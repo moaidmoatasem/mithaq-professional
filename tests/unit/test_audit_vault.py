@@ -1,9 +1,17 @@
 import os
-import pytest
 import sqlite3
 import tempfile
 from pathlib import Path
-from cherenkov.core.storage.database import init_db, save_audit_entry, get_audit_log, save_scan, StorageError
+
+import pytest
+from cherenkov.core.storage.database import (
+    StorageError,
+    get_audit_log,
+    init_db,
+    save_audit_entry,
+    save_scan,
+)
+
 
 @pytest.fixture
 def temp_db():
@@ -50,14 +58,14 @@ def test_audit_log_trace_hash_consistency(temp_db):
     event_type = "CONSISTENCY_CHECK"
     user_id = "operator"
     
-    trace_hash = save_audit_entry(event_type, user_id, details, path=temp_db)
+    save_audit_entry(event_type, user_id, details, path=temp_db)
     
     logs = get_audit_log(path=temp_db)
     entry = logs[0]
     
     # Re-calculate hash manually
-    import json
     import hashlib
+    import json
     payload = f"{entry['timestamp']}|{event_type}|{user_id}|{json.dumps(details)}"
     expected_hash = hashlib.sha256(payload.encode()).hexdigest()
     

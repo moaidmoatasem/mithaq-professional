@@ -3,15 +3,14 @@
 All HTTP calls are mocked — no network required.
 """
 
-import httpx
-import pytest
 from unittest.mock import AsyncMock, MagicMock, patch
 
+import httpx
+import pytest
 from cherenkov.core.base_scanner import Severity
 from cherenkov.scanners.refined.csrf_scanner import CSRFScanner
 from cherenkov.scanners.refined.open_redirect_scanner import OpenRedirectScanner
 from cherenkov.scanners.refined.xss_scanner import XSSScanner
-
 
 # ---------------------------------------------------------------------------
 # Helpers

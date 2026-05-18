@@ -1,5 +1,6 @@
 from cherenkov.compliance import ComplianceMapper
 
+
 def test_cwe79_mapping():
     tags = ComplianceMapper.map_all("CWE-79")
     assert "OWASP" in tags

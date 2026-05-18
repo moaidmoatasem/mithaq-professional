@@ -1,7 +1,9 @@
+from unittest.mock import AsyncMock, MagicMock, patch
+
 import pytest
-from unittest.mock import patch, AsyncMock, MagicMock
-from cherenkov.scanners.path_traversal_scanner import PathTraversalScanner
 from cherenkov.core.base_scanner import Severity
+from cherenkov.scanners.path_traversal_scanner import PathTraversalScanner
+
 
 @pytest.mark.asyncio
 async def test_path_traversal_vulnerable():

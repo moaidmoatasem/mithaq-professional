@@ -1,8 +1,10 @@
 import os
 import subprocess
+from unittest.mock import MagicMock, patch
+
 import pytest
-from unittest.mock import patch, MagicMock
-from cherenkov.core.tokamak import Tokamak, Command, TokamakResult, TOKAMAKProfile
+from cherenkov.core.tokamak import Command, Tokamak, TOKAMAKProfile, TokamakResult
+
 
 def test_tokamak_execute_success():
     cmd = Command(payload="echo 'hello'", scanner_name="test_scanner", timeout=5)

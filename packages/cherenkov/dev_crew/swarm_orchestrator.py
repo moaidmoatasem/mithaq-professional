@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-# src/cherenkov/dev_crew/swarm_orchestrator.py
+# packages/cherenkov/dev_crew/swarm_orchestrator.py
 """
 The Perpetual Build Machine.
 
@@ -50,7 +50,7 @@ class CWEStatus(str, Enum):
     BUILDING = "building"
     CANDIDATE = "candidate"  # passed CI, PR opened
     FAILED = "failed"  # exhausted retries
-    VALIDATED = "validated"  # graduated to src/cherenkov/scanners/
+    VALIDATED = "validated"  # graduated to packages/cherenkov/scanners/
 
 
 @dataclass

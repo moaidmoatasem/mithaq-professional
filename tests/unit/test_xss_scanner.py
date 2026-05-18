@@ -1,8 +1,9 @@
-import pytest
-import httpx
 from unittest.mock import AsyncMock, patch
-from cherenkov.scanners.xss_scanner import XSSScanner
+
+import httpx
+import pytest
 from cherenkov.core.base_scanner import Severity
+from cherenkov.scanners.xss_scanner import XSSScanner
 
 
 @pytest.mark.asyncio

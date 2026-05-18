@@ -1,8 +1,9 @@
-import pytest
-import httpx
 from unittest.mock import AsyncMock, patch
-from cherenkov.scanners.ssrf_scanner import SSRFScanner, _find_url_params, _inject_canary
+
+import httpx
+import pytest
 from cherenkov.core.base_scanner import Severity
+from cherenkov.scanners.ssrf_scanner import SSRFScanner, _find_url_params, _inject_canary
 
 
 @pytest.mark.asyncio

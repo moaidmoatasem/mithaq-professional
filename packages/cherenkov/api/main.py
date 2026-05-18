@@ -81,7 +81,17 @@ _START_TIME = time.time()
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
+    from cherenkov.api.middleware.auth import Role, hash_password
     from cherenkov.core.circuit_breaker import meissner_hub
+    from cherenkov.core.storage.database import get_user, init_db, save_user
+
+    # Initialize database
+    init_db()
+
+    # Auto-provision default admin user if it doesn't exist
+    if not get_user("admin"):
+        hashed = hash_password("admin")
+        save_user("admin", hashed, Role.ADMIN)
 
     meissner_hub.on_open(
         lambda: asyncio.create_task(

@@ -141,19 +141,21 @@ async def _broadcast(event: dict) -> None:
 
 
 @app.websocket("/ws/live")
-async def ws_live(websocket: WebSocket) -> None:
-    """Live event stream for the CHERENKOV web dashboard."""
+async def ws_live(websocket: WebSocket):
     await websocket.accept()
-    _ws_clients.add(websocket)
     try:
         while True:
-            # Keep-alive: echo any client ping, otherwise just wait
-            await asyncio.sleep(30)
-            await websocket.send_text(json.dumps({"type": "ping"}))
+            await websocket.send_json(
+                {
+                    "event": "health_pulse",
+                    "timestamp": datetime.now(timezone.utc).isoformat(),
+                    "queue_depth": 0,
+                    "active_scans": 0,
+                }
+            )
+            await asyncio.sleep(5)
     except WebSocketDisconnect:
         pass
-    finally:
-        _ws_clients.discard(websocket)
 
 
 # ── /api/v1 router (consumed by the React frontend) ─────────────────────────

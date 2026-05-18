@@ -19,7 +19,7 @@ class WaitScanner(BaseScanner):
 @pytest.mark.asyncio
 async def test_parallel_speedup():
     reg = ScannerRegistry()
-    reg.register(WaitScanner, explicit_name="WaitScanner")
+    reg.register(WaitScanner, explicit_name="wait")
     engine = ScanEngine(reg)
 
     target = "http://speed-test.local"

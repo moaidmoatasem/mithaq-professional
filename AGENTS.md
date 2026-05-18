@@ -11,7 +11,6 @@ This file is read by every AI agent working on this repo. Follow it precisely.
 | **Antigravity (Google IDE)** | Gravity preview, local dev | `packages/cherenkov/web/` frontend | `feat/web-*` |
 | **Claude (GitHub Actions)** | `@claude` in issues/PRs | Code review, targeted fixes, issue work | `claude/*` |
 | **Claude Code (local)** | Terminal sessions | Architecture, agentic coordination, multi-file refactors | `claude/*` |
-| **Continue.dev (Qwen 3.5)** | VS Code / IDE | Autonomous coding, scanner graduation | `auto-dev/*` |
 | **Autonomous Pipeline** | Daily cron 2AM UTC | Scanner generation (`autonomous_roadmap_executor.py`) | `auto-dev/<run>` |
 
 ---
@@ -63,26 +62,7 @@ This file is read by every AI agent working on this repo. Follow it precisely.
 
 ---
 
-## 4. Continue.dev / Local Autonomous Agent — Scanner Graduation
-
-**Your domain**: `packages/cherenkov/scanners/` and `packages/cherenkov/core/`
-
-**Current priority** (Sprint 3 backlog):
-1. Pick one scanner from `packages/cherenkov/autonomous_generated/scanners/` that has a real scan implementation
-2. Refactor it to inherit `BaseScanner` (from `packages/cherenkov/core/base_scanner.py`)
-3. Add `async def scan(self, target: str, timeout: float = 10.0) -> ScanResult`
-4. Write a unit test in `tests/unit/test_<scanner_name>.py`
-5. Register it in `packages/cherenkov/core/registry.py`
-6. Open a PR: branch `feat/<N>-graduate-<scanner_name>`
-
-**Code standards**:
-- Strong typing (PEP 484). Use `from __future__ import annotations` where needed.
-- Run `ruff format` + `ruff check` before committing.
-- NEVER import from `src.cherenkov.*` — use `cherenkov.*`
-
----
-
-## 5. Autonomous Pipeline — Scanner Factory
+## 4. Autonomous Pipeline — Scanner Factory
 
 **Trigger**: `scripts/autonomous_roadmap_executor.py --batch-size 3` (daily cron)
 
@@ -97,7 +77,7 @@ This file is read by every AI agent working on this repo. Follow it precisely.
 
 ---
 
-## 6. GitHub Project Management
+## 5. GitHub Project Management
 
 ### Label Taxonomy
 Every issue and PR MUST have at least one of each:
@@ -127,7 +107,7 @@ Every issue and PR MUST have at least one of each:
 
 ---
 
-## 7. Commit Standards
+## 6. Commit Standards
 
 - Format: `<type>(<scope>): <description> (#<issue>)`
 - Example: `feat(scanners): graduate XSS scanner to BaseScanner contract (#47)`
@@ -137,7 +117,7 @@ Every issue and PR MUST have at least one of each:
 
 ---
 
-## 8. Pre-Commit Checklist
+## 7. Pre-Commit Checklist
 
 **Python changes**:
 ```bash
@@ -155,7 +135,7 @@ npx vite build      # production build must pass
 
 ---
 
-## 9. State Files (keep current)
+## 8. State Files (keep current)
 
 | File | Owner | Update cadence |
 |---|---|---|

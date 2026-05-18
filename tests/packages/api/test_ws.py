@@ -1,9 +1,10 @@
-import pytest
-from fastapi.testclient import TestClient
-from fastapi.websockets import WebSocketDisconnect
 from unittest.mock import patch
 
+import pytest
 from cherenkov.api.main import app
+from fastapi.testclient import TestClient
+from fastapi.websockets import WebSocketDisconnect
+
 
 def test_ws_live():
     client = TestClient(app)

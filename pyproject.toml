@@ -20,6 +20,7 @@ dependencies = [
     "pyyaml>=6.0.0",
     "packaging>=23.0",
     "qdrant-client>=1.9.0",
+    "sentence-transformers",
     "slowapi>=0.1.9",
     "ollama>=0.1.0",
 ]
@@ -44,6 +45,7 @@ dev = [
     "groq>=0.4.0",
     "ollama>=0.1.0",
     "qdrant-client>=1.9.0",
+    "sentence-transformers",
     "slowapi>=0.1.9",
 ]
 
@@ -97,4 +99,3 @@ omit = ["tests/*", "venv/*", "candidates/*", "packages/cherenkov/autonomous_gene
 fail_under = 24
 precision = 2
 show_missing = true
-

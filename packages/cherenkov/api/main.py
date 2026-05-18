@@ -65,7 +65,6 @@ from cherenkov.orchestration.workflow_parser import load_workflow
 logger = logging.getLogger(__name__)
 
 _STATIC_DIR = Path(__file__).parent / "static"
-_WEB_DIST_DIR = Path(__file__).parent.parent / "web" / "dist"
 
 # Rate limits are intentionally conservative — scanning is CPU/GPU-heavy and
 # an unbounded queue would exhaust the local Ollama instance.
@@ -126,72 +125,35 @@ app.add_middleware(
 
 # ── WebSocket live-event broadcast ───────────────────────────────────────────
 
-_ws_clients: Dict[WebSocket, Set[str]] = {}
+_ws_clients: Set[WebSocket] = set()
 
 
 async def _broadcast(event: dict) -> None:
     """Push a JSON event to every connected WebSocket client."""
     dead: Set[WebSocket] = set()
     payload = json.dumps(event)
-
-    event_type = event.get("type")
-    scan_id = event.get("scan_id")
-
-    for ws, subscriptions in list(_ws_clients.items()):
-        # If it's a scan_progress event and it specifies a scan_id, filter by subscriptions.
-        # If the client isn't subscribed to any scans, we broadcast it anyway (backwards compatible),
-        # or we could strictly filter. The requirement implies filtering based on subscription.
-        # Let's broadcast unless they explicitly missed the subscription, but the safer approach:
-        if event_type == "scan_progress" and scan_id and scan_id not in subscriptions:
-            # If they have subscriptions but this scan_id isn't one of them, skip.
-            # If they have NO subscriptions, we still send it to be safe (dashboard might need it all).
-            # But normally, if subscriptions exist, we filter.
-            if subscriptions:
-                continue
-
+    for ws in list(_ws_clients):
         try:
             await ws.send_text(payload)
         except Exception:
             dead.add(ws)
-
-    for ws in dead:
-        _ws_clients.pop(ws, None)
-
-
-async def _health_pulse_loop(websocket: WebSocket) -> None:
-    try:
-        while True:
-            await asyncio.sleep(5)
-            await websocket.send_text(json.dumps({"type": "health_pulse"}))
-    except Exception:
-        pass
+    _ws_clients.difference_update(dead)
 
 
 @app.websocket("/ws/live")
 async def ws_live(websocket: WebSocket) -> None:
     """Live event stream for the CHERENKOV web dashboard."""
     await websocket.accept()
-    _ws_clients[websocket] = set()
-
-    pulse_task = asyncio.create_task(_health_pulse_loop(websocket))
-
+    _ws_clients.add(websocket)
     try:
         while True:
-            data = await websocket.receive_json()
-            command = data.get("command")
-            scan_id = data.get("scan_id")
-
-            if command == "subscribe_scan" and scan_id:
-                _ws_clients[websocket].add(scan_id)
-            elif command == "unsubscribe_scan" and scan_id:
-                _ws_clients[websocket].discard(scan_id)
+            # Keep-alive: echo any client ping, otherwise just wait
+            await asyncio.sleep(30)
+            await websocket.send_text(json.dumps({"type": "ping"}))
     except WebSocketDisconnect:
         pass
-    except Exception:
-        pass
     finally:
-        pulse_task.cancel()
-        _ws_clients.pop(websocket, None)
+        _ws_clients.discard(websocket)
 
 
 # ── /api/v1 router (consumed by the React frontend) ─────────────────────────
@@ -783,10 +745,6 @@ async def v1_reject_finding(
 # Serve the static dashboard assets
 if _STATIC_DIR.exists():
     app.mount("/static", StaticFiles(directory=str(_STATIC_DIR)), name="static")
-
-# Serve the React dashboard at /app/ (html=True enables SPA fallback to index.html)
-if _WEB_DIST_DIR.exists():
-    app.mount("/app", StaticFiles(directory=str(_WEB_DIST_DIR), html=True), name="web")
 
 
 # ── Models ──────────────────────────────────────────────────────────────────

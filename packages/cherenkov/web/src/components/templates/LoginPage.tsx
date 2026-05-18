@@ -1,4 +1,4 @@
-import { useState, type FormEvent } from 'react';
+import { useState } from 'react';
 import { motion } from 'motion/react';
 import { CyberButton, Logo } from '../atoms';
 import { API_BASE } from '../../lib/api';
@@ -14,7 +14,7 @@ export function LoginPage({ onLoginSuccess }: LoginPageProps) {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  const handleLogin = async (e: FormEvent) => {
+  const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
     setError(null);

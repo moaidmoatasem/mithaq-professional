@@ -1,191 +1,166 @@
 # CHERENKOV Agent Coordination Guide
-Version: 2.0 | Updated: May 2026
 
-This file is read by every AI agent. Follow it precisely.
-
----
-
-## Current Project State (May 2026)
-
-- **Phase:** 1 (Hygiene) + Phase 2 (Core Wiring) — IN PROGRESS
-- **Version:** v0.1.1-cherenkov
-- **Validated scanners:** 5 (`header_scanner`, `security_headers`, `http_methods`, `tls_detection`, `unified_scanner`)
-- **Broken:** `/health` hardcoded, `/ws/live` missing, TOKAMAK never runs, LATTICE empty
+This file is read by every AI agent working on this repo. Follow it precisely.
 
 ---
 
 ## Agent Roster & Domain Ownership
 
-| Agent | Trigger | Domain | Branch Prefix |
+| Agent | Trigger | Primary Domain | Branch Prefix |
 |---|---|---|---|
-| **Jules (Google)** | Manual task assignment | Scanner validation, DVWA gate, LATTICE wiring | `feat/jules-*` |
-| **Claude Code (local)** | Terminal sessions | Architecture, multi-file refactors, API wiring | `claude/*` |
-| **Antigravity (IDE)** | Local dev | `packages/cherenkov/web/` only | `feat/web-*` |
-| **Gemini (AI Studio)** | Manual | React FE components | `feat/web-*` |
-| **OpenCode** | VS Code | Scanner graduation from `candidates/` | `auto-dev/*` |
-| **Autonomous Pipeline** | Daily cron 2AM UTC | Scanner generation to `autonomous_generated/` | `auto-dev/*` |
+| **Antigravity (Google IDE)** | Gravity preview, local dev | `packages/cherenkov/web/` frontend | `feat/web-*` |
+| **Claude (GitHub Actions)** | `@claude` in issues/PRs | Code review, targeted fixes, issue work | `claude/*` |
+| **Claude Code (local)** | Terminal sessions | Architecture, agentic coordination, multi-file refactors | `claude/*` |
+| **Continue.dev (Qwen 3.5)** | VS Code / IDE | Autonomous coding, scanner graduation | `auto-dev/*` |
+| **Autonomous Pipeline** | Daily cron 2AM UTC | Scanner generation (`autonomous_roadmap_executor.py`) | `auto-dev/<run>` |
 
 ---
 
 ## 1. Branching Rules (NON-NEGOTIABLE)
 
-- NEVER commit directly to `main`. All changes: branch → PR → Moaid merges.
-- Branch format: `<type>/<N>-<description>`
-- Types: `feat`, `fix`, `refactor`, `docs`, `test`, `chore`, `security`
-- Example: `feat/A1-live-health-endpoint`
-- Create PR: `gh pr create --title "..." --body "Closes #N"`
-- **Moaid is the ONLY person who merges PRs.**
-
-> **Exception removed:** State files (`STATUS.md`, `TODO.md`, `AGENT_MEMORY.md`) must also go through PRs. No more direct-to-main exceptions.
+- **NEVER commit directly to `main`.** All changes go through a branch + PR.
+- **Exception**: Agentic state files (`STATUS.md`, `TODO.md`, `AGENT_MEMORY.md`) may be committed to main by the coordinating Claude Code session only when no feature work is included.
+- Branch naming: `<type>/<issue-number>-<short-description>`
+  - Types: `feat`, `fix`, `refactor`, `docs`, `test`, `chore`
+  - Example: `feat/42-tokamak-docker-sandbox`
+- Create PR with `gh pr create`, reference the issue: `Closes #<N>`
 
 ---
 
-## 2. Jules — Scanner Validation Factory
+## 2. Antigravity (Google IDE) — Frontend Agent
 
-**Domain:** scanner candidates, LATTICE bridge, DVWA validation
+**Your domain**: `packages/cherenkov/web/src/`
 
-**Environment available in Jules VM:**
-- DVWA: `http://localhost:80` (admin/password)
-- WebGoat: `http://localhost:8090`
-- Qdrant: `http://localhost:6333`
-- Ollama: `http://localhost:11434` (llama3.2:3b)
-
-**Task format:**
-```
-Single task only: [specific task].
-export PYTHONPATH=$PYTHONPATH:$(pwd)/packages
-Use docker exec -i (NOT -it) for container commands.
-Imports: from cherenkov.* (not src.cherenkov.*)
-Run ruff format + bandit before committing.
-Branch: feat/[issue-N]-[description]
-Report: files changed, tests passed, blockers.
-```
-
-**Do NOT touch:** `packages/cherenkov/web/` (Antigravity domain)
-
----
-
-## 3. Claude Code (local) — Architecture & Wiring
-
-**Domain:** API endpoints, core wiring, multi-file changes
-
-**Session start:** `python scripts/sync_context.py && cat .cherenkov_context`
-
-**Task format:**
-```
-Read CLAUDE.md only. Single task: [X].
-export PYTHONPATH=$PYTHONPATH:$(pwd)/packages
-Canonical path: packages/cherenkov/ (NOT src/)
-After: ruff format, pytest, git push, report.
-```
-
-**Do NOT touch:** `packages/cherenkov/web/` unless explicitly asked
-
----
-
-## 4. Antigravity — Frontend Only
-
-**Domain:** `packages/cherenkov/web/src/`
-
-- Vite dev on port 3000, proxies to FastAPI on port 8000
-- Never hardcode `localhost:8000` — use `API_BASE` from `@/src/lib/api.ts`
+**How you work**:
+- Vite dev server runs on port `3000`
+- Preview connects to FastAPI backend on port `8000` via Vite proxy (configured in `vite.config.ts`)
+- Never hard-code `localhost:8000` — use `API_BASE` and `getWsUrl()` from `@/src/lib/api.ts`
 - Import pattern: `@/src/lib/X`, `@/src/hooks/X`, `@/src/components/X`
-- Run: `tsc --noEmit && npx vite build` before every commit
-- **Do NOT touch:** `packages/cherenkov/api/` or any Python files
+- HMR: respect `DISABLE_HMR` env var (already wired in vite.config)
+
+**Current priority tasks** (pick from TODO.md Sprint 4):
+- `PendingApprovalsPanel` organism — show findings awaiting HITL approval
+- Badge count in `ForensicHeader` for pending approvals
+
+**Do NOT touch**:
+- `packages/cherenkov/api/` (backend Python) — that's a different domain
+- `packages/cherenkov/core/` or `packages/cherenkov/scanners/`
 
 ---
 
-## 5. OpenCode — Scanner Graduation
+## 3. Claude (GitHub Actions) — Issue & PR Agent
 
-**Domain:** `packages/cherenkov/scanners/` and `packages/cherenkov/core/`
+**Trigger**: Any comment containing `@claude` in issues or PRs.
 
-**Process per scanner:**
-1. Pick from `packages/cherenkov/autonomous_generated/scanners/`
-2. Refactor to inherit `BaseScanner`
-3. Implement `async scan(target: str, timeout: float = 10.0) -> ScanResult`
-4. Write unit test in `tests/unit/test_<scanner_name>.py`
-5. Register in `packages/cherenkov/core/registry.py`
-6. PR: `feat/<N>-graduate-<scanner_name>`
+**Your scope**:
+- Answer questions about architecture referencing `CLAUDE.md`, `AGENT_MEMORY.md`
+- Write or fix code when asked in an issue
+- Create a branch, commit, open a PR — never merge your own PR
+- Always run ruff format before committing Python: `ruff format packages/`
+- Always check TS: `cd packages/cherenkov/web && npm run lint`
 
----
-
-## 6. Autonomous Pipeline — Scanner Factory
-
-**Trigger:** daily cron 2AM UTC
-**Output:** `packages/cherenkov/autonomous_generated/scanners/`
-
-**Rules:**
-- Must pass `ruff format`
-- `snake_case.py` filenames
-- Exactly one class inheriting `BaseScanner` per file
-- PR label: `ai:generated`, `area:scanner`, `priority:medium`
+**Label every PR you open with**: `ai:generated`, `ai:autonomous`, and the appropriate `area:*` label.
 
 ---
 
-## 7. GitHub Issue Labels
+## 4. Continue.dev / Local Autonomous Agent — Scanner Graduation
 
-Every issue/PR needs at least one from each category:
+**Your domain**: `packages/cherenkov/scanners/` and `packages/cherenkov/core/`
 
-| Category | Options |
+**Current priority** (Sprint 3 backlog):
+1. Pick one scanner from `packages/cherenkov/autonomous_generated/scanners/` that has a real scan implementation
+2. Refactor it to inherit `BaseScanner` (from `packages/cherenkov/core/base_scanner.py`)
+3. Add `async def scan(self, target: str, timeout: float = 10.0) -> ScanResult`
+4. Write a unit test in `tests/unit/test_<scanner_name>.py`
+5. Register it in `packages/cherenkov/core/registry.py`
+6. Open a PR: branch `feat/<N>-graduate-<scanner_name>`
+
+**Code standards**:
+- Strong typing (PEP 484). Use `from __future__ import annotations` where needed.
+- Run `ruff format` + `ruff check` before committing.
+- NEVER import from `src.cherenkov.*` — use `cherenkov.*`
+
+---
+
+## 5. Autonomous Pipeline — Scanner Factory
+
+**Trigger**: `scripts/autonomous_roadmap_executor.py --batch-size 3` (daily cron)
+
+**Output**: New scanner files in `packages/cherenkov/autonomous_generated/scanners/`
+
+**Rules**:
+- Output must pass `ruff format`
+- File names must be `snake_case.py`
+- Each file must contain exactly one class inheriting `BaseScanner`
+- PR title: `feat: AI-generated scanner — <scanner_name>`
+- Label: `ai:generated`, `area:scanner`, `priority:medium`
+
+---
+
+## 6. GitHub Project Management
+
+### Label Taxonomy
+Every issue and PR MUST have at least one of each:
+
+| Category | Labels |
 |---|---|
-| Type | `feat`, `fix`, `refactor`, `docs`, `test`, `chore`, `security` |
-| Priority | `priority:critical`, `priority:high`, `priority:medium`, `priority:low` |
-| Phase | `phase-1`, `phase-2`, `phase-3`, `phase-4`, `phase-5`, `phase-6` |
-| Area | `area:scanner`, `area:api`, `area:ui`, `area:infra`, `area:agent`, `area:security`, `area:compliance` |
-| Status | `status:in-progress`, `status:review-needed`, `status:blocked` |
-| AI | `ai:generated`, `ai:autonomous` (if AI-authored) |
+| **Type** | `feat`, `fix`, `refactor`, `docs`, `test`, `chore`, `security` |
+| **Priority** | `priority:critical`, `priority:high`, `priority:medium`, `priority:low` |
+| **Phase** | `phase-2`, `phase-3`, `phase-4`, `phase-5` |
+| **Area** | `area:scanner`, `area:api`, `area:ui`, `area:infra`, `area:agent`, `area:security`, `area:compliance` |
+| **Status** | `status:in-progress`, `status:review-needed`, `status:blocked` |
+| **AI** | `ai:generated`, `ai:autonomous` (if AI-authored) |
+
+### Milestones
+- `v1.1.0` — Swarm Concurrency (current — Phase 2)
+- `v1.5.0` — Enterprise Validation & HITL (Phase 3)
+- `v2.0.0` — Mobile Triage (Phase 4)
+- `v2.5.0` — Ecosystem Integration (Phase 5)
+
+### Issue Commands (in comments)
+```
+/assign @me
+/label area:scanner, priority:high
+/milestone v1.1.0
+/close
+```
 
 ---
 
-## 8. Milestones (Updated)
+## 7. Commit Standards
 
-| Milestone | Target | Focus |
-|---|---|---|
-| `v0.1.1-cherenkov` | NOW | Phase 1 hygiene + Phase 2 wiring |
-| `v0.2.0` | +8 weeks | 20 validated scanners + demo works |
-| `v0.3.0` | +16 weeks | TOKAMAK executes real PoCs |
-| `v1.0.0` | +32 weeks | Cairo pilot + EGY-FIN CSF |
-| `v2.0.0` | +52 weeks | Mobile + OWASP LLM |
+- Format: `<type>(<scope>): <description> (#<issue>)`
+- Example: `feat(scanners): graduate XSS scanner to BaseScanner contract (#47)`
+- Co-author line: `Co-Authored-By: Claude Sonnet 4.6 <noreply@anthropic.com>`
+- Python: run `ruff format` before every commit
+- TypeScript: run `tsc --noEmit` before every commit
 
 ---
 
-## 9. Commit Standards
+## 8. Pre-Commit Checklist
 
-Format: `<type>(<scope>): <description> (#<N>)`
-Example: `feat(api): wire /health with live Ollama data (#A1)`
-Co-author: `Co-Authored-By: Claude Sonnet 4.6 <noreply@anthropic.com>`
-
-**Python pre-commit:**
+**Python changes**:
 ```bash
 ruff format packages/
 ruff check packages/ --ignore W,S,B
 pytest -m "not (integration or ai_generated)" --tb=short
 ```
 
-**TypeScript pre-commit:**
+**TypeScript/React changes**:
 ```bash
 cd packages/cherenkov/web
-tsc --noEmit
-npx vite build
+npm run lint        # tsc --noEmit
+npx vite build      # production build must pass
 ```
 
 ---
 
-## 10. Files Agents Must NOT Delete
+## 9. State Files (keep current)
 
-**KEEP at root:** `README.md`, `AGENTS.md`, `ARCHITECTURE.md`, `CHERENKOV_SSOT.md`, `CLAUDE.md`, `CHANGELOG.md`, `CODE_OF_CONDUCT.md`, `CONTRIBUTING.md`, `SECURITY.md`, `DESIGN_SYSTEM.md`, `LICENSE`, `Dockerfile`, `Dockerfile.tokamak`, `pyproject.toml`, `mkdocs.yml`, `setup.sh`, `.env.example`, `.gitignore`, `.pre-commit-config.yaml`, `.gitattributes`, `CHERENKOV_*.md`
-
-**DELETED (do not recreate):** `fly.toml`, `railway.json`, `render.yaml`, `mcp_config.json`, `launch_perfection.sh`, `celebration_scan.sh`, `CLAUDE_COMPRESSED.md`, `CLAUDE_V4.1.md`, `docker-compose.agents.yml`, `docker-compose.optimized.yml`, `Dockerfile.agent`, `Dockerfile.optimized`, `Dockerfile.simple`
-
----
-
-## 11. State Files
-
-| File | Owner | When to update |
+| File | Owner | Update cadence |
 |---|---|---|
-| `CLAUDE.md` | Claude Code | On phase change or architectural decision |
-| `AGENTS.md` | Moaid + Claude Code | When agent roster or process changes |
-| `CHANGELOG.md` | Release Drafter (automated) | On every release |
-| `docs/development/roadmap.md` | Claude Code | On phase status change |
-
-> `STATUS.md`, `TODO.md`, `AGENT_MEMORY.md`: archived to `archive/sessions/` — no longer maintained at root.
+| `STATUS.md` | Claude Code (coordinating) | After each sprint milestone |
+| `TODO.md` | Claude Code (coordinating) | Weekly or when sprint changes |
+| `AGENT_MEMORY.md` | Claude Code (coordinating) | After architectural decisions |
+| `AGENTS.md` | Claude Code (coordinating) | When agent roster changes |
+| `CHANGELOG.md` | Automated (release-drafter) | On release |

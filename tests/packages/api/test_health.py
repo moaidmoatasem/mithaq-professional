@@ -31,7 +31,7 @@ class MockAsyncClient:
 
 @pytest.fixture
 def mock_db_stats():
-    with patch("cherenkov.core.storage.database.db_stats", return_value={"size_bytes": 1024, "trace_count": 0}):
+    with patch("cherenkov.core.storage.database.db_stats", return_value={"size_bytes": 1024}):
         yield
 
 @pytest.fixture
@@ -51,7 +51,7 @@ async def test_health_healthy(mock_db_stats, mock_active_scans, mock_tokamak_cou
         assert res["status"] == "healthy"
         assert res["version"] == "1.1.0"
         assert "timestamp" in res
-        assert res["storage"] == {"size_bytes": 1024, "trace_count": 0}
+        assert res["storage"] == {"size_bytes": 1024}
         assert res["queue"]["scan_jobs_pending"] == 2
 
         nodes = res["nodes"]

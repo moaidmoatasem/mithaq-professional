@@ -77,16 +77,9 @@ def _connect(path: Path = _DB_PATH) -> sqlite3.Connection:
 
 
 def db_stats(path: Path = _DB_PATH) -> dict:
-    """Return SQLite storage statistics and trace count."""
+    """Return SQLite storage statistics."""
     size = path.stat().st_size if path.exists() else 0
-    trace_count = 0
-    if path.exists():
-        try:
-            with closing(_connect(path)) as conn:
-                trace_count = conn.execute("SELECT count(*) FROM audit_log").fetchone()[0]
-        except Exception:
-            pass
-    return {"size_bytes": size, "trace_count": trace_count}
+    return {"size_bytes": size}
 
 
 def init_db(path: Path = _DB_PATH) -> None:

@@ -1,7 +1,7 @@
 # CHERENKOV — Shared Agent Context
 
 > Every agent reads this first. It is the single source of truth for project rules.
-> For tool-specific config: CLAUDE.md (Claude), GEMINI.md (Jules), .continue/config.yaml, opencode.jsonc
+> For tool-specific config: CLAUDE.md (Claude), GEMINI.md (Jules + Antigravity), opencode.jsonc
 
 ## Quick Reference
 

@@ -1,7 +1,41 @@
-# CHERENKOV — Jules / Gemini Agent Configuration
+# CHERENKOV — Gemini Agent Configuration (Jules + Antigravity)
 
-> This file configures Jules and any Gemini-powered agent.
+> This file configures all Gemini-powered agents.
+> **Jules** = backend/Python domain. **Antigravity** = frontend TypeScript/React domain.
 > For Claude agents, see CLAUDE.md. Both files share the same architectural rules.
+
+---
+
+## Antigravity — Frontend Agent
+
+**Domain (strict):** `packages/cherenkov/web/src/` only. Never touch Python or `packages/cherenkov/api/`.
+
+### Environment
+- Vite dev server: port `3000`
+- Proxies to FastAPI backend: port `8000` (configured in `vite.config.ts`)
+- Never hardcode `localhost:8000` — use `API_BASE` and `getWsUrl()` from `@/src/lib/api.ts`
+
+### Import pattern
+```typescript
+import { API_BASE } from '@/src/lib/api';
+import { useMetrics } from '@/src/hooks/useMetrics';
+import { ForensicHeader } from '@/src/components/organisms/ForensicHeader';
+```
+
+### Pre-commit
+```bash
+cd packages/cherenkov/web
+npm run lint        # tsc --noEmit
+npx vite build      # production build must pass
+```
+
+### Branching
+- Branch prefix: `feat/web-<issue>-<slug>`
+- PR body must contain `Closes #<N>`
+
+---
+
+## Jules — Backend / Scanner Agent
 
 ## Environment
 

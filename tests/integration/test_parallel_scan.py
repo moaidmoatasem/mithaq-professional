@@ -17,7 +17,7 @@ class WaitScanner(BaseScanner):
 @pytest.mark.asyncio
 async def test_parallel_speedup():
     reg = ScannerRegistry()
-    reg.register(WaitScanner)
+    reg.register(WaitScanner, explicit_name="WaitScanner")
     engine = ScanEngine(reg)
     
     target = "http://speed-test.local"
@@ -40,6 +40,6 @@ async def test_parallel_speedup():
     
     # Sequential should take ~0.3s (3 * 0.1s)
     # Parallel should take ~0.1s (1 * 0.1s)
-    assert duration_seq >= 0.2
-    assert duration_par < 0.5
-    assert duration_par < duration_seq * 0.8
+    assert duration_seq >= 0.3
+    assert duration_par < 0.3
+    assert duration_par < duration_seq * 0.9

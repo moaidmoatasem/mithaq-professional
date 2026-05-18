@@ -8,7 +8,7 @@ from cherenkov.crews.autonomous_dev_team import AutonomousDevTeam
 
 
 @pytest.mark.integration
-@pytest.mark.skip(reason='CrewAI/OpenAI not in CHERENKOV stack — Ollama only')
+@pytest.mark.skip(reason="CrewAI/OpenAI not in CHERENKOV stack — Ollama only")
 def test_full_dev_team():
     # Define your project
     project_description = """

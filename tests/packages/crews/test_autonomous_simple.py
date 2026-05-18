@@ -13,7 +13,7 @@ load_dotenv()
 
 
 @pytest.mark.integration
-@pytest.mark.skip(reason='CrewAI/OpenAI not in CHERENKOV stack — Ollama only')
+@pytest.mark.skip(reason="CrewAI/OpenAI not in CHERENKOV stack — Ollama only")
 def test_autonomous_simple():
     print("=" * 70)
     print("🤖 AUTONOMOUS CODE GENERATION TEST")

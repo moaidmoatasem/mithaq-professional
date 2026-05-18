@@ -35,9 +35,12 @@ class ScannerRegistry:
         self.register(AndroidScanner)
         self.register(IOSScanner)
 
-    def register(self, scanner_class: Type[BaseScanner]):
+    def register(self, scanner_class: Type[BaseScanner], explicit_name: str = None):
         """Manually register a scanner class"""
-        scanner_name = scanner_class.__name__.replace("Scanner", "").lower()
+        if explicit_name:
+            scanner_name = explicit_name
+        else:
+            scanner_name = scanner_class.__name__.replace("Scanner", "").lower()
         self._registry[scanner_name] = scanner_class
 
     def _load_scanners(self):

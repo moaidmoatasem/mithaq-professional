@@ -21,6 +21,7 @@ dependencies = [
     "packaging>=23.0",
     "qdrant-client>=1.9.0",
     "slowapi>=0.1.9",
+    "ollama>=0.1.0",
 ]
 
 [tool.setuptools.packages.find]

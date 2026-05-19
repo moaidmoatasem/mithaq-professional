@@ -136,7 +136,7 @@ async def ws_live(websocket: WebSocket) -> None:
                     "event": "health_pulse",
                     "timestamp": datetime.now(timezone.utc).isoformat(),
                     "queue_depth": 0,
-                    "active_scans": len(_active_scan_targets),
+                    "active_scans": 0,
                 }
             )
             await asyncio.sleep(5)

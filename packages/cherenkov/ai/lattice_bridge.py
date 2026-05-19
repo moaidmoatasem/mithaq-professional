@@ -1,3 +1,4 @@
+import hashlib
 import logging
 import uuid
 
@@ -11,14 +12,14 @@ MODEL_NAME = "all-MiniLM-L6-v2"
 
 
 def _get_client():
-    return QdrantClient(url=QDRANT_URL)
+    return QdrantClient(url=QDRANT_URL, timeout=5)
 
 
 def _get_model():
     return SentenceTransformer(MODEL_NAME)
 
 
-def _ensure_collection(client):
+def _ensure_collection(client: QdrantClient) -> None:
     try:
         client.get_collection(COLLECTION)
     except Exception:
@@ -28,14 +29,22 @@ def _ensure_collection(client):
 
 
 async def embed_and_store(trace: dict) -> str:
-    client = _get_client()
-    _ensure_collection(client)
-    model = _get_model()
-    text = str(trace.get("findings", trace.get("target", "")))
-    vector = model.encode(text).tolist()
-    point_id = abs(hash(str(trace.get("trace_id", uuid.uuid4())))) % (2**63)
-    client.upsert(COLLECTION, points=[PointStruct(id=point_id, vector=vector, payload=trace)])
-    return str(point_id)
+    try:
+        client = _get_client()
+        _ensure_collection(client)
+        model = _get_model()
+        text = str(trace.get("findings", trace.get("target", "")))
+        vector = model.encode(text).tolist()
+
+        # Deterministic hashing instead of python's hash()
+        trace_id = str(trace.get("trace_id", str(uuid.uuid4())))
+        point_id = int(hashlib.sha256(trace_id.encode()).hexdigest(), 16) % ((1 << 63) - 1)
+
+        client.upsert(COLLECTION, points=[PointStruct(id=point_id, vector=vector, payload=trace)])
+        return str(point_id)
+    except Exception as e:
+        logging.warning("LATTICE embed failed: %s", e)
+        return ""
 
 
 async def query_similar_targets(target: str, limit: int = 5) -> list:

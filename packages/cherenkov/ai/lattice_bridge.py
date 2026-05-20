@@ -1,7 +1,9 @@
+import logging
+import uuid
+
 from qdrant_client import QdrantClient
-from qdrant_client.models import PointStruct, VectorParams, Distance
+from qdrant_client.models import Distance, PointStruct, VectorParams
 from sentence_transformers import SentenceTransformer
-import uuid, logging
 
 QDRANT_URL = 'http://localhost:6333'
 COLLECTION = 'cherenkov_findings'
@@ -19,13 +21,15 @@ def _ensure(client):
 
 async def embed_and_store(trace: dict) -> str:
     try:
-        c = _client(); _ensure(c)
+        c = _client()
+        _ensure(c)
         v = _model().encode(str(trace.get('findings', ''))).tolist()
         pid = abs(hash(trace.get('trace_id', str(uuid.uuid4())))) % (2**53)
         c.upsert(COLLECTION, points=[PointStruct(id=pid, vector=v, payload=trace)])
         return str(pid)
     except Exception as e:
-        logging.warning('LATTICE store failed: %s', e); return ''
+        logging.warning('LATTICE store failed: %s', e)
+        return ''
 
 async def query_similar_targets(target: str, limit: int = 5) -> list:
     try:
@@ -33,7 +37,8 @@ async def query_similar_targets(target: str, limit: int = 5) -> list:
         v = _model().encode(target).tolist()
         return [r.payload for r in c.search(COLLECTION, query_vector=v, limit=limit)]
     except Exception as e:
-        logging.warning('LATTICE query failed: %s', e); return []
+        logging.warning('LATTICE query failed: %s', e)
+        return []
 
 async def label_false_positive(finding_id: str) -> None:
     try:

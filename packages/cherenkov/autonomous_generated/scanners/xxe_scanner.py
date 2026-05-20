@@ -6,10 +6,44 @@ Category: scanners
 
 import re
 
+import aiohttp
 
-class XXE_Scanner:
-    def __init__(self):
-        pass
+from cherenkov.core.base_scanner import BaseScanner, Finding, ScanResult, Severity
+
+
+class XXEScanner(BaseScanner):
+    name = "XXEScanner"
+    description = "Detects XML External Entity (XXE) vulnerabilities."
+    tags = ["web", "active"]
+
+    def __init__(self) -> None:
+        super().__init__(name=self.name, description=self.description)
+
+    async def scan(self, target: str, timeout: float = 10.0) -> ScanResult:
+        findings: list[Finding] = []
+
+        try:
+            # Assuming target is a URL to fetch XML from.
+            async with aiohttp.ClientSession() as session:
+                async with session.get(target, timeout=timeout) as response:
+                    if response.status == 200:
+                        xml_content = await response.text()
+                        vulnerabilities = self.perform_scan(xml_content)
+                        for vuln in vulnerabilities:
+                            findings.append(
+                                Finding(
+                                    title="XXE Vulnerability",
+                                    description=f"Detected XXE Vulnerability: {vuln.get('entity_name')}, value {vuln.get('_value')}",
+                                    severity=Severity.HIGH,
+                                    cwe="CWE-611",
+                                    remediation="Disable external entity resolution in XML parsers."
+                                )
+                            )
+        except Exception:
+            import logging
+            logging.warning("XXE scan failed")
+
+        return ScanResult(scanner_name=self.name, target=target, findings=findings)
 
     def perform_scan(self, xml_content):
         """
@@ -24,7 +58,6 @@ class XXE_Scanner:
         potential_vulnerabilities = []
 
         # Check if the XML content starts with <?xml
-        xml_declaration_injection_pattern = re.compile(r"^<\?\s*xml", re.IGNORECASE)
         if not xml_content.startswith("<?xml"):
             raise ValueError("XML declaration is missing in the input.")
 
@@ -34,7 +67,6 @@ class XXE_Scanner:
             if match is None:
                 break
 
-            entity_name_start_index = max(0, xml_content.rfind(">", match.start()))
             # Extract the XXE entity name and its value
             entity_start = match.group().replace("?", "").strip()
 
@@ -49,32 +81,3 @@ class XXE_Scanner:
 
         return potential_vulnerabilities
 
-    def test_scan(self, xml_data):
-        """
-        This function is used to run tests for the XML External Entity Scanner.
-
-        Args:
-            xml_data (str): Test input data in XML format.
-        """
-        print("Performing XXE scan on provided XML content...")
-        try:
-            scanner = self.perform_scan(xml_data)
-            if not scanner:
-                print("No potential XXE vulnerabilities found.\n")
-
-            for vuln_info in scanner:
-                entity_name = vuln_info.get("entity_name", "null")
-                entity_value = vuln_info.get("_value", "null")
-                print(f"Detected XXE Vulnerability: {entity_name}, value {entity_value}")
-        except ValueError as e:
-            print(f"Error during scan: {e}\n")
-
-
-if __name__ == "__main__":
-    xml_file_path = "path/to/xml/file.xml"
-
-    with open(xml_file_path, "r") as file:
-        content_to_scan = file.read()
-
-    scanner = XXE_Scanner()
-    scanner.test_scan(content_to_scan)

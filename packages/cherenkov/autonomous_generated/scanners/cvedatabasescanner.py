@@ -4,45 +4,46 @@ Source: batch_1_20260501_114614.txt
 Category: scanners
 """
 
-#!/usr/bin/env python3
+import aiohttp
 
-import requests
+from cherenkov.core.base_scanner import BaseScanner, Finding, ScanResult, Severity
 
 
-class CVEDatabaseScanner:
-    """
-    This class implements functionality to connect and interact with the Common Vulnerabilities and Exposures (CVE) database.
+class CVEDatabaseScanner(BaseScanner):
+    name = "CVEDatabaseScanner"
+    description = "Retrieves vulnerabilities from the CVE database."
+    tags = ["cve", "passive"]
 
-    :ivar base_url: str - The base URL of the CVE Database API endpoint.
-    :ivar vulnerabilities: List[Dict] - A list containing dictionaries representing CVE entries with relevant fields filled in by successful requests.
-
-    Example Usage:
-    >>> scanner = CVEDatabaseScanner()
-    >>> response = scanner.get_vulnerabilities(max_results=10, severity="HIGH")
-    >>> print(f"{len(response)} High Severity Vulnerabilities Found:")
-    >>> for vulnerability in response:
-    ...     print(vuln)
-    """
-
-    def __init__(self):
+    def __init__(self) -> None:
+        super().__init__(name=self.name, description=self.description)
         self.base_url = "https://api.example-cve-database.com/v2"
-        self.vulnerabilities = []
 
-    def get_vulnerabilities(self, max_results: int = 50, severity: str = None):
+    async def scan(self, target: str, timeout: float = 10.0) -> ScanResult:
+        findings: list[Finding] = []
+        try:
+            # Here target acts as a package name or identifier to query.
+            vulnerabilities = await self.get_vulnerabilities(target, max_results=50, severity="HIGH")
+            for vuln in vulnerabilities:
+                findings.append(
+                    Finding(
+                        title=f"CVE Found for {target}",
+                        description=str(vuln),
+                        severity=Severity.HIGH,
+                        cwe="CWE-1395",
+                        remediation="Update or remove vulnerable components.",
+                    )
+                )
+        except Exception:
+            import logging
+            logging.warning("CVE Database scan failed")
+
+        return ScanResult(scanner_name=self.name, target=target, findings=findings)
+
+    async def get_vulnerabilities(self, package: str, max_results: int = 50, severity: str = None):
         """
         Retrieves a list of CVEs from the database based on optional query parameters.
-
-        :param max_results: (int) Maximum number of items to retrieve per request.
-                              Note: Due to API limits, this can be configured and capped at lower values such as 10 or fewer
-        :param severity: (str) If specified, will return a filtered list of vulnerabilities based on the given severity level.
-
-        :returns List[Dict]: A list containing dictionaries representing CVE entries with relevant fields filled in by successful requests.
-
-        Example Usage:
-        >>> responses = scanning.get_vulnerabilities(max_results=10)
-        >>> scanned_list_of_cve_dicts = responses['results']
         """
-        params = {}
+        params = {"package": package}
         if severity and severity.lower() not in ("low", "medium", "high"):
             raise ValueError("Valid severities are: 'LOW', 'MEDIUM', or 'HIGH'")
         if max_results > 100:
@@ -52,36 +53,14 @@ class CVEDatabaseScanner:
         if severity is not None:
             params["min_severity"] = severity
 
-        response = requests.get(f"{self.base_url}/list", params=params, timeout=10)
+        async with aiohttp.ClientSession() as session:
+            async with session.get(f"{self.base_url}/list", params=params, timeout=10) as response:
+                if response.status != 200:
+                    return []
 
-        if not response.ok:
-            print(f"Error while fetching vulnerabilities: {response.status_code}")
-            return []
+                try:
+                    content = await response.json()
+                    return content.get("results", [])
+                except ValueError as e:
+                    raise ValueError("Failed to parse JSON data from the API") from e
 
-        try:
-            content = response.json()
-            self.vulnerabilities.extend(content.get("results"))
-        except ValueError as e:
-            raise ValueError("Failed to parse JSON data from the API") from e
-
-        return content.get("results")
-
-    def __str__(self):
-        vulnerabilities_str = "\n".join(str(cve) for cve in self.vulnerabilities)
-        return f"{len(self.vulnerabilities)} Vulnerabilities:\n{vulnerabilities_str}"
-
-
-def main():
-    # Example Usage
-    scanner = CVEDatabaseScanner()
-    vulnerabilities = scanner.get_vulnerabilities(max_results=5, severity="HIGH")
-
-    print(f"High Severity Vulnerabilities Found: {len(vulnerabilities)}\n")
-    for vulnerability in vulnerabilities:
-        print(str(vulnerability))
-
-    return None
-
-
-if __name__ == "__main__":
-    main()

@@ -6,26 +6,41 @@ Category: scanners
 
 import os
 
+from cherenkov.core.base_scanner import BaseScanner, Finding, ScanResult, Severity
 
-class PathTraversalScanner:
-    def __init__(self):
-        self.ROOT = "/path/to/root"  # Change this to the root directory you want to scan
 
-    def check_path(self, path_to_check: str) -> dict:
-        """
-        Checks for path traversal vulnerabilities in a given path.
+class PathTraversalScanner(BaseScanner):
+    name = "PathTraversalScanner"
+    description = "Detects path traversal vulnerabilities"
+    tags = ["web", "active"]
 
-        :param path_to_check: Path to be checked for potential security issues.
-                                It is considered safe if it resides inside the ROOT_PATH
-        :return: A dictionary indicating whether the path was safe or unsafe, and a list of files found within the safe paths
-        """
+    def __init__(self) -> None:
+        super().__init__(name=self.name, description=self.description)
+
+    async def scan(self, target: str, timeout: float = 10.0) -> ScanResult:
+        findings: list[Finding] = []
+
         try:
-            basedir = os.path.join(self.ROOT, path_to_check)
-            return self._scan_path(basedir)
+            res = self._scan_path(target, root=target)
+            if not res["safe"]:
+                for unsafe in res.get("unsafe_paths", []):
+                    findings.append(
+                        Finding(
+                            title="Path Traversal Vulnerability",
+                            description=f"Unsafe path access detected: {unsafe}",
+                            severity=Severity.HIGH,
+                            evidence={"unsafe_path": unsafe},
+                            cwe="CWE-22",
+                            remediation="Ensure user inputs are properly sanitized and validated against allowed paths."
+                        )
+                    )
         except Exception as e:
-            raise ValueError(f"An error occurred while checking the path: {path_to_check}") from e
+            print("Exception:", e)
+            pass
 
-    def _scan_path(self, directory: str) -> dict:
+        return ScanResult(scanner_name=self.name, target=target, findings=findings)
+
+    def _scan_path(self, directory: str, root: str) -> dict:
         """
         Internal method to perform actual file/directory scanning within a given directory.
 
@@ -38,7 +53,7 @@ class PathTraversalScanner:
             result["files_and_dirs"] = sorted(entries, key=lambda x: x[1:])
             for file_or_dir_path in entries:
                 full_path = os.path.join(directory, file_or_dir_path)
-                if not self._is_safe(full_path):
+                if not self._is_safe(full_path, root):
                     result["unsafe_paths"].append(full_path)
                     result["safe"] = False
         except PermissionError as e:
@@ -46,39 +61,16 @@ class PathTraversalScanner:
                 f"PermissionDenied: You do not have access to the directory '{directory}'"
             ) from e
         except Exception as e:
-            raise ValueError(f"An error occurred while processing the path: {full_path}") from e
+            raise ValueError(f"An error occurred while processing the path: {directory}") from e
 
         return result
 
-    def _is_safe(self, full_path: str) -> bool:
+    def _is_safe(self, full_path: str, root: str) -> bool:
         """
         Helper method that checks if the given file or directory is considered safe.
 
         :param full_path: The complete file path to be checked
         :return: True if the file or directory is deemed safe (within current root), otherwise False
         """
-        # This is a placeholder for implementation. In practice, you would use conditions specific to your application's security checks and your definition of "safe".
-        return os.path.commonprefix([self.ROOT, full_path]) == self.ROOT
+        return os.path.commonprefix([root, full_path]) == root
 
-
-def main():
-    scanner = PathTraversalScanner()
-
-    safe_directory = "/path/to/safe"
-    unsafe_directory = "/path/to/unsafe"
-
-    print("Checking Safe Directory:")
-    scan_result_safe = scanner.check_path(safe_directory)
-    print(scan_result_safe)
-
-    # If you are running this in a controlled environment, consider how to handle and demonstrate an unsafe path check
-    try:
-        print("\nChecking Unsafe Directory:")
-        scan_result_unsafe = scanner.check_path(unsafe_directory)
-        print(scan_result_unsafe)
-    except ValueError as e:
-        print(e)
-
-
-if __name__ == "__main__":
-    main()

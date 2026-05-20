@@ -1,69 +1,43 @@
-import hashlib
-import logging
-import uuid
-
 from qdrant_client import QdrantClient
-from qdrant_client.models import Distance, PointStruct, VectorParams
+from qdrant_client.models import PointStruct, VectorParams, Distance
 from sentence_transformers import SentenceTransformer
+import uuid, logging
 
-QDRANT_URL = "http://localhost:6333"
-COLLECTION = "cherenkov_findings"
-MODEL_NAME = "all-MiniLM-L6-v2"
+QDRANT_URL = 'http://localhost:6333'
+COLLECTION = 'cherenkov_findings'
 
+def _client(): return QdrantClient(url=QDRANT_URL, timeout=5)
+def _model(): return SentenceTransformer('all-MiniLM-L6-v2')
 
-def _get_client():
-    return QdrantClient(url=QDRANT_URL, timeout=5)
-
-
-def _get_model():
-    return SentenceTransformer(MODEL_NAME)
-
-
-def _ensure_collection(client: QdrantClient) -> None:
+def _ensure(client):
     try:
         client.get_collection(COLLECTION)
     except Exception:
         client.create_collection(
-            COLLECTION, vectors_config=VectorParams(size=384, distance=Distance.COSINE)
-        )
-
+            COLLECTION,
+            vectors_config=VectorParams(size=384, distance=Distance.COSINE))
 
 async def embed_and_store(trace: dict) -> str:
     try:
-        client = _get_client()
-        _ensure_collection(client)
-        model = _get_model()
-        text = str(trace.get("findings", trace.get("target", "")))
-        vector = model.encode(text).tolist()
-
-        # Deterministic hashing instead of python's hash()
-        trace_id = str(trace.get("trace_id", str(uuid.uuid4())))
-        point_id = int(hashlib.sha256(trace_id.encode()).hexdigest(), 16) % ((1 << 63) - 1)
-
-        client.upsert(COLLECTION, points=[PointStruct(id=point_id, vector=vector, payload=trace)])
-        return str(point_id)
+        c = _client(); _ensure(c)
+        v = _model().encode(str(trace.get('findings', ''))).tolist()
+        pid = abs(hash(trace.get('trace_id', str(uuid.uuid4())))) % (2**53)
+        c.upsert(COLLECTION, points=[PointStruct(id=pid, vector=v, payload=trace)])
+        return str(pid)
     except Exception as e:
-        logging.warning("LATTICE embed failed: %s", e)
-        return ""
-
+        logging.warning('LATTICE store failed: %s', e); return ''
 
 async def query_similar_targets(target: str, limit: int = 5) -> list:
     try:
-        client = _get_client()
-        model = _get_model()
-        vector = model.encode(target).tolist()
-        results = client.search(COLLECTION, query_vector=vector, limit=limit)
-        return [r.payload for r in results]
+        c = _client()
+        v = _model().encode(target).tolist()
+        return [r.payload for r in c.search(COLLECTION, query_vector=v, limit=limit)]
     except Exception as e:
-        logging.warning("LATTICE query failed: %s", e)
-        return []
-
+        logging.warning('LATTICE query failed: %s', e); return []
 
 async def label_false_positive(finding_id: str) -> None:
     try:
-        client = _get_client()
-        client.set_payload(
-            COLLECTION, payload={"is_false_positive": True}, points=[int(finding_id)]
-        )
+        _client().set_payload(COLLECTION,
+            payload={'is_false_positive': True}, points=[int(finding_id)])
     except Exception as e:
-        logging.warning("LATTICE label failed: %s", e)
+        logging.warning('LATTICE label failed: %s', e)

@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { motion } from 'motion/react';
-import { CyberButton, Logo } from '../atoms';
+import { CyberButton, CherenkovLogo as Logo } from '../atoms';
 import { API_BASE } from '../../lib/api';
 import { Lock, User, ShieldAlert, Loader2 } from 'lucide-react';
 

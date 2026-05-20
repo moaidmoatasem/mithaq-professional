@@ -275,6 +275,7 @@ async def v1_assistant_advice(
 async def login(credentials: dict):
     if credentials.get("username") == "admin" and credentials.get("password") == "admin":
         from cherenkov.api.middleware.auth import Role, create_access_token
+
         token = create_access_token(
             {"sub": credentials.get("username", "admin"), "role": int(Role.ADMIN)}
         )

@@ -74,16 +74,6 @@ jobs:
       working-directory: packages/cherenkov/web
       run: npx playwright install --with-deps
 
-    - name: Run frontend dev server in background
-      working-directory: packages/cherenkov/web
-      run: npm run dev &
-
-    - name: Wait for frontend server
-      run: |
-        while ! curl -s http://localhost:3000 > /dev/null; do
-          sleep 1
-        done
-
     - name: Run Playwright tests
       working-directory: packages/cherenkov/web
       run: npm run test

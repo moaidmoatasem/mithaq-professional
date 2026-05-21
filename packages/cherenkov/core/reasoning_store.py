@@ -1,5 +1,7 @@
 from typing import List
+
 from cherenkov.core.schemas.reasoning_trace import ReasoningTrace
+
 
 class ReasoningStore:
     def __init__(self):

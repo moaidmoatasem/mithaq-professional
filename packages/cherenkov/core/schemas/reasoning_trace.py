@@ -1,6 +1,8 @@
-from pydantic import BaseModel, Field
 from datetime import datetime, timezone
-from typing import Any, Optional
+from typing import Optional
+
+from pydantic import BaseModel, Field
+
 
 class ReasoningTrace(BaseModel):
     step_type: str = Field(..., description="Type of reasoning step (e.g., tool_call, plan, delegation)")

@@ -4,19 +4,17 @@
 import hashlib
 import json
 import time
-from typing import Optional
-
-from cherenkov.core.reasoning_store import ReasoningStore
-from cherenkov.core.schemas.reasoning_trace import ReasoningTrace
 from abc import ABC, abstractmethod
-from typing import Any
+from typing import Any, Optional
 
 from crewai import Agent
 from pydantic import BaseModel, Field
 
 from cherenkov.core.ablation import Sanitizer
 from cherenkov.core.config.llm_config import DEFAULT_LLM_MODEL
+from cherenkov.core.reasoning_store import ReasoningStore
 from cherenkov.core.schemas.cloud_instruction import CloudInstruction
+from cherenkov.core.schemas.reasoning_trace import ReasoningTrace
 from cherenkov.core.schemas.sanitized_output import SanitizedOutput
 
 

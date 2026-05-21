@@ -1,3 +1,4 @@
+import os
 from datetime import datetime, timedelta, timezone
 from enum import IntEnum
 from typing import Annotated, Optional
@@ -7,8 +8,10 @@ import jwt
 from fastapi import Depends, Header, HTTPException, status
 from pydantic import BaseModel
 
-# Security Constants (In a real app, these should be in .env)
-JWT_SECRET = "cherenkov-sovereign-audit-key-2024"  # Placeholder
+_jwt_secret = os.environ.get("CHERENKOV_JWT_SECRET")
+if not _jwt_secret:
+    raise RuntimeError("CHERENKOV_JWT_SECRET env var not set")
+JWT_SECRET: str = _jwt_secret
 ALGORITHM = "HS256"
 ACCESS_TOKEN_EXPIRE_MINUTES = 60
 

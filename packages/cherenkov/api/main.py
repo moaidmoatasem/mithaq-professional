@@ -62,6 +62,31 @@ from cherenkov.orchestration.orchestration_api import orchestrate_workflow
 from cherenkov.orchestration.result_persistence import ResultStore
 from cherenkov.orchestration.workflow_parser import load_workflow
 
+from dotenv import load_dotenv
+from cherenkov.api.init_auth import verify_api_key
+
+load_dotenv(dotenv_path=".env", override=True)
+
+# Initialize Limiter
+limiter = Limiter(key_func=get_remote_address)
+app = FastAPI(title="CHERENKOV C2 Hub")
+app.state.limiter = limiter
+app.add_exception_handler(RateLimitExceeded, _rate_limit_exceeded_handler)
+
+# 1. Public Frontend - NO AUTH
+# Vite dist files served as static content
+app.mount("/app", StaticFiles(directory="packages/cherenkov/web/dist", html=True), name="app")
+
+# 2. Protected API - AUTH REQUIRED
+# All routes mounted under /api require valid X-Cherenkov-Token
+api_app = FastAPI(dependencies=[Depends(verify_api_key)])
+app.mount("/api", api_app)
+
+@app.get("/health")
+def health_check():
+    """Publicly accessible health heartbeat."""
+    return {"status": "operational"}
+
 logger = logging.getLogger(__name__)
 
 _STATIC_DIR = Path(__file__).parent / "static"

@@ -3,6 +3,9 @@ import sys
 
 sys.path.insert(0, os.path.realpath(os.path.join(os.path.dirname(__file__), "..", "packages")))
 
+# Must be set before any test module imports auth.py (module-level guard raises RuntimeError otherwise)
+os.environ.setdefault("CHERENKOV_JWT_SECRET", "test-only-secret-key-not-for-production")
+
 import pytest
 
 

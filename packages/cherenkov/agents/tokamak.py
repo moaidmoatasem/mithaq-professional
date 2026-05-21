@@ -23,10 +23,11 @@ import json
 import logging
 import time
 from dataclasses import dataclass, field
-from cherenkov.core.reasoning_store import ReasoningStore
 from enum import Enum
 from pathlib import Path
 from typing import TYPE_CHECKING, Any
+
+from cherenkov.core.reasoning_store import ReasoningStore
 
 if TYPE_CHECKING:
     from ..core.base_scanner import Finding

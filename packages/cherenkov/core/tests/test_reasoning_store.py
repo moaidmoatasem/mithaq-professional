@@ -1,6 +1,8 @@
-import pytest
 from pathlib import Path
+
+import pytest
 from cherenkov.core.reasoning.reasoning_store import ReasoningStore, ReasoningTrace
+
 
 def test_reasoning_store(tmp_path: Path, capsys):
     db_path = tmp_path / "test_session.db"
@@ -11,7 +13,7 @@ def test_reasoning_store(tmp_path: Path, capsys):
         trace_id="trace_1",
         agent_id="agent_1",
         action="action_1",
-        details={"key": "value1"}
+        details={"key": "value1"},
     )
     store.append_trace(trace1)
 
@@ -26,6 +28,7 @@ def test_reasoning_store(tmp_path: Path, capsys):
 
     # Tamper test
     import sqlite3
+
     with sqlite3.connect(db_path) as conn:
         conn.execute("UPDATE traces SET details='{}' WHERE trace_id='trace_1'")
         conn.commit()
@@ -34,4 +37,7 @@ def test_reasoning_store(tmp_path: Path, capsys):
     store3.verify("test_session")
     captured_tamper = capsys.readouterr()
     assert "[FAIL] Step 00" in captured_tamper.out
-    assert "Tamper detected: 1 of 1 steps failed anchor verification." in captured_tamper.out
+    assert (
+        "Tamper detected: 1 of 1 steps failed anchor verification."
+        in captured_tamper.out
+    )

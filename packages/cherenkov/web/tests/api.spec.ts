@@ -2,6 +2,9 @@ import { test, expect } from '@playwright/test';
 
 test.describe('Dashboard API Mocks', () => {
   test.beforeEach(async ({ page }) => {
+    await page.addInitScript(() => {
+      window.sessionStorage.setItem('cherenkov_token', 'dummy-token');
+    });
     // Mock the Health API
     await page.route('**/api/v1/health', async route => {
       await route.fulfill({

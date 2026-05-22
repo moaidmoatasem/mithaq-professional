@@ -1,9 +1,9 @@
 """Base agent class for cherenkov security framework."""
 
-
 import hashlib
 import json
 import time
+import uuid
 from abc import ABC, abstractmethod
 from typing import Any, Optional
 
@@ -19,9 +19,8 @@ from cherenkov.core.schemas.sanitized_output import SanitizedOutput
 
 
 class BaseAgentConfig(BaseModel):
-    """Configuration for base agent."""
-
     model_config = {"arbitrary_types_allowed": True}
+    """Configuration for base agent."""
 
     role: str = Field(..., description="Agent role (e.g., 'Security Architect')")
     goal: str = Field(..., description="Primary goal of the agent")
@@ -52,9 +51,9 @@ class BaseAgent(ABC):
         """
         self.config = config
         self.session_id = config.session_id
-        self.reasoning_store = config.reasoning_store
         self.ablation = Sanitizer()
         self.reasoning_store = config.reasoning_store
+        self._step_counter = 0
         self.agent = self._create_agent()
 
     def _create_agent(self) -> Agent:
@@ -119,30 +118,52 @@ class BaseAgent(ABC):
 
         # Scrub output and truncate to 500 chars
         scrubbed_output = self.sanitize_input(str(output)).sanitized_text[:500]
+        self._step_counter += 1
 
-        trace = ReasoningTrace(
-            step_type="tool_call",
-            tool_name=tool_name,
-            tool_args_hash=tool_args_hash,
-            input_summary=input_summary,
-            output_summary=scrubbed_output,
-            reasoning=reasoning,
-            latency_ms=latency_ms
-        )
-        self.reasoning_store.add_trace(trace)
+        trace_data = {
+            "trace_id": str(uuid.uuid4()),
+            "agent_id": self.__class__.__name__,
+            "agent_role": self.config.role,
+            "session_id": self.session_id or "default",
+            "step_index": self._step_counter,
+            "step_type": "tool_call",
+            "input_summary": input_summary,
+            "output_summary": scrubbed_output,
+            "reasoning": reasoning,
+            "latency_ms": latency_ms,
+            "tool_name": tool_name,
+            "tool_args_hash": tool_args_hash,
+        }
+
+        trace_without_anchor = ReasoningTrace(**trace_data, sha256_anchor="dummy")
+        anchor = trace_without_anchor.compute_hash()
+
+        trace = ReasoningTrace(**trace_data, sha256_anchor=anchor)
+        self.reasoning_store.record(trace)
 
     def _trace_step(self, step_type: str, reasoning: str, input_summary: str, output_summary: str, confidence: Optional[float] = None) -> None:
         if self.reasoning_store is None:
             return
 
-        trace = ReasoningTrace(
-            step_type=step_type,
-            input_summary=input_summary,
-            output_summary=output_summary,
-            reasoning=reasoning,
-            confidence=confidence
-        )
-        self.reasoning_store.add_trace(trace)
+        self._step_counter += 1
+        trace_data = {
+            "trace_id": str(uuid.uuid4()),
+            "agent_id": self.__class__.__name__,
+            "agent_role": self.config.role,
+            "session_id": self.session_id or "default",
+            "step_index": self._step_counter,
+            "step_type": step_type,
+            "input_summary": input_summary,
+            "output_summary": output_summary,
+            "reasoning": reasoning,
+            "confidence": confidence
+        }
+
+        trace_without_anchor = ReasoningTrace(**trace_data, sha256_anchor="dummy")
+        anchor = trace_without_anchor.compute_hash()
+
+        trace = ReasoningTrace(**trace_data, sha256_anchor=anchor)
+        self.reasoning_store.record(trace)
 
     def execute_tool(self, tool_name: str, args: dict, reasoning: str, tool_func) -> Any:
         t0 = time.monotonic()

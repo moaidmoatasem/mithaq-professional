@@ -169,6 +169,16 @@ class TokamakAgent:
         t0 = time.monotonic()
         technique = finding.scanner
 
+        # Optionally record reasoning trace for validation start
+        if getattr(self, "reasoning_store", None) and hasattr(self, "_trace_step"):
+            self._trace_step( # type: ignore
+                step_type="verdict",
+                input_summary=f"Validating finding: {finding.title} via {technique}",
+                output_summary="Started validation sequence",
+                reasoning=f"Executing Tokamak validation for {finding.title}",
+                confidence=None
+            )
+
         # Try fast probe first (XSS, SQLi, CSRF only — no Docker needed)
         fast_result = await self._try_fast_probe(target, technique, finding.title)
         if fast_result is not None:
@@ -212,6 +222,14 @@ class TokamakAgent:
                     logger.info(
                         "CHERENKOV Trace generated and signed for finding: %s", finding.title
                     )
+                    if getattr(self, "reasoning_store", None) and hasattr(self, "_trace_step"):
+                        self._trace_step( # type: ignore
+                            step_type="verdict",
+                            input_summary=f"Validation result for {finding.title}",
+                            output_summary="Confirmed exploitable",
+                            reasoning="PoC executed successfully in Tokamak sandbox",
+                            confidence=1.0
+                        )
                     return TokamakResult(
                         finding_title=finding.title,
                         verdict=TokamakVerdict.CONFIRMED,

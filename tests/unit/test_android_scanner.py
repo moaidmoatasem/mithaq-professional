@@ -1,3 +1,6 @@
+import sys
+from unittest.mock import MagicMock
+sys.modules["httpx"] = MagicMock()
 import pytest
 from cherenkov.core.base_scanner import Severity
 

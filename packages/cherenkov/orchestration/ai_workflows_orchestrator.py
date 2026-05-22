@@ -9,7 +9,11 @@ TODO:
 - Implement logging & metrics hooks for long-running workflows
 """
 
+import uuid
+from pathlib import Path
 from typing import Any, Callable, Dict, List
+
+from cherenkov.core.reasoning.reasoning_store import ReasoningStore
 
 logger = logging.getLogger(__name__)
 
@@ -74,6 +78,12 @@ def orchestrate_ai_workflows(context: Dict[str, Any]) -> Dict[str, Any]:
             raise ValueError(f"Agent '{name}' is not callable")
         registry.register(name, fn)
 
+    session_id = context.get("session_id") or str(uuid.uuid4())
+    store = ReasoningStore(db_path=Path(f"data/reasoning/{session_id}.db"))
+
+    context["session_id"] = session_id
+    context["reasoning_store"] = store
+
     # 3. Simple run loop stub over roadmap steps
     print(f"[cherenkov-ai] Starting orchestration for project: {project_name}")
 
@@ -84,7 +94,9 @@ def orchestrate_ai_workflows(context: Dict[str, Any]) -> Dict[str, Any]:
         agent_name = step.get("agent")
         agent_input = step.get("input", {})
 
-        print(f"[cherenkov-ai] Executing step {idx}: {step_name} using agent '{agent_name}'")
+        print(
+            f"[cherenkov-ai] Executing step {idx}: {step_name} using agent '{agent_name}'"
+        )
 
         result_record: Dict[str, Any] = {
             "index": idx,
@@ -128,6 +140,9 @@ def orchestrate_ai_workflows(context: Dict[str, Any]) -> Dict[str, Any]:
         step_results.append(result_record)
 
     print(f"[cherenkov-ai] Orchestration finished for project: {project_name}")
+    logger.info(
+        f"Session {session_id} complete. Reasoning log: data/reasoning/{session_id}.db ({len(store.query())} steps recorded)."
+    )
 
     return {
         "project_name": project_name,

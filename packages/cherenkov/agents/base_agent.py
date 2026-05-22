@@ -1,7 +1,7 @@
 """Base agent class for cherenkov security framework."""
 
 from abc import ABC, abstractmethod
-from typing import Any
+from typing import Any, Optional
 
 from crewai import Agent
 from pydantic import BaseModel, Field
@@ -15,6 +15,8 @@ from cherenkov.core.schemas.sanitized_output import SanitizedOutput
 class BaseAgentConfig(BaseModel):
     """Configuration for base agent."""
 
+    model_config = {"arbitrary_types_allowed": True}
+
     role: str = Field(..., description="Agent role (e.g., 'Security Architect')")
     goal: str = Field(..., description="Primary goal of the agent")
     backstory: str = Field(..., description="Agent's background and expertise")
@@ -26,6 +28,12 @@ class BaseAgentConfig(BaseModel):
         default=False, description="Allow task delegation to other agents"
     )
     max_iterations: int = Field(default=5, description="Max task iterations")
+    session_id: Optional[str] = Field(
+        default=None, description="Session ID for tracking traces"
+    )
+    reasoning_store: Optional[Any] = Field(
+        default=None, description="Store for reasoning traces"
+    )
 
 
 class BaseAgent(ABC):
@@ -38,6 +46,8 @@ class BaseAgent(ABC):
             config: Agent configuration
         """
         self.config = config
+        self.session_id = config.session_id
+        self.reasoning_store = config.reasoning_store
         self.ablation = Sanitizer()
         self.agent = self._create_agent()
 

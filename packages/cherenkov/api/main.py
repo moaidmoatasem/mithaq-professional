@@ -67,27 +67,6 @@ from cherenkov.orchestration.workflow_parser import load_workflow
 
 load_dotenv(dotenv_path=".env", override=True)
 
-# Initialize Limiter
-limiter = Limiter(key_func=get_remote_address)
-app = FastAPI(title="CHERENKOV C2 Hub")
-app.state.limiter = limiter
-app.add_exception_handler(RateLimitExceeded, _rate_limit_exceeded_handler)
-
-# 1. Public Frontend - NO AUTH
-# Vite dist files served as static content
-app.mount("/app", StaticFiles(directory="packages/cherenkov/api/static", html=True), name="app")
-
-# 2. Protected API - AUTH REQUIRED
-# All routes mounted under /api require valid X-Cherenkov-Token
-api_app = FastAPI(dependencies=[Depends(verify_api_key)])
-api_app.include_router(ai_orchestrator.router, prefix="/v1")
-app.mount("/api", api_app)
-
-@app.get("/health")
-def health_check():
-    """Publicly accessible health heartbeat."""
-    return {"status": "operational"}
-
 logger = logging.getLogger(__name__)
 
 _STATIC_DIR = Path(__file__).parent / "static"
@@ -97,9 +76,9 @@ _STATIC_DIR = Path(__file__).parent / "static"
 _SCAN_RATE = os.getenv("CHERENKOV_SCAN_RATE_LIMIT", "30/minute")
 _WORKFLOW_RATE = os.getenv("CHERENKOV_WORKFLOW_RATE_LIMIT", "10/minute")
 
+# Single limiter instance (duplicate removed — previously defined twice).
 limiter = Limiter(key_func=get_remote_address)
-# Keep _limiter as alias so decorator references below stay consistent
-_limiter = limiter
+_limiter = limiter  # alias kept for decorator consistency
 
 _START_TIME = time.time()
 
@@ -381,7 +360,7 @@ async def _check_ollama() -> str:
 async def _check_qdrant() -> str:
     try:
         async with httpx.AsyncClient(timeout=2.0) as c:
-            r = await c.get("http://localhost:6333/health")
+            r = await c.get("http://localhost:6333/healthz")
             return "ready" if r.status_code == 200 else "offline"
     except Exception:
         return "offline"
@@ -833,7 +812,11 @@ async def dashboard() -> FileResponse:
 
 async def _forward_to_siem(vulnerabilities: list[dict], target: str):
     """Background task to forward findings to local SIEM."""
-    from cherenkov.core.siem import SIEMForwarder
+    try:
+        from cherenkov.core.siem import SIEMForwarder
+    except ModuleNotFoundError:
+        logger.debug("cherenkov.core.siem not available — skipping SIEM forwarding")
+        return
 
     for v in vulnerabilities:
         finding = {**v, "target": target}

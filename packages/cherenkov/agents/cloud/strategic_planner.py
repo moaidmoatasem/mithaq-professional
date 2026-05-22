@@ -5,7 +5,7 @@ Never receives raw sensitive data - only abstract breadcrumbs.
 """
 
 import os
-from typing import Dict, List, Optional
+from typing import Dict, List, Optional, Any
 
 from groq import Groq
 from pydantic import BaseModel, Field
@@ -25,8 +25,15 @@ class StrategicPlanner:
     Handles high-level reasoning without accessing sensitive data.
     """
 
-    def __init__(self, api_key: Optional[str] = None):
+    def __init__(
+        self,
+        api_key: Optional[str] = None,
+        session_id: Optional[str] = None,
+        reasoning_store: Optional[Any] = None,
+    ):
         self.api_key = api_key or os.getenv("GROQ_API_KEY")
+        self.session_id = session_id
+        self.reasoning_store = reasoning_store
         if not self.api_key:
             raise ValueError("GROQ_API_KEY not found in environment")
 

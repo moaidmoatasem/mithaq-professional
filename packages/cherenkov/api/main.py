@@ -21,7 +21,6 @@ from typing import Any, Dict, List, Literal, Optional, Set
 from urllib.parse import urlparse
 
 import httpx
-from dotenv import load_dotenv
 from fastapi import (
     BackgroundTasks,
     Depends,

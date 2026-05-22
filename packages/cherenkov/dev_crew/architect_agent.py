@@ -3,7 +3,7 @@ import json
 from cherenkov.dev_crew.session_manager import get_ssot_context
 
 OLLAMA_URL = "http://localhost:11434/api/generate"
-ARCHITECT_MODEL = "llama3:latest"
+ARCHITECT_MODEL = "llama3.2:3b"
 
 
 class LocalArchitect:
@@ -36,7 +36,7 @@ class LocalArchitect:
             "stream": False,
         }
 
-        async with httpx.AsyncClient(timeout=120.0) as client:
+        async with httpx.AsyncClient(timeout=300.0) as client:
             response = await client.post(OLLAMA_URL, json=payload)
             response.raise_for_status()
             result = response.json()["response"]

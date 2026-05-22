@@ -260,9 +260,12 @@ def reasoning_show(
 ):
     """Display a human-readable reasoning log for the specified session."""
     from cherenkov.core.reasoning_store import ReasoningStore
+    from pathlib import Path
 
-    store = ReasoningStore(session_id)
-    traces = store.query()
+    # Based on the path from the prompt guidelines
+    db_path = Path("data") / "reasoning" / f"{session_id}.db"
+    store = ReasoningStore(db_path)
+    traces = store.query(session_id=session_id)
 
     if not traces:
         console.print(
@@ -271,14 +274,14 @@ def reasoning_show(
         return
 
     for trace in traces:
-        step = trace.get("step_index", 0)
-        tool = trace.get("tool_name", "unknown")
-        model = trace.get("model", "unknown")
-        duration = trace.get("duration_ms", 0)
-        agent = trace.get("agent", "unknown")
-        reasoning = trace.get("reasoning", "")
-        confidence = trace.get("confidence", 0.0)
-        sha256 = trace.get("sha256", "")
+        step = trace.step_index
+        tool = trace.tool_name or "unknown"
+        model = trace.model_backend or "unknown"
+        duration = trace.latency_ms or 0
+        agent = trace.agent_id
+        reasoning = trace.reasoning
+        confidence = trace.confidence or 0.0
+        sha256 = trace.sha256_anchor
         short_sha = sha256[:8] if sha256 else ""
 
         console.print(f"[Step {step:02d} | {tool} | {model} | {duration}ms]")
@@ -296,9 +299,11 @@ def reasoning_export(
 ):
     """Export reasoning log to a JSONL file."""
     from cherenkov.core.reasoning_store import ReasoningStore
+    from pathlib import Path
 
-    store = ReasoningStore(session_id)
-    store.export_jsonl(out)
+    db_path = Path("data") / "reasoning" / f"{session_id}.db"
+    store = ReasoningStore(db_path)
+    store.export_jsonl(session_id, Path(out))
     console.print(f"[green]Exported traces for session {session_id} to {out}[/green]")
 
 
@@ -308,40 +313,45 @@ def reasoning_verify(
 ):
     """Re-compute SHA-256 anchors for all rows to detect tampering."""
     from cherenkov.core.reasoning_store import ReasoningStore
+    from pathlib import Path
 
-    store = ReasoningStore(session_id)
-    results = store.verify_hashes()
+    db_path = Path("data") / "reasoning" / f"{session_id}.db"
+    store = ReasoningStore(db_path)
+    traces = store.query(session_id=session_id)
 
-    if not results:
+    if not traces:
         console.print(
             f"[yellow]No reasoning traces found for session: {session_id}[/yellow]"
         )
         return
 
     failures = 0
-    for res in results:
-        step = res["step_index"]
-        status = res["status"]
+    for trace in traces:
+        step = trace.step_index
+        expected_hash = trace.compute_hash()
+        stored_hash = trace.sha256_anchor
+        status = "PASS" if expected_hash == stored_hash else "FAIL"
+
         if status == "PASS":
-            short_sha = res["stored"] if res["stored"] else ""
+            short_sha = stored_hash[:8] if stored_hash else ""
             console.print(
                 f"[{status}] Step {step:02d} | trace_id={session_id} | anchor={short_sha}..."
             )
         else:
             failures += 1
-            stored = res["stored"] if res["stored"] else "..."
-            recomputed = res["recomputed"] if res["recomputed"] else "..."
+            short_stored = stored_hash[:8] if stored_hash else "..."
+            short_expected = expected_hash[:8] if expected_hash else "..."
             console.print(
-                f"[{status}] Step {step:02d} | trace_id={session_id} | stored={stored} recomputed={recomputed}"
+                f"[{status}] Step {step:02d} | trace_id={session_id} | stored={short_stored} recomputed={short_expected}"
             )
 
     if failures > 0:
         console.print(
-            f"\n[red]Tamper detected: {failures} of {len(results)} steps failed anchor verification.[/red]"
+            f"\n[red]Tamper detected: {failures} of {len(traces)} steps failed anchor verification.[/red]"
         )
     else:
         console.print(
-            f"\n[green]All {len(results)} steps passed anchor verification.[/green]"
+            f"\n[green]All {len(traces)} steps passed anchor verification.[/green]"
         )
 
 

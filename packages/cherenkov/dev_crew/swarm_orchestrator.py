@@ -436,6 +436,7 @@ queue:
 
 # ── Focused single-file sprint (used by dev_crew CLI) ───────────────────────
 
+
 class AutonomousSprint:
     """
     Single-task sprint: Architect drafts spec → Developer writes code →
@@ -456,6 +457,7 @@ class AutonomousSprint:
 
     def _extract_code(self, raw: str) -> str:
         import re
+
         m = re.search(r"```python\n(.*?)\n```", raw, re.DOTALL)
         return m.group(1) if m else raw
 

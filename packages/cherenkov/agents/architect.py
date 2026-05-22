@@ -9,23 +9,19 @@ from cherenkov.core.ai.model_router import ModelRouter
 @dataclass
 class EngagementPlan:
     target: str
-    threat_surface: list[str]      # attack vectors identified
-    red_team_tasks: list[dict]     # for offensive agent
-    secops_tasks: list[dict]       # for compliance agent
-    compliance_framework: str      # EGY-FIN CSF, SAMA CSF, etc.
-    risk_score: int                # 0-100
-    reasoning_trace: str           # LLM reasoning chain
+    threat_surface: list[str]  # attack vectors identified
+    red_team_tasks: list[dict]  # for offensive agent
+    secops_tasks: list[dict]  # for compliance agent
+    compliance_framework: str  # EGY-FIN CSF, SAMA CSF, etc.
+    risk_score: int  # 0-100
+    reasoning_trace: str  # LLM reasoning chain
 
 
 class SecurityArchitect:
     def __init__(self):
         self.router = ModelRouter()
 
-    async def plan_engagement(
-        self,
-        target: str,
-        framework: str = "egyfincsf"
-    ) -> EngagementPlan:
+    async def plan_engagement(self, target: str, framework: str = "egyfincsf") -> EngagementPlan:
         # Query historical context from LATTICE
         history = await query_similar_targets(target, limit=5)
 
@@ -51,7 +47,7 @@ The JSON should have keys: "target", "threat_surface", "red_team_tasks", "secops
         response_text = await self.router.complete(prompt)
 
         # Clean up possible markdown backticks
-        match = re.search(r'```(?:json)?\s*(.*?)\s*```', response_text, re.DOTALL)
+        match = re.search(r"```(?:json)?\s*(.*?)\s*```", response_text, re.DOTALL)
         if match:
             json_str = match.group(1).strip()
         else:
@@ -68,7 +64,7 @@ The JSON should have keys: "target", "threat_surface", "red_team_tasks", "secops
                 "secops_tasks": [],
                 "compliance_framework": framework,
                 "risk_score": 0,
-                "reasoning_trace": response_text
+                "reasoning_trace": response_text,
             }
 
         # Ensure target and framework are in the data to match EngagementPlan

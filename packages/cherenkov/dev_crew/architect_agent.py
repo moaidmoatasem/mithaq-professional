@@ -1,5 +1,7 @@
-import httpx
 import json
+
+import httpx
+
 from cherenkov.dev_crew.session_manager import get_ssot_context
 
 OLLAMA_URL = "http://localhost:11434/api/generate"

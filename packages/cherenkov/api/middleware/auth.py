@@ -8,13 +8,16 @@ import jwt
 from fastapi import Depends, Header, HTTPException, status
 from pydantic import BaseModel
 
+
 def get_jwt_secret() -> str:
     from dotenv import load_dotenv
+
     load_dotenv(dotenv_path=".env", override=True)
     secret = os.environ.get("CHERENKOV_JWT_SECRET")
     if not secret:
         raise RuntimeError("CHERENKOV_JWT_SECRET env var not set")
     return secret
+
 
 ALGORITHM = "HS256"
 ACCESS_TOKEN_EXPIRE_MINUTES = 60

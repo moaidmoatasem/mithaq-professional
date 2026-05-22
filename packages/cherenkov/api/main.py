@@ -747,6 +747,28 @@ async def v1_reject_finding(
         raise HTTPException(status_code=500, detail=f"Failed to reject finding: {exc}") from exc
 
 
+class ArchitectPlanRequest(BaseModel):
+    target: str
+    framework: str = "egyfincsf"
+
+
+@v1.post("/architect/plan")
+async def v1_architect_plan(
+    request: ArchitectPlanRequest, current_user: AuthUser = Depends(get_current_user)
+) -> dict:
+    """Generate a structured engagement plan."""
+    from cherenkov.agents.architect import SecurityArchitect
+
+    try:
+        architect = SecurityArchitect()
+        plan = await architect.plan_engagement(target=request.target, framework=request.framework)
+        return plan.__dict__
+    except Exception as exc:
+        raise HTTPException(
+            status_code=500, detail=f"Failed to generate engagement plan: {exc}"
+        ) from exc
+
+
 # Serve the static dashboard assets
 if _STATIC_DIR.exists():
     app.mount("/static", StaticFiles(directory=str(_STATIC_DIR)), name="static")

@@ -1,9 +1,9 @@
 import sys
 from unittest.mock import MagicMock
-sys.modules["httpx"] = MagicMock()
+
 """Unit tests for the LATTICE adaptive learning bridge."""
 
-from unittest.mock import AsyncMock, MagicMock, patch
+from unittest.mock import AsyncMock, patch
 
 import pytest
 from cherenkov.core.base_scanner import Finding, ScanResult, Severity

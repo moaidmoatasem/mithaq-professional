@@ -18,10 +18,11 @@ import json
 import logging
 import subprocess  # nosec B404 — subprocess is required to manage ephemeral Docker containers (TOKAMAK core)
 from contextlib import asynccontextmanager
-from dataclasses import dataclass
 from datetime import datetime, timezone
 from enum import Enum
-from typing import AsyncGenerator
+from typing import Any, AsyncGenerator
+
+from pydantic import BaseModel, ConfigDict, model_validator
 
 logger = logging.getLogger("cherenkov.tokamak")
 
@@ -108,25 +109,42 @@ _PROFILE_CONFIGS: dict[TOKAMAKProfile, dict] = {
 
 
 # ──────────────────────────────────────────────
-# TOKAMAK
+# TOKAMAK Models (Pydantic V2)
 # ──────────────────────────────────────────────
 
 
-@dataclass
-class Command:
+class Command(BaseModel):
     payload: str
     scanner_name: str = ""
     timeout: int = 30
 
+    @model_validator(mode="before")
+    @classmethod
+    def validate_timeout(cls, values: Any) -> Any:
+        if isinstance(values, dict):
+            timeout = values.get("timeout", 30)
+            if timeout is not None:
+                if timeout > 120:
+                    values["timeout"] = 120
+                elif timeout <= 0:
+                    raise ValueError("timeout must be positive")
+        return values
 
-@dataclass
-class TokamakResult:
+
+class TokamakResult(BaseModel):
+    model_config = ConfigDict(arbitrary_types_allowed=True)
+
     stdout: str
     stderr: str
     trace_hash: str
     shred_receipt: dict
     exit_code: int
     duration_ms: float = 0.0
+
+
+# ──────────────────────────────────────────────
+# TOKAMAK Core
+# ──────────────────────────────────────────────
 
 
 class ScanTOKAMAK:
@@ -140,7 +158,11 @@ class ScanTOKAMAK:
     def __init__(self) -> None:
         if not DOCKER_AVAILABLE:
             raise RuntimeError("Docker SDK not available. Install: pip install docker")
-        self.client = docker.from_env()
+        try:
+            self.client = docker.from_env()
+        except Exception as e:
+            logger.error("Failed to initialize Docker client: %s", e)
+            self.client = None
         self._active_container = None
 
     @asynccontextmanager
@@ -155,13 +177,10 @@ class ScanTOKAMAK:
 
         The container is kept alive with `sleep infinity` so callers can inject
         payloads via exec_run() without a race against the default entrypoint.
-
-        Example:
-            async with tokamak.scan_context("https://target.com") as container:
-                exit_code, output = await asyncio.to_thread(
-                    container.exec_run, ["sh", "-c", "nmap -sV $TARGET"]
-                )
         """
+        if not self.client:
+            raise RuntimeError("Docker daemon is unreachable or client failed to initialize.")
+
         container = None
         cfg = _PROFILE_CONFIGS[profile]
 
@@ -217,41 +236,50 @@ class ScanTOKAMAK:
 
         Returns a dict with 'exploitable' bool and 'evidence' str.
         """
-        async with self.scan_context(
-            target, profile=profile, timeout=self.POC_TIMEOUT
-        ) as container:
-            try:
-                exec_result = await asyncio.wait_for(
-                    asyncio.to_thread(
-                        container.exec_run,
-                        ["sh", "-c", payload],
-                        stdout=True,
-                        stderr=True,
-                        demux=False,
-                    ),
-                    timeout=self.POC_TIMEOUT,
-                )
-                exit_code = exec_result.exit_code
-                raw_output = exec_result.output or b""
-                output = raw_output.decode("utf-8", errors="replace").strip()
-
+        try:
+            async with self.scan_context(
+                target, profile=profile, timeout=self.POC_TIMEOUT
+            ) as container:
                 try:
-                    result = json.loads(output)
-                    if "exploitable" not in result:
-                        result["exploitable"] = exit_code == 0
-                    return result
-                except json.JSONDecodeError:
-                    return {
-                        "exploitable": exit_code == 0,
-                        "evidence": output or f"No output (exit {exit_code})",
-                    }
+                    exec_result = await asyncio.wait_for(
+                        asyncio.to_thread(
+                            container.exec_run,
+                            ["sh", "-c", payload],
+                            stdout=True,
+                            stderr=True,
+                            demux=False,
+                        ),
+                        timeout=self.POC_TIMEOUT,
+                    )
+                    exit_code = exec_result.exit_code
+                    raw_output = exec_result.output or b""
+                    output = raw_output.decode("utf-8", errors="replace").strip()
 
-            except asyncio.TimeoutError:
-                logger.warning("TOKAMAK PoC timed out after %ss — %s", self.POC_TIMEOUT, technique)
-                return {
-                    "exploitable": False,
-                    "evidence": f"PoC timed out after {self.POC_TIMEOUT}s",
-                }
+                    try:
+                        result = json.loads(output)
+                        if "exploitable" not in result:
+                            result["exploitable"] = exit_code == 0
+                        return result
+                    except json.JSONDecodeError:
+                        return {
+                            "exploitable": exit_code == 0,
+                            "evidence": output or f"No output (exit {exit_code})",
+                        }
+
+                except asyncio.TimeoutError:
+                    logger.warning(
+                        "TOKAMAK PoC timed out after %ss — %s", self.POC_TIMEOUT, technique
+                    )
+                    return {
+                        "exploitable": False,
+                        "evidence": f"PoC timed out after {self.POC_TIMEOUT}s",
+                    }
+        except Exception as e:
+            logger.error("TOKAMAK fail-closed triggered during PoC execution: %s", e, exc_info=True)
+            return {
+                "exploitable": False,
+                "evidence": f"Docker execution error: {e}",
+            }
 
     async def kill_active(self) -> None:
         """

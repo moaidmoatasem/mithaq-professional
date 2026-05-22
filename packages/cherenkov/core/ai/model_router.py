@@ -127,9 +127,7 @@ class ModelRouter:
             return await self._call_groq(cfg, prompt, max_tokens)
         raise ValueError(f"Unknown backend: {cfg.name}")
 
-    async def _call_ollama(
-        self, cfg: BackendConfig, prompt: str, max_tokens: int
-    ) -> str:
+    async def _call_ollama(self, cfg: BackendConfig, prompt: str, max_tokens: int) -> str:
         import aiohttp
 
         payload = {
@@ -148,9 +146,7 @@ class ModelRouter:
                 data = await resp.json()
                 return data.get("response", "")
 
-    async def _call_gemini(
-        self, cfg: BackendConfig, prompt: str, max_tokens: int
-    ) -> str:
+    async def _call_gemini(self, cfg: BackendConfig, prompt: str, max_tokens: int) -> str:
         import aiohttp
 
         if not cfg.api_key:

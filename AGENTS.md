@@ -144,3 +144,12 @@ npx vite build      # production build must pass
 | `AGENT_MEMORY.md` | Claude Code (coordinating) | After architectural decisions |
 | `AGENTS.md` | Claude Code (coordinating) | When agent roster changes |
 | `CHANGELOG.md` | Automated (release-drafter) | On release |
+
+---
+
+## 9. Proactive Rate-Limit Management & Handover SOP
+
+All agents must proactively monitor their token usage and context capacity to prevent hard-limit terminations:
+- **Rule**: If context usage or rate-limiting approaches 75% (Yellow Alert) or 90% (Red Alert), the agent **must** immediately save its current state.
+- **Protocol**: Adhere strictly to the [Agentic Handover Protocol](file:///\\wsl.localhost\Ubuntu-24.04\home\moaid\cherenkov-professional\docs\development\agentic-handover-protocol.md) to generate a Handover Packet and serialize live state using the `AgentStateStore` (`packages/cherenkov/core/agent_state_store.py`).
+- **Smooth Handover**: Never leave a session without recording your progress, modified files list, next recommended steps, and verification commands in the conversation log or project workspace.

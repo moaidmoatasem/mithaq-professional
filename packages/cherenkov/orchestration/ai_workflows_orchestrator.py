@@ -13,7 +13,7 @@ import uuid
 from pathlib import Path
 from typing import Any, Callable, Dict, List
 
-from cherenkov.core.reasoning.reasoning_store import ReasoningStore
+from cherenkov.core.reasoning_store import ReasoningStore
 
 logger = logging.getLogger(__name__)
 
@@ -94,9 +94,7 @@ def orchestrate_ai_workflows(context: Dict[str, Any]) -> Dict[str, Any]:
         agent_name = step.get("agent")
         agent_input = step.get("input", {})
 
-        print(
-            f"[cherenkov-ai] Executing step {idx}: {step_name} using agent '{agent_name}'"
-        )
+        print(f"[cherenkov-ai] Executing step {idx}: {step_name} using agent '{agent_name}'")
 
         result_record: Dict[str, Any] = {
             "index": idx,

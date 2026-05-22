@@ -230,5 +230,110 @@ def list_scanners() -> None:
     console.print(t)
 
 
+reasoning_app = typer.Typer(name="reasoning", help="Manage and inspect reasoning logs")
+app.add_typer(reasoning_app)
+
+
+@reasoning_app.command("show")
+def reasoning_show(
+    session_id: str = typer.Argument(..., help="Session ID of the reasoning trace")
+):
+    """Display a human-readable reasoning log for the specified session."""
+    from cherenkov.core.reasoning_store import ReasoningStore
+    from pathlib import Path
+
+    # Based on the path from the prompt guidelines
+    db_path = Path("data") / "reasoning" / f"{session_id}.db"
+    store = ReasoningStore(db_path)
+    traces = store.query(session_id=session_id)
+
+    if not traces:
+        console.print(
+            f"[yellow]No reasoning traces found for session: {session_id}[/yellow]"
+        )
+        return
+
+    for trace in traces:
+        step = trace.step_index
+        tool = trace.tool_name or "unknown"
+        model = trace.model_backend or "unknown"
+        duration = trace.latency_ms or 0
+        agent = trace.agent_id
+        reasoning = trace.reasoning
+        confidence = trace.confidence or 0.0
+        sha256 = trace.sha256_anchor
+        short_sha = sha256[:8] if sha256 else ""
+
+        console.print(f"[Step {step:02d} | {tool} | {model} | {duration}ms]")
+        console.print(f"Agent : {agent}")
+        console.print(f'Reasoning: "{reasoning}"')
+        console.print(f"Confidence: {confidence}")
+        console.print(f"SHA256: {short_sha}...")
+        console.print()
+
+
+@reasoning_app.command("export")
+def reasoning_export(
+    session_id: str = typer.Argument(..., help="Session ID of the reasoning trace"),
+    out: str = typer.Argument(..., help="Output JSONL file path"),
+):
+    """Export reasoning log to a JSONL file."""
+    from cherenkov.core.reasoning_store import ReasoningStore
+    from pathlib import Path
+
+    db_path = Path("data") / "reasoning" / f"{session_id}.db"
+    store = ReasoningStore(db_path)
+    store.export_jsonl(session_id, Path(out))
+    console.print(f"[green]Exported traces for session {session_id} to {out}[/green]")
+
+
+@reasoning_app.command("verify")
+def reasoning_verify(
+    session_id: str = typer.Argument(..., help="Session ID of the reasoning trace")
+):
+    """Re-compute SHA-256 anchors for all rows to detect tampering."""
+    from cherenkov.core.reasoning_store import ReasoningStore
+    from pathlib import Path
+
+    db_path = Path("data") / "reasoning" / f"{session_id}.db"
+    store = ReasoningStore(db_path)
+    traces = store.query(session_id=session_id)
+
+    if not traces:
+        console.print(
+            f"[yellow]No reasoning traces found for session: {session_id}[/yellow]"
+        )
+        return
+
+    failures = 0
+    for trace in traces:
+        step = trace.step_index
+        expected_hash = trace.compute_hash()
+        stored_hash = trace.sha256_anchor
+        status = "PASS" if expected_hash == stored_hash else "FAIL"
+
+        if status == "PASS":
+            short_sha = stored_hash[:8] if stored_hash else ""
+            console.print(
+                f"[{status}] Step {step:02d} | trace_id={session_id} | anchor={short_sha}..."
+            )
+        else:
+            failures += 1
+            short_stored = stored_hash[:8] if stored_hash else "..."
+            short_expected = expected_hash[:8] if expected_hash else "..."
+            console.print(
+                f"[{status}] Step {step:02d} | trace_id={session_id} | stored={short_stored} recomputed={short_expected}"
+            )
+
+    if failures > 0:
+        console.print(
+            f"\n[red]Tamper detected: {failures} of {len(traces)} steps failed anchor verification.[/red]"
+        )
+    else:
+        console.print(
+            f"\n[green]All {len(traces)} steps passed anchor verification.[/green]"
+        )
+
+
 if __name__ == "__main__":
     app()

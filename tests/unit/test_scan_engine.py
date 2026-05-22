@@ -1,9 +1,8 @@
-import sys
-from unittest.mock import MagicMock
-sys.modules["httpx"] = MagicMock()
 import asyncio
+import sys
 import time
 from typing import Dict
+from unittest.mock import MagicMock
 
 import pytest
 from cherenkov.core.base_scanner import BaseScanner, ScanResult

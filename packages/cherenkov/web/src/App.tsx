@@ -6,10 +6,21 @@ import { TacticalOperationsPanel } from './components/organisms/TacticalOperatio
 import { ThreatIntelPanel } from './components/organisms/ThreatIntelPanel';
 import { LogoKit, AssistantWidget } from './components/organisms';
 import { AnimatePresence } from 'motion/react';
+import { validateSession } from './lib/api';
 
 export default function App() {
   const [token, setToken] = useState<string | null>(sessionStorage.getItem('cherenkov_token'));
   const [showLogoKit, setShowLogoKit] = useState(false);
+
+  useEffect(() => {
+    if (token) {
+      validateSession().then((isValid) => {
+        if (!isValid) {
+          setToken(null);
+        }
+      });
+    }
+  }, [token]);
 
   if (!token) {
     return <LoginPage onLoginSuccess={setToken} />;

@@ -1,6 +1,4 @@
 import sys
-from unittest.mock import MagicMock
-sys.modules["httpx"] = MagicMock()
 from unittest.mock import MagicMock, patch
 
 import httpx

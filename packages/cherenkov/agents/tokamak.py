@@ -171,12 +171,12 @@ class TokamakAgent:
 
         # Optionally record reasoning trace for validation start
         if getattr(self, "reasoning_store", None) and hasattr(self, "_trace_step"):
-            self._trace_step( # type: ignore
+            self._trace_step(  # type: ignore
                 step_type="verdict",
                 input_summary=f"Validating finding: {finding.title} via {technique}",
                 output_summary="Started validation sequence",
                 reasoning=f"Executing Tokamak validation for {finding.title}",
-                confidence=None
+                confidence=None,
             )
 
         # Try fast probe first (XSS, SQLi, CSRF only — no Docker needed)
@@ -223,12 +223,12 @@ class TokamakAgent:
                         "CHERENKOV Trace generated and signed for finding: %s", finding.title
                     )
                     if getattr(self, "reasoning_store", None) and hasattr(self, "_trace_step"):
-                        self._trace_step( # type: ignore
+                        self._trace_step(  # type: ignore
                             step_type="verdict",
                             input_summary=f"Validation result for {finding.title}",
                             output_summary="Confirmed exploitable",
                             reasoning="PoC executed successfully in Tokamak sandbox",
-                            confidence=1.0
+                            confidence=1.0,
                         )
                     return TokamakResult(
                         finding_title=finding.title,
@@ -428,23 +428,26 @@ class TokamakAgent:
             confidence_notes=confidence_notes,
         )
 
-        if hasattr(self, 'reasoning_store') and self.reasoning_store is not None:
+        if hasattr(self, "reasoning_store") and self.reasoning_store is not None:
             # Map TokamakVerdict to score
             score_map = {
                 TokamakVerdict.CONFIRMED: 1.0,
                 TokamakVerdict.PROBABLE: 0.7,
                 TokamakVerdict.UNVERIFIED: 0.3,
-                TokamakVerdict.DISCARDED: 0.0
+                TokamakVerdict.DISCARDED: 0.0,
             }
             score = score_map.get(verdict, 0.0)
 
             from cherenkov.core.schemas.reasoning_trace import ReasoningTrace
-            self.reasoning_store.add_trace(ReasoningTrace(
-                step_type="verdict",
-                input_summary=f"Validate finding: {finding.title} using {technique}",
-                output_summary=f"Verdict: {verdict.value}",
-                reasoning=confidence_notes,
-                confidence=score
-            ))
+
+            self.reasoning_store.add_trace(
+                ReasoningTrace(
+                    step_type="verdict",
+                    input_summary=f"Validate finding: {finding.title} using {technique}",
+                    output_summary=f"Verdict: {verdict.value}",
+                    reasoning=confidence_notes,
+                    confidence=score,
+                )
+            )
 
         return trace

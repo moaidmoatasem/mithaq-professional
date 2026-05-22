@@ -18,7 +18,7 @@ from cherenkov.agents.cloud.strategic_planner import (
 )
 from cherenkov.core.ablation.redactor import DataRedactor, RedactionLevel
 from cherenkov.core.exceptions import CognitiveLoopError
-from cherenkov.core.reasoning.reasoning_store import ReasoningStore
+from cherenkov.core.reasoning_store import ReasoningStore
 
 logger = logging.getLogger(__name__)
 
@@ -61,9 +61,7 @@ class HybridOrchestrator:
         self, groq_api_key: Optional[str] = None, session_id: Optional[str] = None
     ) -> None:
         self.session_id = session_id or str(uuid.uuid4())
-        self.reasoning_store = ReasoningStore(
-            db_path=Path(f"data/reasoning/{self.session_id}.db")
-        )
+        self.reasoning_store = ReasoningStore(db_path=Path(f"data/reasoning/{self.session_id}.db"))
         self.cloud_planner = StrategicPlanner(
             api_key=groq_api_key,
             session_id=self.session_id,
@@ -102,23 +100,17 @@ class HybridOrchestrator:
         redaction_result = self.redactor.redact_dict(local_context)
 
         if not redaction_result.is_safe:
-            logger.warning(
-                "FAIL-CLOSED: data not safe for cloud, falling back to local-only"
-            )
+            logger.warning("FAIL-CLOSED: data not safe for cloud, falling back to local-only")
             mode = ExecutionMode.LOCAL_ONLY
         else:
-            logger.info(
-                "Redacted %d sensitive fields", len(redaction_result.redacted_fields)
-            )
+            logger.info("Redacted %d sensitive fields", len(redaction_result.redacted_fields))
 
         strategic_plan: Optional[str] = None
         tokens_used = 0
 
         if mode in (ExecutionMode.CLOUD_ONLY, ExecutionMode.HYBRID):
             logger.info("Requesting strategic plan from cloud")
-            breadcrumb = self.redactor.create_breadcrumb(
-                local_context, metadata_only=True
-            )
+            breadcrumb = self.redactor.create_breadcrumb(local_context, metadata_only=True)
             task = ThreatAnalysisTask(
                 target_type=target_type,
                 abstract_context=breadcrumb,
@@ -138,9 +130,7 @@ class HybridOrchestrator:
 
             if self.task_tracker.check_loop(target_id, simulated_payload):
                 logger.error("Cognitive loop detected for %s", target_id)
-                raise CognitiveLoopError(
-                    f"Infinite logic loop detected for {target_id}"
-                )
+                raise CognitiveLoopError(f"Infinite logic loop detected for {target_id}")
 
             local_findings = {
                 "vulnerabilities_found": 3,
@@ -166,12 +156,8 @@ class HybridOrchestrator:
                 "engine": "CHERENKOV Engine",
                 "artifact": "Cherenkov Trace",
                 "trace_id": f"CT-{time.strftime('%Y')}-{len(self.execution_history):03d}",
-                "cryptographic_anchor": {
-                    "perimeter_status": "MEISSNER Zero-Egress Verified"
-                },
-                "strategic_plan": (
-                    strategic_plan if strategic_plan else "Local-only mode"
-                ),
+                "cryptographic_anchor": {"perimeter_status": "MEISSNER Zero-Egress Verified"},
+                "strategic_plan": (strategic_plan if strategic_plan else "Local-only mode"),
                 "local_findings": local_findings,
                 "redaction_summary": {
                     "redacted_fields": redaction_result.redacted_fields,
@@ -202,9 +188,7 @@ class HybridOrchestrator:
             old_limit = self.concurrency_limit
             self.concurrency_limit = max(1, self.concurrency_limit // 2)
             self.consecutive_successes = 0
-            logger.warning(
-                "Reducing concurrency: %d -> %d", old_limit, self.concurrency_limit
-            )
+            logger.warning("Reducing concurrency: %d -> %d", old_limit, self.concurrency_limit)
         else:
             self.consecutive_successes += 1
             if self.consecutive_successes >= 5:
@@ -223,7 +207,5 @@ class HybridOrchestrator:
             "total_audits": len(self.execution_history),
             "total_tokens": sum(r.tokens_used for r in self.execution_history),
             "modes_used": [r.execution_mode for r in self.execution_history],
-            "total_redacted_fields": sum(
-                len(r.redacted_fields) for r in self.execution_history
-            ),
+            "total_redacted_fields": sum(len(r.redacted_fields) for r in self.execution_history),
         }

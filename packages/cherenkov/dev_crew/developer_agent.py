@@ -1,7 +1,7 @@
 import httpx
 
 OLLAMA_URL = "http://localhost:11434/api/generate"
-CODER_MODEL = "qwen2.5-coder:3b"
+CODER_MODEL = "qwen2.5-coder:7b"
 
 
 class LocalDeveloper:
@@ -24,7 +24,7 @@ class LocalDeveloper:
             "stream": False,
         }
 
-        async with httpx.AsyncClient(timeout=180.0) as client:
+        async with httpx.AsyncClient(timeout=300.0) as client:
             response = await client.post(OLLAMA_URL, json=payload)
             response.raise_for_status()
             return response.json()["response"]

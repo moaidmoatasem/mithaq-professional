@@ -1,3 +1,4 @@
+import os
 """
 cherenkov REST API Server
 FastAPI-based API for security scanning, workflow orchestration, and the web dashboard.
@@ -9,7 +10,6 @@ packages/cherenkov/api/static/index.html via FastAPI StaticFiles.
 import asyncio
 import json
 import logging
-import os
 import re
 import sqlite3
 import time

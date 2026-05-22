@@ -1,5 +1,7 @@
 import os
+
 from dotenv import load_dotenv
+
 load_dotenv(dotenv_path=".env", override=True)
 
 """
@@ -64,7 +66,6 @@ from cherenkov.core.tokamak import Command, Tokamak
 from cherenkov.orchestration.orchestration_api import orchestrate_workflow
 from cherenkov.orchestration.result_persistence import ResultStore
 from cherenkov.orchestration.workflow_parser import load_workflow
-
 
 logger = logging.getLogger(__name__)
 
@@ -273,6 +274,7 @@ async def v1_assistant_advice(
                 return {"advice": "Failed to get advice from Ollama.", "status": "error"}
     except Exception as exc:
         return {"advice": f"Assistant error: {exc}", "status": "error"}
+
 
 @v1.post("/auth/token")
 async def v1_auth_token(request: AuthRequest) -> dict:
@@ -745,28 +747,6 @@ async def v1_reject_finding(
         return {"status": "success", "finding_id": finding_id, "new_status": "rejected"}
     except Exception as exc:
         raise HTTPException(status_code=500, detail=f"Failed to reject finding: {exc}") from exc
-
-
-class ArchitectPlanRequest(BaseModel):
-    target: str
-    framework: str = "egyfincsf"
-
-
-@v1.post("/architect/plan")
-async def v1_architect_plan(
-    request: ArchitectPlanRequest, current_user: AuthUser = Depends(get_current_user)
-) -> dict:
-    """Generate a structured engagement plan."""
-    from cherenkov.agents.architect import SecurityArchitect
-
-    try:
-        architect = SecurityArchitect()
-        plan = await architect.plan_engagement(target=request.target, framework=request.framework)
-        return plan.__dict__
-    except Exception as exc:
-        raise HTTPException(
-            status_code=500, detail=f"Failed to generate engagement plan: {exc}"
-        ) from exc
 
 
 # Serve the static dashboard assets

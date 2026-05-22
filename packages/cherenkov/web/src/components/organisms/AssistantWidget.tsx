@@ -3,6 +3,7 @@ import { motion, AnimatePresence } from 'motion/react';
 import { CyberButton } from '../atoms';
 import { MessageSquare, X, Send, Bot, User, Loader2 } from 'lucide-react';
 import { cn } from '@/src/lib/utils';
+import { API_BASE, fetchWithAuth } from '@/src/lib/api';
 
 const SYSTEM_PROMPT = `You are the CHERENKOV AI Security Assistant — a sovereign, zero-egress AI agent integrated into the Cherenkov security operations dashboard.`;
 
@@ -43,12 +44,10 @@ export function AssistantWidget() {
     setError(null);
 
     try {
-      const token = sessionStorage.getItem('cherenkov_token');
-      const res = await fetch(`${API_BASE}/assistant/advice`, {
+      const res = await fetchWithAuth(`${API_BASE}/assistant/advice`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-          Authorization: `Bearer ${token}`,
         },
         body: JSON.stringify({
           findings: [], // In a real scenario, we'd pass current findings

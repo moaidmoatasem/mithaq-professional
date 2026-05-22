@@ -1,5 +1,7 @@
 import os
+
 from dotenv import load_dotenv
+
 load_dotenv(dotenv_path=".env", override=True)
 
 """
@@ -64,7 +66,6 @@ from cherenkov.core.tokamak import Command, Tokamak
 from cherenkov.orchestration.orchestration_api import orchestrate_workflow
 from cherenkov.orchestration.result_persistence import ResultStore
 from cherenkov.orchestration.workflow_parser import load_workflow
-
 
 logger = logging.getLogger(__name__)
 
@@ -273,6 +274,7 @@ async def v1_assistant_advice(
                 return {"advice": "Failed to get advice from Ollama.", "status": "error"}
     except Exception as exc:
         return {"advice": f"Assistant error: {exc}", "status": "error"}
+
 
 @v1.post("/auth/token")
 async def v1_auth_token(request: AuthRequest) -> dict:

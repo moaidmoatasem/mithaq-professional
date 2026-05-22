@@ -33,10 +33,10 @@ class BaseAgentConfig(BaseModel):
         default=False, description="Allow task delegation to other agents"
     )
     max_iterations: int = Field(default=5, description="Max task iterations")
-    session_id: Optional[str] = Field(
-        default=None, description="Session ID for tracking traces"
+    session_id: Optional[str] = Field(default=None, description="Session ID for tracking traces")
+    reasoning_store: Optional[ReasoningStore] = Field(
+        default=None, description="Store for reasoning traces"
     )
-    reasoning_store: Optional[ReasoningStore] = Field(default=None, description="Store for reasoning traces")
     tools: list[Any] = Field(default_factory=list, description="List of tools for the agent")
 
 
@@ -63,7 +63,7 @@ class BaseAgent(ABC):
             Configured CrewAI Agent
         """
         wrapped_tools = []
-        for tool in getattr(self.config, 'tools', []):
+        for tool in getattr(self.config, "tools", []):
             wrapped_tools.append(self._wrap_tool(tool))
 
         return Agent(
@@ -82,7 +82,7 @@ class BaseAgent(ABC):
         # Support for functions and basic callable tools
         if callable(tool):
             # Try to get name from common tool patterns
-            tool_name = getattr(tool, 'name', getattr(tool, '__name__', 'unknown_tool'))
+            tool_name = getattr(tool, "name", getattr(tool, "__name__", "unknown_tool"))
 
             def wrapper(*args, **kwargs):
                 # We need to construct a dict for args to log
@@ -96,20 +96,21 @@ class BaseAgent(ABC):
                     tool_name=tool_name,
                     args=call_args,
                     reasoning=f"Calling tool {tool_name}",
-                    tool_func=tool
+                    tool_func=tool,
                 )
 
             # Copy attributes to fool CrewAI/Langchain
             wrapper.name = tool_name
-            wrapper.description = getattr(tool, 'description', '')
-            wrapper.args_schema = getattr(tool, 'args_schema', None)
+            wrapper.description = getattr(tool, "description", "")
+            wrapper.args_schema = getattr(tool, "args_schema", None)
             wrapper.func = tool
             return wrapper
 
         return tool
 
-
-    def _trace_tool_call(self, tool_name: str, args: dict, output: Any, latency_ms: int, reasoning: str) -> None:
+    def _trace_tool_call(
+        self, tool_name: str, args: dict, output: Any, latency_ms: int, reasoning: str
+    ) -> None:
         if self.reasoning_store is None:
             return
 
@@ -141,7 +142,14 @@ class BaseAgent(ABC):
         trace = ReasoningTrace(**trace_data, sha256_anchor=anchor)
         self.reasoning_store.record(trace)
 
-    def _trace_step(self, step_type: str, reasoning: str, input_summary: str, output_summary: str, confidence: Optional[float] = None) -> None:
+    def _trace_step(
+        self,
+        step_type: str,
+        reasoning: str,
+        input_summary: str,
+        output_summary: str,
+        confidence: Optional[float] = None,
+    ) -> None:
         if self.reasoning_store is None:
             return
 
@@ -156,7 +164,7 @@ class BaseAgent(ABC):
             "input_summary": input_summary,
             "output_summary": output_summary,
             "reasoning": reasoning,
-            "confidence": confidence
+            "confidence": confidence,
         }
 
         trace_without_anchor = ReasoningTrace(**trace_data, sha256_anchor="dummy")

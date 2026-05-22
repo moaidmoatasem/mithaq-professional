@@ -37,7 +37,4 @@ def test_reasoning_store(tmp_path: Path, capsys):
     store3.verify("test_session")
     captured_tamper = capsys.readouterr()
     assert "[FAIL] Step 00" in captured_tamper.out
-    assert (
-        "Tamper detected: 1 of 1 steps failed anchor verification."
-        in captured_tamper.out
-    )
+    assert "Tamper detected: 1 of 1 steps failed anchor verification." in captured_tamper.out

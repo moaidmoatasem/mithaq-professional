@@ -1,7 +1,6 @@
 import sys
-from unittest.mock import MagicMock
-# sys.modules["httpx"] = MagicMock()
 import uuid
+from unittest.mock import MagicMock
 
 import pytest
 from fastapi.testclient import TestClient

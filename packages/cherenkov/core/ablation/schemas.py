@@ -8,6 +8,7 @@ from pydantic import BaseModel, ConfigDict, Field
 def get_utc_now() -> datetime:
     return datetime.now(timezone.utc)
 
+
 class Telemetry(BaseModel):
     model_config = ConfigDict(strict=True, extra="forbid")
 
@@ -17,11 +18,13 @@ class Telemetry(BaseModel):
     status: str = Field(..., description="Outcome status")
     metadata: Optional[Dict[str, Any]] = Field(default=None)
 
+
 class RedactionResult(BaseModel):
     original_length: int = Field(..., ge=0)
     redacted_length: int = Field(..., ge=0)
     redacted_fields: List[str] = Field(default_factory=list)
     is_successful: bool = Field(...)
+
 
 class SanitizedFinding(BaseModel):
     model_config = ConfigDict(strict=True)

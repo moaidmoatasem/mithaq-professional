@@ -12,9 +12,7 @@ from cherenkov.core.storage.database import init_db, list_scans, save_scan
 
 logger = logging.getLogger(__name__)
 
-app = typer.Typer(
-    name="cherenkov", help="cherenkov security scanner CLI", no_args_is_help=True
-)
+app = typer.Typer(name="cherenkov", help="cherenkov security scanner CLI", no_args_is_help=True)
 console = Console()
 
 _TRACES_DIR = Path.home() / ".cherenkov" / "traces"
@@ -51,9 +49,7 @@ def _write_pdf(chk_id: str, target: str, findings: list[dict], anchor: dict) -> 
     from cherenkov.core.base_scanner import Finding, ScanResult, Severity
 
     mapper = ComplianceMapper()
-    compliance_data = {
-        f["cwe"]: mapper.map_all(f["cwe"]) for f in findings if f.get("cwe")
-    }
+    compliance_data = {f["cwe"]: mapper.map_all(f["cwe"]) for f in findings if f.get("cwe")}
 
     scan_findings = []
     for f in findings:
@@ -82,9 +78,7 @@ def _write_pdf(chk_id: str, target: str, findings: list[dict], anchor: dict) -> 
 @app.command()
 def scan(
     target: str = typer.Argument(..., help="Target URL or host to scan"),
-    output: OutputFormat = typer.Option(
-        OutputFormat.table, "--output", "-o", help="Output format"
-    ),
+    output: OutputFormat = typer.Option(OutputFormat.table, "--output", "-o", help="Output format"),
     rps: float = typer.Option(5.0, "--rps", help="Requests per second cap"),
     pdf: bool = typer.Option(
         False, "--pdf", "-p", help="Generate signed PDF report to ~/.cherenkov/traces/"
@@ -130,9 +124,7 @@ def scan(
     # Sign findings — SHA-256 + best-effort RFC 3161 timestamp
     anchor = sign_trace(json.dumps(findings, sort_keys=True))
     tsa_note = (
-        "RFC 3161 ✓"
-        if anchor.get("tsa_status") == "ok"
-        else f"TSA {anchor.get('tsa_status')}"
+        "RFC 3161 ✓" if anchor.get("tsa_status") == "ok" else f"TSA {anchor.get('tsa_status')}"
     )
     console.print(f"[dim]sha256: {anchor['sha256'][:16]}…  {tsa_note}[/dim]")
 
@@ -255,12 +247,11 @@ app.add_typer(reasoning_app)
 
 
 @reasoning_app.command("show")
-def reasoning_show(
-    session_id: str = typer.Argument(..., help="Session ID of the reasoning trace")
-):
+def reasoning_show(session_id: str = typer.Argument(..., help="Session ID of the reasoning trace")):
     """Display a human-readable reasoning log for the specified session."""
-    from cherenkov.core.reasoning_store import ReasoningStore
     from pathlib import Path
+
+    from cherenkov.core.reasoning_store import ReasoningStore
 
     # Based on the path from the prompt guidelines
     db_path = Path("data") / "reasoning" / f"{session_id}.db"
@@ -268,9 +259,7 @@ def reasoning_show(
     traces = store.query(session_id=session_id)
 
     if not traces:
-        console.print(
-            f"[yellow]No reasoning traces found for session: {session_id}[/yellow]"
-        )
+        console.print(f"[yellow]No reasoning traces found for session: {session_id}[/yellow]")
         return
 
     for trace in traces:
@@ -298,8 +287,9 @@ def reasoning_export(
     out: str = typer.Argument(..., help="Output JSONL file path"),
 ):
     """Export reasoning log to a JSONL file."""
-    from cherenkov.core.reasoning_store import ReasoningStore
     from pathlib import Path
+
+    from cherenkov.core.reasoning_store import ReasoningStore
 
     db_path = Path("data") / "reasoning" / f"{session_id}.db"
     store = ReasoningStore(db_path)
@@ -309,20 +299,19 @@ def reasoning_export(
 
 @reasoning_app.command("verify")
 def reasoning_verify(
-    session_id: str = typer.Argument(..., help="Session ID of the reasoning trace")
+    session_id: str = typer.Argument(..., help="Session ID of the reasoning trace"),
 ):
     """Re-compute SHA-256 anchors for all rows to detect tampering."""
-    from cherenkov.core.reasoning_store import ReasoningStore
     from pathlib import Path
+
+    from cherenkov.core.reasoning_store import ReasoningStore
 
     db_path = Path("data") / "reasoning" / f"{session_id}.db"
     store = ReasoningStore(db_path)
     traces = store.query(session_id=session_id)
 
     if not traces:
-        console.print(
-            f"[yellow]No reasoning traces found for session: {session_id}[/yellow]"
-        )
+        console.print(f"[yellow]No reasoning traces found for session: {session_id}[/yellow]")
         return
 
     failures = 0
@@ -350,9 +339,7 @@ def reasoning_verify(
             f"\n[red]Tamper detected: {failures} of {len(traces)} steps failed anchor verification.[/red]"
         )
     else:
-        console.print(
-            f"\n[green]All {len(traces)} steps passed anchor verification.[/green]"
-        )
+        console.print(f"\n[green]All {len(traces)} steps passed anchor verification.[/green]")
 
 
 if __name__ == "__main__":

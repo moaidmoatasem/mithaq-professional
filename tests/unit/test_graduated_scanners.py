@@ -1,3 +1,6 @@
+import sys
+from unittest.mock import MagicMock
+sys.modules["httpx"] = MagicMock()
 """Unit tests for the three graduated scanners: CSRF, XSS, OpenRedirect.
 
 All HTTP calls are mocked — no network required.

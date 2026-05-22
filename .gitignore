@@ -26,6 +26,7 @@ manifests/cwe_queue.yaml
 agent_state/
 workflow_checkpoints/
 workflow_results/
+data/reasoning/
 
 # Qdrant runtime data (local vector DB state — not config)
 qdrant/

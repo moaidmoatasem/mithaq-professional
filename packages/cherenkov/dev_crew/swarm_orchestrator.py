@@ -38,7 +38,7 @@ logging.basicConfig(level=logging.INFO, format="%(asctime)s [%(levelname)s] %(me
 logger = logging.getLogger("cherenkov.swarm")
 
 OLLAMA_URL = "http://localhost:11434"
-OLLAMA_MODEL = os.getenv("cherenkov_OLLAMA_MODEL", "qwen2.5-coder:3b")
+OLLAMA_MODEL = os.getenv("cherenkov_OLLAMA_MODEL", "qwen2.5-coder:7b")
 MAX_RETRIES = 3
 CANDIDATES = Path("candidates/generated_scanners")
 MANIFESTS = Path("manifests/cwe_queue.yaml")

@@ -30,6 +30,17 @@ Below is a synthesis of the architectural breakthroughs and fixes achieved durin
   - **Dangling FastApi Limiter**: Discovered a dead, first FastAPI application instance declared in `main.py` which held a dangling `Limiter` instance. Eliminated the duplicate instance, binding the single `Limiter` cleanly to the actual live app instance.
   - **SIEM Guarding**: Bound dynamic imports of the experimental `cherenkov.core.siem` module with exception guards, preventing `ModuleNotFoundError` from crashing scan responses.
 
+### 🤖 Session D: Agentic Handover Protocol & Sovereign Hardening (2026-05-22)
+- **Objective**: Establish the formal agentic handover protocol, harden sovereign CI, extend local-LLM fallback, and fix React key-prop warnings in the frontend.
+- **Breakthroughs**:
+  - **Handover Protocol**: Introduced `docs/development/agentic-handover-protocol.md` — three-tier alert system (Green/Yellow/Red) with a standardized Handover Packet template and programmatic `AgentStateStore` serialization spec.
+  - **Sovereign CI**: Rewired `.github/workflows/claude.yml` — trigger changed from `@claude` → `@agent`, runner changed to `self-hosted`, replaced cloud action with local sovereign review (`DecisionHub` + `ruff`).
+  - **Ollama Local Fallback**: `StrategicPlanner` gracefully falls back to `OllamaClient` when `GROQ_API_KEY` is absent — zero cloud egress on air-gapped nodes.
+  - **Role-Specific LLM Models**: Added `ROLE_MODELS` to `llm_config.py`; `TesterAgent` now uses `ROLE_MODELS["testing"]` for higher-fidelity security test reasoning.
+  - **Playwright E2E Capability**: `TesterAgent.generate_playwright_test()` added for frontend component coverage.
+  - **Frontend React Key Fixes**: Resolved unstable key warnings in `PendingApprovalsPanel` and `ThreatIntelPanel`.
+  - **Agentic Console SSOT**: Created `docs/agentic_console/` with `MASTER_CONSOLE.md`, `DB_HISTORY.md`, and `THOUGHT_LOGS.md`.
+
 ### 🔑 Session C: Fixing Cherenkov Scan Authentication
 - **Objective**: Resolve `401 Unauthorized` errors on scan initiation and address websocket upgrade disconnects (`WS_DISCONNECTED` badge).
 - **Breakthroughs**:
@@ -88,6 +99,27 @@ Before finishing any work, the acting agent must:
 | Area | Feature Description | Assigned Agent | Status |
 |---|---|---|---|
 | **Frontend** | `PendingApprovalsPanel` & Badge count in `ForensicHeader` | Antigravity | 🟢 READY / VERIFIED |
+| **Frontend** | Fix React key-prop warnings in list-render components | Claude | 🟢 COMPLETED |
 | **Backend** | TOKAMAK Docker sandboxing environment | Jules / Claude | 🟡 IN PROGRESS |
 | **Backend** | Real health metrics with SQLite WAL storage | Jules | 🟡 IN PROGRESS |
 | **API** | Human-in-the-Loop approval gate API endpoints | Jules | 🟢 COMPLETED |
+| **Agents** | Ollama local fallback in `StrategicPlanner` (zero cloud egress) | Claude | 🟢 COMPLETED |
+| **Agents** | Role-specific LLM model routing (`ROLE_MODELS` in `llm_config`) | Claude | 🟢 COMPLETED |
+| **Agents** | `TesterAgent.generate_playwright_test()` E2E capability | Claude | 🟢 COMPLETED |
+| **CI/CD** | Sovereign `self-hosted` CI workflow replacing cloud action | Claude | 🟢 COMPLETED |
+| **Docs** | Agentic Handover Protocol & Code of Conduct | Claude | 🟢 COMPLETED |
+
+---
+
+## 📆 5. Sprint 5 Targets (Antigravity Incoming)
+
+| Area | Feature Description | Assigned Agent | Priority |
+|---|---|---|---|
+| **Frontend** | Implement Playwright E2E test suite for `PendingApprovalsPanel` | Antigravity | P0 |
+| **Frontend** | Playwright E2E for scan initiation + HITL approval flow | Antigravity | P0 |
+| **Security** | Remove admin/admin backdoor endpoint at `api/main.py:274` | Jules | P0 |
+| **Security** | Seed admin from `CHERENKOV_ADMIN_PASSWORD` env var (not hardcoded) | Jules | P0 |
+| **Security** | Add `Depends(get_current_user)` to unauthenticated scan/report endpoints | Jules | P1 |
+| **Backend** | Complete TOKAMAK Docker sandboxing (`core/tokamak.py`) | Jules | P1 |
+| **Backend** | Fix `prune_old_scans` to null-payload instead of hard-delete (TOKAMAK invariant) | Jules | P1 |
+| **CI/CD** | Remove `--ignore S` from ruff CI check on `core/` and `api/` | Claude | P2 |

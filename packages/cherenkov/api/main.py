@@ -1,4 +1,5 @@
 import os
+
 """
 cherenkov REST API Server
 FastAPI-based API for security scanning, workflow orchestration, and the web dashboard.
@@ -40,7 +41,6 @@ from slowapi import Limiter, _rate_limit_exceeded_handler
 from slowapi.errors import RateLimitExceeded
 from slowapi.util import get_remote_address
 
-from cherenkov.api.init_auth import verify_api_key
 from cherenkov.api.middleware.auth import (
     Role,
     RoleChecker,
@@ -51,7 +51,6 @@ from cherenkov.api.middleware.auth import (
 from cherenkov.api.middleware.auth import (
     User as AuthUser,
 )
-from cherenkov.api.routers import ai_orchestrator
 from cherenkov.core.storage.database import (
     _DB_PATH,
     erase_target_data,
@@ -1149,5 +1148,3 @@ if __name__ == "__main__":
     host = os.getenv("cherenkov_API_HOST", "127.0.0.1")
     port = int(os.getenv("cherenkov_API_PORT", "8000"))
     uvicorn.run(app, host=host, port=port, log_level="info")
-
-

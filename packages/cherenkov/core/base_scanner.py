@@ -2,7 +2,7 @@
 
 from abc import ABC, abstractmethod
 from enum import Enum
-from typing import List
+from typing import List, Optional
 
 import httpx
 from pydantic import BaseModel
@@ -22,6 +22,10 @@ class Finding(BaseModel):
     description: str
     cwe: str
     remediation: str
+    id: str = ""
+    poc_command: str = ""
+    confirmed: bool = False
+    proof: Optional[str] = None
 
 
 class ScanResult(BaseModel):

@@ -5,6 +5,11 @@ test.describe('Dashboard API Mocks', () => {
     await page.addInitScript(() => {
       window.sessionStorage.setItem('cherenkov_token', 'dummy-token');
     });
+
+    // Handle authentication API
+    await page.route("**/api/v1/auth/me", async route => { await route.fulfill({ status: 200, json: { username: "admin" } }); });
+    await page.route("**/api/v1/scans/history", async route => { await route.fulfill({ status: 200, json: [] }); });
+
     // Mock the Health API
     await page.route('**/api/v1/health', async route => {
       await route.fulfill({

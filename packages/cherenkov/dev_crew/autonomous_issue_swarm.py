@@ -317,7 +317,6 @@ class AutonomousIssueSwarm:
 
     def _report(self, batch: list[IssueTask], results: list) -> None:
         passed = sum(1 for r in results if r is True)
-        failed = len(results) - passed
         logger.info(
             "Batch done: %d/%d succeeded | issues: %s",
             passed,

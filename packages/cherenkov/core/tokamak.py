@@ -16,7 +16,6 @@ import asyncio
 import hashlib
 import json
 import logging
-import subprocess  # nosec B404 — subprocess is required to manage ephemeral Docker containers (TOKAMAK core)
 from contextlib import asynccontextmanager
 from datetime import datetime, timezone
 from enum import Enum
@@ -314,53 +313,6 @@ class Tokamak:
     """
     Sandbox environment for executing untrusted payloads securely via Docker.
     """
-
-    async def execute_poc(self, request: ValidationRequest) -> ValidationResult:
-        """
-        Execute a PoC payload using docker-py to verify a finding.
-        """
-        if not DOCKER_AVAILABLE:
-            logger.error("Docker SDK not available, cannot execute PoC.")
-            return ValidationResult(is_verified=False)
-
-        try:
-            client = docker.from_env()
-        except Exception as e:
-            logger.error("Failed to initialize Docker client for execute_poc: %s", e)
-            return ValidationResult(is_verified=False)
-
-        container = None
-        try:
-            container = await asyncio.to_thread(
-                client.containers.run,
-                image="alpine:latest",
-                command=request.exploit_command,
-                detach=True,
-                network_mode="none",
-                mem_limit="128m",
-                cpu_quota=50000,
-                remove=False
-            )
-
-            result = await asyncio.to_thread(container.wait, timeout=request.timeout_seconds)
-            exit_code = result.get("StatusCode", 1)
-
-        except Exception as e:
-            logger.error(f"Error: {e}")
-            exit_code = 1
-            stdout = ""
-            stderr = str(e)
-            duration_ms = 0
-            trace_hash = ""
-            shred_receipt = ""
-        return TokamakResult(
-            stdout=stdout,
-            stderr=stderr,
-            trace_hash=trace_hash,
-            shred_receipt=shred_receipt,
-            exit_code=exit_code,
-            duration_ms=duration_ms,
-        )
 
     async def execute_poc(self, request: ValidationRequest) -> ValidationResult:
         """

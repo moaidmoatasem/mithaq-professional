@@ -7,6 +7,11 @@ test.describe('Dashboard E2E Tests', () => {
       window.sessionStorage.setItem('cherenkov_token', 'dummy-token');
     });
 
+    await page.route("**/api/v1/auth/me", async route => { await route.fulfill({ status: 200, json: { username: "admin" } }); });
+    await page.route("**/api/v1/health", async route => { await route.fulfill({ status: 200, json: { status: "operational", nodes: {}, queue: {}, meissner: { state: "CLOSED" } } }); });
+    await page.route("**/api/v1/scans/history", async route => { await route.fulfill({ status: 200, json: [] }); });
+    await page.route("**/api/v1/ablation/stats", async route => { await route.fulfill({ status: 200, json: { session_stats: { attempts: 0, drops: 0 }, drop_reasons: {} } }); });
+
     // Mock the pending findings API to prevent fetch errors
     await page.route('**/api/v1/findings/pending', async route => {
       await route.fulfill({

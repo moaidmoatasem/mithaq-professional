@@ -1,7 +1,9 @@
 # packages/cherenkov/core/ablation/schemas.py
-from pydantic import BaseModel, Field, ConfigDict
-from typing import List, Dict, Any, Optional
 from datetime import datetime, timezone
+from typing import Any, Dict, List, Optional
+
+from pydantic import BaseModel, ConfigDict, Field
+
 
 def get_utc_now() -> datetime:
     return datetime.now(timezone.utc)
@@ -12,7 +14,7 @@ class Telemetry(BaseModel):
     Must not contain raw target data.
     """
     model_config = ConfigDict(strict=True, extra="forbid")
-    
+
     timestamp: datetime = Field(default_factory=get_utc_now)
     module: str = Field(..., description="The component reporting telemetry (e.g., 'ablation_bridge')")
     action: str = Field(..., description="The action taken (e.g., 'redact_payload', 'drop_packet')")
@@ -38,15 +40,15 @@ class SanitizedFinding(BaseModel):
     finding_id: str = Field(..., description="Unique UUID for the finding")
     scanner_name: str = Field(..., description="The TOKAMAK agent that found this")
     severity: str = Field(..., pattern="^(INFO|LOW|MEDIUM|HIGH|CRITICAL)$")
-    
+
     # The actual payload, guaranteed to be stripped of credentials
-    sanitized_payload: Dict[str, Any] 
-    
+    sanitized_payload: Dict[str, Any]
+
     # Audit trail of the redaction process
     redaction_metrics: RedactionResult
-    
+
     # The Fail-Closed Gatekeeper
     is_sanitized: bool = Field(
-        default=False, 
+        default=False,
         description="CRITICAL: Defaults to False. Must be explicitly flipped by the Redactor."
     )

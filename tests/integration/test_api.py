@@ -101,7 +101,7 @@ def test_scan_post(client, monkeypatch):
         return {
             "status": "accepted",
             "scan_id": "test_scan_123",
-            "target": request.target_url,
+            "target": request.url,
             "count": 0,
             "timestamp": datetime.now(timezone.utc).isoformat(),
         }
@@ -114,7 +114,7 @@ def test_scan_post(client, monkeypatch):
     token = token_response.json()["access_token"]
     headers = {"Authorization": f"Bearer {token}"}
 
-    scan_payload = {"target_url": "http://example.com"}
+    scan_payload = {"url": "http://example.com"}
     response = client.post("/api/v1/scan", json=scan_payload, headers=headers)
 
     assert response.status_code == 200

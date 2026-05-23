@@ -1,6 +1,7 @@
 # packages/cherenkov/dev_crew/swarm_orchestrator.py
 import re
 from pathlib import Path
+
 from cherenkov.dev_crew.architect_agent import LocalArchitect
 from cherenkov.dev_crew.developer_agent import LocalDeveloper
 from cherenkov.dev_crew.validation_gate import ValidationGate
@@ -22,7 +23,7 @@ class AutonomousSprint:
 
     async def execute_sprint(self):
         print(f"🚀 INITIATING SPRINT: {self.focus_area}")
-        
+
         # Step 1: Architect generates the spec
         print("🧠 Architect is analyzing SSOT and drafting specification...")
         spec = await self.architect.get_next_directive(self.focus_area)
@@ -35,7 +36,7 @@ class AutonomousSprint:
         while iteration < MAX_ITERATIONS:
             iteration += 1
             print(f"\n💻 Developer Iteration {iteration}/{MAX_ITERATIONS}...")
-            
+
             # Inject feedback if this is a retry
             task_prompt = spec
             if current_feedback:
@@ -58,7 +59,7 @@ class AutonomousSprint:
                 # Future: Trigger SSOT update here
                 return True
             else:
-                print(f"❌ VALIDATION FAILED. Feeding errors back to Developer.")
+                print("❌ VALIDATION FAILED. Feeding errors back to Developer.")
                 current_feedback = val_result.feedback
 
         print("🛑 CIRCUIT BREAKER TRIPPED. Max iterations reached. Human intervention required.")

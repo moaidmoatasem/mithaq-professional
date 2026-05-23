@@ -1,6 +1,7 @@
 # packages/cherenkov/dev_crew/architect_agent.py
-import httpx
 import json
+
+import httpx
 from cherenkov.dev_crew.session_manager import get_ssot_context
 
 OLLAMA_URL = "http://localhost:11434/api/generate"
@@ -26,7 +27,7 @@ class LocalArchitect:
     async def get_next_directive(self, current_focus: str) -> dict:
         """Asks the local Ollama PMO for the next engineering task."""
         prompt = f"Based on our SSOT, what is the exact specification to build: {current_focus}?"
-        
+
         payload = {
             "model": ARCHITECT_MODEL,
             "system": self.system_prompt,
@@ -34,7 +35,7 @@ class LocalArchitect:
             "format": "json", # Force JSON output for pipeline automation
             "stream": False
         }
-        
+
         async with httpx.AsyncClient(timeout=60.0) as client:
             response = await client.post(OLLAMA_URL, json=payload)
             response.raise_for_status()

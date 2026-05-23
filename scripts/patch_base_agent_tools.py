@@ -1,4 +1,3 @@
-import re
 
 with open('packages/cherenkov/agents/base_agent.py', 'r') as f:
     content = f.read()

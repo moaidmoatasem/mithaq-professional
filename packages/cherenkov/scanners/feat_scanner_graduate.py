@@ -2,33 +2,28 @@ import httpx
 from cherenkov.core.base_scanner import BaseScanner, Finding, ScanResult, Severity
 
 
-class ExampleScanner(BaseScanner):
-    """
-    CWE-240: Improper Neutralization of Special Elements used in an OS Command ('OS Command Injection')
-    """
-
+class CVE242Scanner(BaseScanner):
     async def scan(self) -> ScanResult:
-        findings = []
+        """
+        CWE-ISSUE-242: Improper Access Control
+        Technique: Failing to Validate Input Data Before Using It
+        Remediation: Always validate and sanitize user inputs before using them.
+
+        This scanner checks for potential vulnerabilities due to improper access control.
+        """
+        url = self.target.url
         try:
             async with httpx.AsyncClient() as client:
-                response = await client.get("https://example.com")
-                if response.status_code != 200:
+                response = await client.get(url)
+                if "Authorization" not in response.headers:
                     finding = Finding(
                         severity=Severity.HIGH,
-                        description="Non-200 status code received from example.com",
+                        title="CWE-242: Improper Access Control",
+                        description="The target does not include an 'Authorization' header.",
+                        cwe_id="CWE-ISSUE-242",
                     )
-                    findings.append(finding)
-        except httpx.ConnectError as e:
-            finding = Finding(
-                severity=Severity.CRITICAL,
-                description=f"Connection error: {e}",
-            )
-            findings.append(finding)
-        except httpx.TimeoutException as e:
-            finding = Finding(
-                severity=Severity.CRITICAL,
-                description=f"Timeout error: {e}",
-            )
-            findings.append(finding)
+                    return ScanResult(failings=[finding])
+        except (httpx.ConnectError, httpx.TimeoutException):
+            pass
 
-        return ScanResult(findings=findings)
+        return ScanResult()

@@ -1,4 +1,5 @@
 import os
+
 """
 cherenkov REST API Server
 FastAPI-based API for security scanning, workflow orchestration, and the web dashboard.
@@ -21,6 +22,7 @@ from typing import Any, Dict, List, Literal, Optional, Set
 from urllib.parse import urlparse
 
 import httpx
+from dotenv import load_dotenv
 from fastapi import (
     BackgroundTasks,
     Depends,
@@ -35,13 +37,11 @@ from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import FileResponse
 from fastapi.routing import APIRouter
 from fastapi.staticfiles import StaticFiles
-from dotenv import load_dotenv
 from pydantic import BaseModel
 from slowapi import Limiter, _rate_limit_exceeded_handler
 from slowapi.errors import RateLimitExceeded
 from slowapi.util import get_remote_address
 
-from cherenkov.api.init_auth import verify_api_key
 from cherenkov.api.middleware.auth import (
     Role,
     RoleChecker,
@@ -52,7 +52,6 @@ from cherenkov.api.middleware.auth import (
 from cherenkov.api.middleware.auth import (
     User as AuthUser,
 )
-from cherenkov.api.routers import ai_orchestrator
 from cherenkov.core.storage.database import (
     _DB_PATH,
     erase_target_data,
@@ -73,6 +72,7 @@ logger = logging.getLogger(__name__)
 class ScanRequest(BaseModel):
     target_url: str
     scanners: list[str] = []
+
 
 _STATIC_DIR = Path(__file__).parent / "static"
 
@@ -871,7 +871,10 @@ async def _run_scan(
             )
 
         scan_results = await engine.scan_all(
-            request.target_url, scanners=request.scanners, timeout=10.0, on_progress=on_scan_progress
+            request.target_url,
+            scanners=request.scanners,
+            timeout=10.0,
+            on_progress=on_scan_progress,
         )
     except Exception as exc:
         logger.error("ScanEngine failed for %s: %s", request.target_url, exc)
@@ -879,20 +882,30 @@ async def _run_scan(
             _active_scan_targets.discard(normalised_target)
         raise HTTPException(status_code=500, detail=f"Scan execution failed: {exc}") from exc
 
+    from cherenkov.core.aggregator import ScanAggregator
+
+    aggregated_result = ScanAggregator.aggregate(list(scan_results.values()))
+
     vulnerabilities: list[dict] = []
-    for scanner_name, result in scan_results.items():
-        for f in result.findings:
-            vulnerabilities.append(
-                {
-                    "scanner": scanner_name,
-                    "title": f.title,
-                    "type": f.title,
-                    "severity": f.severity.value,
-                    "cwe": f.cwe,
-                    "description": f.description,
-                    "remediation": f.remediation,
-                }
-            )
+    for f in aggregated_result.findings:
+        # Find which scanner produced this finding
+        scanner_name = "unknown"
+        for s_name, res in scan_results.items():
+            if any(x.title == f.title for x in res.findings):
+                scanner_name = s_name
+                break
+
+        vulnerabilities.append(
+            {
+                "scanner": scanner_name,
+                "title": f.title,
+                "type": f.title,
+                "severity": f.severity.value,
+                "cwe": f.cwe,
+                "description": f.description,
+                "remediation": f.remediation,
+            }
+        )
 
     finished = datetime.now(timezone.utc).isoformat()
 
@@ -971,7 +984,9 @@ async def _run_scan(
 
     # Trigger SIEM forwarding
     try:
-        asyncio.get_running_loop().create_task(_forward_to_siem(vulnerabilities, request.target_url))
+        asyncio.get_running_loop().create_task(
+            _forward_to_siem(vulnerabilities, request.target_url)
+        )
     except RuntimeError:
         pass  # No running loop — skip SIEM forwarding in this context
 
@@ -1152,4 +1167,7 @@ if __name__ == "__main__":
     port = int(os.getenv("cherenkov_API_PORT", "8000"))
     uvicorn.run(app, host=host, port=port, log_level="info")
 
-
+@app.get("/v1/models")
+async def openai_models_compat():
+    """OpenAI compatibility endpoint — silences IDE polling."""
+    return {"object": "list", "data": []}

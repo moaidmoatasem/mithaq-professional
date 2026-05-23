@@ -31,13 +31,13 @@ test.describe('Dashboard E2E Tests', () => {
     await expect(page.locator('h2', { hasText: 'C2 Hub Dashboard' })).toBeVisible();
     
     // Check buttons
-    await expect(page.locator('button', { hasText: 'INITIATE NEW SCAN' })).toBeVisible();
+    await expect(page.locator('button', { hasText: '▶ INITIATE NEW SCAN' })).toBeVisible();
     await expect(page.locator('button', { hasText: 'REBOOT_TOPOLOGY' })).toBeVisible();
   });
 
   test('should open New Scan form modal', async ({ page }) => {
     // Click New Scan button
-    await page.locator('button', { hasText: 'INITIATE NEW SCAN' }).click();
+    await page.locator('button', { hasText: '▶ INITIATE NEW SCAN' }).click();
     
     // Check if modal appears
     await expect(page.locator('h3', { hasText: 'Configure New Scan' })).toBeVisible();

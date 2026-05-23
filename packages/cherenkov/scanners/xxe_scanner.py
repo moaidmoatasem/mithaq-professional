@@ -11,7 +11,11 @@ from cherenkov.core.base_scanner import BaseScanner, Finding, ScanResult, Severi
 class XXEScanner(BaseScanner):
     """Scanner to detect XML External Entity (XXE) vulnerabilities."""
 
-    def __init__(self, name: str = "xxe", description: str = "Detects XML External Entity (XXE) injection vulnerabilities"):
+    def __init__(
+        self,
+        name: str = "xxe",
+        description: str = "Detects XML External Entity (XXE) injection vulnerabilities",
+    ):
         super().__init__(name, description)
 
     async def scan(self, target: str, timeout: float = 10.0) -> ScanResult:

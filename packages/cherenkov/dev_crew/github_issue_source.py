@@ -15,7 +15,7 @@ from __future__ import annotations
 import json
 import logging
 import subprocess
-from dataclasses import dataclass, field
+from dataclasses import dataclass
 from datetime import datetime
 from pathlib import Path
 from typing import Literal
@@ -59,6 +59,7 @@ class IssueTask:
         if not self.description:
             # Strip [ANN] prefix from title
             import re
+
             self.description = re.sub(r"^\[A\d+\]\s*", "", self.title)
 
     def _parse_branch(self) -> str:
@@ -101,10 +102,15 @@ class GitHubIssueSource:
 
     def _gh_list_issues(self, limit: int) -> list[dict]:
         cmd = [
-            "gh", "issue", "list",
-            "--limit", str(limit),
-            "--state", "open",
-            "--json", "number,title,labels,milestone",
+            "gh",
+            "issue",
+            "list",
+            "--limit",
+            str(limit),
+            "--state",
+            "open",
+            "--json",
+            "number,title,labels,milestone",
         ]
         if self.repo:
             cmd += ["--repo", self.repo]
@@ -143,10 +149,15 @@ class GitHubIssueSource:
     def gh_create_pr(branch: str, title: str, body: str, repo: str = "") -> str:
         """Returns PR URL or empty string on failure."""
         cmd = [
-            "gh", "pr", "create",
-            "--head", branch,
-            "--title", title,
-            "--body", body,
+            "gh",
+            "pr",
+            "create",
+            "--head",
+            branch,
+            "--title",
+            title,
+            "--body",
+            body,
         ]
         if repo:
             cmd += ["--repo", repo]
@@ -211,6 +222,7 @@ class GitHubIssueSource:
             return set()
         try:
             import yaml
+
             data = yaml.safe_load(ISSUE_QUEUE.read_text()) or {}
             return {
                 item["number"]
@@ -248,16 +260,18 @@ class GitHubIssueSource:
                 item["updated_at"] = datetime.utcnow().isoformat()
                 break
         else:
-            issues.append({
-                "number": number,
-                "title": title,
-                "kind": kind,
-                "branch": branch,
-                "status": status,
-                "pr_url": pr_url,
-                "fail_reason": fail_reason[:300] if fail_reason else "",
-                "created_at": datetime.utcnow().isoformat(),
-                "updated_at": datetime.utcnow().isoformat(),
-            })
+            issues.append(
+                {
+                    "number": number,
+                    "title": title,
+                    "kind": kind,
+                    "branch": branch,
+                    "status": status,
+                    "pr_url": pr_url,
+                    "fail_reason": fail_reason[:300] if fail_reason else "",
+                    "created_at": datetime.utcnow().isoformat(),
+                    "updated_at": datetime.utcnow().isoformat(),
+                }
+            )
         data["issues"] = issues
         ISSUE_QUEUE.write_text(yaml.dump(data, default_flow_style=False, allow_unicode=True))

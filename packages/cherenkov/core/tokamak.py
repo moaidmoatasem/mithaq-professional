@@ -464,7 +464,7 @@ class Tokamak:
                 proof_hash = hashlib.sha256(proof_data.encode()).hexdigest()
 
                 return ValidationResult(is_verified=True, cryptographic_proof=proof_hash)
-            
+
             return ValidationResult(is_verified=False)
 
         except (asyncio.TimeoutError, Exception) as e:

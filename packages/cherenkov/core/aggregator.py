@@ -1,14 +1,14 @@
 """Scan Result Aggregator Pipeline"""
 
 import hashlib
-import json
 import logging
 from datetime import datetime, timezone
 from typing import Dict, List, Tuple
 
 from cherenkov.core.base_scanner import Finding, ScanResult, Severity
+from cherenkov.core.storage.database import save_trace
 
-logger = logging.getLogger(__name__)
+logger = logging.getLogger("cherenkov.aggregator")
 
 # Severity priority order (higher value = more severe)
 SEVERITY_ORDER = {
@@ -31,7 +31,6 @@ class ScanAggregator:
         Keeps the highest severity finding when deduplicating.
         Sums duration_ms from all results.
         Sorts findings by severity with CRITICAL first down to INFO.
-        Generates and signs a unified Cherenkov trace hash, persisting it in WAL DB.
         """
         if not results:
             return ScanResult(
@@ -49,18 +48,9 @@ class ScanAggregator:
         total_duration = sum(r.duration_ms for r in results)
 
         unique_findings: Dict[Tuple[str, str, str], Finding] = {}
-        trace_hashes: List[str] = []
 
         for result in results:
-            if result.trace_hash:
-                trace_hashes.append(result.trace_hash)
-            if result.trace_hashes:
-                trace_hashes.extend(result.trace_hashes)
-
             for finding in result.findings:
-                if finding.trace_hash:
-                    trace_hashes.append(finding.trace_hash)
-
                 key = (result.target, result.scanner_name, finding.title)
 
                 # If key not seen yet, or if this finding has a higher severity, keep it
@@ -77,40 +67,44 @@ class ScanAggregator:
             unique_findings.values(), key=lambda f: SEVERITY_ORDER.get(f.severity, -1), reverse=True
         )
 
-        trace_hashes = sorted(list(set(trace_hashes)))
+        # Collect and deduplicate trace hashes from results and findings
+        trace_hashes_set = set()
+        for r in results:
+            if r.trace_hash:
+                trace_hashes_set.add(r.trace_hash)
+            if r.trace_hashes:
+                for h in r.trace_hashes:
+                    if h:
+                        trace_hashes_set.add(h)
+            for f in r.findings:
+                if f.trace_hash:
+                    trace_hashes_set.add(f.trace_hash)
 
-        # Cryptographically sign the aggregated result
-        timestamp = datetime.now(timezone.utc).isoformat()
-        findings_data = [
-            f.model_dump() if hasattr(f, "model_dump") else f.dict() for f in sorted_findings
-        ]
-        findings_json = json.dumps(findings_data, sort_keys=True)
-        payload = f"{target}|{findings_json}|{timestamp}"
-        trace_hash = hashlib.sha256(payload.encode()).hexdigest()
+        sorted_trace_hashes = sorted(list(trace_hashes_set))
 
-        # Persist aggregated trace in the SQLite WAL database
-        shred_receipt = {
-            "files_erased": ["container_ephemeral_fs"],
-            "timestamp": datetime.now(timezone.utc).isoformat(),
-            "method": "cryptographic_shred_via_docker_rm",
-        }
+        # Generate a valid 64-char SHA-256 trace hash for the aggregated result
+        iso_timestamp = datetime.now(timezone.utc).isoformat()
+        if sorted_trace_hashes:
+            hash_input = "".join(sorted_trace_hashes)
+        else:
+            hash_input = target + iso_timestamp
+
+        trace_hash = hashlib.sha256(hash_input.encode()).hexdigest()
+
+        # Persist the aggregator trace in the WAL database
         try:
-            from cherenkov.core.storage.database import init_db, save_trace
-
-            init_db()
             save_trace(
-                finding_id=f"agg_{uuid.uuid4()}",
+                finding_id=trace_hash,
                 exploit_command="scan_aggregation",
-                stdout="",
+                stdout="Scan aggregation succeeded.",
                 stderr="",
                 exit_code=0,
                 trace_hash=trace_hash,
-                timestamp=datetime.now(timezone.utc).isoformat(),
-                shred_receipt=shred_receipt,
+                timestamp=iso_timestamp,
+                shred_receipt={"files_erased": []},
             )
-        except Exception:
-            # Under standard run environments, if db is not initialized, let it pass or log
-            pass
+        except Exception as e:
+            logger.warning("Failed to persist aggregator trace: %s", e)
 
         return ScanResult(
             target=target,
@@ -119,5 +113,5 @@ class ScanAggregator:
             duration_ms=total_duration,
             status="completed",
             trace_hash=trace_hash,
-            trace_hashes=trace_hashes,
+            trace_hashes=sorted_trace_hashes,
         )

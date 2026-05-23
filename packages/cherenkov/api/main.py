@@ -922,7 +922,7 @@ async def _run_scan(
                     finding_id,
                     v["title"],
                     v.get("description", ""),
-                    request.url,
+                    request.target_url,
                     v["scanner"],
                     v["severity"],
                     v.get("cwe", ""),
@@ -936,7 +936,7 @@ async def _run_scan(
                             finding_id,
                             v["title"],
                             v.get("description", ""),
-                            request.url,
+                            request.target_url,
                             v["scanner"],
                             v["severity"],
                             v.get("cwe", ""),
@@ -971,7 +971,7 @@ async def _run_scan(
 
     # Trigger SIEM forwarding
     try:
-        asyncio.get_running_loop().create_task(_forward_to_siem(vulnerabilities, request.url))
+        asyncio.get_running_loop().create_task(_forward_to_siem(vulnerabilities, request.target_url))
     except RuntimeError:
         pass  # No running loop — skip SIEM forwarding in this context
 

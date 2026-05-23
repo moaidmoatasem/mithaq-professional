@@ -499,7 +499,7 @@ async def v1_scan(
     save_audit_entry(
         event_type="SCAN_INITIATED",
         user_id=current_user.username,
-        details={"target": scan_request.url, "scan_id": result["scan_id"]},
+        details={"target": scan_request.target_url, "scan_id": result["scan_id"]},
     )
 
     await _broadcast(
@@ -756,7 +756,8 @@ if _STATIC_DIR.exists():
 
 
 class ScanRequest(BaseModel):
-    url: str
+    target_url: str
+    scanners: list[str] = []
 
 
 class FindingApproval(BaseModel):
@@ -824,7 +825,7 @@ async def _run_scan(
     from cherenkov.core.storage.database import init_db, save_scan
 
     try:
-        parsed = urlparse(request.url)
+        parsed = urlparse(request.target_url)
     except Exception as exc:
         raise HTTPException(status_code=400, detail=f"Invalid URL: {exc}") from exc
 
@@ -834,12 +835,12 @@ async def _run_scan(
         raise HTTPException(status_code=400, detail="Invalid URL: missing hostname")
 
     # Deduplication: reject concurrent scans of the same target
-    normalised_target = request.url.rstrip("/").lower()
+    normalised_target = request.target_url.rstrip("/").lower()
     async with _active_scan_lock:
         if normalised_target in _active_scan_targets:
             raise HTTPException(
                 status_code=409,
-                detail=f"A scan of '{request.url}' is already in progress. Wait for it to complete.",
+                detail=f"A scan of '{request.target_url}' is already in progress. Wait for it to complete.",
             )
         _active_scan_targets.add(normalised_target)
 
@@ -856,10 +857,10 @@ async def _run_scan(
             )
 
         scan_results = await engine.scan_all(
-            request.url, timeout=10.0, on_progress=on_scan_progress
+            request.target_url, scanners=request.scanners if request.scanners else None, timeout=10.0, on_progress=on_scan_progress
         )
     except Exception as exc:
-        logger.error("ScanEngine failed for %s: %s", request.url, exc)
+        logger.error("ScanEngine failed for %s: %s", request.target_url, exc)
         async with _active_scan_lock:
             _active_scan_targets.discard(normalised_target)
         raise HTTPException(status_code=500, detail=f"Scan execution failed: {exc}") from exc
@@ -885,7 +886,7 @@ async def _run_scan(
         init_db()
         save_scan(
             scan_id,
-            request.url,
+            request.target_url,
             vulnerabilities,
             meta={"scanners_run": list(scan_results.keys())},
             started_at=started,
@@ -907,7 +908,7 @@ async def _run_scan(
                     finding_id,
                     v["title"],
                     v.get("description", ""),
-                    request.url,
+                    request.target_url,
                     v["scanner"],
                     v["severity"],
                     v.get("cwe", ""),
@@ -921,7 +922,7 @@ async def _run_scan(
                             finding_id,
                             v["title"],
                             v.get("description", ""),
-                            request.url,
+                            request.target_url,
                             v["scanner"],
                             v["severity"],
                             v.get("cwe", ""),
@@ -956,13 +957,14 @@ async def _run_scan(
 
     # Trigger SIEM forwarding
     try:
-        asyncio.get_running_loop().create_task(_forward_to_siem(vulnerabilities, request.url))
+        if hasattr(asyncio, "get_running_loop"):
+            asyncio.get_running_loop().create_task(_forward_to_siem(vulnerabilities, request.target_url))
     except RuntimeError:
         pass  # No running loop — skip SIEM forwarding in this context
 
     result = {
         "scan_id": scan_id,
-        "target": request.url,
+        "target": request.target_url,
         "timestamp": finished,
         "vulnerabilities": vulnerabilities,
         "count": len(vulnerabilities),

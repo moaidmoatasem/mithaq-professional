@@ -21,6 +21,7 @@ from typing import Any, Dict, List, Literal, Optional, Set
 from urllib.parse import urlparse
 
 import httpx
+from dotenv import load_dotenv
 from fastapi import (
     BackgroundTasks,
     Depends,
@@ -877,20 +878,30 @@ async def _run_scan(
             _active_scan_targets.discard(normalised_target)
         raise HTTPException(status_code=500, detail=f"Scan execution failed: {exc}") from exc
 
+    from cherenkov.core.aggregator import ScanAggregator
+
+    aggregated_result = ScanAggregator.aggregate(list(scan_results.values()))
+
     vulnerabilities: list[dict] = []
-    for scanner_name, result in scan_results.items():
-        for f in result.findings:
-            vulnerabilities.append(
-                {
-                    "scanner": scanner_name,
-                    "title": f.title,
-                    "type": f.title,
-                    "severity": f.severity.value,
-                    "cwe": f.cwe,
-                    "description": f.description,
-                    "remediation": f.remediation,
-                }
-            )
+    for f in aggregated_result.findings:
+        # Find which scanner produced this finding
+        scanner_name = "unknown"
+        for s_name, res in scan_results.items():
+            if any(x.title == f.title for x in res.findings):
+                scanner_name = s_name
+                break
+
+        vulnerabilities.append(
+            {
+                "scanner": scanner_name,
+                "title": f.title,
+                "type": f.title,
+                "severity": f.severity.value,
+                "cwe": f.cwe,
+                "description": f.description,
+                "remediation": f.remediation,
+            }
+        )
 
     finished = datetime.now(timezone.utc).isoformat()
 
@@ -1149,5 +1160,3 @@ if __name__ == "__main__":
     host = os.getenv("cherenkov_API_HOST", "127.0.0.1")
     port = int(os.getenv("cherenkov_API_PORT", "8000"))
     uvicorn.run(app, host=host, port=port, log_level="info")
-
-

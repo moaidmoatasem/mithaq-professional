@@ -1,9 +1,9 @@
-<<<<<<< HEAD
 import os
 import hashlib
 from datetime import datetime
 import sqlite3
 
+# SecurityFindingLogger (original implementation)
 class SecurityFindingLogger:
     def __init__(self, db_path):
         self.db_path = db_path
@@ -14,10 +14,22 @@ class SecurityFindingLogger:
                 trace_id TEXT PRIMARY KEY,
                 timestamp TEXT,
                 finding TEXT
-=======
-import sqlite3
-import hashlib
+            )
+        ''')
+        self.conn.commit()
 
+    def log_finding(self, finding):
+        timestamp = datetime.now().isoformat()
+        trace_id = hashlib.sha256(f"{timestamp}{finding}".encode()).hexdigest()
+        cursor = self.conn.cursor()
+        cursor.execute('INSERT INTO security_findings (trace_id, timestamp, finding) VALUES (?, ?, ?)',
+                       (trace_id, timestamp, finding))
+        self.conn.commit()
+
+    def shred_receipt(self, receipt_path):
+        os.remove(receipt_path)
+
+# SQLiteWALLogger (alternative implementation)
 class SQLiteWALLogger:
     def __init__(self, db_path):
         self.db_path = db_path
@@ -32,29 +44,11 @@ class SQLiteWALLogger:
                 id INTEGER PRIMARY KEY AUTOINCREMENT,
                 finding TEXT NOT NULL,
                 trace TEXT NOT NULL
->>>>>>> origin/main
             )
         ''')
         self.conn.commit()
 
     def log_finding(self, finding):
-<<<<<<< HEAD
-        timestamp = datetime.now().isoformat()
-        trace_id = hashlib.sha256(f"{timestamp}{finding}".encode()).hexdigest()
-        cursor = self.conn.cursor()
-        cursor.execute('INSERT INTO security_findings (trace_id, timestamp, finding) VALUES (?, ?, ?)',
-                       (trace_id, timestamp, finding))
-        self.conn.commit()
-
-    def shred_receipt(self, receipt_path):
-        os.remove(receipt_path)
-
-# Example usage:
-if __name__ == "__main__":
-    logger = SecurityFindingLogger('security_findings.db')
-    logger.log_finding("Potential security breach detected")
-    logger.shred_receipt('path_to_shred')
-=======
         trace = self.hash_finding(finding)
         self.cursor.execute('INSERT INTO security_findings (finding, trace) VALUES (?, ?)', (finding, trace))
         self.conn.commit()
@@ -64,4 +58,9 @@ if __name__ == "__main__":
 
     def close(self):
         self.conn.close()
->>>>>>> origin/main
+
+# Example usage (uses SecurityFindingLogger by default)
+if __name__ == "__main__":
+    logger = SecurityFindingLogger('security_findings.db')
+    logger.log_finding("Potential security breach detected")
+    logger.shred_receipt('path_to_shred')

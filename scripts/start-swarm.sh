@@ -11,21 +11,36 @@ cd "$SCRIPT_DIR"
 PIDFILE="$SCRIPT_DIR/logs/swarm.pid"
 LOGFILE="$SCRIPT_DIR/logs/swarm.log"
 
-mkdir -p logs candidates/generated_scanners
+mkdir -p logs candidates/generated_scanners manifests
+
+# SWARM_MODE=cwe  → legacy CWE-only SwarmOrchestrator
+# SWARM_MODE=issues (default) → AutonomousIssueSwarm (GitHub issues + roadmap)
+SWARM_MODE="${SWARM_MODE:-issues}"
+
+if [ "$SWARM_MODE" = "cwe" ]; then
+    ENTRYPOINT="packages/cherenkov/dev_crew/swarm_orchestrator.py"
+    SWARM_LABEL="CWE Swarm"
+else
+    ENTRYPOINT="packages/cherenkov/dev_crew/autonomous_issue_swarm.py"
+    SWARM_LABEL="Autonomous Issue Swarm"
+fi
 
 # Check if already running
 if [ -f "$PIDFILE" ] && kill -0 "$(cat "$PIDFILE")" 2>/dev/null; then
-    echo "Swarm already running (PID $(cat "$PIDFILE")). Log: $LOGFILE"
+    echo "$SWARM_LABEL already running (PID $(cat "$PIDFILE")). Log: $LOGFILE"
     exit 0
 fi
 
 nohup bash -c "
     export PATH=\"$HOME/.local/bin:\$PATH\"
+    export SWARM_BATCH_SIZE=\"${SWARM_BATCH_SIZE:-3}\"
+    export SWARM_POLL_INTERVAL=\"${SWARM_POLL_INTERVAL:-300}\"
+    export SWARM_REPO=\"${SWARM_REPO:-}\"
     cd \"$SCRIPT_DIR\"
-    exec PYTHONPATH=packages python3 packages/cherenkov/dev_crew/swarm_orchestrator.py
+    PYTHONPATH=packages python3 $ENTRYPOINT \${SWARM_REPO}
 " >> "$LOGFILE" 2>&1 &
 
 echo $! > "$PIDFILE"
-echo "Swarm started (PID $!). Tailing logs..."
+echo "$SWARM_LABEL started (PID $!). Tailing logs..."
 sleep 2
 tail -f "$LOGFILE"

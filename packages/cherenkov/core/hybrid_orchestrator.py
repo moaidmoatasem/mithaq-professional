@@ -12,7 +12,9 @@ from pydantic import BaseModel, Field
 
 from cherenkov.agents.cloud.strategic_planner import StrategicPlanner, ThreatAnalysisTask
 from cherenkov.core.ablation.redactor import DataRedactor, RedactionLevel
+from cherenkov.core.ai.model_router import ModelRouter
 from cherenkov.core.exceptions import CognitiveLoopError
+from cherenkov.core.reasoning_store import ReasoningStore
 
 logger = logging.getLogger(__name__)
 
@@ -51,13 +53,16 @@ class HybridOrchestrator:
     Local: Privileged operations (Ollama)
     """
 
-    def __init__(self, groq_api_key: Optional[str] = None) -> None:
+    def __init__(self, groq_api_key: Optional[str] = None, session_id: str = "default") -> None:
         self.cloud_planner = StrategicPlanner(api_key=groq_api_key)
         self.redactor = DataRedactor(level=RedactionLevel.MODERATE)
         self.execution_history: List[TaskResult] = []
         self.concurrency_limit = 4
         self.consecutive_successes = 0
         self.task_tracker = TaskExecutionTracker()
+
+        self.reasoning_store = ReasoningStore(f"data/reasoning/{session_id}.db")
+        self.model_router = ModelRouter(reasoning_store=self.reasoning_store)
 
     def execute_security_audit(
         self,

@@ -1,9 +1,15 @@
+import hashlib
+import json
 import logging
 import os
+import re
 import time
 from dataclasses import dataclass
 from pathlib import Path
-from typing import Optional
+from typing import TYPE_CHECKING, Optional
+
+from cherenkov.core.ablation.redactor import DataRedactor
+from cherenkov.core.schemas.reasoning_trace import ReasoningTrace
 
 logger = logging.getLogger(__name__)
 
@@ -64,12 +70,22 @@ def _default_backends() -> list[BackendConfig]:
     ]
 
 
+if TYPE_CHECKING:
+    from cherenkov.core.reasoning_store import ReasoningStore
+
+
 class ModelRouter:
     """Async LLM router: Ollama → Gemini → Groq, respecting local/hybrid/cloud mode."""
 
-    def __init__(self, backends: Optional[list[BackendConfig]] = None, mode: Optional[str] = None):
+    def __init__(
+        self,
+        backends: Optional[list[BackendConfig]] = None,
+        mode: Optional[str] = None,
+        reasoning_store: "ReasoningStore | None" = None,
+    ):
         self.backends: list[BackendConfig] = backends or _default_backends()
         self.mode: str = mode or _load_mode()
+        self.reasoning_store = reasoning_store
 
     # ------------------------------------------------------------------
     # Public API
@@ -85,7 +101,7 @@ class ModelRouter:
             try:
                 t0 = time.monotonic()
                 text = await self._call(backend, prompt, max_tokens)
-                elapsed = time.monotonic() - t0
+                elapsed_s = time.monotonic() - t0
                 cost = _estimate_cost(backend.name, prompt, text)
                 logger.info(
                     "model_router backend=%s model=%s tokens_est=%d cost_usd=%.6f elapsed=%.2fs",
@@ -93,8 +109,39 @@ class ModelRouter:
                     backend.model,
                     _rough_tokens(prompt + text),
                     cost,
-                    elapsed,
+                    elapsed_s,
                 )
+
+                # Reasoning Trace Logging
+                if self.reasoning_store is not None:
+                    try:
+                        redactor = DataRedactor()
+                        input_summary, _ = redactor.redact_text(prompt[:500])
+                        output_summary, _ = redactor.redact_text(text[:500])
+
+                        reasoning_match = re.search(r"<thinking>(.*?)</thinking>", text, re.DOTALL)
+                        reasoning_str = (
+                            reasoning_match.group(1).strip() if reasoning_match else "[implicit]"
+                        )
+
+                        trace_data = {
+                            "step_type": "llm_inference",
+                            "input_summary": input_summary,
+                            "output_summary": output_summary,
+                            "reasoning": reasoning_str,
+                            "model_backend": backend.name,
+                            "latency_ms": elapsed_s * 1000.0,
+                            "confidence": None,
+                        }
+                        sha256_anchor = hashlib.sha256(
+                            json.dumps(trace_data, sort_keys=True).encode()
+                        ).hexdigest()
+
+                        trace = ReasoningTrace(**trace_data, sha256_anchor=sha256_anchor)
+                        self.reasoning_store.record(trace)
+                    except Exception as store_exc:
+                        logger.warning("Failed to record reasoning trace: %s", store_exc)
+
                 return text
             except Exception as exc:  # noqa: BLE001
                 logger.warning(

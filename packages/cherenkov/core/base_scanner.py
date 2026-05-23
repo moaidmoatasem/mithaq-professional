@@ -23,6 +23,7 @@ class Finding(BaseModel):
     cwe: str
     remediation: str
     id: str = ""
+    trace_hash: str = ""
     poc_command: str = ""
     confirmed: bool = False
     proof: Optional[str] = None
@@ -34,6 +35,8 @@ class ScanResult(BaseModel):
     findings: List[Finding] = []
     duration_ms: float = 0.0
     status: str = "completed"
+    trace_hash: str = ""
+    trace_hashes: List[str] = []
 
 
 class BaseScanner(ABC):

@@ -21,8 +21,9 @@ fi
 
 nohup bash -c "
     export PATH=\"$HOME/.local/bin:\$PATH\"
+    export PYTHONPATH=\"$SCRIPT_DIR/packages\"
     cd \"$SCRIPT_DIR\"
-    exec PYTHONPATH=packages python3 packages/cherenkov/dev_crew/swarm_orchestrator.py
+    exec python3 packages/cherenkov/dev_crew/swarm_orchestrator.py
 " >> "$LOGFILE" 2>&1 &
 
 echo $! > "$PIDFILE"

@@ -14,7 +14,7 @@ logger = logging.getLogger(__name__)
 
 sys.path.insert(0, "cherenkov/scanners/refined")  # noqa: E402
 # from csrf_scanner import scan_csrf  # TODO: wire when csrf_scanner is validated  # noqa: E402
-from open_redirect_scanner import scan_open_redirect  # noqa: E402
+# from open_redirect_scanner import scan_open_redirect  # noqa: E402
 from xss_scanner import scan_xss  # noqa: E402
 
 from ..header_scanner import SimpleScanner  # noqa: E402

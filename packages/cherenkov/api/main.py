@@ -1,5 +1,4 @@
 import os
-
 """
 cherenkov REST API Server
 FastAPI-based API for security scanning, workflow orchestration, and the web dashboard.
@@ -22,7 +21,6 @@ from typing import Any, Dict, List, Literal, Optional, Set
 from urllib.parse import urlparse
 
 import httpx
-from dotenv import load_dotenv
 from fastapi import (
     BackgroundTasks,
     Depends,
@@ -37,11 +35,13 @@ from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import FileResponse
 from fastapi.routing import APIRouter
 from fastapi.staticfiles import StaticFiles
+from dotenv import load_dotenv
 from pydantic import BaseModel
 from slowapi import Limiter, _rate_limit_exceeded_handler
 from slowapi.errors import RateLimitExceeded
 from slowapi.util import get_remote_address
 
+from cherenkov.api.init_auth import verify_api_key
 from cherenkov.api.middleware.auth import (
     Role,
     RoleChecker,
@@ -52,6 +52,7 @@ from cherenkov.api.middleware.auth import (
 from cherenkov.api.middleware.auth import (
     User as AuthUser,
 )
+from cherenkov.api.routers import ai_orchestrator
 from cherenkov.core.storage.database import (
     _DB_PATH,
     erase_target_data,
@@ -67,6 +68,11 @@ from cherenkov.orchestration.workflow_parser import load_workflow
 load_dotenv(dotenv_path=".env", override=True)
 
 logger = logging.getLogger(__name__)
+
+
+class ScanRequest(BaseModel):
+    target_url: str
+    scanners: list[str] = []
 
 _STATIC_DIR = Path(__file__).parent / "static"
 
@@ -498,7 +504,7 @@ async def v1_sandbox_status() -> dict:
 @limiter.limit(_SCAN_RATE)
 async def v1_scan(
     request: Request,
-    scan_request: "ScanRequest",
+    scan_request: ScanRequest,
     background_tasks: BackgroundTasks,
     current_user: AuthUser = Depends(get_current_user),
 ) -> dict:
@@ -512,7 +518,7 @@ async def v1_scan(
     save_audit_entry(
         event_type="SCAN_INITIATED",
         user_id=current_user.username,
-        details={"target": scan_request.url, "scan_id": result["scan_id"]},
+        details={"target": scan_request.target_url, "scan_id": result["scan_id"]},
     )
 
     await _broadcast(
@@ -768,10 +774,6 @@ if _STATIC_DIR.exists():
 # ── Models ──────────────────────────────────────────────────────────────────
 
 
-class ScanRequest(BaseModel):
-    url: str
-
-
 class FindingApproval(BaseModel):
     finding_id: str
     severity: str
@@ -829,7 +831,7 @@ _active_scan_lock = asyncio.Lock()
 
 
 async def _run_scan(
-    request: "ScanRequest", background_tasks: Optional[BackgroundTasks] = None
+    request: ScanRequest, background_tasks: Optional[BackgroundTasks] = None
 ) -> dict:
     """Core scan logic shared by /api/scan and /api/v1/scan."""
     from cherenkov.core.engine import ScanEngine
@@ -837,7 +839,7 @@ async def _run_scan(
     from cherenkov.core.storage.database import init_db, save_scan
 
     try:
-        parsed = urlparse(request.url)
+        parsed = urlparse(request.target_url)
     except Exception as exc:
         raise HTTPException(status_code=400, detail=f"Invalid URL: {exc}") from exc
 
@@ -847,12 +849,12 @@ async def _run_scan(
         raise HTTPException(status_code=400, detail="Invalid URL: missing hostname")
 
     # Deduplication: reject concurrent scans of the same target
-    normalised_target = request.url.rstrip("/").lower()
+    normalised_target = request.target_url.rstrip("/").lower()
     async with _active_scan_lock:
         if normalised_target in _active_scan_targets:
             raise HTTPException(
                 status_code=409,
-                detail=f"A scan of '{request.url}' is already in progress. Wait for it to complete.",
+                detail=f"A scan of '{request.target_url}' is already in progress. Wait for it to complete.",
             )
         _active_scan_targets.add(normalised_target)
 
@@ -869,38 +871,28 @@ async def _run_scan(
             )
 
         scan_results = await engine.scan_all(
-            request.url, timeout=10.0, on_progress=on_scan_progress
+            request.target_url, scanners=request.scanners, timeout=10.0, on_progress=on_scan_progress
         )
     except Exception as exc:
-        logger.error("ScanEngine failed for %s: %s", request.url, exc)
+        logger.error("ScanEngine failed for %s: %s", request.target_url, exc)
         async with _active_scan_lock:
             _active_scan_targets.discard(normalised_target)
         raise HTTPException(status_code=500, detail=f"Scan execution failed: {exc}") from exc
 
-    from cherenkov.core.aggregator import ScanAggregator
-
-    aggregated_result = ScanAggregator.aggregate(list(scan_results.values()))
-
     vulnerabilities: list[dict] = []
-    for f in aggregated_result.findings:
-        # Find which scanner produced this finding
-        scanner_name = "unknown"
-        for s_name, res in scan_results.items():
-            if any(x.title == f.title for x in res.findings):
-                scanner_name = s_name
-                break
-
-        vulnerabilities.append(
-            {
-                "scanner": scanner_name,
-                "title": f.title,
-                "type": f.title,
-                "severity": f.severity.value,
-                "cwe": f.cwe,
-                "description": f.description,
-                "remediation": f.remediation,
-            }
-        )
+    for scanner_name, result in scan_results.items():
+        for f in result.findings:
+            vulnerabilities.append(
+                {
+                    "scanner": scanner_name,
+                    "title": f.title,
+                    "type": f.title,
+                    "severity": f.severity.value,
+                    "cwe": f.cwe,
+                    "description": f.description,
+                    "remediation": f.remediation,
+                }
+            )
 
     finished = datetime.now(timezone.utc).isoformat()
 
@@ -908,7 +900,7 @@ async def _run_scan(
         init_db()
         save_scan(
             scan_id,
-            request.url,
+            request.target_url,
             vulnerabilities,
             meta={"scanners_run": list(scan_results.keys())},
             started_at=started,
@@ -985,7 +977,7 @@ async def _run_scan(
 
     result = {
         "scan_id": scan_id,
-        "target": request.url,
+        "target": request.target_url,
         "timestamp": finished,
         "vulnerabilities": vulnerabilities,
         "count": len(vulnerabilities),
@@ -1159,3 +1151,5 @@ if __name__ == "__main__":
     host = os.getenv("cherenkov_API_HOST", "127.0.0.1")
     port = int(os.getenv("cherenkov_API_PORT", "8000"))
     uvicorn.run(app, host=host, port=port, log_level="info")
+
+

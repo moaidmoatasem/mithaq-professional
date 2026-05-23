@@ -148,7 +148,7 @@ export async function submitScan(payload: ScanRequestPayload): Promise<ScanResul
     headers: { 
       'Content-Type': 'application/json',
     },
-    body: JSON.stringify({ url: payload.url }),
+    body: JSON.stringify({ target_url: payload.url, scanners: ["header_scanner"] }),
   });
 
   if (!res.ok) {

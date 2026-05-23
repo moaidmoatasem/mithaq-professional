@@ -1,11 +1,13 @@
+from typing import Any, Dict, List
+
 from pydantic import BaseModel
-from typing import List, Dict, Any, Optional
-from cherenkov.core.base_scanner import Finding
+
 
 class EngagementPlan(BaseModel):
     target: str
     red_team_tasks: List[Dict[str, Any]]
     compliance_framework: str
+
 
 class ComplianceReport(BaseModel):
     controls_tested: int

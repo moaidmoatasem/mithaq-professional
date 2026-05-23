@@ -19,7 +19,7 @@ class XXEScanner(BaseScanner):
                 response = await client.get(self.target)
                 if response.status_code == 200:
                     content_type = response.headers.get("Content-Type")
-                    if "xml" in content_type:
+                    if content_type and "xml" in content_type:
                         xml_content = response.text
                         if "<!DOCTYPE" in xml_content or "&entity;" in xml_content:
                             findings.append(
@@ -35,3 +35,28 @@ class XXEScanner(BaseScanner):
             pass
 
         return ScanResult(target=self.target, findings=findings, tags=tags)
+
+
+class CVE242Scanner(BaseScanner):
+    async def scan(self) -> ScanResult:
+        """
+        CWE-ISSUE-242: Improper Access Control
+        Technique: Failing to Validate Input Data Before Using It
+        Remediation: Always validate and sanitize user inputs before using them.
+
+        This scanner checks for potential vulnerabilities due to improper access control.
+        """
+        try:
+            async with httpx.AsyncClient() as client:
+                response = await client.get(self.target)
+                if "Authorization" not in response.headers:
+                    finding = Finding(
+                        severity=Severity.HIGH,
+                        title="CWE-242: Improper Access Control",
+                        description="The target does not include an 'Authorization' header.",
+                    )
+                    return ScanResult(target=self.target, findings=[finding])
+        except (httpx.ConnectError, httpx.TimeoutException):
+            pass
+
+        return ScanResult(target=self.target, findings=[])

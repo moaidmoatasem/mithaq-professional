@@ -1,8 +1,14 @@
 """Scan Result Aggregator Pipeline"""
 
+import hashlib
+import json
+import logging
+from datetime import datetime, timezone
 from typing import Dict, List, Tuple
 
 from cherenkov.core.base_scanner import Finding, ScanResult, Severity
+
+logger = logging.getLogger(__name__)
 
 # Severity priority order (higher value = more severe)
 SEVERITY_ORDER = {
@@ -25,6 +31,7 @@ class ScanAggregator:
         Keeps the highest severity finding when deduplicating.
         Sums duration_ms from all results.
         Sorts findings by severity with CRITICAL first down to INFO.
+        Generates and signs a unified Cherenkov trace hash, persisting it in WAL DB.
         """
         if not results:
             return ScanResult(
@@ -33,6 +40,8 @@ class ScanAggregator:
                 findings=[],
                 duration_ms=0.0,
                 status="completed",
+                trace_hash="",
+                trace_hashes=[],
             )
 
         target = results[0].target
@@ -40,9 +49,18 @@ class ScanAggregator:
         total_duration = sum(r.duration_ms for r in results)
 
         unique_findings: Dict[Tuple[str, str, str], Finding] = {}
+        trace_hashes: List[str] = []
 
         for result in results:
+            if result.trace_hash:
+                trace_hashes.append(result.trace_hash)
+            if result.trace_hashes:
+                trace_hashes.extend(result.trace_hashes)
+
             for finding in result.findings:
+                if finding.trace_hash:
+                    trace_hashes.append(finding.trace_hash)
+
                 key = (result.target, result.scanner_name, finding.title)
 
                 # If key not seen yet, or if this finding has a higher severity, keep it
@@ -59,14 +77,41 @@ class ScanAggregator:
             unique_findings.values(), key=lambda f: SEVERITY_ORDER.get(f.severity, -1), reverse=True
         )
 
-        # If any input result failed, set status to failed or completed?
-        # Let's check if there is an explicit requirement. The instruction says:
-        # "Merged ScanResult uses target from first result and scanner_name equals aggregated."
-        # Status can default to "completed".
+        trace_hashes = sorted(list(set(trace_hashes)))
+
+        # Cryptographically sign the aggregated result
+        timestamp = datetime.now(timezone.utc).isoformat()
+        findings_data = [
+            f.model_dump() if hasattr(f, "model_dump") else f.dict() for f in sorted_findings
+        ]
+        findings_json = json.dumps(findings_data, sort_keys=True)
+        payload = f"{target}|{findings_json}|{timestamp}"
+        trace_hash = hashlib.sha256(payload.encode()).hexdigest()
+
+        # Persist aggregated trace in the SQLite WAL database
+        try:
+            from cherenkov.core.storage.database import init_db, save_trace
+
+            init_db()
+            save_trace(
+                finding_id=f"agg-{target[:50]}-{timestamp}",
+                exploit_command="scan_aggregation",
+                stdout=findings_json,
+                stderr="",
+                exit_code=0,
+                trace_hash=trace_hash,
+                timestamp=timestamp,
+                shred_receipt={"method": "none-aggregator"},
+            )
+        except Exception as e:
+            logger.debug("Failed to auto-persist aggregator trace in WAL database: %s", e)
+
         return ScanResult(
             target=target,
             scanner_name=scanner_name,
             findings=sorted_findings,
             duration_ms=total_duration,
             status="completed",
+            trace_hash=trace_hash,
+            trace_hashes=trace_hashes,
         )

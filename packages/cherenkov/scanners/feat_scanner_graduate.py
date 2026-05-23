@@ -46,20 +46,23 @@ class CVE242Scanner(BaseScanner):
 
         This scanner checks for potential vulnerabilities due to improper access control.
         """
+        url = self.target
         try:
             async with httpx.AsyncClient() as client:
-                response = await client.get(self.target)
+                response = await client.get(url)
                 if "Authorization" not in response.headers:
                     finding = Finding(
                         severity=Severity.HIGH,
                         title="CWE-242: Improper Access Control",
                         description="The target does not include an 'Authorization' header.",
+                        cwe="CWE-ISSUE-242",
+                        remediation="Always validate and sanitize user inputs before using them.",
                     )
-                    return ScanResult(target=self.target, findings=[finding])
+                    return ScanResult(target=self.target, scanner_name="CVE242Scanner", findings=[finding])
         except (httpx.ConnectError, httpx.TimeoutException):
             pass
 
-        return ScanResult(target=self.target, findings=[])
+        return ScanResult(target=self.target, scanner_name="CVE242Scanner", findings=[])
 
 
 class AttackChainDetector(BaseScanner):

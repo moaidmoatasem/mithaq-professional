@@ -3,7 +3,7 @@ import subprocess
 from unittest.mock import MagicMock, patch
 
 import pytest
-from cherenkov.core.tokamak import Command, Tokamak, TOKAMAKProfile, TokamakResult
+from cherenkov.core.tokamak import Command, Tokamak, TOKAMAKProfile, TokamakResult, ValidationRequest, ValidationResult
 
 
 def test_tokamak_execute_success():
@@ -129,3 +129,93 @@ def test_tokamak_profile_enum_values():
     assert TOKAMAKProfile.STANDARD.value == "standard"
     assert TOKAMAKProfile.MOBILE.value == "mobile"
     assert TOKAMAKProfile.KALI.value == "kali"
+
+
+@pytest.mark.asyncio
+async def test_tokamak_execute_poc_success():
+    req = ValidationRequest(
+        finding_id="test_id",
+        exploit_command="echo 'poc_verified'",
+        timeout_seconds=5
+    )
+
+    with patch("docker.from_env") as mock_from_env:
+        mock_client = MagicMock()
+        mock_container = MagicMock()
+        mock_container.wait = MagicMock(return_value={"StatusCode": 0})
+        mock_container.logs = MagicMock(return_value=b"poc_verified")
+        mock_client.containers.run = MagicMock(return_value=mock_container)
+        mock_from_env.return_value = mock_client
+
+        sandbox = Tokamak()
+        result = await sandbox.execute_poc(req)
+
+        assert isinstance(result, ValidationResult)
+        assert result.is_verified is True
+        assert result.cryptographic_proof is not None
+        assert len(result.cryptographic_proof) == 64
+
+        mock_client.containers.run.assert_called_once_with(
+            image="alpine:latest",
+            command=["sh", "-c", "echo 'poc_verified'"],
+            detach=True,
+            network_mode="none",
+            mem_limit="128m",
+            cpu_quota=50000,
+            remove=False
+        )
+        mock_container.remove.assert_called_once_with(force=True)
+
+
+@pytest.mark.asyncio
+async def test_tokamak_execute_poc_failure():
+    req = ValidationRequest(
+        finding_id="test_id",
+        exploit_command="exit 1",
+        timeout_seconds=5
+    )
+
+    with patch("docker.from_env") as mock_from_env:
+        mock_client = MagicMock()
+        mock_container = MagicMock()
+        mock_container.wait = MagicMock(return_value={"StatusCode": 1})
+        mock_client.containers.run = MagicMock(return_value=mock_container)
+        mock_from_env.return_value = mock_client
+
+        sandbox = Tokamak()
+        result = await sandbox.execute_poc(req)
+
+        assert isinstance(result, ValidationResult)
+        assert result.is_verified is False
+        assert result.cryptographic_proof is None
+        mock_container.remove.assert_called_once_with(force=True)
+
+
+@pytest.mark.asyncio
+async def test_tokamak_execute_poc_timeout():
+    req = ValidationRequest(
+        finding_id="test_id",
+        exploit_command="sleep 10",
+        timeout_seconds=1
+    )
+
+    with patch("docker.from_env") as mock_from_env:
+        mock_client = MagicMock()
+        mock_container = MagicMock()
+
+        def mock_wait(*args, **kwargs):
+            import time
+            time.sleep(2)
+            return {"StatusCode": 0}
+
+        mock_container.wait = mock_wait
+        mock_client.containers.run = MagicMock(return_value=mock_container)
+        mock_from_env.return_value = mock_client
+
+        sandbox = Tokamak()
+        result = await sandbox.execute_poc(req)
+
+        assert isinstance(result, ValidationResult)
+        assert result.is_verified is False
+        assert result.cryptographic_proof is None
+        mock_container.remove.assert_called_once_with(force=True)

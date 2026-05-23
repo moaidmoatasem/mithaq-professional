@@ -1,4 +1,5 @@
 import os
+
 """
 cherenkov REST API Server
 FastAPI-based API for security scanning, workflow orchestration, and the web dashboard.
@@ -36,13 +37,11 @@ from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import FileResponse
 from fastapi.routing import APIRouter
 from fastapi.staticfiles import StaticFiles
-from dotenv import load_dotenv
 from pydantic import BaseModel
 from slowapi import Limiter, _rate_limit_exceeded_handler
 from slowapi.errors import RateLimitExceeded
 from slowapi.util import get_remote_address
 
-from cherenkov.api.init_auth import verify_api_key
 from cherenkov.api.middleware.auth import (
     Role,
     RoleChecker,
@@ -53,7 +52,6 @@ from cherenkov.api.middleware.auth import (
 from cherenkov.api.middleware.auth import (
     User as AuthUser,
 )
-from cherenkov.api.routers import ai_orchestrator
 from cherenkov.core.storage.database import (
     _DB_PATH,
     erase_target_data,
@@ -74,6 +72,7 @@ logger = logging.getLogger(__name__)
 class ScanRequest(BaseModel):
     target_url: str
     scanners: list[str] = []
+
 
 _STATIC_DIR = Path(__file__).parent / "static"
 
@@ -872,7 +871,10 @@ async def _run_scan(
             )
 
         scan_results = await engine.scan_all(
-            request.target_url, scanners=request.scanners, timeout=10.0, on_progress=on_scan_progress
+            request.target_url,
+            scanners=request.scanners,
+            timeout=10.0,
+            on_progress=on_scan_progress,
         )
     except Exception as exc:
         logger.error("ScanEngine failed for %s: %s", request.target_url, exc)
@@ -982,7 +984,9 @@ async def _run_scan(
 
     # Trigger SIEM forwarding
     try:
-        asyncio.get_running_loop().create_task(_forward_to_siem(vulnerabilities, request.target_url))
+        asyncio.get_running_loop().create_task(
+            _forward_to_siem(vulnerabilities, request.target_url)
+        )
     except RuntimeError:
         pass  # No running loop — skip SIEM forwarding in this context
 

@@ -345,6 +345,14 @@ class Tokamak:
             result = await asyncio.to_thread(container.wait, timeout=request.timeout_seconds)
             exit_code = result.get("StatusCode", 1)
 
+        except Exception as e:
+            logger.error(f"Error: {e}")
+            exit_code = 1
+            stdout = ""
+            stderr = str(e)
+            duration_ms = 0
+            trace_hash = ""
+            shred_receipt = ""
         return TokamakResult(
             stdout=stdout,
             stderr=stderr,

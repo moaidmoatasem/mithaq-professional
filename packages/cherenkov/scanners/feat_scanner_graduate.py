@@ -36,7 +36,6 @@ class XXEScanner(BaseScanner):
 
         return ScanResult(target=self.target, findings=findings, tags=tags)
 
-
 class CVE242Scanner(BaseScanner):
     async def scan(self) -> ScanResult:
         """
@@ -54,6 +53,7 @@ class CVE242Scanner(BaseScanner):
                         severity=Severity.HIGH,
                         title="CWE-242: Improper Access Control",
                         description="The target does not include an 'Authorization' header.",
+                        cwe_id="CWE-ISSUE-242",
                     )
                     return ScanResult(target=self.target, findings=[finding])
         except (httpx.ConnectError, httpx.TimeoutException):

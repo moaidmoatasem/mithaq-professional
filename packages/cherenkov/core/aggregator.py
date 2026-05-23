@@ -1,8 +1,14 @@
 """Scan Result Aggregator Pipeline"""
 
+import hashlib
+import logging
+from datetime import datetime, timezone
 from typing import Dict, List, Tuple
 
 from cherenkov.core.base_scanner import Finding, ScanResult, Severity
+from cherenkov.core.storage.database import save_trace
+
+logger = logging.getLogger("cherenkov.aggregator")
 
 # Severity priority order (higher value = more severe)
 SEVERITY_ORDER = {
@@ -33,6 +39,8 @@ class ScanAggregator:
                 findings=[],
                 duration_ms=0.0,
                 status="completed",
+                trace_hash="",
+                trace_hashes=[],
             )
 
         target = results[0].target
@@ -59,14 +67,51 @@ class ScanAggregator:
             unique_findings.values(), key=lambda f: SEVERITY_ORDER.get(f.severity, -1), reverse=True
         )
 
-        # If any input result failed, set status to failed or completed?
-        # Let's check if there is an explicit requirement. The instruction says:
-        # "Merged ScanResult uses target from first result and scanner_name equals aggregated."
-        # Status can default to "completed".
+        # Collect and deduplicate trace hashes from results and findings
+        trace_hashes_set = set()
+        for r in results:
+            if r.trace_hash:
+                trace_hashes_set.add(r.trace_hash)
+            if r.trace_hashes:
+                for h in r.trace_hashes:
+                    if h:
+                        trace_hashes_set.add(h)
+            for f in r.findings:
+                if f.trace_hash:
+                    trace_hashes_set.add(f.trace_hash)
+
+        sorted_trace_hashes = sorted(list(trace_hashes_set))
+
+        # Generate a valid 64-char SHA-256 trace hash for the aggregated result
+        iso_timestamp = datetime.now(timezone.utc).isoformat()
+        if sorted_trace_hashes:
+            hash_input = "".join(sorted_trace_hashes)
+        else:
+            hash_input = target + iso_timestamp
+
+        trace_hash = hashlib.sha256(hash_input.encode()).hexdigest()
+
+        # Persist the aggregator trace in the WAL database
+        try:
+            save_trace(
+                finding_id=trace_hash,
+                exploit_command="scan_aggregation",
+                stdout="Scan aggregation succeeded.",
+                stderr="",
+                exit_code=0,
+                trace_hash=trace_hash,
+                timestamp=iso_timestamp,
+                shred_receipt={"files_erased": []},
+            )
+        except Exception as e:
+            logger.warning("Failed to persist aggregator trace: %s", e)
+
         return ScanResult(
             target=target,
             scanner_name=scanner_name,
             findings=sorted_findings,
             duration_ms=total_duration,
             status="completed",
+            trace_hash=trace_hash,
+            trace_hashes=sorted_trace_hashes,
         )

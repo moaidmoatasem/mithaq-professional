@@ -3,7 +3,7 @@
 from typing import Any
 
 from cherenkov.agents.base_agent import BaseAgent, BaseAgentConfig
-from cherenkov.core.config.llm_config import DEFAULT_LLM_MODEL
+from cherenkov.core.config.llm_config import DEFAULT_LLM_MODEL, ROLE_MODELS
 from cherenkov.core.schemas.cloud_instruction import CloudInstruction
 
 
@@ -24,7 +24,7 @@ class ArchitectAgentConfig(BaseAgentConfig):
                 "security architecture design, and CVE analysis. Specializes in mobile app "
                 "security, cloud infrastructure, and zero-trust architectures.",
             ),
-            llm_model=data.get("llm_model", DEFAULT_LLM_MODEL),
+            llm_model=data.get("llm_model", ROLE_MODELS.get("design", DEFAULT_LLM_MODEL)),
             verbose=data.get("verbose", True),
             allow_delegation=data.get("allow_delegation", False),
             max_iterations=data.get("max_iterations", 5),

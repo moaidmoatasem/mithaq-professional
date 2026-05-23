@@ -1,0 +1,21 @@
+issues:
+- branch: ''
+  created_at: '2026-05-23T12:36:45.957835'
+  fail_reason: 'Server error ''500 Internal Server Error'' for url ''http://localhost:11434/api/generate''
+
+    For more information check: https://developer.mozilla.org/en-US/docs/Web/HTTP/Status/500'
+  kind: ''
+  number: 246
+  pr_url: ''
+  status: in_progress
+  title: ''
+  updated_at: '2026-05-23T13:17:30.519149'
+- branch: test/239-ci-matrix
+  created_at: '2026-05-23T12:36:58.347260'
+  fail_reason: could not parse target file from task spec
+  kind: sprint
+  number: 239
+  pr_url: ''
+  status: failed
+  title: '[A10] test: Phase 2 CI test matrix — ensure 146+ tests pass on every PR'
+  updated_at: '2026-05-23T13:17:36.508443'

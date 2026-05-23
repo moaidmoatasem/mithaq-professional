@@ -413,8 +413,6 @@ def get_trace(finding_id: str, path: Path | None = None) -> dict | None:
     return d
 
 
-
-
 def _row_to_dict(row: sqlite3.Row) -> dict:
     d = dict(row)
     d["findings"] = json.loads(d["findings"])

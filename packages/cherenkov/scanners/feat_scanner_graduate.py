@@ -88,7 +88,9 @@ class CVE242Scanner(BaseScanner):
                         cwe="CWE-ISSUE-242",
                         remediation="Always validate and sanitize user inputs before using them.",
                     )
-                    return ScanResult(target=self.target, scanner_name="CVE242Scanner", findings=[finding])
+                    return ScanResult(
+                        target=self.target, scanner_name="CVE242Scanner", findings=[finding]
+                    )
         except (httpx.ConnectError, httpx.TimeoutException):
             pass
 

@@ -52,6 +52,7 @@ class ScanEngine:
             result = await asyncio.wait_for(scanner.scan(target, timeout), timeout=timeout)
             if result and result.findings:
                 from .tokamak import Tokamak, ValidationRequest
+
                 for finding in result.findings:
                     if finding.severity in ["HIGH", "CRITICAL"] and finding.poc_command:
                         try:
@@ -60,7 +61,7 @@ class ScanEngine:
                                 ValidationRequest(
                                     finding_id=finding.id,
                                     exploit_command=finding.poc_command,
-                                    timeout_seconds=30
+                                    timeout_seconds=30,
                                 )
                             )
                             finding.confirmed = tokamak_result.is_verified

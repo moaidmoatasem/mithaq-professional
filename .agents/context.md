@@ -23,11 +23,14 @@ packages/cherenkov/
   core/
     base_scanner.py    ← BaseScanner, ScanResult, Finding, Severity (START HERE)
     circuit_breaker.py ← CircuitBreaker, Meissner, meissner_hub
-    tokamak.py         ← Execution sandbox (223-line stub — Sprint 3)
-    storage/database.py← SQLite WAL helpers: init_db, save_scan
-  scanners/            ← Production scanners (registered in registry.py)
-  orchestration/       ← Workflow engine, agent factory
-  compliance/          ← (to be created — Sprint 5)
+    registry.py        ← ScannerRegistry — auto-discover BaseScanner subclasses (#236)
+    aggregator.py      ← Scan result aggregation pipeline (#237)
+    tokamak.py         ← Execution sandbox (TOKAMAK signing)
+    storage/database.py← SQLite WAL helpers: init_db, save_trace, compute_trace_hash
+  scanners/            ← Production scanners (auto-discovered by registry)
+  orchestration/       ← Workflow engine, agent factory, architect, red_team, secops
+  compliance/          ← (to be created — Phase 5)
+
   web/src/
     lib/api.ts         ← API_BASE, getWsUrl(), typed interfaces, fetch helpers
     hooks/             ← useMetrics, useLiveEvents
@@ -62,25 +65,80 @@ import { API_BASE, getWsUrl } from '@/src/lib/api';
 const url = 'http://localhost:8000/api/v1/...'
 ```
 
+---
+
 ## Active Issues → task files
+
+> Last updated: 2026-05-23. Issues #174–#224 are **closed** (see `.agents/tasks/archive/README.md`).
+
+### 🔴 v1.1.0 — Phase 2 (Sprint 2, current)
 
 **P0 — Pick these first. Phase 2 is blocked until they are done.**
 
-| Issue | File | Priority |
-|---|---|---|
-| [#222](https://github.com/moaidmoatasem/cherenkov-professional/issues/222) | `.agents/tasks/issue-222.md` | 🔴 P0 — TOKAMAK Docker sandbox |
-| [#221](https://github.com/moaidmoatasem/cherenkov-professional/issues/221) | `.agents/tasks/issue-221.md` | 🔴 P0 — Real health metrics |
-| [#224](https://github.com/moaidmoatasem/cherenkov-professional/issues/224) | `.agents/tasks/issue-224.md` | 🔴 P0 — LATTICE Qdrant wiring |
-| [#223](https://github.com/moaidmoatasem/cherenkov-professional/issues/223) | `.agents/tasks/issue-223.md` | 🔴 P0 — Root cleanup |
+| Issue | File | Priority | Type |
+|---|---|---|---|
+| [#230](https://github.com/moaidmoatasem/cherenkov-professional/issues/230) | `issue-230.md` | 🔴 critical | security — remove cloud configs (MEISSNER) |
+| [#234](https://github.com/moaidmoatasem/cherenkov-professional/issues/234) | `issue-234.md` | 🟠 high | chore — harden .gitignore |
+| [#236](https://github.com/moaidmoatasem/cherenkov-professional/issues/236) | `issue-236.md` | 🟠 high | feat — scanner registry auto-discovery |
+| [#237](https://github.com/moaidmoatasem/cherenkov-professional/issues/237) | `issue-237.md` | 🟠 high | feat — scan result aggregation pipeline |
+| [#238](https://github.com/moaidmoatasem/cherenkov-professional/issues/238) | `issue-238.md` | 🟠 high | feat — wire POST /api/v1/scan (depends #236, #237) |
+| [#239](https://github.com/moaidmoatasem/cherenkov-professional/issues/239) | `issue-239.md` | 🟠 high | test — CI matrix 146+ tests pass |
 
-**Phase 2 remaining (after P0):**
+**P1 — Phase 2 remaining (after P0):**
 
-| Issue | File | Priority |
-|---|---|---|
-| [#177](https://github.com/moaidmoatasem/cherenkov-professional/issues/177) | `.agents/tasks/issue-177.md` | P1 — SQLite persistence |
-| [#178](https://github.com/moaidmoatasem/cherenkov-professional/issues/178) | `.agents/tasks/issue-178.md` | P1 — Scanner graduation |
+| Issue | File | Priority | Type |
+|---|---|---|---|
+| [#231](https://github.com/moaidmoatasem/cherenkov-professional/issues/231) | `issue-231.md` | 🟡 medium | chore — GitHub repo metadata |
+| [#232](https://github.com/moaidmoatasem/cherenkov-professional/issues/232) | `issue-232.md` | 🟡 medium | chore — root cleanup (in-progress) |
+| [#233](https://github.com/moaidmoatasem/cherenkov-professional/issues/233) | `issue-233.md` | 🟡 medium | chore — align GEMINI.md |
+| [#235](https://github.com/moaidmoatasem/cherenkov-professional/issues/235) | `issue-235.md` | 🔵 low | chore — canonicalize CHANGELOG |
 
-**Do NOT pick up Phase 3/4 issues (#183–#190) until Phase 2 P0 items above are closed.**
+### 🟣 v1.5.0 — Phase 3 (Scanner Graduation)
+
+**Do NOT start Phase 3 until all Phase 2 P0 items above are closed.**
+
+**P0 — Critical infrastructure:**
+
+| Issue | File | Priority | Type |
+|---|---|---|---|
+| [#246](https://github.com/moaidmoatasem/cherenkov-professional/issues/246) | `issue-246.md` | 🔴 critical | feat — TOKAMAK SQLite WAL logger |
+| [#247](https://github.com/moaidmoatasem/cherenkov-professional/issues/247) | `issue-247.md` | 🔴 critical | feat — wire Cherenkov Trace signing (depends #237, #246) |
+
+**P1 — Scanner graduation (high priority):**
+
+| Issue | File | Priority | Type |
+|---|---|---|---|
+| [#240](https://github.com/moaidmoatasem/cherenkov-professional/issues/240) | `issue-240.md` | 🟠 high | feat — graduate NetworkVulnerabilityScanner |
+| [#241](https://github.com/moaidmoatasem/cherenkov-professional/issues/241) | `issue-241.md` | 🟠 high | feat — verify XXE scanner contract |
+| [#245](https://github.com/moaidmoatasem/cherenkov-professional/issues/245) | `issue-245.md` | 🟠 high | feat — verify SSRF scanner contract |
+
+**P2 — Scanner graduation (medium priority):**
+
+| Issue | File | Priority | Type |
+|---|---|---|---|
+| [#242](https://github.com/moaidmoatasem/cherenkov-professional/issues/242) | `issue-242.md` | 🟡 medium | feat — graduate CVE Database Scanner |
+| [#243](https://github.com/moaidmoatasem/cherenkov-professional/issues/243) | `issue-243.md` | 🟡 medium | feat — graduate CI/CD Integration Scanner |
+| [#244](https://github.com/moaidmoatasem/cherenkov-professional/issues/244) | `issue-244.md` | 🟡 medium | feat — graduate AttackChainDetector |
+
+---
+
+## Dependency Graph
+
+```
+Phase 2 (v1.1.0):
+  #230 (MEISSNER cleanup) ── no deps, do first
+  #234 (.gitignore) ── no deps
+  #236 (registry) ── no deps
+  #237 (aggregator) ── no deps
+  #238 (scan endpoint) ── depends on #236 + #237
+  #239 (CI tests) ── do last in Phase 2, verifies everything
+
+Phase 3 (v1.5.0):
+  #246 (SQLite WAL) ── no deps
+  #247 (trace signing) ── depends on #237 + #246
+  #240–#245 (scanner graduation) ── independent of each other
+```
+
 
 ## How to pick up a task
 

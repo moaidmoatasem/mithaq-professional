@@ -20,7 +20,7 @@ import subprocess  # nosec B404 — subprocess is required to manage ephemeral D
 from contextlib import asynccontextmanager
 from datetime import datetime, timezone
 from enum import Enum
-from typing import Any, AsyncGenerator
+from typing import Any, AsyncGenerator, Optional
 
 from pydantic import BaseModel, ConfigDict, model_validator
 
@@ -140,6 +140,17 @@ class TokamakResult(BaseModel):
     shred_receipt: dict
     exit_code: int
     duration_ms: float = 0.0
+
+
+class ValidationRequest(BaseModel):
+    finding_id: str
+    exploit_command: str
+    timeout_seconds: int
+
+
+class ValidationResult(BaseModel):
+    is_verified: bool
+    cryptographic_proof: Optional[str] = None
 
 
 # ──────────────────────────────────────────────
@@ -334,23 +345,69 @@ class Tokamak:
             result = await asyncio.to_thread(container.wait, timeout=request.timeout_seconds)
             exit_code = result.get("StatusCode", 1)
 
-            if exit_code == 0:
-                logs = await asyncio.to_thread(container.logs)
-                trace_data = logs.decode("utf-8", errors="replace") + str(datetime.now(timezone.utc).timestamp())
-                trace_hash = hashlib.sha256(trace_data.encode()).hexdigest()
-                return ValidationResult(is_verified=True, cryptographic_proof=trace_hash)
-            else:
-                return ValidationResult(is_verified=False)
+        return TokamakResult(
+            stdout=stdout,
+            stderr=stderr,
+            trace_hash=trace_hash,
+            shred_receipt=shred_receipt,
+            exit_code=exit_code,
+            duration_ms=duration_ms,
+        )
 
-        except (docker.errors.NotFound, docker.errors.APIError) as e:
-            logger.error("Docker API error during execute_poc: %s", e)
+    async def execute_poc(self, request: ValidationRequest) -> ValidationResult:
+        """
+        Asynchronously executes a PoC payload inside an air-gapped alpine container.
+        Signs logs on successful execution and forcefully cleans up resources.
+        """
+        if not DOCKER_AVAILABLE:
+            logger.error("Docker SDK not available for live PoC validation.")
             return ValidationResult(is_verified=False)
-        except Exception as e:
-            logger.error("Unexpected error during execute_poc: %s", e)
+
+        client = docker.from_env()
+        container = None
+
+        try:
+            # Spawn container using docker-py in a thread
+            container = await asyncio.to_thread(
+                client.containers.run,
+                image="alpine:latest",
+                command=["sh", "-c", request.exploit_command],
+                detach=True,
+                network_mode="none",      # MEISSNER air-gap compliance
+                mem_limit="128m",
+                cpu_quota=50000,
+                remove=False
+            )
+
+            # Wait for execution status with a circuit breaker timeout
+            exit_status = await asyncio.wait_for(
+                asyncio.to_thread(container.wait),
+                timeout=request.timeout_seconds
+            )
+            exit_code = exit_status.get("StatusCode", 1)
+
+            if exit_code == 0:
+                # Retrieve and decode stdout/stderr logs
+                logs_bytes = await asyncio.to_thread(container.logs)
+                logs_str = logs_bytes.decode("utf-8", errors="replace")
+
+                # SHA-256 sign: hash(logs + timestamp)
+                timestamp = datetime.now(timezone.utc).isoformat()
+                proof_data = f"{logs_str}\n{timestamp}"
+                proof_hash = hashlib.sha256(proof_data.encode()).hexdigest()
+
+                return ValidationResult(is_verified=True, cryptographic_proof=proof_hash)
+
             return ValidationResult(is_verified=False)
+
+        except (asyncio.TimeoutError, Exception) as e:
+            logger.warning("TOKAMAK PoC validation failed or timed out: %s", e)
+            return ValidationResult(is_verified=False)
+
         finally:
             if container:
                 try:
+                    # Forcefully remove the container on exit
                     await asyncio.to_thread(container.remove, force=True)
-                except Exception as e:
-                    logger.warning("Failed to force remove container %s: %s", container.short_id, e)
+                except Exception as ex:
+                    logger.warning("Failed to clean up TOKAMAK container: %s", ex)

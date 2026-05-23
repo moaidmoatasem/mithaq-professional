@@ -1166,3 +1166,8 @@ if __name__ == "__main__":
     host = os.getenv("cherenkov_API_HOST", "127.0.0.1")
     port = int(os.getenv("cherenkov_API_PORT", "8000"))
     uvicorn.run(app, host=host, port=port, log_level="info")
+
+@app.get("/v1/models")
+async def openai_models_compat():
+    """OpenAI compatibility endpoint — silences IDE polling."""
+    return {"object": "list", "data": []}

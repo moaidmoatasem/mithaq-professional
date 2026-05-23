@@ -67,6 +67,7 @@ from cherenkov.orchestration.workflow_parser import load_workflow
 
 load_dotenv(dotenv_path=".env", override=True)
 
+
 logger = logging.getLogger(__name__)
 
 

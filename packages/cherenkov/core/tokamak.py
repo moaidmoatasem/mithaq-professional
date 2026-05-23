@@ -304,108 +304,53 @@ class Tokamak:
     Sandbox environment for executing untrusted payloads securely via Docker.
     """
 
-    @staticmethod
-    def execute(command: Command) -> TokamakResult:
-        import os
-        import tempfile
-        import time as time_module
-
-        start = time_module.monotonic()
-        iso_timestamp = datetime.now(timezone.utc).isoformat()
-        tmpdir = None
-        payload_path = None
+    async def execute_poc(self, request: ValidationRequest) -> ValidationResult:
+        """
+        Execute a PoC payload using docker-py to verify a finding.
+        """
+        if not DOCKER_AVAILABLE:
+            logger.error("Docker SDK not available, cannot execute PoC.")
+            return ValidationResult(is_verified=False)
 
         try:
-            tmpdir = tempfile.mkdtemp(prefix="tokamak_")
-            payload_path = os.path.join(tmpdir, "payload.sh")
-            with open(payload_path, "w", newline="") as f:
-                f.write(command.payload)
-
-            host_tmpdir = tmpdir.replace("\\", "/")
-
-            # Image: use env override or fall back to the Kali base image defined
-            # in deploy/docker-compose.yml.  The image name "cherenkov-tokamak"
-            # was a placeholder — it does not exist as a built image.
-            tokamak_image = os.environ.get("TOKAMAK_IMAGE", "kalilinux/kali-rolling")
-            process = subprocess.run(  # nosec B603 B607 — fixed arg list, no shell=True; Docker sandboxes the payload
-                [
-                    "docker",
-                    "run",
-                    "--rm",
-                    "--network",
-                    "none",
-                    "--cap-drop=ALL",
-                    "--security-opt=no-new-privileges",
-                    "--read-only",
-                    "--tmpfs=/tmp:size=64m",
-                    "--label=cherenkov.role=tokamak",
-                    "-v",
-                    f"{host_tmpdir}:/workspace:ro",
-                    tokamak_image,
-                    "sh",
-                    "/workspace/payload.sh",
-                ],
-                capture_output=True,
-                text=True,
-                timeout=command.timeout,
-            )
-            stdout = process.stdout
-            stderr = process.stderr
-            exit_code = process.returncode
-        except subprocess.TimeoutExpired as e:
-            stdout = e.stdout if e.stdout else ""
-            stderr = (e.stderr if e.stderr else "") + "\nTimeoutExpired"
-            exit_code = 124
+            client = docker.from_env()
         except Exception as e:
-            stdout = ""
-            stderr = str(e)
-            exit_code = 1
+            logger.error("Failed to initialize Docker client for execute_poc: %s", e)
+            return ValidationResult(is_verified=False)
 
-        duration_ms = (time_module.monotonic() - start) * 1000
-
-        trace_data = stdout + stderr + iso_timestamp
-        trace_hash = hashlib.sha256(trace_data.encode()).hexdigest()
-
-        shredded_files = []
-        if tmpdir and os.path.isdir(tmpdir):
-            for root, dirs, files in os.walk(tmpdir, topdown=False):
-                for name in files:
-                    fpath = os.path.join(root, name)
-                    try:
-                        size = os.path.getsize(fpath)
-                        with open(fpath, "wb") as sf:
-                            sf.write(b"\x00" * size)
-                        os.truncate(fpath, 0)
-                        os.remove(fpath)
-                        shredded_files.append(fpath)
-                    except Exception:
-                        shredded_files.append(f"{fpath} (shred_failed)")
-                for name in dirs:
-                    dpath = os.path.join(root, name)
-                    try:
-                        os.rmdir(dpath)
-                    except Exception:
-                        pass
-            try:
-                os.rmdir(tmpdir)
-            except Exception:
-                pass
+        container = None
         try:
-            os.rmdir(tmpdir)
-        except Exception:
-            pass
+            container = await asyncio.to_thread(
+                client.containers.run,
+                image="alpine:latest",
+                command=request.exploit_command,
+                detach=True,
+                network_mode="none",
+                mem_limit="128m",
+                cpu_quota=50000,
+                remove=False
+            )
 
-        shred_receipt = {
-            "files_erased": shredded_files if shredded_files else ["payload.sh"],
-            "timestamp": datetime.now(timezone.utc).isoformat(),
-            "method": "overwrite+truncate",
-        }
+            result = await asyncio.to_thread(container.wait, timeout=request.timeout_seconds)
+            exit_code = result.get("StatusCode", 1)
 
-        return TokamakResult(
-            stdout=stdout,
-            stderr=stderr,
-            trace_hash=trace_hash,
-            shred_receipt=shred_receipt,
-            exit_code=exit_code,
-            duration_ms=duration_ms,
-        )
+            if exit_code == 0:
+                logs = await asyncio.to_thread(container.logs)
+                trace_data = logs.decode("utf-8", errors="replace") + str(datetime.now(timezone.utc).timestamp())
+                trace_hash = hashlib.sha256(trace_data.encode()).hexdigest()
+                return ValidationResult(is_verified=True, cryptographic_proof=trace_hash)
+            else:
+                return ValidationResult(is_verified=False)
+
+        except (docker.errors.NotFound, docker.errors.APIError) as e:
+            logger.error("Docker API error during execute_poc: %s", e)
+            return ValidationResult(is_verified=False)
+        except Exception as e:
+            logger.error("Unexpected error during execute_poc: %s", e)
+            return ValidationResult(is_verified=False)
+        finally:
+            if container:
+                try:
+                    await asyncio.to_thread(container.remove, force=True)
+                except Exception as e:
+                    logger.warning("Failed to force remove container %s: %s", container.short_id, e)

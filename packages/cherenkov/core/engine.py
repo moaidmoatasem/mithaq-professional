@@ -50,6 +50,22 @@ class ScanEngine:
         start_time = time.time()
         try:
             result = await asyncio.wait_for(scanner.scan(target, timeout), timeout=timeout)
+
+            # Wire TOKAMAK execution
+            for finding in result.findings:
+                if finding.severity in ["HIGH", "CRITICAL"] and finding.poc_command:
+                    from .tokamak import Tokamak, ValidationRequest
+                    sandbox = Tokamak()
+                    tokamak_result = await sandbox.execute_poc(
+                        ValidationRequest(
+                            finding_id=finding.id,
+                            exploit_command=finding.poc_command,
+                            timeout_seconds=30
+                        )
+                    )
+                    finding.confirmed = tokamak_result.is_verified
+                    finding.proof = tokamak_result.cryptographic_proof
+
         except asyncio.TimeoutError:
             logger.warning("Scanner %s timed out on %s", scanner_name, target)
             if raise_on_failure:

@@ -33,11 +33,12 @@ fi
 
 nohup bash -c "
     export PATH=\"$HOME/.local/bin:\$PATH\"
+    export PYTHONPATH=\"$SCRIPT_DIR/packages\"
     export SWARM_BATCH_SIZE=\"${SWARM_BATCH_SIZE:-3}\"
     export SWARM_POLL_INTERVAL=\"${SWARM_POLL_INTERVAL:-300}\"
     export SWARM_REPO=\"${SWARM_REPO:-}\"
     cd \"$SCRIPT_DIR\"
-    PYTHONPATH=packages python3 $ENTRYPOINT \${SWARM_REPO}
+    python3 $ENTRYPOINT \${SWARM_REPO}
 " >> "$LOGFILE" 2>&1 &
 
 echo $! > "$PIDFILE"

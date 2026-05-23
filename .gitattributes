@@ -17,3 +17,4 @@
 *.jpg  binary
 *.pdf  binary
 *.zip  binary
+scripts/start-swarm.sh text eol=lf

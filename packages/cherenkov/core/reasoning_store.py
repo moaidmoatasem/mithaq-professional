@@ -1,4 +1,3 @@
-import json
 import logging
 import sqlite3
 from pathlib import Path
@@ -6,6 +5,7 @@ from pathlib import Path
 from cherenkov.core.schemas.reasoning_trace import ReasoningTrace
 
 logger = logging.getLogger(__name__)
+
 
 class ReasoningStore:
     def __init__(self, db_path: str):
@@ -54,8 +54,8 @@ class ReasoningStore:
                         trace.latency_ms,
                         trace.confidence,
                         trace.sha256_anchor,
-                        trace.timestamp.isoformat()
-                    )
+                        trace.timestamp.isoformat(),
+                    ),
                 )
         except Exception as e:
             logger.error("Failed to record reasoning trace: %s", e)

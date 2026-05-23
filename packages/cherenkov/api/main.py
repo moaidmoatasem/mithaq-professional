@@ -21,6 +21,7 @@ from typing import Any, Dict, List, Literal, Optional, Set
 from urllib.parse import urlparse
 
 import httpx
+from dotenv import load_dotenv
 from fastapi import (
     BackgroundTasks,
     Depends,
@@ -40,6 +41,7 @@ from slowapi import Limiter, _rate_limit_exceeded_handler
 from slowapi.errors import RateLimitExceeded
 from slowapi.util import get_remote_address
 
+from cherenkov.api.init_auth import verify_api_key
 from cherenkov.api.middleware.auth import (
     Role,
     RoleChecker,
@@ -62,9 +64,6 @@ from cherenkov.orchestration.orchestration_api import orchestrate_workflow
 from cherenkov.orchestration.result_persistence import ResultStore
 from cherenkov.orchestration.workflow_parser import load_workflow
 
-from dotenv import load_dotenv
-from cherenkov.api.init_auth import verify_api_key
-
 load_dotenv(dotenv_path=".env", override=True)
 
 # Initialize Limiter
@@ -82,10 +81,12 @@ app.mount("/app", StaticFiles(directory="packages/cherenkov/web/dist", html=True
 api_app = FastAPI(dependencies=[Depends(verify_api_key)])
 app.mount("/api", api_app)
 
+
 @app.get("/health")
 def health_check():
     """Publicly accessible health heartbeat."""
     return {"status": "operational"}
+
 
 logger = logging.getLogger(__name__)
 

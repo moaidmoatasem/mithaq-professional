@@ -16,8 +16,6 @@ import time
 from typing import List
 from urllib.parse import parse_qs, urlencode, urlparse, urlunparse
 
-import httpx
-
 from cherenkov.core.base_scanner import BaseScanner, Finding, ScanResult, Severity
 
 logger = logging.getLogger("cherenkov.scanners.ssrf")
@@ -198,4 +196,3 @@ class SSRFScanner(BaseScanner):
             duration_ms=duration_ms,
             status="completed",
         )
-

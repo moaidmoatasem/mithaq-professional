@@ -30,7 +30,6 @@ packages/cherenkov/
   scanners/            ← Production scanners (auto-discovered by registry)
   orchestration/       ← Workflow engine, agent factory, architect, red_team, secops
   compliance/          ← (to be created — Phase 5)
-
   web/src/
     lib/api.ts         ← API_BASE, getWsUrl(), typed interfaces, fetch helpers
     hooks/             ← useMetrics, useLiveEvents
@@ -138,7 +137,6 @@ Phase 3 (v1.5.0):
   #247 (trace signing) ── depends on #237 + #246
   #240–#245 (scanner graduation) ── independent of each other
 ```
-
 
 ## How to pick up a task
 

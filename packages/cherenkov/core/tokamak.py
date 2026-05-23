@@ -335,8 +335,7 @@ class Tokamak:
             host_tmpdir = tmpdir.replace("\\", "/")
 
             # Image: use env override or fall back to the Kali base image defined
-            # in deploy/docker-compose.yml.  The image name "cherenkov-tokamak"
-            # was a placeholder — it does not exist as a built image.
+            # in deploy/docker-compose.yml.
             tokamak_image = os.environ.get("TOKAMAK_IMAGE", "kalilinux/kali-rolling")
             process = subprocess.run(  # nosec B603 B607 — fixed arg list, no shell=True; Docker sandboxes the payload
                 [
@@ -440,16 +439,15 @@ class Tokamak:
                 image="alpine:latest",
                 command=["sh", "-c", request.exploit_command],
                 detach=True,
-                network_mode="none",      # MEISSNER air-gap compliance
+                network_mode="none",  # MEISSNER air-gap compliance
                 mem_limit="128m",
                 cpu_quota=50000,
-                remove=False
+                remove=False,
             )
 
             # Wait for execution status with a circuit breaker timeout
             exit_status = await asyncio.wait_for(
-                asyncio.to_thread(container.wait),
-                timeout=request.timeout_seconds
+                asyncio.to_thread(container.wait), timeout=request.timeout_seconds
             )
             exit_code = exit_status.get("StatusCode", 1)
 

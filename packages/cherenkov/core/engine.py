@@ -50,7 +50,7 @@ class ScanEngine:
         start_time = time.time()
         try:
             result = await asyncio.wait_for(scanner.scan(target, timeout), timeout=timeout)
-            if result and result.findings:
+if result and result.findings:
                 from .tokamak import Tokamak, ValidationRequest
 
                 for finding in result.findings:

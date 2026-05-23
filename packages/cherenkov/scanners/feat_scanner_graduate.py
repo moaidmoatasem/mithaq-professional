@@ -1,4 +1,5 @@
 import httpx
+
 from cherenkov.core.base_scanner import BaseScanner, Finding, ScanResult, Severity
 
 
@@ -35,6 +36,7 @@ class XXEScanner(BaseScanner):
             pass
 
         return ScanResult(target=self.target, findings=findings, tags=tags)
+
 
 class CVE242Scanner(BaseScanner):
     async def scan(self) -> ScanResult:

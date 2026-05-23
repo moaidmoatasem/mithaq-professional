@@ -1,4 +1,5 @@
 import httpx
+
 from cherenkov.core.base_scanner import BaseScanner, Finding, ScanResult, Severity
 
 

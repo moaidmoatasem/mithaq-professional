@@ -1,5 +1,4 @@
 # CHERENKOV Funding Configuration
 # These are supported funding model platforms
-
 github: [moaidmoatasem]
 custom: ['https://cherenkov-security.com']

@@ -22,6 +22,8 @@ class Finding(BaseModel):
     description: str
     cwe: str
     remediation: str
+    trace_hash: str = ""
+    poc_command: str = ""
 
 
 class ScanResult(BaseModel):
@@ -30,6 +32,8 @@ class ScanResult(BaseModel):
     findings: List[Finding] = []
     duration_ms: float = 0.0
     status: str = "completed"
+    trace_hash: str = ""
+    trace_hashes: List[str] = []
 
 
 class BaseScanner(ABC):

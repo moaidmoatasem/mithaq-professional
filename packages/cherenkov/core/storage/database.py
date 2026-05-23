@@ -359,12 +359,13 @@ def save_trace(
     trace_hash: str,
     timestamp: str,
     shred_receipt: dict,
-    path: Path = _DB_PATH,
+    path: Path | None = None,
 ) -> None:
     """Save a forensic execution trace of a TOKAMAK PoC validation.
 
     WORM enforcement: once a trace is written, it can never be altered or deleted.
     """
+    path = path or _DB_PATH
     with closing(_connect(path)) as conn:
         with conn:
             existing = conn.execute(
@@ -398,8 +399,9 @@ def save_trace(
             )
 
 
-def get_trace(finding_id: str, path: Path = _DB_PATH) -> dict | None:
+def get_trace(finding_id: str, path: Path | None = None) -> dict | None:
     """Retrieve a persisted forensic execution trace."""
+    path = path or _DB_PATH
     with closing(_connect(path)) as conn:
         row = conn.execute(
             "SELECT * FROM cherenkov_traces WHERE finding_id = ?", (finding_id,)
@@ -409,6 +411,8 @@ def get_trace(finding_id: str, path: Path = _DB_PATH) -> dict | None:
     d = dict(row)
     d["shred_receipt"] = json.loads(d["shred_receipt"])
     return d
+
+
 
 
 def _row_to_dict(row: sqlite3.Row) -> dict:

@@ -76,7 +76,6 @@ ignore = ["E501", "S101"]
 "packages/cherenkov/core/workflow_retry.py" = ["S108", "S311", "S110"]
 "packages/cherenkov/core/agent_message_bus.py" = ["S110"]
 "packages/cherenkov/cli/main.py" = ["B008"]
-"packages/cherenkov/api/main.py" = ["B008", "E402"]
 "cherenkov_simple_scanner.py" = ["S108"]
 "system_dashboard.py" = ["S110"]
 

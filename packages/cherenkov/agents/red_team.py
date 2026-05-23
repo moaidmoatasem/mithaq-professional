@@ -1,6 +1,8 @@
-from typing import List, Any
-from cherenkov.core.base_scanner import Finding
+from typing import Any, List
+
 from cherenkov.agents.schemas import EngagementPlan
+from cherenkov.core.base_scanner import Finding
+
 
 class RedTeamAgent:
     def __init__(self, tokamak: Any = None, scanners: dict = None):

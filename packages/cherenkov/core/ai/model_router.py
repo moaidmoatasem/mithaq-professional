@@ -1,9 +1,17 @@
 import logging
 import os
+import re
 import time
+import uuid
 from dataclasses import dataclass
 from pathlib import Path
-from typing import Any, Optional
+from typing import Any, Optional, TYPE_CHECKING
+
+from cherenkov.core.ablation.redactor import DataRedactor
+from cherenkov.core.schemas.reasoning_trace import ReasoningTrace
+
+if TYPE_CHECKING:
+    from cherenkov.core.reasoning_store import ReasoningStore
 
 logger = logging.getLogger(__name__)
 
@@ -72,7 +80,7 @@ class ModelRouter:
         backends: Optional[list[BackendConfig]] = None,
         mode: Optional[str] = None,
         session_id: Optional[str] = None,
-        reasoning_store: Optional[Any] = None,
+        reasoning_store: "ReasoningStore | None" = None,
     ):
         self.backends: list[BackendConfig] = backends or _default_backends()
         self.mode: str = mode or _load_mode()
@@ -103,6 +111,40 @@ class ModelRouter:
                     cost,
                     elapsed,
                 )
+
+                if self.reasoning_store is not None:
+                    try:
+                        redactor = DataRedactor()
+                        input_summary, _ = redactor.redact_text(prompt[:500])
+                        output_summary, _ = redactor.redact_text(text[:500])
+
+                        reasoning_match = re.search(r"<thinking>(.*?)</thinking>", text, re.DOTALL)
+                        reasoning_str = (
+                            reasoning_match.group(1).strip() if reasoning_match else "[implicit]"
+                        )
+
+                        trace_fields = {
+                            "trace_id": str(uuid.uuid4()),
+                            "agent_id": "model_router",
+                            "agent_role": "llm",
+                            "session_id": self.session_id or "unknown",
+                            "step_index": 0,
+                            "step_type": "llm_inference",
+                            "input_summary": input_summary,
+                            "output_summary": output_summary,
+                            "reasoning": reasoning_str,
+                            "model_backend": backend.name,
+                            "latency_ms": int(elapsed * 1000),
+                            "confidence": None,
+                            "sha256_anchor": "placeholder",
+                        }
+                        _tmp = ReasoningTrace(**trace_fields)
+                        trace_fields["sha256_anchor"] = _tmp.compute_hash()
+                        trace = ReasoningTrace(**trace_fields)
+                        self.reasoning_store.record(trace)
+                    except Exception as store_exc:
+                        logger.warning("Failed to record reasoning trace: %s", store_exc)
+
                 return text
             except Exception as exc:  # noqa: BLE001
                 logger.warning(

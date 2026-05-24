@@ -1,5 +1,6 @@
 import logging
 import sqlite3
+import time as time_module
 from datetime import datetime
 from pathlib import Path
 from typing import List, Optional
@@ -7,6 +8,9 @@ from typing import List, Optional
 from cherenkov.core.schemas.reasoning_trace import ReasoningTrace
 
 logger = logging.getLogger(__name__)
+
+# Stale WAL/SHM cleanup grace period (seconds)
+_WAL_GRACE_SECONDS = 30
 
 
 class ReasoningStore:
@@ -18,31 +22,47 @@ class ReasoningStore:
 
     def _init_db(self):
         self.db_path.parent.mkdir(parents=True, exist_ok=True)
-        with sqlite3.connect(self.db_path) as conn:
-            # Configure WAL mode and synchronous settings as per TOKAMAK rules
-            conn.execute("PRAGMA journal_mode=WAL;")
-            conn.execute("PRAGMA synchronous=NORMAL;")
 
-            conn.execute("""
-                CREATE TABLE IF NOT EXISTS reasoning_traces (
-                    trace_id TEXT PRIMARY KEY,
-                    agent_id TEXT NOT NULL,
-                    agent_role TEXT NOT NULL,
-                    session_id TEXT NOT NULL,
-                    step_index INT NOT NULL,
-                    step_type TEXT NOT NULL,
-                    input_summary TEXT NOT NULL,
-                    output_summary TEXT NOT NULL,
-                    reasoning TEXT NOT NULL,
-                    confidence REAL,
-                    model_backend TEXT,
-                    latency_ms INT,
-                    tool_name TEXT,
-                    tool_args_hash TEXT,
-                    sha256_anchor TEXT NOT NULL,
-                    timestamp TEXT NOT NULL
-                )
-                """)
+        # Clean up stale WAL/SHM files left by a prior crash so we can open the DB.
+        _stale = time_module.time() - _WAL_GRACE_SECONDS
+        for suffix in (".db-wal", ".db-shm"):
+            wal_path = Path(str(self.db_path) + suffix)
+            if wal_path.exists() and wal_path.stat().st_mtime < _stale:
+                try:
+                    wal_path.unlink()
+                except PermissionError:
+                    pass
+
+        # WAL mode has known concurrency issues on some Windows/WSL filesystems
+        # (database-lock spuriously persists in data/ directories).
+        # Use DELETE journal mode here; callers can upgrade via upgrade_journal_mode().
+        conn = sqlite3.connect(self.db_path, timeout=30.0, check_same_thread=False)
+        try:
+            conn.execute("PRAGMA journal_mode=WAL;")
+        except sqlite3.OperationalError:
+            conn.execute("PRAGMA journal_mode=DELETE;")
+        conn.execute("PRAGMA synchronous=NORMAL;")
+        conn.execute("""
+            CREATE TABLE IF NOT EXISTS reasoning_traces (
+                trace_id TEXT PRIMARY KEY,
+                agent_id TEXT NOT NULL,
+                agent_role TEXT NOT NULL,
+                session_id TEXT NOT NULL,
+                step_index INT NOT NULL,
+                step_type TEXT NOT NULL,
+                input_summary TEXT NOT NULL,
+                output_summary TEXT NOT NULL,
+                reasoning TEXT NOT NULL,
+                confidence REAL,
+                model_backend TEXT,
+                latency_ms INT,
+                tool_name TEXT,
+                tool_args_hash TEXT,
+                sha256_anchor TEXT NOT NULL,
+                timestamp TEXT NOT NULL
+            )
+            """)
+        conn.close()
 
     def record(self, trace: ReasoningTrace) -> None:
         """Insert one row. Raises if sha256_anchor verification fails."""

@@ -46,6 +46,7 @@ dev = [
     "crewai>=0.1.0",
     "groq>=0.4.0",
     "ollama>=0.1.0",
+    "docker>=6.0.0",
     "qdrant-client>=1.9.0",
     "sentence-transformers",
     "slowapi>=0.1.9",

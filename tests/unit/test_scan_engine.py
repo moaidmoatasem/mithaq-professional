@@ -1,8 +1,6 @@
 import asyncio
-import sys
 import time
 from typing import Dict
-from unittest.mock import MagicMock
 
 import pytest
 from cherenkov.core.base_scanner import BaseScanner, ScanResult
@@ -64,7 +62,7 @@ async def test_scan_all_concurrency(engine, registry):
     duration = time.time() - start_time
 
     assert len(results) == 3
-    assert duration < 3.5
+    assert duration < 2.0
 
 
 @pytest.mark.asyncio

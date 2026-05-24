@@ -16,6 +16,8 @@ import time
 from typing import List
 from urllib.parse import parse_qs, urlencode, urlparse, urlunparse
 
+import httpx
+
 from cherenkov.core.base_scanner import BaseScanner, Finding, ScanResult, Severity
 
 logger = logging.getLogger("cherenkov.scanners.ssrf")
@@ -121,68 +123,69 @@ class SSRFScanner(BaseScanner):
         findings: List[Finding] = []
 
         try:
-            url_params = _find_url_params(target)
+            async with httpx.AsyncClient(timeout=timeout, verify=True) as client:
+                url_params = _find_url_params(target)
 
-            # If the URL has no interesting parameters, probe a synthetic one.
-            if not url_params:
-                parsed = urlparse(target)
-                synthetic_url = urlunparse(
-                    parsed._replace(query=urlencode({"url": "http://127.0.0.1/"}))
-                )
-                probe_list = [(synthetic_url, "url")]
-            else:
-                probe_list = [
-                    (_inject_canary(target, param, canary), param)
-                    for param in url_params
-                    for canary in _SSRF_CANARIES[:2]  # Limit probes per param
-                ]
-
-            # Get a baseline response to avoid false positives on static pages.
-            try:
-                baseline = await self._http_request(target, timeout)
-                baseline_lower = baseline.text.lower()
-            except Exception:
-                baseline_lower = ""
-
-            for probe_url, param in probe_list:
-                try:
-                    response = await self._http_request(probe_url, timeout)
-                except Exception:
-                    continue
-
-                body_lower = response.text.lower()
-
-                # Indicator must appear in probe response but NOT in baseline.
-                new_indicators = [
-                    ind
-                    for ind in _SSRF_INDICATORS
-                    if ind in body_lower and ind not in baseline_lower
-                ]
-
-                if response.status_code == 200 and new_indicators:
-                    canary_used = probe_url.split(f"{param}=")[-1].split("&")[0]
-                    findings.append(
-                        Finding(
-                            title="Server-Side Request Forgery (SSRF)",
-                            severity=Severity.HIGH,
-                            description=(
-                                f'Parameter "{param}" appears to trigger a server-side '
-                                f"request when set to {canary_used!r}. "
-                                f"Response contained: {new_indicators[0]!r}. "
-                                f"An attacker may use this to reach internal services, "
-                                f"cloud metadata endpoints, or the host filesystem."
-                            ),
-                            cwe="CWE-918",
-                            remediation=(
-                                "Validate and allowlist any URLs the server fetches on behalf "
-                                "of users. Block requests to RFC-1918, loopback, and cloud "
-                                "metadata address ranges at the network layer. "
-                                "Use an egress proxy that enforces this allowlist. "
-                                "Never forward raw user-supplied URLs to internal HTTP clients."
-                            ),
-                        )
+                # If the URL has no interesting parameters, probe a synthetic one.
+                if not url_params:
+                    parsed = urlparse(target)
+                    synthetic_url = urlunparse(
+                        parsed._replace(query=urlencode({"url": "http://127.0.0.1/"}))
                     )
-                    break  # One confirmed SSRF finding per target is sufficient
+                    probe_list = [(synthetic_url, "url")]
+                else:
+                    probe_list = [
+                        (_inject_canary(target, param, canary), param)
+                        for param in url_params
+                        for canary in _SSRF_CANARIES[:2]  # Limit probes per param
+                    ]
+
+                # Get a baseline response to avoid false positives on static pages.
+                try:
+                    baseline = await client.get(target, follow_redirects=True)
+                    baseline_lower = baseline.text.lower()
+                except (httpx.RequestError, httpx.TimeoutException):
+                    baseline_lower = ""
+
+                for probe_url, param in probe_list:
+                    try:
+                        response = await client.get(probe_url, follow_redirects=True)
+                    except (httpx.RequestError, httpx.TimeoutException):
+                        continue
+
+                    body_lower = response.text.lower()
+
+                    # Indicator must appear in probe response but NOT in baseline.
+                    new_indicators = [
+                        ind
+                        for ind in _SSRF_INDICATORS
+                        if ind in body_lower and ind not in baseline_lower
+                    ]
+
+                    if response.status_code == 200 and new_indicators:
+                        canary_used = probe_url.split(f"{param}=")[-1].split("&")[0]
+                        findings.append(
+                            Finding(
+                                title="Server-Side Request Forgery (SSRF)",
+                                severity=Severity.HIGH,
+                                description=(
+                                    f'Parameter "{param}" appears to trigger a server-side '
+                                    f"request when set to {canary_used!r}. "
+                                    f"Response contained: {new_indicators[0]!r}. "
+                                    f"An attacker may use this to reach internal services, "
+                                    f"cloud metadata endpoints, or the host filesystem."
+                                ),
+                                cwe="CWE-918",
+                                remediation=(
+                                    "Validate and allowlist any URLs the server fetches on behalf "
+                                    "of users. Block requests to RFC-1918, loopback, and cloud "
+                                    "metadata address ranges at the network layer. "
+                                    "Use an egress proxy that enforces this allowlist. "
+                                    "Never forward raw user-supplied URLs to internal HTTP clients."
+                                ),
+                            )
+                        )
+                        break  # One confirmed SSRF finding per target is sufficient
 
         except Exception as exc:
             logger.debug("SSRF scan network/parse error for %s: %s", target, exc)

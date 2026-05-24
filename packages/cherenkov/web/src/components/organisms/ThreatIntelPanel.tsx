@@ -296,7 +296,7 @@ export function ThreatIntelPanel() {
             .filter(t => filter === 'ALL' || t.severity.toUpperCase() === filter)
             .map((threat, idx) => (
               <VulnCard 
-                key={`${threat.title}-${threat.severity}-${idx}`}
+                key={idx}
                 {...threat}
                 onViewProof={() => setSelectedThreat(threat)}
               />

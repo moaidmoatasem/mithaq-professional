@@ -49,9 +49,9 @@ export function PendingApprovalsPanel() {
         <span className="text-[10px] font-mono text-hud-amber uppercase tracking-[0.2em]">Pending_HITL_Approvals</span>
       </div>
       <AnimatePresence>
-        {pendingFindings.map((finding: FindingApproval, index: number) => (
+        {pendingFindings.map((finding: FindingApproval) => (
           <motion.div
-            key={finding.id ? `pending-${finding.id}` : finding.finding_id || `pending-${index}`}
+            key={finding.id}
             initial={{ opacity: 0, height: 0 }}
             animate={{ opacity: 1, height: 'auto' }}
             exit={{ opacity: 0, height: 0 }}

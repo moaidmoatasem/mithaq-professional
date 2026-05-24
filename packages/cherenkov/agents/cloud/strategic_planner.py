@@ -5,7 +5,7 @@ Never receives raw sensitive data - only abstract breadcrumbs.
 """
 
 import os
-from typing import Any, Dict, List, Optional
+from typing import Dict, List, Optional
 
 from groq import Groq
 from pydantic import BaseModel, Field
@@ -25,38 +25,13 @@ class StrategicPlanner:
     Handles high-level reasoning without accessing sensitive data.
     """
 
-    def __init__(
-        self,
-        api_key: Optional[str] = None,
-        session_id: Optional[str] = None,
-        reasoning_store: Optional[Any] = None,
-    ):
+    def __init__(self, api_key: Optional[str] = None):
         self.api_key = api_key or os.getenv("GROQ_API_KEY")
-        self.session_id = session_id
-        self.reasoning_store = reasoning_store
-        self.use_local = False
-
-        # Fallback for testing environments to allow offline tests to pass without GROQ_API_KEY
-        if not self.api_key and "PYTEST_CURRENT_TEST" in os.environ:
-            self.api_key = "mock_key"
-
         if not self.api_key:
-            # Transition to offline/local-first mode using Ollama
-            self.use_local = True
-            from cherenkov.agents.local.ollama_client import OllamaClient, OllamaConfig
-            from cherenkov.core.config.llm_config import DEFAULT_LLM_MODEL, OLLAMA_BASE_URL
+            raise ValueError("GROQ_API_KEY not found in environment")
 
-            # Extract model name (e.g. "ollama/qwen2.5:3b" -> "qwen2.5:3b")
-            model_name = (
-                DEFAULT_LLM_MODEL.split("/")[-1] if "/" in DEFAULT_LLM_MODEL else DEFAULT_LLM_MODEL
-            )
-            config = OllamaConfig(base_url=OLLAMA_BASE_URL, model=model_name)
-            self.local_client = OllamaClient(config=config)
-            self.model = DEFAULT_LLM_MODEL
-            self.client = None
-        else:
-            self.client = Groq(api_key=self.api_key)
-            self.model = "llama-3.3-70b-versatile"
+        self.client = Groq(api_key=self.api_key)
+        self.model = "llama-3.3-70b-versatile"
 
     def plan_security_audit(self, task: ThreatAnalysisTask) -> Dict:
         """
@@ -87,18 +62,6 @@ Create a strategic security audit plan with:
 
 Do NOT request raw data. Work with abstract patterns only.
 """
-
-        if self.use_local:
-            response = self.local_client.generate(
-                prompt=user_prompt,
-                system_prompt=system_prompt,
-                temperature=0.3,
-            )
-            return {
-                "plan": response.response,
-                "model": self.model,
-                "tokens_used": response.eval_count or 0,
-            }
 
         response = self.client.chat.completions.create(
             model=self.model,
@@ -140,13 +103,6 @@ Each subtask should be:
 
 Provide actionable steps without requiring sensitive data.
 """
-
-        if self.use_local:
-            response = self.local_client.generate(
-                prompt=prompt,
-                temperature=0.2,
-            )
-            return {"subtasks": response.response, "model": self.model}
 
         response = self.client.chat.completions.create(
             model=self.model,

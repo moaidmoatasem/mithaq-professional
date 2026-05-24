@@ -22,7 +22,7 @@ class AutonomousSprint:
 
     async def execute_sprint(self):
         print(f"🚀 INITIATING SPRINT: {self.focus_area}")
-
+        
         # Step 1: Architect generates the spec
         print("🧠 Architect is analyzing SSOT and drafting specification...")
         spec = await self.architect.get_next_directive(self.focus_area)
@@ -35,7 +35,7 @@ class AutonomousSprint:
         while iteration < MAX_ITERATIONS:
             iteration += 1
             print(f"\n💻 Developer Iteration {iteration}/{MAX_ITERATIONS}...")
-
+            
             # Inject feedback if this is a retry
             task_prompt = spec
             if current_feedback:

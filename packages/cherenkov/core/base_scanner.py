@@ -2,7 +2,7 @@
 
 from abc import ABC, abstractmethod
 from enum import Enum
-from typing import List
+from typing import List, Optional
 
 import httpx
 from pydantic import BaseModel
@@ -17,11 +17,16 @@ class Severity(str, Enum):
 
 
 class Finding(BaseModel):
+    id: str = ""
     title: str
     severity: Severity
     description: str
     cwe: str
     remediation: str
+    trace_hash: str = ""
+    poc_command: str = ""
+    confirmed: bool = False
+    proof: Optional[str] = None
 
 
 class ScanResult(BaseModel):
@@ -30,6 +35,8 @@ class ScanResult(BaseModel):
     findings: List[Finding] = []
     duration_ms: float = 0.0
     status: str = "completed"
+    trace_hash: str = ""
+    trace_hashes: List[str] = []
 
 
 class BaseScanner(ABC):

@@ -1,3 +1,5 @@
+import os
+
 """
 cherenkov REST API Server
 FastAPI-based API for security scanning, workflow orchestration, and the web dashboard.
@@ -9,7 +11,6 @@ packages/cherenkov/api/static/index.html via FastAPI StaticFiles.
 import asyncio
 import json
 import logging
-import os
 import re
 import sqlite3
 import time
@@ -41,7 +42,6 @@ from slowapi import Limiter, _rate_limit_exceeded_handler
 from slowapi.errors import RateLimitExceeded
 from slowapi.util import get_remote_address
 
-from cherenkov.api.init_auth import verify_api_key
 from cherenkov.api.middleware.auth import (
     Role,
     RoleChecker,
@@ -66,29 +66,14 @@ from cherenkov.orchestration.workflow_parser import load_workflow
 
 load_dotenv(dotenv_path=".env", override=True)
 
-# Initialize Limiter
-limiter = Limiter(key_func=get_remote_address)
-app = FastAPI(title="CHERENKOV C2 Hub")
-app.state.limiter = limiter
-app.add_exception_handler(RateLimitExceeded, _rate_limit_exceeded_handler)
-
-# 1. Public Frontend - NO AUTH
-# Vite dist files served as static content
-app.mount("/app", StaticFiles(directory="packages/cherenkov/web/dist", html=True), name="app")
-
-# 2. Protected API - AUTH REQUIRED
-# All routes mounted under /api require valid X-Cherenkov-Token
-api_app = FastAPI(dependencies=[Depends(verify_api_key)])
-app.mount("/api", api_app)
-
-
-@app.get("/health")
-def health_check():
-    """Publicly accessible health heartbeat."""
-    return {"status": "operational"}
-
 
 logger = logging.getLogger(__name__)
+
+
+class ScanRequest(BaseModel):
+    target_url: str
+    scanners: list[str] = []
+
 
 _STATIC_DIR = Path(__file__).parent / "static"
 
@@ -97,9 +82,9 @@ _STATIC_DIR = Path(__file__).parent / "static"
 _SCAN_RATE = os.getenv("CHERENKOV_SCAN_RATE_LIMIT", "30/minute")
 _WORKFLOW_RATE = os.getenv("CHERENKOV_WORKFLOW_RATE_LIMIT", "10/minute")
 
+# Single limiter instance (duplicate removed — previously defined twice).
 limiter = Limiter(key_func=get_remote_address)
-# Keep _limiter as alias so decorator references below stay consistent
-_limiter = limiter
+_limiter = limiter  # alias kept for decorator consistency
 
 _START_TIME = time.time()
 
@@ -299,14 +284,21 @@ async def v1_assistant_advice(
 
 @app.post("/api/v1/auth/token")
 async def login(credentials: dict):
-    if credentials.get("username") == "admin" and credentials.get("password") == "admin":
-        from cherenkov.api.middleware.auth import Role, create_access_token
+    """Authenticate a user and return a JWT token.
+    
+    This endpoint validates credentials using bcrypt against the database.
+    Legacy endpoint - new code should use /api/v1/auth/token via the v1 router.
+    """
+    user_data = get_user(credentials.get("username", ""))
+    if not user_data or not verify_password(credentials.get("password", ""), user_data.get("password", "")):
+        raise HTTPException(status_code=401, detail="Invalid credentials")
+    
+    from cherenkov.api.middleware.auth import Role, create_access_token
 
-        token = create_access_token(
-            {"sub": credentials.get("username", "admin"), "role": int(Role.ADMIN)}
-        )
-        return {"access_token": token, "token_type": "bearer"}
-    raise HTTPException(status_code=401, detail="Invalid credentials")
+    token = create_access_token(
+        {"sub": credentials.get("username", "admin"), "role": int(Role.ADMIN)}
+    )
+    return {"access_token": token, "token_type": "bearer"}
 
 
 @v1.post("/auth/token")
@@ -381,7 +373,7 @@ async def _check_ollama() -> str:
 async def _check_qdrant() -> str:
     try:
         async with httpx.AsyncClient(timeout=2.0) as c:
-            r = await c.get("http://localhost:6333/health")
+            r = await c.get("http://localhost:6333/healthz")
             return "ready" if r.status_code == 200 else "offline"
     except Exception:
         return "offline"
@@ -520,7 +512,7 @@ async def v1_sandbox_status() -> dict:
 @limiter.limit(_SCAN_RATE)
 async def v1_scan(
     request: Request,
-    scan_request: "ScanRequest",
+    scan_request: ScanRequest,
     background_tasks: BackgroundTasks,
     current_user: AuthUser = Depends(get_current_user),
 ) -> dict:
@@ -534,7 +526,7 @@ async def v1_scan(
     save_audit_entry(
         event_type="SCAN_INITIATED",
         user_id=current_user.username,
-        details={"target": scan_request.url, "scan_id": result["scan_id"]},
+        details={"target": scan_request.target_url, "scan_id": result["scan_id"]},
     )
 
     await _broadcast(
@@ -790,10 +782,6 @@ if _STATIC_DIR.exists():
 # ── Models ──────────────────────────────────────────────────────────────────
 
 
-class ScanRequest(BaseModel):
-    url: str
-
-
 class FindingApproval(BaseModel):
     finding_id: str
     severity: str
@@ -802,368 +790,3 @@ class FindingApproval(BaseModel):
     status: Literal["pending", "approved", "rejected"]
     operator_id: Optional[str] = None
     approved_at: Optional[str] = None
-
-
-class WorkflowExecuteRequest(BaseModel):
-    workflow_name: str
-    config: Optional[Dict[str, Any]] = None
-
-
-class WorkflowResponse(BaseModel):
-    success: bool
-    workflow: str
-    outputs: Dict[str, Any]
-    duration: float
-
-
-# ── Dashboard ────────────────────────────────────────────────────────────────
-
-
-@app.get("/", include_in_schema=False)
-async def dashboard() -> FileResponse:
-    """Serve the CHERENKOV web dashboard (replaces retired Flask app)."""
-    index = _STATIC_DIR / "index.html"
-    if not index.exists():
-        raise HTTPException(status_code=404, detail="Dashboard not found")
-    return FileResponse(str(index), media_type="text/html")
-
-
-# ── Shared scan implementation ────────────────────────────────────────────────
-
-
-async def _forward_to_siem(vulnerabilities: list[dict], target: str):
-    """Background task to forward findings to local SIEM."""
-    from cherenkov.core.siem import SIEMForwarder
-
-    for v in vulnerabilities:
-        finding = {**v, "target": target}
-        # Default local syslog forward (UDP 514)
-        SIEMForwarder.send_syslog(finding)
-        logger.debug("Forwarded finding to local SIEM: %s", v["title"])
-
-
-_active_scan_targets: set[str] = set()
-_active_scan_lock = asyncio.Lock()
-
-
-async def _run_scan(
-    request: "ScanRequest", background_tasks: Optional[BackgroundTasks] = None
-) -> dict:
-    """Core scan logic shared by /api/scan and /api/v1/scan."""
-    from cherenkov.core.engine import ScanEngine
-    from cherenkov.core.registry import ScannerRegistry
-    from cherenkov.core.storage.database import init_db, save_scan
-
-    try:
-        parsed = urlparse(request.url)
-    except Exception as exc:
-        raise HTTPException(status_code=400, detail=f"Invalid URL: {exc}") from exc
-
-    if parsed.scheme not in ("http", "https"):
-        raise HTTPException(status_code=400, detail="Only http/https URLs are supported")
-    if not parsed.netloc:
-        raise HTTPException(status_code=400, detail="Invalid URL: missing hostname")
-
-    # Deduplication: reject concurrent scans of the same target
-    normalised_target = request.url.rstrip("/").lower()
-    async with _active_scan_lock:
-        if normalised_target in _active_scan_targets:
-            raise HTTPException(
-                status_code=409,
-                detail=f"A scan of '{request.url}' is already in progress. Wait for it to complete.",
-            )
-        _active_scan_targets.add(normalised_target)
-
-    scan_id = str(uuid.uuid4())
-    started = datetime.now(timezone.utc).isoformat()
-
-    try:
-        registry = ScannerRegistry()
-        engine = ScanEngine(registry)
-
-        async def on_scan_progress(scanner_name: str, result: Any):
-            asyncio.get_running_loop().create_task(
-                _broadcast({"type": "scan_progress", "scanner": scanner_name})
-            )
-
-        scan_results = await engine.scan_all(
-            request.url, timeout=10.0, on_progress=on_scan_progress
-        )
-    except Exception as exc:
-        logger.error("ScanEngine failed for %s: %s", request.url, exc)
-        async with _active_scan_lock:
-            _active_scan_targets.discard(normalised_target)
-        raise HTTPException(status_code=500, detail=f"Scan execution failed: {exc}") from exc
-
-    vulnerabilities: list[dict] = []
-    for scanner_name, result in scan_results.items():
-        for f in result.findings:
-            vulnerabilities.append(
-                {
-                    "scanner": scanner_name,
-                    "title": f.title,
-                    "type": f.title,
-                    "severity": f.severity.value,
-                    "cwe": f.cwe,
-                    "description": f.description,
-                    "remediation": f.remediation,
-                }
-            )
-
-    finished = datetime.now(timezone.utc).isoformat()
-
-    try:
-        init_db()
-        save_scan(
-            scan_id,
-            request.url,
-            vulnerabilities,
-            meta={"scanners_run": list(scan_results.keys())},
-            started_at=started,
-            finished_at=finished,
-        )
-
-        from cherenkov.core.lattice_bridge import embed_and_store
-        from cherenkov.core.storage.database import save_pending_finding
-
-        for v in vulnerabilities:
-            finding_id = str(uuid.uuid4())
-
-            # Index every finding in LATTICE for similarity recall and FP learning.
-            # Use BackgroundTasks so the work runs after response delivery and
-            # doesn't leak asyncio tasks into subsequent test event loops.
-            if background_tasks is not None:
-                background_tasks.add_task(
-                    embed_and_store,
-                    finding_id,
-                    v["title"],
-                    v.get("description", ""),
-                    request.url,
-                    v["scanner"],
-                    v["severity"],
-                    v.get("cwe", ""),
-                )
-            else:
-                # Fallback for callers that don't supply background_tasks
-                try:
-                    asyncio.get_running_loop().create_task(
-                        asyncio.to_thread(
-                            embed_and_store,
-                            finding_id,
-                            v["title"],
-                            v.get("description", ""),
-                            request.url,
-                            v["scanner"],
-                            v["severity"],
-                            v.get("cwe", ""),
-                        )
-                    )
-                except RuntimeError:
-                    pass  # No running loop — skip indexing in this context
-
-            if v["severity"] in ("CRITICAL", "HIGH"):
-                save_pending_finding(
-                    finding_id=finding_id,
-                    severity=v["severity"],
-                    scanner=v["scanner"],
-                    title=v["title"],
-                    scan_id=scan_id,
-                )
-                try:
-                    asyncio.get_running_loop().create_task(
-                        _broadcast(
-                            {
-                                "type": "finding_discovered",
-                                "finding_id": finding_id,
-                                "severity": v["severity"],
-                            }
-                        )
-                    )
-                except RuntimeError:
-                    pass  # No running loop — skip WebSocket broadcast in this context
-
-    except Exception as exc:
-        logger.error("Failed to persist scan %s: %s", scan_id, exc)
-
-    # Trigger SIEM forwarding
-    try:
-        asyncio.get_running_loop().create_task(_forward_to_siem(vulnerabilities, request.url))
-    except RuntimeError:
-        pass  # No running loop — skip SIEM forwarding in this context
-
-    result = {
-        "scan_id": scan_id,
-        "target": request.url,
-        "timestamp": finished,
-        "vulnerabilities": vulnerabilities,
-        "count": len(vulnerabilities),
-    }
-
-    # Release dedup lock
-    async with _active_scan_lock:
-        _active_scan_targets.discard(normalised_target)
-
-    return result
-
-
-# ── Legacy scan + health endpoints (keep for backwards compat) ───────────────
-
-
-@app.post("/api/scan")
-@limiter.limit(_SCAN_RATE)
-async def scan_target(request: Request, scan_request: ScanRequest) -> dict:
-    """Run all registered scanners against a target URL."""
-    return await _run_scan(scan_request)
-
-
-# ── Health ───────────────────────────────────────────────────────────────────
-
-
-@app.get("/health")
-async def health() -> dict:
-    """Legacy health endpoint — delegates to /api/v1/health for live data."""
-    return await v1_health()
-
-
-@app.post("/workflows/execute", response_model=WorkflowResponse)
-@limiter.limit(_WORKFLOW_RATE)
-async def execute_workflow(
-    http_request: Request, request: WorkflowExecuteRequest
-) -> WorkflowResponse:
-    """Execute a workflow by name or config"""
-    try:
-        # Load workflow config
-        if request.config:
-            config = request.config
-        else:
-            # Sanitize workflow_name before path construction (prevent path traversal)
-            safe_name = Path(request.workflow_name).name
-            if not re.fullmatch(r"[a-zA-Z0-9_-]+", safe_name):
-                raise HTTPException(
-                    status_code=400,
-                    detail="workflow_name must contain only letters, digits, hyphens, or underscores",
-                )
-            workflow_path = str(Path("examples/workflows") / f"{safe_name}.yaml")
-            config = load_workflow(workflow_path)
-
-        # Execute
-        result = orchestrate_workflow(config)
-
-        # Save result
-        store = ResultStore()
-        store.save_result(request.workflow_name, result.outputs)
-
-        return WorkflowResponse(
-            success=result.success,
-            workflow=request.workflow_name,
-            outputs=result.outputs,
-            duration=result.duration,
-        )
-    except Exception as e:
-        raise HTTPException(status_code=500, detail=str(e)) from e
-
-
-@app.get("/workflows")
-async def list_workflows() -> dict:
-    """List available workflows"""
-    from pathlib import Path
-
-    workflows_dir = Path("examples/workflows")
-    if workflows_dir.exists():
-        workflows = [f.stem for f in workflows_dir.glob("*.yaml")]
-        return {"workflows": workflows, "count": len(workflows)}
-    return {"workflows": [], "count": 0}
-
-
-@app.get("/results/{workflow_name}")
-async def get_results(workflow_name: str) -> dict:
-    """Get latest results for a workflow"""
-    store = ResultStore()
-    result = store.get_latest(workflow_name)
-    if result:
-        return result
-    raise HTTPException(status_code=404, detail="No results found")
-
-
-class LatticeQueryRequest(BaseModel):
-    title: str
-    description: str = ""
-    top_k: int = 5
-    exclude_false_positives: bool = True
-
-
-@v1.post("/lattice/similar")
-async def v1_lattice_similar(
-    request: LatticeQueryRequest,
-    current_user: AuthUser = Depends(get_current_user),
-) -> dict:
-    """
-    Query LATTICE for past findings similar to the supplied title + description.
-
-    Used by the dashboard and autonomous agents to surface precedent before
-    escalating a new finding.  Excludes false-positives by default.
-    """
-    from cherenkov.core.lattice_bridge import query_similar_targets
-
-    results = await asyncio.to_thread(
-        query_similar_targets,
-        request.title,
-        request.description,
-        request.top_k,
-        request.exclude_false_positives,
-    )
-
-    return {
-        "results": [
-            {
-                "id": r.id,
-                "score": round(r.score, 4),
-                "title": r.title,
-                "target": r.target,
-                "scanner": r.scanner,
-                "is_false_positive": r.is_false_positive,
-            }
-            for r in results
-        ],
-        "count": len(results),
-    }
-
-
-@v1.get("/lattice/stats")
-async def v1_lattice_stats(current_user: AuthUser = Depends(get_current_user)) -> dict:
-    """Return LATTICE vector store statistics."""
-    from cherenkov.core.lattice_bridge import vector_count
-
-    count = await asyncio.to_thread(vector_count)
-    return {
-        "vector_count": count,
-        "collection": "cherenkov_findings",
-        "status": "ready" if count >= 0 else "offline",
-    }
-
-
-@v1.get("/mesh/nodes")
-async def v1_mesh_nodes(current_user: AuthUser = Depends(get_current_user)) -> dict:
-    """List discovered mesh nodes."""
-    import socket
-
-    from cherenkov.core.mesh import MeshManager
-
-    # Note: In production, this would be a persistent singleton
-    manager = MeshManager(node_name=f"node-{socket.gethostname()}")
-    nodes = manager.discover_nodes(timeout=1.0)
-    manager.shutdown()
-
-    return {"nodes": nodes, "count": len(nodes)}
-
-
-# Register /api/v1 router
-app.include_router(v1)
-
-
-if __name__ == "__main__":
-    import uvicorn
-
-    host = os.getenv("cherenkov_API_HOST", "127.0.0.1")
-    port = int(os.getenv("cherenkov_API_PORT", "8000"))
-    uvicorn.run(app, host=host, port=port, log_level="info")

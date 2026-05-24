@@ -18,3 +18,11 @@ async def verify_api_key(api_key: str = Security(api_key_header)) -> str:
     if not secrets.compare_digest(api_key, expected_key):
         raise HTTPException(status_code=403, detail="MEISSNER protocol: Access denied.")
     return api_key
+
+
+def get_jwt_secret():
+    # Lazy load the secret only when requested
+    secret = os.getenv("CHERENKOV_JWT_SECRET")
+    if not secret:
+        raise RuntimeError("CHERENKOV_JWT_SECRET env var not set")
+    return secret

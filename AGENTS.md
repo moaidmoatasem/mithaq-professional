@@ -12,6 +12,9 @@ This file is read by every AI agent working on this repo. Follow it precisely.
 | **Claude (GitHub Actions)** | `@claude` in issues/PRs | Code review, targeted fixes, issue work | `claude/*` |
 | **Claude Code (local)** | Terminal sessions | Architecture, agentic coordination, multi-file refactors | `claude/*` |
 | **Autonomous Pipeline** | Daily cron 2AM UTC | Scanner generation (`autonomous_roadmap_executor.py`) | `auto-dev/<run>` |
+| **Security Architect** | Scan initiation | Threat modeling, EngagementPlan, LATTICE queries | `feat/arch-*` |
+| **Red Team Agent** | EngagementPlan start | Active exploitation, CVE mapping, TOKAMAK validation | `feat/red-*` |
+| **SecOps Agent** | Scan completion | Compliance mapping, EGY-FIN CSF reports | `feat/secops-*` |
 
 ---
 
@@ -92,10 +95,10 @@ Every issue and PR MUST have at least one of each:
 | **AI** | `ai:generated`, `ai:autonomous` (if AI-authored) |
 
 ### Milestones
-- `v1.1.0` — Swarm Concurrency (current — Phase 2)
+- `v1.1.0` — Swarm Concurrency (Phase 2)
 - `v1.5.0` — Enterprise Validation & HITL (Phase 3)
-- `v2.0.0` — Mobile Triage (Phase 4)
-- `v2.5.0` — Ecosystem Integration (Phase 5)
+- `v2.0.0` — Mobile Triage & Architect Layer (Phase 4)
+- `v2.5.0` — Ecosystem Integration & Compliance (Phase 5)
 
 ### Issue Commands (in comments)
 ```
@@ -144,3 +147,12 @@ npx vite build      # production build must pass
 | `AGENT_MEMORY.md` | Claude Code (coordinating) | After architectural decisions |
 | `AGENTS.md` | Claude Code (coordinating) | When agent roster changes |
 | `CHANGELOG.md` | Automated (release-drafter) | On release |
+
+---
+
+## 9. Proactive Rate-Limit Management & Handover SOP
+
+All agents must proactively monitor their token usage and context capacity to prevent hard-limit terminations:
+- **Rule**: If context usage or rate-limiting approaches 75% (Yellow Alert) or 90% (Red Alert), the agent **must** immediately save its current state.
+- **Protocol**: Adhere strictly to the [Agentic Handover Protocol](file:///\\wsl.localhost\Ubuntu-24.04\home\moaid\cherenkov-professional\docs\development\agentic-handover-protocol.md) to generate a Handover Packet and serialize live state using the `AgentStateStore` (`packages/cherenkov/core/agent_state_store.py`).
+- **Smooth Handover**: Never leave a session without recording your progress, modified files list, next recommended steps, and verification commands in the conversation log or project workspace.

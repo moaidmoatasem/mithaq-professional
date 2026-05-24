@@ -1,3 +1,6 @@
+import sys
+from unittest.mock import MagicMock
+
 import pytest
 from cherenkov.core.base_scanner import BaseScanner, Finding, ScanResult, Severity
 
@@ -44,7 +47,7 @@ async def test_scan_result():
     assert result.status == "completed"
 
 
-from unittest.mock import MagicMock, patch
+from unittest.mock import patch
 
 
 @pytest.mark.asyncio

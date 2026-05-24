@@ -27,6 +27,8 @@ from enum import Enum
 from pathlib import Path
 from typing import TYPE_CHECKING, Any
 
+from cherenkov.core.reasoning_store import ReasoningStore
+
 if TYPE_CHECKING:
     from ..core.base_scanner import Finding
 
@@ -151,9 +153,11 @@ class TokamakAgent:
         self,
         tokamak_executor=None,  # injected in production
         timeout: int = POC_TIMEOUT_SECONDS,
+        reasoning_store: ReasoningStore | None = None,
     ) -> None:
         self.tokamak = tokamak_executor
         self.timeout = timeout
+        self.reasoning_store = reasoning_store
 
     async def validate(self, finding: "Finding", target: str) -> TokamakResult:
         """
@@ -164,6 +168,16 @@ class TokamakAgent:
         """
         t0 = time.monotonic()
         technique = finding.scanner
+
+        # Optionally record reasoning trace for validation start
+        if getattr(self, "reasoning_store", None) and hasattr(self, "_trace_step"):
+            self._trace_step(  # type: ignore
+                step_type="verdict",
+                input_summary=f"Validating finding: {finding.title} via {technique}",
+                output_summary="Started validation sequence",
+                reasoning=f"Executing Tokamak validation for {finding.title}",
+                confidence=None,
+            )
 
         # Try fast probe first (XSS, SQLi, CSRF only — no Docker needed)
         fast_result = await self._try_fast_probe(target, technique, finding.title)
@@ -208,6 +222,14 @@ class TokamakAgent:
                     logger.info(
                         "CHERENKOV Trace generated and signed for finding: %s", finding.title
                     )
+                    if getattr(self, "reasoning_store", None) and hasattr(self, "_trace_step"):
+                        self._trace_step(  # type: ignore
+                            step_type="verdict",
+                            input_summary=f"Validation result for {finding.title}",
+                            output_summary="Confirmed exploitable",
+                            reasoning="PoC executed successfully in Tokamak sandbox",
+                            confidence=1.0,
+                        )
                     return TokamakResult(
                         finding_title=finding.title,
                         verdict=TokamakVerdict.CONFIRMED,
@@ -395,7 +417,7 @@ class TokamakAgent:
     ) -> TokamakTrace:
         raw_evidence = f"{finding.title}|{technique}|{evidence}"
         sha256 = hashlib.sha256(raw_evidence.encode()).hexdigest()
-        return TokamakTrace(
+        trace = TokamakTrace(
             finding_title=finding.title,
             verdict=verdict,
             poc_technique=technique,
@@ -405,3 +427,27 @@ class TokamakAgent:
             human_review_required=(verdict == TokamakVerdict.PROBABLE),
             confidence_notes=confidence_notes,
         )
+
+        if hasattr(self, "reasoning_store") and self.reasoning_store is not None:
+            # Map TokamakVerdict to score
+            score_map = {
+                TokamakVerdict.CONFIRMED: 1.0,
+                TokamakVerdict.PROBABLE: 0.7,
+                TokamakVerdict.UNVERIFIED: 0.3,
+                TokamakVerdict.DISCARDED: 0.0,
+            }
+            score = score_map.get(verdict, 0.0)
+
+            from cherenkov.core.schemas.reasoning_trace import ReasoningTrace
+
+            self.reasoning_store.add_trace(
+                ReasoningTrace(
+                    step_type="verdict",
+                    input_summary=f"Validate finding: {finding.title} using {technique}",
+                    output_summary=f"Verdict: {verdict.value}",
+                    reasoning=confidence_notes,
+                    confidence=score,
+                )
+            )
+
+        return trace

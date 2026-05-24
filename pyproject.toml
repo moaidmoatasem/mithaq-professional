@@ -23,6 +23,8 @@ dependencies = [
     "sentence-transformers",
     "slowapi>=0.1.9",
     "ollama>=0.1.0",
+    "requests>=2.31.0",
+    "websockets>=12.0",
 ]
 
 [tool.setuptools.packages.find]
@@ -44,6 +46,7 @@ dev = [
     "crewai>=0.1.0",
     "groq>=0.4.0",
     "ollama>=0.1.0",
+    "docker>=6.0.0",
     "qdrant-client>=1.9.0",
     "sentence-transformers",
     "slowapi>=0.1.9",
@@ -74,6 +77,7 @@ ignore = ["E501", "S101"]
 "packages/cherenkov/core/workflow_retry.py" = ["S108", "S311", "S110"]
 "packages/cherenkov/core/agent_message_bus.py" = ["S110"]
 "packages/cherenkov/cli/main.py" = ["B008"]
+"packages/cherenkov/api/main.py" = ["B008", "E402"]
 "cherenkov_simple_scanner.py" = ["S108"]
 "system_dashboard.py" = ["S110"]
 

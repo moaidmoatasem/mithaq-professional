@@ -1,9 +1,12 @@
+import sys
+from unittest.mock import MagicMock
+
 """Unit tests for the three graduated scanners: CSRF, XSS, OpenRedirect.
 
 All HTTP calls are mocked — no network required.
 """
 
-from unittest.mock import AsyncMock, MagicMock, patch
+from unittest.mock import AsyncMock, patch
 
 import httpx
 import pytest

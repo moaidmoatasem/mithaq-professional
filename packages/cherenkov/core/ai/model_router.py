@@ -6,7 +6,7 @@ import re
 import time
 from dataclasses import dataclass
 from pathlib import Path
-from typing import TYPE_CHECKING, Optional
+from typing import TYPE_CHECKING, Any, Optional
 
 from cherenkov.core.ablation.redactor import DataRedactor
 from cherenkov.core.schemas.reasoning_trace import ReasoningTrace
@@ -81,10 +81,12 @@ class ModelRouter:
         self,
         backends: Optional[list[BackendConfig]] = None,
         mode: Optional[str] = None,
+        session_id: Optional[str] = None,
         reasoning_store: "ReasoningStore | None" = None,
     ):
         self.backends: list[BackendConfig] = backends or _default_backends()
         self.mode: str = mode or _load_mode()
+        self.session_id = session_id
         self.reasoning_store = reasoning_store
 
     # ------------------------------------------------------------------
@@ -145,7 +147,9 @@ class ModelRouter:
                 return text
             except Exception as exc:  # noqa: BLE001
                 logger.warning(
-                    "model_router backend=%s failed: %s — trying next", backend.name, exc
+                    "model_router backend=%s failed: %s — trying next",
+                    backend.name,
+                    exc,
                 )
 
         logger.error("model_router all backends exhausted, returning empty string")
@@ -206,7 +210,10 @@ class ModelRouter:
 
         if not cfg.api_key:
             raise ValueError("GROQ_API_KEY not set")
-        headers = {"Authorization": f"Bearer {cfg.api_key}", "Content-Type": "application/json"}
+        headers = {
+            "Authorization": f"Bearer {cfg.api_key}",
+            "Content-Type": "application/json",
+        }
         payload = {
             "model": cfg.model,
             "messages": [{"role": "user", "content": prompt}],

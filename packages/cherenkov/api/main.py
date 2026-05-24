@@ -76,9 +76,10 @@ app.add_exception_handler(RateLimitExceeded, _rate_limit_exceeded_handler)
 
 # 1. Public Frontend - NO AUTH
 # Vite dist files served as static content
-app.mount(
-    "/app", StaticFiles(directory="packages/cherenkov/web/dist", html=True), name="app"
-)
+if os.path.exists("packages/cherenkov/web/dist"):
+    app.mount(
+        "/app", StaticFiles(directory="packages/cherenkov/web/dist", html=True), name="app"
+    )
 
 # 2. Protected API - AUTH REQUIRED
 # All routes mounted under /api require valid X-Cherenkov-Token

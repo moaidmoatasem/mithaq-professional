@@ -71,3 +71,11 @@ validation_results.json
 # coordination artifacts, not throwaway session scratchpads.
 build/
 .aider*
+
+# Runtime data and local model downloads
+data/
+models/
+
+# Docs site build output (source is tracked)
+cherno-docs/dist/
+cherno-docs/.astro/

@@ -573,7 +573,7 @@ class Meissner(CircuitBreaker):
                 # the API, dashboard, Ollama, and Qdrant continue to function.
                 # Rules are inserted at the top of the OUTPUT chain and removed
                 # on recovery (fail_open) by matching the comment string.
-                _meissner_rule = "cherenkov-meissner-egress-block"
+                _MEISSNER_RULE = "cherenkov-meissner-egress-block"
                 # Allow loopback and Docker internal bridge
                 subprocess.run(
                     ["iptables", "-A", "OUTPUT", "-o", "lo", "-j", "ACCEPT"], check=True
@@ -582,11 +582,11 @@ class Meissner(CircuitBreaker):
                     ["iptables", "-A", "OUTPUT", "-o", "docker0", "-j", "ACCEPT"], check=True
                 )
                 # Block all remaining outbound traffic with a comment marker
-                subprocess.run(  # noqa: S603
+                subprocess.run(
                     [
                         "iptables",
                         "-A", "OUTPUT",
-                        "-m", "comment", "--comment", _meissner_rule,
+                        "-m", "comment", "--comment", _MEISSNER_RULE,
                         "-j", "DROP",
                     ],
                     check=True,
@@ -634,12 +634,12 @@ class Meissner(CircuitBreaker):
         try:
             if system == "linux":
                 # Remove rules matching the comment marker
-                _meissner_rule = "cherenkov-meissner-egress-block"
-                subprocess.run(  # noqa: S603
+                _MEISSNER_RULE = "cherenkov-meissner-egress-block"
+                subprocess.run(
                     [
                         "iptables",
                         "-D", "OUTPUT",
-                        "-m", "comment", "--comment", _meissner_rule,
+                        "-m", "comment", "--comment", _MEISSNER_RULE,
                         "-j", "DROP",
                     ],
                     check=True,

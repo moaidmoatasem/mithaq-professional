@@ -70,7 +70,6 @@ load_dotenv(dotenv_path=".env", override=True)
 # Initialize Limiter
 limiter = Limiter(key_func=get_remote_address)
 app = FastAPI(title="CHERENKOV C2 Hub")
-app.state.limiter = limiter
 app.add_exception_handler(RateLimitExceeded, _rate_limit_exceeded_handler)
 
 # 1. Public Frontend - NO AUTH

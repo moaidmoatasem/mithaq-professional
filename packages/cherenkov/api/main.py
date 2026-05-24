@@ -284,14 +284,17 @@ async def v1_assistant_advice(
 
 @app.post("/api/v1/auth/token")
 async def login(credentials: dict):
-    if credentials.get("username") == "admin" and credentials.get("password") == "admin":
-        from cherenkov.api.middleware.auth import Role, create_access_token
+    """Authenticate using bcrypt database credentials (no hardcoded fallback)."""
+    from cherenkov.api.middleware.auth import create_access_token
 
-        token = create_access_token(
-            {"sub": credentials.get("username", "admin"), "role": int(Role.ADMIN)}
-        )
-        return {"access_token": token, "token_type": "bearer"}
-    raise HTTPException(status_code=401, detail="Invalid credentials")
+    user_data = get_user(credentials.get("username", ""))
+    if not user_data or not verify_password(credentials.get("password", ""), user_data["password"]):
+        raise HTTPException(status_code=401, detail="Invalid credentials")
+
+    access_token = create_access_token(
+        data={"sub": credentials.get("username", ""), "role": user_data["role"]}
+    )
+    return {"access_token": access_token, "token_type": "bearer"}
 
 
 @v1.post("/auth/token")

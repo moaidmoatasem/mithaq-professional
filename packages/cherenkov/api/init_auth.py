@@ -20,9 +20,6 @@ async def verify_api_key(api_key: str = Security(api_key_header)) -> str:
     return api_key
 
 
-# packages/cherenkov/api/middleware/auth.py
-
-
 def get_jwt_secret():
     # Lazy load the secret only when requested
     secret = os.getenv("CHERENKOV_JWT_SECRET")

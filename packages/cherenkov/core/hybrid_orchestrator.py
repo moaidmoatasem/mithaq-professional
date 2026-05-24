@@ -17,6 +17,7 @@ from cherenkov.agents.cloud.strategic_planner import (
     ThreatAnalysisTask,
 )
 from cherenkov.core.ablation.redactor import DataRedactor, RedactionLevel
+from cherenkov.core.ai.model_router import ModelRouter
 from cherenkov.core.exceptions import CognitiveLoopError
 from cherenkov.core.reasoning_store import ReasoningStore
 
@@ -72,6 +73,9 @@ class HybridOrchestrator:
         self.concurrency_limit = 4
         self.consecutive_successes = 0
         self.task_tracker = TaskExecutionTracker()
+        self.model_router = ModelRouter(
+            session_id=self.session_id, reasoning_store=self.reasoning_store
+        )
 
     def execute_security_audit(
         self,

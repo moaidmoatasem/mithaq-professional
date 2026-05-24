@@ -1,6 +1,4 @@
 import asyncio
-import sys
-from unittest.mock import MagicMock
 
 from cherenkov.core.base_scanner import BaseScanner, ScanResult
 from cherenkov.core.engine import ScanEngine

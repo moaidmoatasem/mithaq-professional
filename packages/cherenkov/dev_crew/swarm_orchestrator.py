@@ -38,7 +38,7 @@ logging.basicConfig(level=logging.INFO, format="%(asctime)s [%(levelname)s] %(me
 logger = logging.getLogger("cherenkov.swarm")
 
 OLLAMA_URL = "http://localhost:11434"
-OLLAMA_MODEL = os.getenv("cherenkov_OLLAMA_MODEL", "qwen2.5-coder:7b")
+OLLAMA_MODEL = os.getenv("cherenkov_OLLAMA_MODEL", "qwen2.5-coder:3b")
 MAX_RETRIES = 3
 CANDIDATES = Path("candidates/generated_scanners")
 MANIFESTS = Path("manifests/cwe_queue.yaml")
@@ -432,60 +432,6 @@ queue:
     tier: 2
     status: pending
 """
-
-
-# ── Focused single-file sprint (used by dev_crew CLI) ───────────────────────
-
-
-class AutonomousSprint:
-    """
-    Single-task sprint: Architect drafts spec → Developer writes code →
-    ValidationGate runs ruff+pytest and feeds errors back (up to MAX_RETRIES).
-    Use this when you have a specific file target, not a CWE queue.
-    """
-
-    def __init__(self, focus_area: str, target_filepath: str) -> None:
-        from cherenkov.dev_crew.architect_agent import LocalArchitect
-        from cherenkov.dev_crew.developer_agent import LocalDeveloper
-        from cherenkov.dev_crew.validation_gate import ValidationGate
-
-        self.focus_area = focus_area
-        self.target_file = Path(target_filepath)
-        self.architect = LocalArchitect()
-        self.developer = LocalDeveloper()
-        self.gate = ValidationGate(self.target_file)
-
-def _extract_code(self, raw: str) -> str:
-        import re
-
-        m = re.search(r"```python\n(.*?)\n```", raw, re.DOTALL)
-        return m.group(1) if m else raw
-
-    async def execute_sprint(self) -> bool:
-        logger.info("SPRINT START: %s", self.focus_area)
-        spec = await self.architect.get_next_directive(self.focus_area)
-        logger.info("Spec: %s", spec.get("task_name", "unnamed"))
-
-        feedback = ""
-        for i in range(1, MAX_RETRIES + 1):
-            logger.info("Developer iteration %d/%d", i, MAX_RETRIES)
-            task = dict(spec)
-            if feedback:
-                task["previous_failure_feedback"] = feedback
-
-            raw = await self.developer.write_code(task)
-            self.target_file.parent.mkdir(parents=True, exist_ok=True)
-            self.target_file.write_text(self._extract_code(raw), encoding="utf-8")
-
-            result = self.gate.run_checks()
-            if result.passed:
-                logger.info("SPRINT SUCCESS")
-                return True
-            logger.warning("Validation failed, retrying: %s", result.feedback[:120])
-            feedback = result.feedback
-
-        logger.error("CIRCUIT BREAKER: max iterations reached")
-        return False
 
 
 # ── CLI entry point ─────────────────────────────────────────────────────────

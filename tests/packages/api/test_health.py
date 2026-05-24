@@ -25,7 +25,7 @@ class MockAsyncClient:
             raise RequestError("Connection error")
         if "11434/api/tags" in url:
             return Response(self.ollama_status)
-        if "6333/health" in url or "6333/healthz" in url or url.endswith("/healthz"):
+        if "6333/health" in url:
             return Response(self.qdrant_status)
         if "6333/collections/cherenkov_findings" in url:
             return Response(200, json={"result": {"vectors_count": self.qdrant_vector_count}})

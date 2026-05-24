@@ -13,8 +13,8 @@ class MockScanner(BaseScanner):
 
 class TestScannerRegistry(unittest.TestCase):
     def setUp(self):
-        # We patch discover_scanners to avoid actual file system scanning during most tests
-        with patch.object(ScannerRegistry, "discover_scanners"):
+        # We patch load_scanners to avoid actual file system scanning during most tests
+        with patch.object(ScannerRegistry, "_load_scanners"):
             self.registry = ScannerRegistry()
             self.registry._registry = {"mock": MockScanner}
 

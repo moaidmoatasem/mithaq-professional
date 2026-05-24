@@ -11,14 +11,5 @@ ALTERNATIVE_MODELS = {
     "balanced": "ollama/qwen3.5:latest",  # Requires 6+ GB RAM
 }
 
-# Role-specific local LLM models for sovereign execution
-ROLE_MODELS = {
-    "coding": "ollama/qwen2.5-coder:7b",
-    "c2_board": "ollama/qwen2.5:3b",
-    "design": "ollama/llama3.1:8b",
-    "review": "ollama/qwen2.5-coder:7b",
-    "testing": "ollama/qwen2.5-coder:7b",
-}
-
 # Ollama configuration
 OLLAMA_BASE_URL = "http://localhost:11434"

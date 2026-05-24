@@ -3,7 +3,7 @@
 from typing import Any
 
 from cherenkov.agents.base_agent import BaseAgent, BaseAgentConfig
-from cherenkov.core.config.llm_config import DEFAULT_LLM_MODEL, ROLE_MODELS
+from cherenkov.core.config.llm_config import DEFAULT_LLM_MODEL
 from cherenkov.core.schemas.cloud_instruction import CloudInstruction
 
 
@@ -16,15 +16,16 @@ class TesterAgentConfig(BaseAgentConfig):
             role=data.get("role", "Security Tester"),
             goal=data.get(
                 "goal",
-                "Perform penetration testing, validate security vulnerabilities, and design high-coverage automated E2E browser tests using Playwright.",
+                "Perform penetration testing and validate security vulnerabilities",
             ),
             backstory=data.get(
                 "backstory",
-                "Expert penetration tester and QA automation engineer with 10+ years in offensive security, "
-                "vulnerability assessment, and Playwright E2E browser testing. Certified OSCP, CEH with "
-                "extensive experience in building robust, flawless, mock-driven Playwright test suites for modern React/TS applications.",
+                "Expert penetration tester with 10+ years in offensive security, "
+                "vulnerability assessment, and security QA. Certified OSCP, CEH with "
+                "extensive experience in mobile app pentesting, web app security, and "
+                "automated security testing frameworks.",
             ),
-            llm_model=data.get("llm_model", ROLE_MODELS.get("testing", DEFAULT_LLM_MODEL)),
+            llm_model=data.get("llm_model", DEFAULT_LLM_MODEL),
             verbose=data.get("verbose", True),
             allow_delegation=data.get("allow_delegation", False),
             max_iterations=data.get("max_iterations", 8),
@@ -162,30 +163,5 @@ class TesterAgent(BaseAgent):
             action="complete_audit",
             target=compliance_standard,
             confidence=0.93,
-            reasoning=reasoning,
-        )
-
-    def generate_playwright_test(
-        self, component_name: str, test_scenarios: list[str]
-    ) -> CloudInstruction:
-        """Generate automated E2E browser testing steps using Playwright framework.
-
-        Args:
-            component_name: Target frontend component or page route
-            test_scenarios: Scenarios to cover in the E2E suite
-
-        Returns:
-            CloudInstruction for Playwright test generation
-        """
-        reasoning = (
-            f"Designing secure high-coverage Playwright E2E browser testing flow for {component_name}. "
-            f"Scenarios covered: {', '.join(test_scenarios)}"
-        )
-
-        return self.create_instruction(
-            task_id=f"playwright-{hash(component_name) % 10000}",
-            action="generate_playwright",
-            target=component_name,
-            confidence=0.95,
             reasoning=reasoning,
         )

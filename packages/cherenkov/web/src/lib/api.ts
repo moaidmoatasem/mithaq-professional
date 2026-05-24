@@ -35,53 +35,6 @@ export function logout(): void {
   window.location.reload();
 }
 
-/**
- * Custom fetch wrapper that automatically attaches authorization headers,
- * and handles 401 Unauthorized status by clearing session storage and redirecting.
- */
-export async function fetchWithAuth(url: string, init?: RequestInit): Promise<Response> {
-  const headers = {
-    ...getAuthHeader(),
-    ...(init?.headers || {}),
-  };
-
-  const res = await fetch(url, {
-    ...init,
-    headers,
-  });
-
-  if (res.status === 401) {
-    sessionStorage.removeItem('cherenkov_token');
-    window.location.reload();
-  }
-
-  return res;
-}
-
-/**
- * Validate current session by calling `/auth/me`.
- * Returns true if the session is valid.
- */
-export async function validateSession(): Promise<boolean> {
-  const token = sessionStorage.getItem('cherenkov_token');
-  if (!token) return false;
-
-  try {
-    const res = await fetch(`${API_BASE}/auth/me`, {
-      headers: {
-        'Authorization': `Bearer ${token}`
-      }
-    });
-    if (res.status === 401) {
-      sessionStorage.removeItem('cherenkov_token');
-      return false;
-    }
-    return res.ok;
-  } catch (err) {
-    return false;
-  }
-}
-
 export interface ScanRequestPayload {
   url: string;
   profile?: string;
@@ -143,12 +96,13 @@ export interface NodeInfo {
  * POST a new scan request to the backend.
  */
 export async function submitScan(payload: ScanRequestPayload): Promise<ScanResult> {
-  const res = await fetchWithAuth(`${API_BASE}/scan`, {
+  const res = await fetch(`${API_BASE}/scan`, {
     method: 'POST',
     headers: { 
       'Content-Type': 'application/json',
+      ...getAuthHeader()
     },
-    body: JSON.stringify({ target_url: payload.url, scanners: ["header_scanner"] }),
+    body: JSON.stringify({ url: payload.url }),
   });
 
   if (!res.ok) {
@@ -163,7 +117,9 @@ export async function submitScan(payload: ScanRequestPayload): Promise<ScanResul
  * Fetch scan history from the backend.
  */
 export async function fetchScanHistory(): Promise<ScanResult[]> {
-  const res = await fetchWithAuth(`${API_BASE}/scans/history`);
+  const res = await fetch(`${API_BASE}/scans/history`, {
+    headers: getAuthHeader()
+  });
   if (!res.ok) return [];
   return res.json();
 }
@@ -172,7 +128,9 @@ export async function fetchScanHistory(): Promise<ScanResult[]> {
  * Fetch pending approvals (HITL gate)
  */
 export async function fetchPendingApprovals(): Promise<FindingApproval[]> {
-  const res = await fetchWithAuth(`${API_BASE}/findings/pending`);
+  const res = await fetch(`${API_BASE}/findings/pending`, {
+    headers: getAuthHeader()
+  });
   if (!res.ok) return [];
   return res.json();
 }
@@ -181,8 +139,9 @@ export async function fetchPendingApprovals(): Promise<FindingApproval[]> {
  * Approve a finding
  */
 export async function approveFinding(id: string): Promise<void> {
-  const res = await fetchWithAuth(`${API_BASE}/findings/${id}/approve`, {
+  const res = await fetch(`${API_BASE}/findings/${id}/approve`, {
     method: 'POST',
+    headers: getAuthHeader()
   });
   if (!res.ok) {
     throw new Error(`Failed to approve finding ${id}`);
@@ -193,8 +152,9 @@ export async function approveFinding(id: string): Promise<void> {
  * Reject a finding
  */
 export async function rejectFinding(id: string): Promise<void> {
-  const res = await fetchWithAuth(`${API_BASE}/findings/${id}/reject`, {
+  const res = await fetch(`${API_BASE}/findings/${id}/reject`, {
     method: 'POST',
+    headers: getAuthHeader()
   });
   if (!res.ok) {
     throw new Error(`Failed to reject finding ${id}`);
@@ -205,7 +165,9 @@ export async function rejectFinding(id: string): Promise<void> {
  * Fetch the CHERENKOV audit log (Admin only)
  */
 export async function fetchAuditLog(): Promise<any[]> {
-  const res = await fetchWithAuth(`${API_BASE}/audit`);
+  const res = await fetch(`${API_BASE}/audit`, {
+    headers: getAuthHeader()
+  });
   if (!res.ok) return [];
   return res.json();
 }

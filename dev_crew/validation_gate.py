@@ -15,7 +15,7 @@ class ValidationGate:
 
     def run_checks(self) -> ValidationResult:
         """Runs strict deterministic checks on the generated code."""
-
+        
         # 1. Syntax and Linting Check (Ruff)
         lint_result = subprocess.run(
             ["ruff", "check", str(self.target_file)],
@@ -23,7 +23,7 @@ class ValidationGate:
         )
         if lint_result.returncode != 0:
             return ValidationResult(
-                passed=False,
+                passed=False, 
                 feedback=f"LINTING FAILED. Fix these errors:\n{lint_result.stdout}"
             )
 

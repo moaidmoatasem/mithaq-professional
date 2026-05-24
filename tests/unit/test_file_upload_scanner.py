@@ -1,6 +1,8 @@
-import pytest
+import sys
+from unittest.mock import AsyncMock, MagicMock, patch
+
 import httpx
-from unittest.mock import AsyncMock, patch
+import pytest
 from cherenkov.core.base_scanner import Severity
 
 FileUploadScanner = pytest.importorskip(
@@ -26,7 +28,6 @@ async def test_file_upload_positive():
     assert len(result.findings) == 1
     assert result.findings[0].severity == Severity.HIGH
     assert "Unrestricted File Upload" in result.findings[0].title
-
 
 
 @pytest.mark.asyncio

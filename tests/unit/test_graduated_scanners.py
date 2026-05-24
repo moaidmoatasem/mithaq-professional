@@ -1,21 +1,24 @@
+import sys
+from unittest.mock import MagicMock
+
 """Unit tests for the three graduated scanners: CSRF, XSS, OpenRedirect.
 
 All HTTP calls are mocked — no network required.
 """
 
+from unittest.mock import AsyncMock, patch
+
 import httpx
 import pytest
-from unittest.mock import AsyncMock, MagicMock, patch
-
 from cherenkov.core.base_scanner import Severity
 from cherenkov.scanners.refined.csrf_scanner import CSRFScanner
 from cherenkov.scanners.refined.open_redirect_scanner import OpenRedirectScanner
 from cherenkov.scanners.refined.xss_scanner import XSSScanner
 
-
 # ---------------------------------------------------------------------------
 # Helpers
 # ---------------------------------------------------------------------------
+
 
 def _mock_http_response(
     status_code: int = 200,
@@ -42,6 +45,7 @@ def _make_async_client_mock(get_response: AsyncMock) -> MagicMock:
 # ---------------------------------------------------------------------------
 # CSRFScanner
 # ---------------------------------------------------------------------------
+
 
 class TestCSRFScanner:
     def setup_method(self):
@@ -135,6 +139,7 @@ class TestCSRFScanner:
 # XSSScanner
 # ---------------------------------------------------------------------------
 
+
 class TestXSSScanner:
     def setup_method(self):
         self.scanner = XSSScanner()
@@ -207,9 +212,7 @@ class TestXSSScanner:
     @pytest.mark.asyncio
     async def test_handles_request_error_gracefully(self):
         mock_client = AsyncMock()
-        mock_client.__aenter__ = AsyncMock(
-            side_effect=httpx.RequestError("connection refused")
-        )
+        mock_client.__aenter__ = AsyncMock(side_effect=httpx.RequestError("connection refused"))
         mock_client.__aexit__ = AsyncMock(return_value=False)
 
         with patch(
@@ -227,6 +230,7 @@ class TestXSSScanner:
 # ---------------------------------------------------------------------------
 # OpenRedirectScanner
 # ---------------------------------------------------------------------------
+
 
 class TestOpenRedirectScanner:
     def setup_method(self):

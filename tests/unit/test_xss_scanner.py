@@ -1,8 +1,10 @@
-import pytest
+import sys
+from unittest.mock import AsyncMock, MagicMock, patch
+
 import httpx
-from unittest.mock import AsyncMock, patch
-from cherenkov.scanners.xss_scanner import XSSScanner
+import pytest
 from cherenkov.core.base_scanner import Severity
+from cherenkov.scanners.xss_scanner import XSSScanner
 
 
 @pytest.mark.asyncio

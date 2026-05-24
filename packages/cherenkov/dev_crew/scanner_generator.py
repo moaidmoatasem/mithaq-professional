@@ -1,4 +1,4 @@
-# src/cherenkov/dev_crew/scanner_generator.py
+# packages/cherenkov/dev_crew/scanner_generator.py
 """
 Scanner template generator.
 (Accepted: Gemini — accelerates Phase 3, makes 50 scanners in 10 weeks viable)
@@ -7,7 +7,7 @@ Uses qwen2.5-coder:7b locally. Cost: $0.
 Input: CWE ID + vulnerability description
 Output: BaseScanner implementation + positive/negative test stubs + DVWA harness
 
-This tool NEVER writes directly to src/cherenkov/scanners/.
+This tool NEVER writes directly to packages/cherenkov/scanners/.
 Output always goes to candidates/generated_scanners/.
 Validation gate enforced separately.
 """

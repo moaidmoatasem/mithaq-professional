@@ -1,7 +1,10 @@
+import sys
+from unittest.mock import AsyncMock, MagicMock, patch
+
 import pytest
-from unittest.mock import patch, AsyncMock, MagicMock
-from cherenkov.scanners.xxe_scanner import XXEScanner
 from cherenkov.core.base_scanner import Severity
+from cherenkov.scanners.xxe_scanner import XXEScanner
+
 
 @pytest.mark.asyncio
 async def test_xxe_scanner_vulnerable():
@@ -12,9 +15,14 @@ async def test_xxe_scanner_vulnerable():
     mock_response.text = "root:x:0:0:root:/root:/bin/bash"
 
     class MockClient:
-        async def __aenter__(self): return self
-        async def __aexit__(self, *args): pass
-        async def post(self, *args, **kwargs): return mock_response
+        async def __aenter__(self):
+            return self
+
+        async def __aexit__(self, *args):
+            pass
+
+        async def post(self, *args, **kwargs):
+            return mock_response
 
     with patch("httpx.AsyncClient", return_value=MockClient()):
         result = await scanner.scan("http://vulnerable.com")
@@ -28,6 +36,7 @@ async def test_xxe_scanner_vulnerable():
         assert finding.cwe == "CWE-611"
         assert "XML External Entity" in finding.title
 
+
 @pytest.mark.asyncio
 async def test_xxe_scanner_safe():
     scanner = XXEScanner("xxe_scanner", "test scanner")
@@ -37,9 +46,14 @@ async def test_xxe_scanner_safe():
     mock_response.text = "Bad Request"
 
     class MockClient:
-        async def __aenter__(self): return self
-        async def __aexit__(self, *args): pass
-        async def post(self, *args, **kwargs): return mock_response
+        async def __aenter__(self):
+            return self
+
+        async def __aexit__(self, *args):
+            pass
+
+        async def post(self, *args, **kwargs):
+            return mock_response
 
     with patch("httpx.AsyncClient", return_value=MockClient()):
         result = await scanner.scan("http://safe.com")
@@ -47,11 +61,13 @@ async def test_xxe_scanner_safe():
         assert result.target == "http://safe.com"
         assert len(result.findings) == 0
 
+
 @pytest.mark.asyncio
 async def test_xxe_scanner_timeout():
     scanner = XXEScanner("xxe_scanner", "test scanner")
 
     import httpx
+
     with patch("httpx.AsyncClient", side_effect=httpx.RequestError("Error", request=MagicMock())):
         result = await scanner.scan("http://timeout.com")
 

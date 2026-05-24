@@ -1,8 +1,10 @@
 import os
 import subprocess
+from unittest.mock import MagicMock, patch
+
 import pytest
-from unittest.mock import patch, MagicMock
-from cherenkov.core.tokamak import Tokamak, Command, TokamakResult, TOKAMAKProfile
+from cherenkov.core.tokamak import Command, Tokamak, TOKAMAKProfile, TokamakResult, ValidationRequest, ValidationResult
+
 
 def test_tokamak_execute_success():
     cmd = Command(payload="echo 'hello'", scanner_name="test_scanner", timeout=5)
@@ -29,7 +31,7 @@ def test_tokamak_execute_success():
         assert "-v" in cmd_args
         assert "sh" in cmd_args
         assert "/workspace/payload.sh" in cmd_args
-        
+
         assert kwargs["timeout"] == 5
         assert kwargs["capture_output"] is True
         assert kwargs["text"] is True
@@ -41,6 +43,7 @@ def test_tokamak_execute_success():
         assert len(result.trace_hash) == 64
         assert "files_erased" in result.shred_receipt
         assert result.shred_receipt["method"] == "overwrite+truncate"
+
 
 def test_tokamak_execute_timeout():
     cmd = Command(payload="sleep 10", scanner_name="slow", timeout=1)
@@ -58,6 +61,7 @@ def test_tokamak_execute_timeout():
         assert "TimeoutExpired" in result.stderr
         assert len(result.trace_hash) == 64
 
+
 def test_tokamak_execute_exception():
     cmd = Command(payload="bad", scanner_name="crash", timeout=5)
 
@@ -70,9 +74,10 @@ def test_tokamak_execute_exception():
         assert "Docker not found" in result.stderr
         assert len(result.trace_hash) == 64
 
+
 def test_tokamak_signing_and_receipt():
     cmd = Command(payload="echo hello", scanner_name="test_scanner")
-    
+
     with patch("subprocess.run") as mock_run:
         mock_process = MagicMock()
         mock_process.stdout = "hello\n"
@@ -94,12 +99,14 @@ def test_tokamak_signing_and_receipt():
         assert isinstance(result.duration_ms, float)
         assert result.duration_ms >= 0
 
+
 def test_tokamak_image_env_override():
     """TOKAMAK_IMAGE env var overrides the default kali image."""
     cmd = Command(payload="echo 'test'", scanner_name="test_scanner", timeout=5)
 
-    with patch("subprocess.run") as mock_run, patch.dict(
-        os.environ, {"TOKAMAK_IMAGE": "custom-image:latest"}
+    with (
+        patch("subprocess.run") as mock_run,
+        patch.dict(os.environ, {"TOKAMAK_IMAGE": "custom-image:latest"}),
     ):
         mock_run.return_value = MagicMock(stdout="", stderr="", returncode=0)
         Tokamak.execute(cmd)
@@ -108,9 +115,7 @@ def test_tokamak_image_env_override():
         assert "custom-image:latest" in args
 
     # Default image when env var is unset
-    with patch("subprocess.run") as mock_run, patch.dict(
-        os.environ, {}, clear=False
-    ):
+    with patch("subprocess.run") as mock_run, patch.dict(os.environ, {}, clear=False):
         os.environ.pop("TOKAMAK_IMAGE", None)
         mock_run.return_value = MagicMock(stdout="", stderr="", returncode=0)
         Tokamak.execute(cmd)
@@ -124,3 +129,93 @@ def test_tokamak_profile_enum_values():
     assert TOKAMAKProfile.STANDARD.value == "standard"
     assert TOKAMAKProfile.MOBILE.value == "mobile"
     assert TOKAMAKProfile.KALI.value == "kali"
+
+
+@pytest.mark.asyncio
+async def test_tokamak_execute_poc_success():
+    req = ValidationRequest(
+        finding_id="test_id",
+        exploit_command="echo 'poc_verified'",
+        timeout_seconds=5
+    )
+
+    with patch("docker.from_env") as mock_from_env:
+        mock_client = MagicMock()
+        mock_container = MagicMock()
+        mock_container.wait = MagicMock(return_value={"StatusCode": 0})
+        mock_container.logs = MagicMock(return_value=b"poc_verified")
+        mock_client.containers.run = MagicMock(return_value=mock_container)
+        mock_from_env.return_value = mock_client
+
+        sandbox = Tokamak()
+        result = await sandbox.execute_poc(req)
+
+        assert isinstance(result, ValidationResult)
+        assert result.is_verified is True
+        assert result.cryptographic_proof is not None
+        assert len(result.cryptographic_proof) == 64
+
+        mock_client.containers.run.assert_called_once_with(
+            image="alpine:latest",
+            command=["sh", "-c", "echo 'poc_verified'"],
+            detach=True,
+            network_mode="none",
+            mem_limit="128m",
+            cpu_quota=50000,
+            remove=False
+        )
+        mock_container.remove.assert_called_once_with(force=True)
+
+
+@pytest.mark.asyncio
+async def test_tokamak_execute_poc_failure():
+    req = ValidationRequest(
+        finding_id="test_id",
+        exploit_command="exit 1",
+        timeout_seconds=5
+    )
+
+    with patch("docker.from_env") as mock_from_env:
+        mock_client = MagicMock()
+        mock_container = MagicMock()
+        mock_container.wait = MagicMock(return_value={"StatusCode": 1})
+        mock_client.containers.run = MagicMock(return_value=mock_container)
+        mock_from_env.return_value = mock_client
+
+        sandbox = Tokamak()
+        result = await sandbox.execute_poc(req)
+
+        assert isinstance(result, ValidationResult)
+        assert result.is_verified is False
+        assert result.cryptographic_proof is None
+        mock_container.remove.assert_called_once_with(force=True)
+
+
+@pytest.mark.asyncio
+async def test_tokamak_execute_poc_timeout():
+    req = ValidationRequest(
+        finding_id="test_id",
+        exploit_command="sleep 10",
+        timeout_seconds=1
+    )
+
+    with patch("docker.from_env") as mock_from_env:
+        mock_client = MagicMock()
+        mock_container = MagicMock()
+
+        def mock_wait(*args, **kwargs):
+            import time
+            time.sleep(2)
+            return {"StatusCode": 0}
+
+        mock_container.wait = mock_wait
+        mock_client.containers.run = MagicMock(return_value=mock_container)
+        mock_from_env.return_value = mock_client
+
+        sandbox = Tokamak()
+        result = await sandbox.execute_poc(req)
+
+        assert isinstance(result, ValidationResult)
+        assert result.is_verified is False
+        assert result.cryptographic_proof is None
+        mock_container.remove.assert_called_once_with(force=True)

@@ -1,7 +1,55 @@
-# CHERENKOV — Jules / Gemini Agent Configuration
+# CHERENKOV — Gemini Agent Configuration (Jules + Antigravity)
 
-> This file configures Jules and any Gemini-powered agent.
+> This file configures all Gemini-powered agents.
+> **Jules** = backend/Python domain. **Antigravity** = frontend TypeScript/React domain.
 > For Claude agents, see CLAUDE.md. Both files share the same architectural rules.
+
+---
+
+## Agent Roster & Domain Ownership
+
+| Agent | Trigger | Primary Domain | Branch Prefix |
+|---|---|---|---|
+| **Antigravity (Google IDE)** | Gravity preview, local dev | `packages/cherenkov/web/` frontend | `feat/web-*` |
+| **Claude (GitHub Actions)** | `@claude` in issues/PRs | Code review, targeted fixes, issue work | `claude/*` |
+| **Claude Code (local)** | Terminal sessions | Architecture, agentic coordination, multi-file refactors | `claude/*` |
+| **Autonomous Pipeline** | Daily cron 2AM UTC | Scanner generation (`autonomous_roadmap_executor.py`) | `auto-dev/<run>` |
+| **Security Architect** | Scan initiation | Threat modeling, EngagementPlan, LATTICE queries | `feat/arch-*` |
+| **Red Team Agent** | EngagementPlan start | Active exploitation, CVE mapping, TOKAMAK validation | `feat/red-*` |
+| **SecOps Agent** | Scan completion | Compliance mapping, EGY-FIN CSF reports | `feat/secops-*` |
+
+---
+
+## Antigravity — Frontend Agent
+
+**Domain (strict):** `packages/cherenkov/web/src/` only. Never touch Python or `packages/cherenkov/api/`.
+
+### Environment
+- Vite dev server: port `3000`
+- Proxies to FastAPI backend: port `8000` (configured in `vite.config.ts`)
+- Never hard-code `localhost:8000` — use `API_BASE` and `getWsUrl()` from `@/src/lib/api.ts`
+
+### Import pattern
+```typescript
+import { API_BASE } from '@/src/lib/api';
+import { useMetrics } from '@/src/hooks/useMetrics';
+import { ForensicHeader } from '@/src/components/organisms/ForensicHeader';
+```
+
+### Pre-commit
+```bash
+cd packages/cherenkov/web
+npm run lint        # tsc --noEmit
+npx vite build      # production build must pass
+```
+
+### Branching
+- Branch prefix: `feat/web-<issue>-<slug>`
+- PR body must contain `Closes #<N>`
+
+---
+
+## Jules — Backend / Scanner Agent
 
 ## Environment
 
@@ -42,7 +90,7 @@ packages/cherenkov/
   api/          FastAPI server  (main.py — all /api/v1/* routes)
   core/         Domain logic    (base_scanner, circuit_breaker, tokamak, …)
   scanners/     Production-ready scanners (inherit BaseScanner)
-  orchestration/Workflow engine
+  orchestration/Workflow engine (architect, red_team, secops, etc.)
   web/src/      React 19 + Vite + Tailwind v4 dashboard
   autonomous_generated/  Raw AI output — do not import directly
 
@@ -78,10 +126,15 @@ from src.cherenkov.X import Y
 
 ## Key GitHub Issues (active work)
 
-| # | What | Priority |
-|---|---|---|
-| [#174](https://github.com/moaidmoatasem/cherenkov-professional/issues/174) | TOKAMAK Docker sandbox | high |
-| [#175](https://github.com/moaidmoatasem/cherenkov-professional/issues/175) | HITL approval gate | high |
-| [#176](https://github.com/moaidmoatasem/cherenkov-professional/issues/176) | Compliance mapper + SARIF/PDF | medium |
-| [#177](https://github.com/moaidmoatasem/cherenkov-professional/issues/177) | SQLite WAL + real health metrics | high |
-| [#178](https://github.com/moaidmoatasem/cherenkov-professional/issues/178) | Graduate 5 scanners to BaseScanner | medium |
+| # | What | Priority | Phase |
+|---|---|---|---|
+| [#230](https://github.com/moaidmoatasem/cherenkov-professional/issues/230) | Remove cloud configs (MEISSNER) | critical | Phase 2 |
+| [#234](https://github.com/moaidmoatasem/cherenkov-professional/issues/234) | Harden .gitignore | high | Phase 2 |
+| [#236](https://github.com/moaidmoatasem/cherenkov-professional/issues/236) | Scanner registry auto-discovery | high | Phase 2 |
+| [#237](https://github.com/moaidmoatasem/cherenkov-professional/issues/237) | Scan result aggregation pipeline | high | Phase 2 |
+| [#238](https://github.com/moaidmoatasem/cherenkov-professional/issues/238) | Wire POST /api/v1/scan (depends #236, #237) | high | Phase 2 |
+| [#239](https://github.com/moaidmoatasem/cherenkov-professional/issues/239) | CI matrix 146+ tests pass | high | Phase 2 |
+| [#233](https://github.com/moaidmoatasem/cherenkov-professional/issues/233) | Align GEMINI.md with AGENTS.md roster | medium | Phase 2 |
+| [#246](https://github.com/moaidmoatasem/cherenkov-professional/issues/246) | TOKAMAK SQLite WAL logger | critical | Phase 3 |
+| [#247](https://github.com/moaidmoatasem/cherenkov-professional/issues/247) | Wire Cherenkov Trace signing | critical | Phase 3 |
+

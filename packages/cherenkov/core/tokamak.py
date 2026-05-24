@@ -1,4 +1,4 @@
-# src/cherenkov/core/tokamak.py
+# packages/cherenkov/core/tokamak.py
 """
 Scan tokamak — ephemeral Docker containers per scan.
 
@@ -18,10 +18,11 @@ import json
 import logging
 import subprocess  # nosec B404 — subprocess is required to manage ephemeral Docker containers (TOKAMAK core)
 from contextlib import asynccontextmanager
-from dataclasses import dataclass
 from datetime import datetime, timezone
 from enum import Enum
-from typing import AsyncGenerator
+from typing import Any, AsyncGenerator, Optional
+
+from pydantic import BaseModel, ConfigDict, model_validator
 
 logger = logging.getLogger("cherenkov.tokamak")
 
@@ -108,25 +109,53 @@ _PROFILE_CONFIGS: dict[TOKAMAKProfile, dict] = {
 
 
 # ──────────────────────────────────────────────
-# TOKAMAK
+# TOKAMAK Models (Pydantic V2)
 # ──────────────────────────────────────────────
 
 
-@dataclass
-class Command:
+class Command(BaseModel):
     payload: str
     scanner_name: str = ""
     timeout: int = 30
 
+    @model_validator(mode="before")
+    @classmethod
+    def validate_timeout(cls, values: Any) -> Any:
+        if isinstance(values, dict):
+            timeout = values.get("timeout", 30)
+            if timeout is not None:
+                if timeout > 120:
+                    values["timeout"] = 120
+                elif timeout <= 0:
+                    raise ValueError("timeout must be positive")
+        return values
 
-@dataclass
-class TokamakResult:
+
+class TokamakResult(BaseModel):
+    model_config = ConfigDict(arbitrary_types_allowed=True)
+
     stdout: str
     stderr: str
     trace_hash: str
     shred_receipt: dict
     exit_code: int
     duration_ms: float = 0.0
+
+
+class ValidationRequest(BaseModel):
+    finding_id: str
+    exploit_command: str
+    timeout_seconds: int
+
+
+class ValidationResult(BaseModel):
+    is_verified: bool
+    cryptographic_proof: Optional[str] = None
+
+
+# ──────────────────────────────────────────────
+# TOKAMAK Core
+# ──────────────────────────────────────────────
 
 
 class ScanTOKAMAK:
@@ -140,7 +169,11 @@ class ScanTOKAMAK:
     def __init__(self) -> None:
         if not DOCKER_AVAILABLE:
             raise RuntimeError("Docker SDK not available. Install: pip install docker")
-        self.client = docker.from_env()
+        try:
+            self.client = docker.from_env()
+        except Exception as e:
+            logger.error("Failed to initialize Docker client: %s", e)
+            self.client = None
         self._active_container = None
 
     @asynccontextmanager
@@ -155,13 +188,10 @@ class ScanTOKAMAK:
 
         The container is kept alive with `sleep infinity` so callers can inject
         payloads via exec_run() without a race against the default entrypoint.
-
-        Example:
-            async with tokamak.scan_context("https://target.com") as container:
-                exit_code, output = await asyncio.to_thread(
-                    container.exec_run, ["sh", "-c", "nmap -sV $TARGET"]
-                )
         """
+        if not self.client:
+            raise RuntimeError("Docker daemon is unreachable or client failed to initialize.")
+
         container = None
         cfg = _PROFILE_CONFIGS[profile]
 
@@ -217,41 +247,50 @@ class ScanTOKAMAK:
 
         Returns a dict with 'exploitable' bool and 'evidence' str.
         """
-        async with self.scan_context(
-            target, profile=profile, timeout=self.POC_TIMEOUT
-        ) as container:
-            try:
-                exec_result = await asyncio.wait_for(
-                    asyncio.to_thread(
-                        container.exec_run,
-                        ["sh", "-c", payload],
-                        stdout=True,
-                        stderr=True,
-                        demux=False,
-                    ),
-                    timeout=self.POC_TIMEOUT,
-                )
-                exit_code = exec_result.exit_code
-                raw_output = exec_result.output or b""
-                output = raw_output.decode("utf-8", errors="replace").strip()
-
+        try:
+            async with self.scan_context(
+                target, profile=profile, timeout=self.POC_TIMEOUT
+            ) as container:
                 try:
-                    result = json.loads(output)
-                    if "exploitable" not in result:
-                        result["exploitable"] = exit_code == 0
-                    return result
-                except json.JSONDecodeError:
-                    return {
-                        "exploitable": exit_code == 0,
-                        "evidence": output or f"No output (exit {exit_code})",
-                    }
+                    exec_result = await asyncio.wait_for(
+                        asyncio.to_thread(
+                            container.exec_run,
+                            ["sh", "-c", payload],
+                            stdout=True,
+                            stderr=True,
+                            demux=False,
+                        ),
+                        timeout=self.POC_TIMEOUT,
+                    )
+                    exit_code = exec_result.exit_code
+                    raw_output = exec_result.output or b""
+                    output = raw_output.decode("utf-8", errors="replace").strip()
 
-            except asyncio.TimeoutError:
-                logger.warning("TOKAMAK PoC timed out after %ss — %s", self.POC_TIMEOUT, technique)
-                return {
-                    "exploitable": False,
-                    "evidence": f"PoC timed out after {self.POC_TIMEOUT}s",
-                }
+                    try:
+                        result = json.loads(output)
+                        if "exploitable" not in result:
+                            result["exploitable"] = exit_code == 0
+                        return result
+                    except json.JSONDecodeError:
+                        return {
+                            "exploitable": exit_code == 0,
+                            "evidence": output or f"No output (exit {exit_code})",
+                        }
+
+                except asyncio.TimeoutError:
+                    logger.warning(
+                        "TOKAMAK PoC timed out after %ss — %s", self.POC_TIMEOUT, technique
+                    )
+                    return {
+                        "exploitable": False,
+                        "evidence": f"PoC timed out after {self.POC_TIMEOUT}s",
+                    }
+        except Exception as e:
+            logger.error("TOKAMAK fail-closed triggered during PoC execution: %s", e, exc_info=True)
+            return {
+                "exploitable": False,
+                "evidence": f"Docker execution error: {e}",
+            }
 
     async def kill_active(self) -> None:
         """
@@ -296,8 +335,7 @@ class Tokamak:
             host_tmpdir = tmpdir.replace("\\", "/")
 
             # Image: use env override or fall back to the Kali base image defined
-            # in deploy/docker-compose.yml.  The image name "cherenkov-tokamak"
-            # was a placeholder — it does not exist as a built image.
+            # in deploy/docker-compose.yml.
             tokamak_image = os.environ.get("TOKAMAK_IMAGE", "kalilinux/kali-rolling")
             process = subprocess.run(  # nosec B603 B607 — fixed arg list, no shell=True; Docker sandboxes the payload
                 [
@@ -381,3 +419,60 @@ class Tokamak:
             exit_code=exit_code,
             duration_ms=duration_ms,
         )
+
+    async def execute_poc(self, request: ValidationRequest) -> ValidationResult:
+        """
+        Asynchronously executes a PoC payload inside an air-gapped alpine container.
+        Signs logs on successful execution and forcefully cleans up resources.
+        """
+        if not DOCKER_AVAILABLE:
+            logger.error("Docker SDK not available for live PoC validation.")
+            return ValidationResult(is_verified=False)
+
+        client = docker.from_env()
+        container = None
+
+        try:
+            # Spawn container using docker-py in a thread
+            container = await asyncio.to_thread(
+                client.containers.run,
+                image="alpine:latest",
+                command=["sh", "-c", request.exploit_command],
+                detach=True,
+                network_mode="none",  # MEISSNER air-gap compliance
+                mem_limit="128m",
+                cpu_quota=50000,
+                remove=False,
+            )
+
+            # Wait for execution status with a circuit breaker timeout
+            exit_status = await asyncio.wait_for(
+                asyncio.to_thread(container.wait), timeout=request.timeout_seconds
+            )
+            exit_code = exit_status.get("StatusCode", 1)
+
+            if exit_code == 0:
+                # Retrieve and decode stdout/stderr logs
+                logs_bytes = await asyncio.to_thread(container.logs)
+                logs_str = logs_bytes.decode("utf-8", errors="replace")
+
+                # SHA-256 sign: hash(logs + timestamp)
+                timestamp = datetime.now(timezone.utc).isoformat()
+                proof_data = f"{logs_str}\n{timestamp}"
+                proof_hash = hashlib.sha256(proof_data.encode()).hexdigest()
+
+                return ValidationResult(is_verified=True, cryptographic_proof=proof_hash)
+
+            return ValidationResult(is_verified=False)
+
+        except (asyncio.TimeoutError, Exception) as e:
+            logger.warning("TOKAMAK PoC validation failed or timed out: %s", e)
+            return ValidationResult(is_verified=False)
+
+        finally:
+            if container:
+                try:
+                    # Forcefully remove the container on exit
+                    await asyncio.to_thread(container.remove, force=True)
+                except Exception as ex:
+                    logger.warning("Failed to clean up TOKAMAK container: %s", ex)

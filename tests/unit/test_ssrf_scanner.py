@@ -1,8 +1,10 @@
-import pytest
+import sys
+from unittest.mock import AsyncMock, MagicMock, patch
+
 import httpx
-from unittest.mock import AsyncMock, patch
-from cherenkov.scanners.ssrf_scanner import SSRFScanner, _find_url_params, _inject_canary
+import pytest
 from cherenkov.core.base_scanner import Severity
+from cherenkov.scanners.ssrf_scanner import SSRFScanner, _find_url_params, _inject_canary
 
 
 @pytest.mark.asyncio

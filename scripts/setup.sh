@@ -1,84 +1,58 @@
 #!/bin/bash
-# cherenkov NEXUS - Quick Setup Script
+set -euo pipefail
+echo "CHERENKOV Proving Ground initializing..."
 
-echo "🚀 cherenkov NEXUS - AI Security Orchestrator Setup"
-echo "================================================================"
-echo ""
+# 1. Dependencies
+pip install --upgrade pip
+pip install -e ".[dev]"
+pip install ollama sentence-transformers qdrant-client websockets
+export PYTHONPATH=$PYTHONPATH:$(pwd)/packages:/usr/lib/python3/dist-packages
 
-# Check Docker
-if ! command -v docker &> /dev/null; then
-    echo "❌ Docker not found. Please install Docker first:"
-    echo "   https://docs.docker.com/get-docker/"
-    exit 1
-fi
+# 2. Docker + VFS
+curl -fsSL https://get.docker.com -o get-docker.sh && sh get-docker.sh
+sudo mkdir -p /etc/docker
+echo '{"storage-driver":"vfs"}' | sudo tee /etc/docker/daemon.json
+sudo systemctl restart docker && sleep 5
 
-echo "✅ Docker found"
+# 3. LATTICE
+sudo docker run -d --name qdrant --restart unless-stopped \
+  -p 6333:6333 qdrant/qdrant
 
-# Check Docker Compose
-if ! command -v docker-compose &> /dev/null && ! docker compose version &> /dev/null; then
-    echo "❌ Docker Compose not found. Please install it:"
-    echo "   https://docs.docker.com/compose/install/"
-    exit 1
-fi
+# 4. DVWA (GHCR mirror — avoids Docker Hub rate limit)
+sudo docker run -d --name dvwa --restart unless-stopped \
+  -p 80:80 \
+  ghcr.io/digininja/dvwa:latest
 
-DOCKER_COMPOSE_CMD="docker compose"
-if command -v docker-compose &> /dev/null; then
-    DOCKER_COMPOSE_CMD="docker-compose"
-fi
+# 5. WebGoat
+sudo docker run -d --name webgoat --restart unless-stopped \
+  -p 8090:8080 \
+  webgoat/webgoat:latest
 
-echo "✅ Docker Compose found"
-echo ""
+# 6. Ollama + KINETIC
+curl -fsSL https://ollama.com/install.sh | sh
+ollama serve > /dev/null 2>&1 &
+sleep 8
+ollama pull llama3.2:3b
 
-# Create results directory
-mkdir -p results
+# 7. FE build
+[ -f "packages/cherenkov/web/package.json" ] && \
+  cd packages/cherenkov/web && npm install && npm run build && cd /app
 
-# Start all services
-echo "🐳 Starting all cherenkov NEXUS services..."
-$DOCKER_COMPOSE_CMD up -d
-
-echo ""
-echo "⏳ Waiting for services to start (30 seconds)..."
-sleep 30
-
-# Find the Ollama container name dynamically based on docker-compose project name
-OLLAMA_CONTAINER=$($DOCKER_COMPOSE_CMD ps -q ollama 2>/dev/null || echo "cherenkov-ollama")
-if [ -z "$OLLAMA_CONTAINER" ]; then
-    OLLAMA_CONTAINER="cherenkov-ollama"
-fi
-
-# Download AI models
-echo ""
-echo "📥 Downloading AI models (this may take 5-10 minutes)..."
-echo "   Model 1: DeepSeek-R1 1.5B (fast, efficient)..."
-docker exec $OLLAMA_CONTAINER ollama pull deepseek-r1:1.5b || echo "Failed to pull DeepSeek-R1. Please check if ollama is running."
-
-echo "   Model 2: Qwen 2.5 3B (better reasoning)..."
-docker exec $OLLAMA_CONTAINER ollama pull qwen2.5:3b || echo "Failed to pull Qwen 2.5 3B. Please check if ollama is running."
+# 8. Health check
+echo "--- Health ---"
+sudo docker ps --format "table {{.Names}}\t{{.Status}}"
+curl -sf http://localhost:6333/health   && echo " LATTICE  OK" || echo " LATTICE  FAIL"
+curl -sf http://localhost:80            > /dev/null \
+                                        && echo " DVWA     OK" || echo " DVWA     FAIL"
+curl -sf http://localhost:8090          > /dev/null \
+                                        && echo " WebGoat  OK" || echo " WebGoat  FAIL"
+curl -sf http://localhost:11434/api/tags > /dev/null \
+                                        && echo " Ollama   OK" || echo " Ollama   FAIL"
+python -c "from cherenkov.core.base_scanner import BaseScanner; print(' Package  OK')"
 
 echo ""
-echo "================================================================"
-echo "✅ cherenkov NEXUS IS READY!"
-echo "================================================================"
-echo ""
-echo "Services running:"
-echo "  🤖 AI Orchestrator:  http://localhost:8000"
-echo "  🔍 OWASP ZAP:        http://localhost:8080"
-echo "  🧠 Ollama API:       http://localhost:11434"
-echo "  📊 Redis:            localhost:6379"
-echo ""
-echo "📖 Test the API:"
-echo "   curl http://localhost:8000/"
-echo ""
-echo "🔍 Start a scan:"
-echo "   curl -X POST http://localhost:8000/api/scan \\"
-echo "     -H 'Content-Type: application/json' \\"
-echo "     -d '{\"target\": \"https://example.com\", \"scan_types\": [\"web\", \"ai-agent\"]}'"
-echo ""
-echo "View logs:     docker-compose logs -f orchestrator"
-echo "Stop services: docker-compose down"
-echo ""
-echo "================================================================"
-
-
-sudo docker run --rm -d -p 8090:8080 webgoat/goat-and-wolf
-echo "WebGoat running at localhost:8090 for false-positive validation"
+echo "Proving Ground ready."
+echo "  DVWA    → http://localhost:80     (admin/password after setup.php)"
+echo "  WebGoat → http://localhost:8090"
+echo "  LATTICE → http://localhost:6333"
+echo "  Ollama  → http://localhost:11434"

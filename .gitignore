@@ -26,6 +26,7 @@ manifests/cwe_queue.yaml
 agent_state/
 workflow_checkpoints/
 workflow_results/
+data/reasoning/
 
 # Qdrant runtime data (local vector DB state — not config)
 qdrant/
@@ -70,4 +71,45 @@ validation_results.json
 # NOTE: AGENT_MEMORY.md and TODO.md are now tracked — they are multi-agent
 # coordination artifacts, not throwaway session scratchpads.
 build/
+.aider*
+
+# === Added by #234 — harden gitignore ===
+
+# Database files
+*.sqlite
+*.sqlite3
+*.db
+
+# Node
+node_modules/
+dist/
+
+# Aider
+.aider*
+.aider.tags.cache.v3/
+
+# Agent runtime state
+agent_state/
+workflow_checkpoints/
+
+# Vector DB
+qdrant/
+
+# MkDocs
 site/
+
+# Python build
+*.egg-info/
+build/
+
+# IDE
+.idea/
+.vscode/settings.json
+
+# OS
+Thumbs.db
+.DS_Store
+
+# Scratch scripts
+scripts/gh-*.sh
+scripts/do-*.sh

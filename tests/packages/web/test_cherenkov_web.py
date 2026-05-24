@@ -28,13 +28,13 @@ def _client() -> "TestClient":
 
 def test_run_scan_invalid_url_format():
     # IPv6 bracket not closed — urlparse raises ValueError → 400
-    response = _client().post("/api/scan", json={"target_url": "http://[::1"})
+    response = _client().post("/api/scan", json={"url": "http://[::1"})
     assert response.status_code == 400
     assert "detail" in response.json()
 
 
 def test_run_scan_missing_body():
-    # Missing required field `target_url` → 422 Unprocessable Entity from Pydantic
+    # Missing required field `url` → 422 Unprocessable Entity from Pydantic
     response = _client().post("/api/scan", json={})
     assert response.status_code == 422
 
@@ -45,12 +45,12 @@ def test_run_scan_missing_url():
 
 
 def test_run_scan_invalid_scheme():
-    response = _client().post("/api/scan", json={"target_url": "ftp://example.com"})
+    response = _client().post("/api/scan", json={"url": "ftp://example.com"})
     assert response.status_code == 400
     assert "Only http/https" in response.json()["detail"]
 
 
 def test_run_scan_missing_hostname():
-    response = _client().post("/api/scan", json={"target_url": "http://"})
+    response = _client().post("/api/scan", json={"url": "http://"})
     assert response.status_code == 400
     assert "hostname" in response.json()["detail"]

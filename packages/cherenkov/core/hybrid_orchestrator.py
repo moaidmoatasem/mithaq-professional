@@ -5,21 +5,14 @@ Implements ReAct (Reasoning + Acting) loop with dual-brain architecture.
 
 import logging
 import time
-import uuid
 from enum import Enum
-from pathlib import Path
 from typing import Any, Dict, List, Optional
 
 from pydantic import BaseModel, Field
 
-from cherenkov.agents.cloud.strategic_planner import (
-    StrategicPlanner,
-    ThreatAnalysisTask,
-)
+from cherenkov.agents.cloud.strategic_planner import StrategicPlanner, ThreatAnalysisTask
 from cherenkov.core.ablation.redactor import DataRedactor, RedactionLevel
-from cherenkov.core.ai.model_router import ModelRouter
 from cherenkov.core.exceptions import CognitiveLoopError
-from cherenkov.core.reasoning_store import ReasoningStore
 
 logger = logging.getLogger(__name__)
 
@@ -58,24 +51,13 @@ class HybridOrchestrator:
     Local: Privileged operations (Ollama)
     """
 
-    def __init__(
-        self, groq_api_key: Optional[str] = None, session_id: Optional[str] = None
-    ) -> None:
-        self.session_id = session_id or str(uuid.uuid4())
-        self.reasoning_store = ReasoningStore(db_path=Path(f"data/reasoning/{self.session_id}.db"))
-        self.cloud_planner = StrategicPlanner(
-            api_key=groq_api_key,
-            session_id=self.session_id,
-            reasoning_store=self.reasoning_store,
-        )
+    def __init__(self, groq_api_key: Optional[str] = None) -> None:
+        self.cloud_planner = StrategicPlanner(api_key=groq_api_key)
         self.redactor = DataRedactor(level=RedactionLevel.MODERATE)
         self.execution_history: List[TaskResult] = []
         self.concurrency_limit = 4
         self.consecutive_successes = 0
         self.task_tracker = TaskExecutionTracker()
-        self.model_router = ModelRouter(
-            session_id=self.session_id, reasoning_store=self.reasoning_store
-        )
 
     def execute_security_audit(
         self,
@@ -180,9 +162,6 @@ class HybridOrchestrator:
             mode.value,
             tokens_used,
             len(redaction_result.redacted_fields),
-        )
-        logger.info(
-            f"Session {self.session_id} complete. Reasoning log: data/reasoning/{self.session_id}.db ({len(self.reasoning_store.query())} steps recorded)."
         )
         return result.model_dump()
 

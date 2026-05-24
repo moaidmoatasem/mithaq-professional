@@ -10,18 +10,18 @@ async def main():
         description="CHERENKOV Autonomous PMO & Developer CLI",
         formatter_class=argparse.RawTextHelpLabel
     )
-
+    
     parser.add_argument(
-        "--focus",
-        type=str,
-        required=True,
+        "--focus", 
+        type=str, 
+        required=True, 
         help="The specific feature or module to build (e.g., 'SQLite WAL initialization')"
     )
-
+    
     parser.add_argument(
-        "--file",
-        type=str,
-        required=True,
+        "--file", 
+        type=str, 
+        required=True, 
         help="The target relative file path for the output (e.g., 'packages/cherenkov/core/storage/database.py')"
     )
 
@@ -38,7 +38,7 @@ async def main():
     print("===================================================")
 
     sprint = AutonomousSprint(focus_area=args.focus, target_filepath=str(target_filepath))
-
+    
     success = await sprint.execute_sprint()
 
     if success:

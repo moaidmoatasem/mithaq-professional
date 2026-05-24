@@ -1,19 +1,9 @@
-import hashlib
-import json
 import logging
 import os
-import re
 import time
-import uuid
 from dataclasses import dataclass
 from pathlib import Path
-from typing import TYPE_CHECKING, Any, Optional
-
-from cherenkov.core.ablation.redactor import DataRedactor
-from cherenkov.core.schemas.reasoning_trace import ReasoningTrace
-
-if TYPE_CHECKING:
-    from cherenkov.core.reasoning_store import ReasoningStore
+from typing import Optional
 
 logger = logging.getLogger(__name__)
 
@@ -74,24 +64,12 @@ def _default_backends() -> list[BackendConfig]:
     ]
 
 
-if TYPE_CHECKING:
-    from cherenkov.core.reasoning_store import ReasoningStore
-
-
 class ModelRouter:
     """Async LLM router: Ollama → Gemini → Groq, respecting local/hybrid/cloud mode."""
 
-    def __init__(
-        self,
-        backends: Optional[list[BackendConfig]] = None,
-        mode: Optional[str] = None,
-        session_id: Optional[str] = None,
-        reasoning_store: "ReasoningStore | None" = None,
-    ):
+    def __init__(self, backends: Optional[list[BackendConfig]] = None, mode: Optional[str] = None):
         self.backends: list[BackendConfig] = backends or _default_backends()
         self.mode: str = mode or _load_mode()
-        self.session_id = session_id
-        self.reasoning_store = reasoning_store
 
     # ------------------------------------------------------------------
     # Public API
@@ -107,7 +85,7 @@ class ModelRouter:
             try:
                 t0 = time.monotonic()
                 text = await self._call(backend, prompt, max_tokens)
-                elapsed_s = time.monotonic() - t0
+                elapsed = time.monotonic() - t0
                 cost = _estimate_cost(backend.name, prompt, text)
                 logger.info(
                     "model_router backend=%s model=%s tokens_est=%d cost_usd=%.6f elapsed=%.2fs",
@@ -115,49 +93,12 @@ class ModelRouter:
                     backend.model,
                     _rough_tokens(prompt + text),
                     cost,
-                    elapsed_s,
+                    elapsed,
                 )
-
-                # Reasoning Trace Logging
-                if self.reasoning_store is not None:
-                    try:
-                        redactor = DataRedactor()
-                        input_summary, _ = redactor.redact_text(prompt[:500])
-                        output_summary, _ = redactor.redact_text(text[:500])
-
-                        reasoning_match = re.search(r"<thinking>(.*?)</thinking>", text, re.DOTALL)
-                        reasoning_str = (
-                            reasoning_match.group(1).strip() if reasoning_match else "[implicit]"
-                        )
-
-                        trace_fields = {
-                            "trace_id": str(uuid.uuid4()),
-                            "agent_id": "model_router",
-                            "agent_role": "llm",
-                            "session_id": self.session_id or "unknown",
-                            "step_index": 0,
-                            "step_type": "llm_inference",
-                            "input_summary": input_summary,
-                            "output_summary": output_summary,
-                            "reasoning": reasoning_str,
-                            "model_backend": backend.name,
-                            "latency_ms": int(elapsed * 1000),
-                            "confidence": None,
-                            "sha256_anchor": "placeholder",
-                        }
-                        _tmp = ReasoningTrace(**trace_fields)
-                        trace_fields["sha256_anchor"] = _tmp.compute_hash()
-                        trace = ReasoningTrace(**trace_fields)
-                        self.reasoning_store.record(trace)
-                    except Exception as store_exc:
-                        logger.warning("Failed to record reasoning trace: %s", store_exc)
-
                 return text
             except Exception as exc:  # noqa: BLE001
                 logger.warning(
-                    "model_router backend=%s failed: %s — trying next",
-                    backend.name,
-                    exc,
+                    "model_router backend=%s failed: %s — trying next", backend.name, exc
                 )
 
         logger.error("model_router all backends exhausted, returning empty string")
@@ -218,10 +159,7 @@ class ModelRouter:
 
         if not cfg.api_key:
             raise ValueError("GROQ_API_KEY not set")
-        headers = {
-            "Authorization": f"Bearer {cfg.api_key}",
-            "Content-Type": "application/json",
-        }
+        headers = {"Authorization": f"Bearer {cfg.api_key}", "Content-Type": "application/json"}
         payload = {
             "model": cfg.model,
             "messages": [{"role": "user", "content": prompt}],

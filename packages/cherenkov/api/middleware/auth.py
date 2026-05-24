@@ -8,17 +8,10 @@ import jwt
 from fastapi import Depends, Header, HTTPException, status
 from pydantic import BaseModel
 
-
-def get_jwt_secret() -> str:
-    from dotenv import load_dotenv
-
-    load_dotenv(dotenv_path=".env", override=True)
-    secret = os.environ.get("CHERENKOV_JWT_SECRET")
-    if not secret:
-        raise RuntimeError("CHERENKOV_JWT_SECRET env var not set")
-    return secret
-
-
+_jwt_secret = os.environ.get("CHERENKOV_JWT_SECRET")
+if not _jwt_secret:
+    raise RuntimeError("CHERENKOV_JWT_SECRET env var not set")
+JWT_SECRET: str = _jwt_secret
 ALGORITHM = "HS256"
 ACCESS_TOKEN_EXPIRE_MINUTES = 60
 
@@ -42,7 +35,7 @@ def create_access_token(data: dict, expires_delta: Optional[timedelta] = None):
     else:
         expire = datetime.now(timezone.utc) + timedelta(minutes=15)
     to_encode.update({"exp": expire})
-    encoded_jwt = jwt.encode(to_encode, get_jwt_secret(), algorithm=ALGORITHM)
+    encoded_jwt = jwt.encode(to_encode, JWT_SECRET, algorithm=ALGORITHM)
     return encoded_jwt
 
 
@@ -62,7 +55,7 @@ async def get_current_user(authorization: Annotated[Optional[str], Header()] = N
                 detail="Invalid authentication scheme",
             )
 
-        payload = jwt.decode(token, get_jwt_secret(), algorithms=[ALGORITHM])
+        payload = jwt.decode(token, JWT_SECRET, algorithms=[ALGORITHM])
         username: str = payload.get("sub")
         role_val: int = payload.get("role")
 

@@ -23,7 +23,7 @@ This Code of Conduct applies both within project spaces and in public spaces whe
 CHERENKOV relies heavily on AI agents. The following rules govern interactions:
 - **Agent Autonomy:** Agents are permitted to operate autonomously within predefined bounds (e.g., executing established scanners, writing standard code).
 - **Human-in-the-Loop (HITL):** Critical security changes (e.g., modifications to TOKAMAK, ABLATION, TOKAMAK, or core orchestration) **REQUIRE** explicit human review and cryptographic approval. Agents must halt and wait for this approval.
-- **Agent Handoffs:** Agents must communicate clearly defined state and context during handoffs, adhering to the `AgentState` schema to prevent context pollution. In accordance with the [Agentic Handover Protocol](file:///\\wsl.localhost\Ubuntu-24.04\home\moaid\cherenkov-professional\docs\development\agentic-handover-protocol.md), agents must proactively save progress checkpoints and serialize their state to `agent_state/` upon hitting the 75% or 90% context/rate limit alert thresholds. Leaving an active session without writing a Handover Packet and saving state is a violation of agentic professional conduct.
+- **Agent Handoffs:** Agents must communicate clearly defined state and context during handoffs, adhering to the `AgentState` schema to prevent context pollution.
 
 ## 6. Enforcement
 Instances of abusive, harassing, or otherwise unacceptable behavior may be reported by contacting the project team. All complaints will be reviewed and investigated and will result in a response that is deemed necessary and appropriate to the circumstances. The project team will maintain confidentiality with regard to the reporter of an incident. 

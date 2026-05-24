@@ -568,10 +568,32 @@ class Meissner(CircuitBreaker):
 
         try:
             if system == "linux":
-                # Use iptables to drop all output traffic
-                # -I OUTPUT 1 inserts at the top of the chain
-                subprocess.run(["iptables", "-I", "OUTPUT", "1", "-j", "DROP"], check=True)
-                logger.info("Linux iptables: Egress dropped successfully.")
+                # Drop outbound traffic to external networks only.
+                # Preserve internal Docker bridge (docker0) and loopback so
+                # the API, dashboard, Ollama, and Qdrant continue to function.
+                # Rules are inserted at the top of the OUTPUT chain and removed
+                # on recovery (fail_open) by matching the comment string.
+                _MEISSNER_RULE = "cherenkov-meissner-egress-block"
+                # Allow loopback and Docker internal bridge
+                subprocess.run(
+                    ["iptables", "-A", "OUTPUT", "-o", "lo", "-j", "ACCEPT"], check=True
+                )
+                subprocess.run(
+                    ["iptables", "-A", "OUTPUT", "-o", "docker0", "-j", "ACCEPT"], check=True
+                )
+                # Block all remaining outbound traffic with a comment marker
+                subprocess.run(
+                    [
+                        "iptables",
+                        "-A", "OUTPUT",
+                        "-m", "comment", "--comment", _MEISSNER_RULE,
+                        "-j", "DROP",
+                    ],
+                    check=True,
+                )
+                logger.info(
+                    "Linux iptables: External egress blocked (lo/docker0 preserved)."
+                )
             elif system == "windows":
                 # Use netsh to block all outgoing traffic
                 # First ensure firewall is on, then set default to block outbound
@@ -611,9 +633,24 @@ class Meissner(CircuitBreaker):
 
         try:
             if system == "linux":
-                # Remove the drop rule
-                subprocess.run(["iptables", "-D", "OUTPUT", "-j", "DROP"], check=True)
-                logger.info("Linux iptables: Egress restored.")
+                # Remove rules matching the comment marker
+                _MEISSNER_RULE = "cherenkov-meissner-egress-block"
+                subprocess.run(
+                    [
+                        "iptables",
+                        "-D", "OUTPUT",
+                        "-m", "comment", "--comment", _MEISSNER_RULE,
+                        "-j", "DROP",
+                    ],
+                    check=True,
+                )
+                subprocess.run(
+                    ["iptables", "-D", "OUTPUT", "-o", "lo", "-j", "ACCEPT"], check=True
+                )
+                subprocess.run(
+                    ["iptables", "-D", "OUTPUT", "-o", "docker0", "-j", "ACCEPT"], check=True
+                )
+                logger.info("Linux iptables: External egress restored.")
             elif system == "windows":
                 # Restore default outbound behavior (allow)
                 subprocess.run(

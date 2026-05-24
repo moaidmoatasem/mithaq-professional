@@ -21,7 +21,6 @@ from typing import Any, Dict, List, Literal, Optional, Set
 from urllib.parse import urlparse
 
 import httpx
-from dotenv import load_dotenv
 from fastapi import (
     BackgroundTasks,
     Depends,
@@ -65,11 +64,16 @@ from cherenkov.orchestration.orchestration_api import orchestrate_workflow
 from cherenkov.orchestration.result_persistence import ResultStore
 from cherenkov.orchestration.workflow_parser import load_workflow
 
+from dotenv import load_dotenv
+from cherenkov.api.init_auth import verify_api_key
+from cherenkov.api.routers import ai_orchestrator
+
 load_dotenv(dotenv_path=".env", override=True)
 
 # Initialize Limiter
 limiter = Limiter(key_func=get_remote_address)
 app = FastAPI(title="CHERENKOV C2 Hub")
+app.state.limiter = limiter
 app.add_exception_handler(RateLimitExceeded, _rate_limit_exceeded_handler)
 
 # 1. Public Frontend - NO AUTH

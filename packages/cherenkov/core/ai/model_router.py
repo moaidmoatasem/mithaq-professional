@@ -1,3 +1,5 @@
+import hashlib
+import json
 import logging
 import os
 import re
@@ -5,7 +7,7 @@ import time
 import uuid
 from dataclasses import dataclass
 from pathlib import Path
-from typing import Any, Optional, TYPE_CHECKING
+from typing import TYPE_CHECKING, Any, Optional
 
 from cherenkov.core.ablation.redactor import DataRedactor
 from cherenkov.core.schemas.reasoning_trace import ReasoningTrace
@@ -72,6 +74,10 @@ def _default_backends() -> list[BackendConfig]:
     ]
 
 
+if TYPE_CHECKING:
+    from cherenkov.core.reasoning_store import ReasoningStore
+
+
 class ModelRouter:
     """Async LLM router: Ollama → Gemini → Groq, respecting local/hybrid/cloud mode."""
 
@@ -101,7 +107,7 @@ class ModelRouter:
             try:
                 t0 = time.monotonic()
                 text = await self._call(backend, prompt, max_tokens)
-                elapsed = time.monotonic() - t0
+                elapsed_s = time.monotonic() - t0
                 cost = _estimate_cost(backend.name, prompt, text)
                 logger.info(
                     "model_router backend=%s model=%s tokens_est=%d cost_usd=%.6f elapsed=%.2fs",
@@ -109,9 +115,10 @@ class ModelRouter:
                     backend.model,
                     _rough_tokens(prompt + text),
                     cost,
-                    elapsed,
+                    elapsed_s,
                 )
 
+                # Reasoning Trace Logging
                 if self.reasoning_store is not None:
                     try:
                         redactor = DataRedactor()

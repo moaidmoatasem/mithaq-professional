@@ -55,13 +55,18 @@ class StaticAnalysisAgent:
 
     def scan(self, code: str) -> str:
         logger.info(f"Agent '{self.role}' beginning code vulnerability scan...")
+        
+        # Apply ABLATION sanitization pre-inference
+        from ablation import AblationSanitizer
+        sanitized_code = AblationSanitizer.sanitize(code)
+        
         prompt = (
             "Analyze the following Python source code. List all security vulnerabilities you discover. "
             "For each finding, specify: \n"
             "1. Line / Area of vulnerability\n"
             "2. Vulnerability Type (e.g. SQL Injection, Hardcoded Secrets, Command Injection)\n"
             "3. Impact and risk severity (Critical/High/Medium/Low)\n\n"
-            f"Code to analyze:\n```python\n{code}\n```"
+            f"Code to analyze:\n```python\n{sanitized_code}\n```"
         )
         return self.client.generate(
             prompt=prompt,

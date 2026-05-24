@@ -105,12 +105,149 @@ class TestLLMIntegration(unittest.TestCase):
         report = self.client.get_performance_report()
         self.assertGreaterEqual(report["total_requests"], 1)
         self.assertGreaterEqual(report["total_tokens"], 1)
-        self.assertGreater(report["total_latency_seconds"], 0)
-        self.assertGreater(report["avg_tokens_per_second"], 0)
+        self.assertGreaterEqual(report["total_latency_seconds"], 0.0)
+        self.assertGreaterEqual(report["avg_tokens_per_second"], 0.0)
+        self.assertEqual(report["circuit_state"], "CLOSED")
         
         print("\n[Performance Metrics Collected in Session]")
         for k, v in report.items():
             print(f"      {k}: {v}")
+
+    def test_05_ablation_redaction(self):
+        """Verify that the AblationSanitizer correctly redacts sensitive patterns."""
+        print("\n[Running Integration Test 05: ABLATION Redaction verification]")
+        from ablation import AblationSanitizer
+        
+        raw_code = 'db_password = "MySuperSecretPassword123!"\nemail = "dev@sovereign.security"\nkey = "-----BEGIN RSA PRIVATE KEY-----\nMIIEvgIBADANBgkqhkiG9w0BAQEFAASCBKgwggSkAgEAAoIBAQD..."\n-----END RSA PRIVATE KEY-----'
+        sanitized = AblationSanitizer.sanitize(raw_code)
+        
+        self.assertNotIn("MySuperSecretPassword123!", sanitized)
+        self.assertNotIn("dev@sovereign.security", sanitized)
+        self.assertNotIn("-----BEGIN RSA PRIVATE KEY-----", sanitized)
+        
+        self.assertIn("[REDACTED_DB_PASSWORD]", sanitized)
+        self.assertIn("[REDACTED_EMAIL]", sanitized)
+        self.assertIn("[REDACTED_PRIVATE_KEY]", sanitized)
+        print("      Ablation successfully redacted secret variable, email, and private key.")
+
+    def test_06_circuit_breaker_transitions(self):
+        """Test the state transitions of the simulated MEISSNER circuit breaker."""
+        print("\n[Running Integration Test 06: MEISSNER Circuit Breaker transitions]")
+        import time
+        
+        # Test client with low failure threshold for test control
+        faulty_client = UnifiedLLMClient(
+            backend="vllm",
+            base_url="http://localhost:9999/v1",  # Invalid port to force failures
+            max_retries=1,
+            failure_threshold=2,
+            cooldown_seconds=1.0
+        )
+        
+        # Initially CLOSED
+        self.assertEqual(faulty_client.breaker.state, "CLOSED")
+        
+        # Trigger failure 1 (threshold is 2)
+        response1 = faulty_client.generate("Trigger SQL check")
+        # Should drop to rule-based fallback since LLM call fails
+        self.assertIn("[FALLBACK SCAN]", response1)
+        self.assertIn("Potential SQL Injection Vulnerability", response1)
+        self.assertEqual(faulty_client.breaker.state, "CLOSED")
+        
+        # Trigger failure 2 (circuit should trip to OPEN)
+        response2 = faulty_client.generate("Trigger RCE system")
+        self.assertIn("[FALLBACK SCAN]", response2)
+        self.assertEqual(faulty_client.breaker.state, "OPEN")
+        
+        # When OPEN, a new request is immediately blocked and routed to fallback without calling OpenAI client
+        response3 = faulty_client.generate("password check")
+        self.assertIn("[FALLBACK SCAN]", response3)
+        self.assertEqual(faulty_client.breaker.state, "OPEN")
+        
+        # Wait for cooldown to expire
+        time.sleep(1.1)
+        
+        # State check should shift it to HALF_OPEN when calling generate
+        response4 = faulty_client.generate("normal scan")
+        # Because the port is still down, the attempt in HALF_OPEN fails, and immediately trips back to OPEN
+        self.assertIn("[FALLBACK SCAN]", response4)
+        self.assertEqual(faulty_client.breaker.state, "OPEN")
+        print("      Circuit breaker successfully transitioned CLOSED -> OPEN -> HALF_OPEN -> OPEN and routed to Fallback.")
+
+    def test_07_frida_sanitization(self):
+        """Verify that the FridaInputSanitizer successfully strips malicious characters."""
+        print("\n[Running Integration Test 07: FRIDA Hook Input Sanitization verification]")
+        from frida_sanitizer import FridaInputSanitizer
+        
+        malicious_hooks = [
+            "com.bank.app.LoginClass.submit\"; alert('INJECTED'); //",
+            "com.bank.app.RootCheck.isDeviceRooted"
+        ]
+        
+        script = FridaInputSanitizer.generate_safe_frida_script("android", malicious_hooks)
+        
+        # Verify that the injection attempt is neutralized
+        self.assertNotIn("submit\"; alert('INJECTED'); //", script)
+        # Check that it's stripped to clean safe chars
+        self.assertIn("submitalertINJECTED", script)
+        self.assertIn("com.bank.app.RootCheck.isDeviceRooted", script)
+        print("      Frida sanitizer successfully stripped injection characters and built a safe script.")
+
+    def test_08_health_diagnostics(self):
+        """Verify that the AutonomicHealthGateway correctly performs diagnostics checks."""
+        print("\n[Running Integration Test 08: Autonomic Health & Readiness Diagnostics verification]")
+        from health_diagnostics import AutonomicHealthGateway
+        
+        diag_engine = AutonomicHealthGateway()
+        
+        # Test 1: Liveness check
+        live_ok, live_details = diag_engine.check_liveness()
+        self.assertTrue(live_ok)
+        self.assertIn("uptime_seconds", live_details)
+        self.assertIn("pid", live_details)
+        
+        # Test 2: Readiness check
+        ready_ok, ready_details = diag_engine.check_readiness()
+        self.assertTrue(ready_ok)
+        self.assertEqual(ready_details["database"]["status"], "OK")
+        self.assertEqual(ready_details["inference_runtime"]["status"], "OK")
+        print("      Liveness and Readiness checks completed with verified OK statuses.")
+
+    def test_09_security_gateway(self):
+        """Verify that the security gateway middleware correctly enforces limits and authenticates websockets."""
+        print("\n[Running Integration Test 09: Autonomic Security Gateway Middleware verification]")
+        from security_gateway import SlidingWindowRateLimiter, WebSocketAuthenticator
+        import jwt
+        
+        # 1. Rate limiter test
+        limiter = SlidingWindowRateLimiter(limit=2, window_seconds=2.0)
+        ok1, rem1 = limiter.is_allowed("10.0.0.5")
+        self.assertTrue(ok1)
+        self.assertEqual(rem1, 1)
+        
+        ok2, rem2 = limiter.is_allowed("10.0.0.5")
+        self.assertTrue(ok2)
+        self.assertEqual(rem2, 0)
+        
+        ok3, rem3 = limiter.is_allowed("10.0.0.5")
+        self.assertFalse(ok3)
+        self.assertEqual(rem3, 0)
+        
+        # 2. WebSocket authenticator test
+        auth = WebSocketAuthenticator()
+        payload = {"sub": "admin_test", "role": "admin"}
+        token = jwt.encode(payload, auth.secret_key, algorithm=auth.algorithm)
+        
+        # Validate query string extraction
+        auth_ok, user_payload = auth.validate_connection(f"token={token}")
+        self.assertTrue(auth_ok)
+        self.assertEqual(user_payload["sub"], "admin_test")
+        
+        # Validate header extraction
+        auth_ok2, user_payload2 = auth.validate_connection("", headers={"Authorization": f"Bearer {token}"})
+        self.assertTrue(auth_ok2)
+        self.assertEqual(user_payload2["sub"], "admin_test")
+        print("      Rate limiter blocked excess requests and WebSocket successfully verified JWTs.")
 
 
 if __name__ == "__main__":

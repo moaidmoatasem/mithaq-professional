@@ -23,7 +23,6 @@ class Finding(BaseModel):
     description: str
     cwe: str
     remediation: str
-    id: str = ""
     trace_hash: str = ""
     poc_command: str = ""
     confirmed: bool = False

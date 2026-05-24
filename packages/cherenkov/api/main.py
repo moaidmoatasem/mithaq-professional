@@ -1209,6 +1209,7 @@ async def v1_mesh_nodes(current_user: AuthUser = Depends(get_current_user)) -> d
 
 # Register /api/v1 router
 app.include_router(v1)
+app.include_router(ai_orchestrator.router)
 
 
 if __name__ == "__main__":

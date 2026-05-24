@@ -455,7 +455,7 @@ class AutonomousSprint:
         self.developer = LocalDeveloper()
         self.gate = ValidationGate(self.target_file)
 
-    def _extract_code(self, raw: str) -> str:
+def _extract_code(self, raw: str) -> str:
         import re
 
         m = re.search(r"```python\n(.*?)\n```", raw, re.DOTALL)

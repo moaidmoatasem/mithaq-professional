@@ -11,12 +11,14 @@ import sys
 import unittest
 from unittest.mock import MagicMock
 from pathlib import Path
+import pytest
 
 # Add src to the path
 sys.path.append(str(Path(__file__).parent.parent / "src"))
 from vllm_client import UnifiedLLMClient
 
 
+@pytest.mark.integration
 class TestLLMIntegration(unittest.TestCase):
     
     @classmethod

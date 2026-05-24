@@ -27,6 +27,7 @@ def _ensure(client):
 
 
 async def embed_and_store(trace: dict) -> str:
+    """DEPRECATED: Use cherenkov.core.lattice_bridge.embed_and_store instead."""
     try:
         c = _client()
         _ensure(c)

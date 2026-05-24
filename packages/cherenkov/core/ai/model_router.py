@@ -4,12 +4,16 @@ import logging
 import os
 import re
 import time
+import uuid
 from dataclasses import dataclass
 from pathlib import Path
 from typing import TYPE_CHECKING, Any, Optional
 
 from cherenkov.core.ablation.redactor import DataRedactor
 from cherenkov.core.schemas.reasoning_trace import ReasoningTrace
+
+if TYPE_CHECKING:
+    from cherenkov.core.reasoning_store import ReasoningStore
 
 logger = logging.getLogger(__name__)
 
@@ -126,20 +130,24 @@ class ModelRouter:
                             reasoning_match.group(1).strip() if reasoning_match else "[implicit]"
                         )
 
-                        trace_data = {
+                        trace_fields = {
+                            "trace_id": str(uuid.uuid4()),
+                            "agent_id": "model_router",
+                            "agent_role": "llm",
+                            "session_id": self.session_id or "unknown",
+                            "step_index": 0,
                             "step_type": "llm_inference",
                             "input_summary": input_summary,
                             "output_summary": output_summary,
                             "reasoning": reasoning_str,
                             "model_backend": backend.name,
-                            "latency_ms": elapsed_s * 1000.0,
+                            "latency_ms": int(elapsed * 1000),
                             "confidence": None,
+                            "sha256_anchor": "placeholder",
                         }
-                        sha256_anchor = hashlib.sha256(
-                            json.dumps(trace_data, sort_keys=True).encode()
-                        ).hexdigest()
-
-                        trace = ReasoningTrace(**trace_data, sha256_anchor=sha256_anchor)
+                        _tmp = ReasoningTrace(**trace_fields)
+                        trace_fields["sha256_anchor"] = _tmp.compute_hash()
+                        trace = ReasoningTrace(**trace_fields)
                         self.reasoning_store.record(trace)
                     except Exception as store_exc:
                         logger.warning("Failed to record reasoning trace: %s", store_exc)

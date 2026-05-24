@@ -1,5 +1,6 @@
 """cherenkov Scanners Module"""
 
+from cherenkov.cve.scanner import CVEScanner
 from .header_scanner import SimpleScanner
 from .http_methods import HTTPMethodsScanner
 from .path_traversal_scanner import PathTraversalScanner
@@ -9,6 +10,7 @@ from .web.nuclei_scanner import NucleiScanner
 from .xxe_scanner import XXEScanner
 
 __all__ = [
+    "CVEScanner",
     "SimpleScanner",
     "SecurityHeadersScanner",
     "HTTPMethodsScanner",

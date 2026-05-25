@@ -8,10 +8,10 @@
 </p>
 
 <p align="center">
-  <img src="https://img.shields.io/badge/license-MIT_/_Apache_2.0-00E0FF?style=for-the-badge&labelColor=0A0E1A" alt="License">
-  <img src="https://img.shields.io/badge/python-3.11%2B-00E0FF?style=for-the-badge&labelColor=0A0E1A" alt="Python">
+  <img src="https://img.shields.io/badge/license-MIT_/_Apache_2.0-00A3FF?style=for-the-badge&labelColor=0A0E1A" alt="License">
+  <img src="https://img.shields.io/badge/python-3.11%2B-00A3FF?style=for-the-badge&labelColor=0A0E1A" alt="Python">
   <img src="https://img.shields.io/badge/status-alpha-9D00FF?style=for-the-badge&labelColor=0A0E1A" alt="Status">
-  <img src="https://img.shields.io/badge/architecture-air--gapped-00E0FF?style=for-the-badge&labelColor=0A0E1A" alt="Air-Gapped">
+  <img src="https://img.shields.io/badge/architecture-air--gapped-00A3FF?style=for-the-badge&labelColor=0A0E1A" alt="Air-Gapped">
   <img src="https://img.shields.io/badge/security-sovereign-9D00FF?style=for-the-badge&labelColor=0A0E1A" alt="Sovereign">
 </p>
 
@@ -37,7 +37,7 @@ CHERENKOV operates on a mathematically provable "Trident of Truth": it finds vul
 | **Governance** | SHA-256 signed WAL/WORM · Shred Receipts · Zero-Egress |
 | **AI Stack** | Ollama-powered multi-agent swarm · LLM-driven scanner generation |
 | **Compliance** | EGY-FIN CSF · SAMA CSF · DORA · ISO 27001-aligned |
-| **Design System** | See [`DESIGN_SYSTEM.md`](DESIGN_SYSTEM.md) for brand guidelines |
+| **Design System** | See [`Design System docs`](docs/development/design-system.md) for brand guidelines |
 
 ---
 
@@ -108,7 +108,7 @@ We refuse to utilize the "SSO Wall of Shame." Core security features (SSO, RBAC,
 </p>
 
 <p align="center">
-  <a href="DESIGN_SYSTEM.md">🎨 Design System</a> ·
+  <a href="docs/development/design-system.md">🎨 Design System</a> ·
   <a href="docs/">📚 Documentation</a> ·
   <a href="https://docs.cherenkov-security.com/">🌐 docs.cherenkov-security.com</a> ·
   <a href="docs/PROJECT_BRIEFING.md">📋 Project briefing</a> ·

@@ -1,0 +1,39 @@
+# Paths and branches that agents must never modify.
+# Read by every agent before any edit. Not enforced by git — enforced by
+# prompt and by reviewer. See AGENTS.md for the full coordination protocol.
+
+# Protected branches — never commit, push, or merge directly
+main
+master
+
+# Wrong source path — CHERENKOV code lives in packages/cherenkov/, never src/
+src/
+
+# Secrets and local config — never stage, never read into prompts
+.env
+.env.*
+*.pem
+*.key
+mcp_config.json
+.claude/settings.local.json
+
+# Build artifacts and dependency trees — let tooling regenerate these
+venv/
+.venv/
+node_modules/
+site/
+dist/
+build/
+__pycache__/
+*.egg-info/
+
+# Other agents' working state — do not cross-contaminate
+.kilo/
+.worktrees/
+.aider*
+
+# Forensic / runtime state — only the system writes here
+*.sqlite
+*.sqlite-wal
+*.sqlite-shm
+forensic_traces/

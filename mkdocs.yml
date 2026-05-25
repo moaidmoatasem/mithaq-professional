@@ -79,7 +79,6 @@ nav:
     - DORA: compliance/dora.md
   - Development:
     - development/index.md
-    - Contributing: development/contributing.md
     - Development Workflow: development/workflow.md
     - Sprint Plan: development/sprint-plan.md
     - Code Standards: development/code-standards.md
@@ -100,9 +99,18 @@ nav:
     - Releases: development/releases.md
     - Newsletter Concept: development/newsletter-concept.md
     - Wiki Index: development/wiki-index.md
+    - Writing Style Guide: development/writing-style.md
   - Security:
     - security/index.md
     - Vulnerability Disclosure: security/disclosure.md
+  - Governance:
+    - Code of Conduct: governance/code-of-conduct.md
+    - Security Policy: governance/security.md
+    - Agent Rules: governance/agent-rules.md
+    - HITL Enforcement: governance/hitl-enforcement.md
+    - Contributing: governance/contributing.md
+  - Architecture Reference:
+    - ARCHITECTURE.md (Root): https://github.com/moaidmoatasem/cherenkov-professional/blob/main/ARCHITECTURE.md
 
 plugins:
   - search

@@ -22,6 +22,7 @@ from typing import Any, Dict, List, Literal, Optional, Set
 from urllib.parse import urlparse
 
 import httpx
+from dotenv import load_dotenv
 from fastapi import (
     BackgroundTasks,
     Depends,
@@ -41,23 +42,19 @@ from slowapi import Limiter, _rate_limit_exceeded_handler
 from slowapi.errors import RateLimitExceeded
 from slowapi.util import get_remote_address
 
+from cherenkov.api.dependencies import require_rotated_credentials
 from cherenkov.api.init_auth import verify_api_key
 from cherenkov.api.middleware.auth import (
     Role,
     RoleChecker,
     create_access_token,
-    get_current_user_bearer,
     get_current_user,
     verify_password,
 )
 from cherenkov.api.middleware.auth import (
     User as AuthUser,
 )
-from cherenkov.api.middleware.session import get_current_user_dependency
-from cherenkov.api.middleware.csrf_mw import CsrfMiddleware
 from cherenkov.api.routers import ai_orchestrator
-from cherenkov.api.dependencies import require_rotated_credentials
-from cherenkov.credentials import DefaultCredentialsManager
 from cherenkov.core.storage.database import (
     _DB_PATH,
     erase_target_data,
@@ -66,13 +63,10 @@ from cherenkov.core.storage.database import (
     save_audit_entry,
 )
 from cherenkov.core.tokamak import Command, Tokamak
+from cherenkov.credentials import DefaultCredentialsManager
 from cherenkov.orchestration.orchestration_api import orchestrate_workflow
 from cherenkov.orchestration.result_persistence import ResultStore
 from cherenkov.orchestration.workflow_parser import load_workflow
-
-from dotenv import load_dotenv
-from cherenkov.api.init_auth import verify_api_key
-from cherenkov.api.routers import ai_orchestrator
 
 load_dotenv(dotenv_path=".env", override=True)
 
@@ -770,8 +764,6 @@ async def v1_scan_report_pdf(
     scan_id: str, current_user: AuthUser = Depends(get_current_user)
 ):
     """Download PDF security report."""
-    from fastapi.responses import Response
-
     from cherenkov.compliance.mapper import ComplianceMapper
     from cherenkov.compliance.reports import PDFReportGenerator
     from cherenkov.core.base_scanner import Finding, ScanResult, Severity

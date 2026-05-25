@@ -398,7 +398,8 @@ async def v1_rotate_password(
                 except RuntimeError:
                     continue
             else:
-                from cherenkov.api.middleware.auth import JWT_SECRET as secret
+                from cherenkov.api.middleware.auth import JWT_SECRET
+                secret = JWT_SECRET
             payload = jwt.decode(session_cookie, secret, algorithms=["HS256"])
             username = payload.get("sub")
             break

@@ -39,7 +39,7 @@ def create_access_token(data: dict, expires_delta: Optional[timedelta] = None):
     return encoded_jwt
 
 
-async def get_current_user(authorization: Annotated[Optional[str], Header()] = None) -> User:
+async def get_current_user_bearer(authorization: Annotated[Optional[str], Header()] = None) -> User:
     if not authorization:
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
@@ -75,11 +75,15 @@ async def get_current_user(authorization: Annotated[Optional[str], Header()] = N
         )
 
 
+# Alias for backward compatibility
+get_current_user = get_current_user_bearer
+
+
 class RoleChecker:
     def __init__(self, required_role: Role):
         self.required_role = required_role
 
-    def __call__(self, user: User = Depends(get_current_user)):
+    def __call__(self, user: User = Depends(get_current_user_bearer)):
         if user.role < self.required_role:
             raise HTTPException(
                 status_code=status.HTTP_403_FORBIDDEN,

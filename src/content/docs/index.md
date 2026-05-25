@@ -1,0 +1,1 @@
+# Starlight Documentation This is the main documentation page for Cherenkov Security. ## Getting Started To add new documentation, create Markdown files in the `src/content/docs/` directory. ## Available Pages - [Readme](readme.md) - [Index](index.md) Last updated: May 24, 2026

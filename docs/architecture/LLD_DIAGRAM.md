@@ -8,31 +8,32 @@ sequenceDiagram
     participant Orchestrator
     participant Governor as Agent Governor
     participant Sanitizer as Ablation Sanitizer
-    participant Tensor as TENSOR (Cloud)
-    participant Kinetic as KINETIC (Local)
-    participant Tokamak as Tokamak (Validator)
-    participant Lattice as LATTICE (Memory)
+    participant Tensor as TENSOR (Ollama Qwen 7B)
+    participant Kinetic as KINETIC (Ollama Qwen 1.5B)
+    participant Tokamak as TOKAMAK (Docker PoC)
+    participant Lattice as LATTICE (Qdrant + nomic)
 
     User->>Orchestrator: Submit Scan Request
     Orchestrator->>Governor: Route Task
-    Governor->>Lattice: Retrieve Context (Dialect/CVEs)
+    Governor->>Lattice: Retrieve Context (CVEs / dialect)
     Lattice-->>Governor: Context Vectors
 
     alt Needs Strategic Planning
-        Governor->>Sanitizer: Redact PII/Sensitive Data
-        Sanitizer-->>Governor: Cleaned Context
-        Governor->>Tensor: Send Sanitized Plan Request
-        Tensor-->>Governor: Strategic Plan / Attack Chain
+        Governor->>Sanitizer: Redact PII / code
+        Sanitizer-->>Governor: Cleaned payload
+        Governor->>Tensor: Request attack plan
+        Tensor-->>Governor: Attack chain schema
     end
 
-    Governor->>Kinetic: Send Execution Task
-    Kinetic->>Kinetic: Execute Scanners / Triage
-    Kinetic-->>Governor: Execution Results
+    Governor->>Kinetic: Dispatch execution task
+    Kinetic->>Kinetic: Run scanners / triage
+    Kinetic-->>Governor: Findings collected
 
-    Governor->>Tokamak: Validate Proof of Concept
-    Tokamak->>Tokamak: Sandbox Execution
-    Tokamak-->>Governor: Validation Results
+    Governor->>Tokamak: Validate via PoC
+    Tokamak->>Tokamak: Sandbox execution
+    Tokamak-->>Governor: PoC result + trace
 
-    Governor->>Orchestrator: Final Aggregated Result
-    Orchestrator-->>User: Report
+    Governor->>Governor: Compile CherenkovTrace
+    Governor->>Orchestrator: Aggregated result
+    Orchestrator-->>User: Signed report
 ```

@@ -1,13 +1,14 @@
 /* CHERENKOV Unified Brand Styles */
-/* Consolidated from cherenkov.css + extra.css — single source of truth */
+/* Derived from assets/cherenkov-logo.svg — PRIMARY: #00E0FF, SECONDARY: #9D00FF */
 
 :root {
   --md-primary-fg-color: #0B0D0F;
   --md-primary-fg-color--light: #2F5F8A;
   --md-primary-fg-color--dark: #07080A;
-  --md-accent-fg-color: #00A3FF;
-  --md-accent-fg-color--transparent: rgba(0, 163, 255, 0.1);
-  --md-typeset-a-color: #00A3FF;
+  --md-accent-fg-color: #00E0FF;
+  --md-accent-fg-color--transparent: rgba(0, 224, 255, 0.1);
+  --md-typeset-a-color: #00E0FF;
+  --md-secondary-color: #9D00FF;
 }
 
 .md-header {
@@ -24,12 +25,12 @@ h1, h2, h3, h4, h5, h6 {
 }
 
 .md-button--primary {
-  box-shadow: 0 0 10px rgba(0, 163, 255, 0.3);
+  box-shadow: 0 0 10px rgba(0, 224, 255, 0.3);
   transition: box-shadow 0.3s ease;
 }
 
 .md-button--primary:hover {
-  box-shadow: 0 0 15px rgba(0, 163, 255, 0.6);
+  box-shadow: 0 0 15px rgba(0, 224, 255, 0.6);
 }
 
 .md-nav__item--active > .md-nav__link {
@@ -38,8 +39,8 @@ h1, h2, h3, h4, h5, h6 {
 
 /* Code block styling */
 .md-typeset code {
-  color: #00A3FF;
-  background-color: rgba(0, 163, 255, 0.05);
+  color: #00E0FF;
+  background-color: rgba(0, 224, 255, 0.05);
 }
 
 /* Mermaid diagram background */
@@ -56,10 +57,18 @@ h1, h2, h3, h4, h5, h6 {
 
 /* Link hover effects */
 .md-typeset a:hover {
-  color: #00E0FF;
+  color: #9D00FF;
 }
 
 /* CHERENKOV brand signature at page bottom */
 .md-footer-meta {
   background-color: #07080A;
+}
+
+/* CHERENKOV brand gradient for special elements */
+.cv-gradient {
+  background: linear-gradient(135deg, #00E0FF, #9D00FF);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
 }

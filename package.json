@@ -6,7 +6,10 @@
   "scripts": {
     "build": "pip install -r requirements-docs.txt && mkdocs build",
     "deploy": "npm run build && wrangler deploy",
-    "dev": "wrangler dev"
+    "dev": "wrangler dev",
+    "docs:dev": "npm --prefix cherno-docs run dev",
+    "docs:build": "npm --prefix cherno-docs run build",
+    "docs:preview": "npm --prefix cherno-docs run preview"
   },
   "devDependencies": {
     "wrangler": "^3.114.1"

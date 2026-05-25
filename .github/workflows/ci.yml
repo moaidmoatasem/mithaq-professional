@@ -85,3 +85,42 @@ jobs:
         name: playwright-report
         path: packages/cherenkov/web/playwright-report/
         retention-days: 30
+
+  docs-drift:
+    # Enforce the Documentation Mandate (AGENTS.md). Any PR touching a
+    # documented surface (API, storage, auth middleware) must also update
+    # cherno-docs/. PR-only — pushes to main bypass.
+    if: github.event_name == 'pull_request'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - name: Check for documentation drift
+        env:
+          BASE: origin/${{ github.base_ref }}
+        run: scripts/check-docs-drift.sh
+
+  docs-build:
+    # Build the Starlight docs site. Node 22 is required by Astro 6.
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: 'npm'
+          cache-dependency-path: cherno-docs/package-lock.json
+      - name: Install docs dependencies
+        working-directory: cherno-docs
+        run: npm ci
+      - name: Build Starlight site
+        working-directory: cherno-docs
+        run: npm run build
+      - name: Upload built site
+        uses: actions/upload-artifact@v4
+        with:
+          name: docs-dist
+          path: cherno-docs/dist/
+          retention-days: 14

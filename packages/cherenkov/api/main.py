@@ -11,6 +11,7 @@ import json
 import logging
 import os
 import re
+import secrets
 import sqlite3
 import time
 import uuid
@@ -32,7 +33,7 @@ from fastapi import (
     status,
 )
 from fastapi.middleware.cors import CORSMiddleware
-from fastapi.responses import FileResponse
+from fastapi.responses import FileResponse, Response
 from fastapi.routing import APIRouter
 from fastapi.staticfiles import StaticFiles
 from pydantic import BaseModel
@@ -45,13 +46,18 @@ from cherenkov.api.middleware.auth import (
     Role,
     RoleChecker,
     create_access_token,
+    get_current_user_bearer,
     get_current_user,
     verify_password,
 )
 from cherenkov.api.middleware.auth import (
     User as AuthUser,
 )
+from cherenkov.api.middleware.session import get_current_user_dependency
+from cherenkov.api.middleware.csrf_mw import CsrfMiddleware
 from cherenkov.api.routers import ai_orchestrator
+from cherenkov.api.dependencies import require_rotated_credentials
+from cherenkov.credentials import DefaultCredentialsManager
 from cherenkov.core.storage.database import (
     _DB_PATH,
     erase_target_data,
@@ -119,6 +125,13 @@ async def lifespan(app: FastAPI):
     from cherenkov.core.storage.database import get_user, init_db, save_user
 
     init_db()
+    env_path = Path(".env")
+    if not env_path.exists():
+        logger.warning(
+            "Runtime .env not found at %s. "
+            "CHERENKOV_JWT_SECRET must be set via environment variable.",
+            env_path,
+        )
     if not get_user("admin"):
         save_user("admin", hash_password("admin"), Role.ADMIN)
 
@@ -214,6 +227,11 @@ class AuthRequest(BaseModel):
     password: str
 
 
+class PasswordRotateRequest(BaseModel):
+    old_password: str
+    new_password: str
+
+
 class FridaGenerateRequest(BaseModel):
     platform: str
     hooks: List[str]
@@ -281,9 +299,15 @@ if (ObjC.available) {
 
 @v1.post("/assistant/advice")
 async def v1_assistant_advice(
-    request: AssistantAdviceRequest, current_user: AuthUser = Depends(get_current_user)
+    request: AssistantAdviceRequest,
+    current_user: AuthUser = Depends(get_current_user),
 ) -> dict:
     """Get remediation advice from the AI Studio Assistant (Ollama)."""
+    if DefaultCredentialsManager.is_rotation_required():
+        raise HTTPException(
+            status_code=423,
+            detail={"code": "rotation_required", "message": "Password rotation required"}
+        )
     import json
 
     import httpx
@@ -351,6 +375,79 @@ async def v1_auth_token(request: AuthRequest) -> dict:
 async def v1_auth_me(current_user: AuthUser = Depends(get_current_user)) -> dict:
     """Return the current authenticated user's profile."""
     return {"username": current_user.username, "role": current_user.role.name}
+
+
+@v1.post("/auth/rotate-password")
+async def v1_rotate_password(
+    request: PasswordRotateRequest,
+    fastapi_request: Request,
+) -> dict:
+    """Rotate admin password and regenerate JWT secret.
+
+    Requires valid session cookie. Clears rotation flag after success.
+    """
+    import jwt
+
+    session_cookie = fastapi_request.cookies.get("session")
+    if not session_cookie:
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Missing session cookie",
+        )
+
+    username = None
+    for secret_source in [None, "credentials"]:
+        try:
+            if secret_source == "credentials":
+                try:
+                    secret = DefaultCredentialsManager.get_jwt_secret()
+                except RuntimeError:
+                    continue
+            else:
+                from cherenkov.api.middleware.auth import JWT_SECRET as secret
+            payload = jwt.decode(session_cookie, secret, algorithms=["HS256"])
+            username = payload.get("sub")
+            break
+        except jwt.PyJWTError:
+            continue
+
+    if not username:
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Invalid session",
+        )
+
+    user_data = get_user(username)
+    if not user_data:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="User not found",
+        )
+
+    if not verify_password(request.old_password, user_data["password"]):
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Incorrect old password",
+        )
+
+    from cherenkov.api.middleware.auth import hash_password
+    from cherenkov.core.storage.database import save_user
+
+    save_user(username, hash_password(request.new_password), user_data["role"])
+
+    new_secret = secrets.token_urlsafe(32)
+    DefaultCredentialsManager.set_jwt_secret(new_secret)
+    os.environ["CHERENKOV_JWT_SECRET"] = new_secret
+
+    from cherenkov.api.middleware.auth import create_access_token
+
+    new_token = create_access_token(data={"sub": username, "role": user_data["role"]})
+
+    response = {"status": "rotated"}
+    fastapi_request.state.new_token = new_token
+    fastapi_request.state.new_secret = new_secret
+
+    return response
 
 
 @v1.get("/audit")
@@ -534,9 +631,15 @@ async def v1_ablation_stats() -> dict:
 
 @v1.post("/sandbox/execute")
 async def v1_sandbox_execute(
-    command: Command, current_user: AuthUser = Depends(RoleChecker(Role.OPERATOR))
+    command: Command,
+    current_user: AuthUser = Depends(RoleChecker(Role.OPERATOR)),
 ) -> dict:
     """Execute a payload in the TOKAMAK sandbox. Requires OPERATOR role."""
+    if DefaultCredentialsManager.is_rotation_required():
+        raise HTTPException(
+            status_code=423,
+            detail={"code": "rotation_required", "message": "Password rotation required"}
+        )
     result = await asyncio.to_thread(Tokamak.execute, command)
     return {
         "stdout": result.stdout,
@@ -548,7 +651,7 @@ async def v1_sandbox_execute(
 
 
 @v1.get("/sandbox/status")
-async def v1_sandbox_status() -> dict:
+async def v1_sandbox_status(req: Request = Depends(require_rotated_credentials)) -> dict:
     """Return the status of the Tokamak sandbox."""
     return {"status": "ready"}
 
@@ -561,6 +664,15 @@ async def v1_scan(
     background_tasks: BackgroundTasks,
     current_user: AuthUser = Depends(get_current_user),
 ) -> dict:
+    """Proxy to the core scan engine; broadcasts a live event on completion.
+
+    Rate-limited to 30 requests/minute per IP to protect Ollama from exhaustion.
+    """
+    if DefaultCredentialsManager.is_rotation_required():
+        raise HTTPException(
+            status_code=423,
+            detail={"code": "rotation_required", "message": "Password rotation required"}
+        )
     """Proxy to the core scan engine; broadcasts a live event on completion.
 
     Rate-limited to 30 requests/minute per IP to protect Ollama from exhaustion.
@@ -771,9 +883,15 @@ async def v1_get_pending_findings() -> list[dict]:
 
 @v1.post("/findings/{finding_id}/approve")
 async def v1_approve_finding(
-    finding_id: str, current_user: AuthUser = Depends(RoleChecker(Role.OPERATOR))
+    finding_id: str,
+    current_user: AuthUser = Depends(RoleChecker(Role.OPERATOR)),
 ) -> dict:
     """Approve a finding. Requires OPERATOR role or higher."""
+    if DefaultCredentialsManager.is_rotation_required():
+        raise HTTPException(
+            status_code=423,
+            detail={"code": "rotation_required", "message": "Password rotation required"}
+        )
     from cherenkov.core.storage.database import init_db, update_finding_status
 
     try:
@@ -805,6 +923,11 @@ async def v1_reject_finding(
     Side-effect: labels the finding in LATTICE so future scans de-rank it
     automatically via cosine similarity scoring.
     """
+    if DefaultCredentialsManager.is_rotation_required():
+        raise HTTPException(
+            status_code=423,
+            detail={"code": "rotation_required", "message": "Password rotation required"}
+        )
     from cherenkov.core.lattice_bridge import label_false_positive
     from cherenkov.core.storage.database import init_db, update_finding_status
 
@@ -1156,6 +1279,11 @@ async def v1_lattice_similar(
     Used by the dashboard and autonomous agents to surface precedent before
     escalating a new finding.  Excludes false-positives by default.
     """
+    if DefaultCredentialsManager.is_rotation_required():
+        raise HTTPException(
+            status_code=423,
+            detail={"code": "rotation_required", "message": "Password rotation required"}
+        )
     from cherenkov.core.lattice_bridge import query_similar_targets
 
     results = await asyncio.to_thread(
@@ -1185,6 +1313,11 @@ async def v1_lattice_similar(
 @v1.get("/lattice/stats")
 async def v1_lattice_stats(current_user: AuthUser = Depends(get_current_user)) -> dict:
     """Return LATTICE vector store statistics."""
+    if DefaultCredentialsManager.is_rotation_required():
+        raise HTTPException(
+            status_code=423,
+            detail={"code": "rotation_required", "message": "Password rotation required"}
+        )
     from cherenkov.core.lattice_bridge import vector_count
 
     count = await asyncio.to_thread(vector_count)
@@ -1198,6 +1331,11 @@ async def v1_lattice_stats(current_user: AuthUser = Depends(get_current_user)) -
 @v1.get("/mesh/nodes")
 async def v1_mesh_nodes(current_user: AuthUser = Depends(get_current_user)) -> dict:
     """List discovered mesh nodes."""
+    if DefaultCredentialsManager.is_rotation_required():
+        raise HTTPException(
+            status_code=423,
+            detail={"code": "rotation_required", "message": "Password rotation required"}
+        )
     import socket
 
     from cherenkov.core.mesh import MeshManager

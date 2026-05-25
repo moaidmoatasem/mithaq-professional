@@ -1,0 +1,8 @@
+{
+  "name": "cherno-docs",
+  "version": "0.1.0",
+  "private": true,
+  "scripts": {
+    "build": "echo 'Mock build success'"
+  }
+}

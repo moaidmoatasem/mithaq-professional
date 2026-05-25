@@ -1,10 +1,13 @@
-/* CHERENKOV Custom Styles */
+/* CHERENKOV Unified Brand Styles */
+/* Consolidated from cherenkov.css + extra.css — single source of truth */
+
 :root {
   --md-primary-fg-color: #0B0D0F;
   --md-primary-fg-color--light: #2F5F8A;
   --md-primary-fg-color--dark: #07080A;
   --md-accent-fg-color: #00A3FF;
   --md-accent-fg-color--transparent: rgba(0, 163, 255, 0.1);
+  --md-typeset-a-color: #00A3FF;
 }
 
 .md-header {
@@ -16,6 +19,7 @@
 }
 
 h1, h2, h3, h4, h5, h6 {
+  color: var(--md-primary-fg-color);
   font-weight: 800;
 }
 
@@ -26,4 +30,36 @@ h1, h2, h3, h4, h5, h6 {
 
 .md-button--primary:hover {
   box-shadow: 0 0 15px rgba(0, 163, 255, 0.6);
+}
+
+.md-nav__item--active > .md-nav__link {
+  color: var(--md-accent-fg-color);
+}
+
+/* Code block styling */
+.md-typeset code {
+  color: #00A3FF;
+  background-color: rgba(0, 163, 255, 0.05);
+}
+
+/* Mermaid diagram background */
+.mermaid {
+  background-color: #0A0E1A;
+  padding: 1rem;
+  border-radius: 4px;
+}
+
+/* Admonition branding */
+.md-typeset .admonition {
+  border-left-color: var(--md-accent-fg-color);
+}
+
+/* Link hover effects */
+.md-typeset a:hover {
+  color: #00E0FF;
+}
+
+/* CHERENKOV brand signature at page bottom */
+.md-footer-meta {
+  background-color: #07080A;
 }

@@ -212,6 +212,28 @@ npm run lint        # tsc --noEmit
 npx vite build      # production build must pass
 ```
 
+**Documentation changes**:
+```bash
+markdownlint docs/ --ignore docs/assets/
+python dev_crew/doc_gate.py validate --manifest docs/manifest.json
+mkdocs build --strict
+python scripts/sync_docs.py validate
+```
+
+## 8. Documentation Compliance (All Agents)
+
+When generating or modifying documentation, every agent MUST:
+
+1. **Structure** — Follow the Writing Style Guide at `docs/development/writing-style.md`
+2. **Cross-References** — All `[text](path)` links must resolve. Run `doc_gate.py validate` before committing.
+3. **Diagrams** — Every architecture doc MUST include at least one Mermaid diagram.
+4. **Manifest** — Every new doc MUST be registered in `docs/manifest.json`.
+5. **Naming** — File names must be `kebab-case.md`. Titles must match H1.
+6. **Signature** — Each AI-generated doc MUST declare `Agent: <name>` in a frontmatter comment.
+7. **Sync** — Root governance files (`CODE_OF_CONDUCT.md`, `CONTRIBUTING.md`, `SECURITY.md`) are the SSOT. Edits to `docs/governance/` copies will be overwritten by `scripts/sync_docs.py`.
+
+Violations of these rules are **Sovereign Breaches** and will block PRs via the doc gate CI check.
+
 ---
 
 ## 8. State Files (keep current)

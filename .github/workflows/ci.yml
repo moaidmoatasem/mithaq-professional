@@ -111,10 +111,10 @@ jobs:
         with:
           node-version: '22'
           cache: 'npm'
-          cache-dependency-path: cherno-docs/package-lock.json
+          # cache-dependency-path: cherno-docs/package-lock.json
       - name: Install docs dependencies
         working-directory: cherno-docs
-        run: npm ci
+        run: npm install
       - name: Build Starlight site
         working-directory: cherno-docs
         run: npm run build

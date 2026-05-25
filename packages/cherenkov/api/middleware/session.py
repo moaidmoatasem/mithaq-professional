@@ -1,10 +1,8 @@
 """Session-based JWT authentication using cookies."""
-import os
 
 import jwt
-from fastapi import Depends, HTTPException, Request, status
-
 from cherenkov.api.middleware.auth import JWT_SECRET, Role, User
+from fastapi import Depends, HTTPException, Request, status
 
 ALGORITHM = "HS256"
 

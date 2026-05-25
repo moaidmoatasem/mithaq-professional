@@ -1,13 +1,18 @@
 import os
-import secrets
 from pathlib import Path
 from typing import Optional
 
 _ENV_PATH = Path.home() / ".cherenkov" / ".env"
 
 _BAD_SECRETS = {
-    "change-me", "admin", "secret", "password", "cherenkov-sovereign-audit-key-2024",
-    "", "CHERENKOV_JWT_SECRET=dev", "CHERENKOV_JWT_SECRET=default",
+    "change-me",
+    "admin",
+    "secret",
+    "password",
+    "cherenkov-sovereign-audit-key-2024",
+    "",
+    "CHERENKOV_JWT_SECRET=dev",
+    "CHERENKOV_JWT_SECRET=default",
 }
 
 
@@ -72,7 +77,7 @@ class DefaultCredentialsManager:
         if not secret or secret in _BAD_SECRETS:
             cls.set_rotation_flag()
             raise RuntimeError(
-                f"CHERENKOV_JWT_SECRET is a known-bad/default value. "
+                "CHERENKOV_JWT_SECRET is a known-bad/default value. "
                 "Run /auth/rotate-password to set a secure password and regenerate the secret."
             )
         return secret

@@ -1,4 +1,5 @@
 """CSRF protection via double-submit cookie pattern."""
+
 from dataclasses import dataclass
 
 from starlette.requests import Request
@@ -7,12 +8,14 @@ from starlette.requests import Request
 @dataclass
 class CsrfTokenPair:
     """Container for CSRF token cookie and header values."""
+
     cookie_value: str
     header_value: str
 
 
 class CsrfError(RuntimeError):
     """Raised when CSRF validation fails."""
+
     pass
 
 

@@ -385,12 +385,13 @@ async def v1_rotate_password(
         try:
             if secret_source == "credentials":
                 try:
-                    secret = DefaultCredentialsManager.get_jwt_secret()
+                    jwt_secret_val = DefaultCredentialsManager.get_jwt_secret()
                 except RuntimeError:
                     continue
             else:
-                from cherenkov.api.middleware.auth import JWT_SECRET as secret
-            payload = jwt.decode(session_cookie, secret, algorithms=["HS256"])
+                from cherenkov.api.middleware.auth import JWT_SECRET
+                jwt_secret_val = JWT_SECRET
+            payload = jwt.decode(session_cookie, jwt_secret_val, algorithms=["HS256"])
             username = payload.get("sub")
             break
         except jwt.PyJWTError:

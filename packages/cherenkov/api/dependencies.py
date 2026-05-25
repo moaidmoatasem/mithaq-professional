@@ -1,4 +1,4 @@
-from fastapi import Depends, HTTPException, Request
+from fastapi import HTTPException, Request
 
 from cherenkov.credentials import DefaultCredentialsManager
 

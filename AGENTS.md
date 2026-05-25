@@ -69,6 +69,87 @@ This file is read by every AI agent working on this repo. Follow it precisely.
 
 ---
 
+## 1e. Claim Tickets (conflict prevention)
+
+Before editing any file, every agent MUST:
+
+1. **Check for an existing claim** on the files it intends to touch:
+   ```bash
+   gh issue list -l claim/active --search "<path-or-keyword>"
+   ```
+2. **If a claim exists** that overlaps your files, do not edit. Either:
+   - Comment on the existing claim offering to take it over (if the prior
+     agent's token expired or the work is stalled), then update the issue
+     body to reflect the new owner; or
+   - Pick a different task.
+3. **If no claim exists**, open one before editing:
+   ```bash
+   gh issue create -l claim/active -t "[claim] <task-slug>" -b "
+   Branch: ai/<task-slug>
+   Files:
+     - packages/cherenkov/api/main.py
+     - packages/cherenkov/api/middleware/auth.py
+   Agent: <identity>
+   Started: <UTC timestamp>
+   "
+   ```
+4. **Close the claim** when the PR merges or you abandon the task.
+
+**Why this works across token rotation:** claims are GitHub issues, not
+agent identities. If Claude's token expires mid-task, Jules can take over
+the same claim and the same branch — no ownership change, no conflict.
+
+---
+
+## 1f. Domain Hints (advisory, not enforced)
+
+Routing preference when multiple agents are available. Any agent may
+fulfill any role; this just suggests the first-choice match.
+
+| Domain | Paths | First-choice agent |
+|---|---|---|
+| frontend | `packages/cherenkov/web/`, `cherno-docs/` | Antigravity |
+| backend | `packages/cherenkov/api/`, `packages/cherenkov/core/` | Claude Code |
+| scanners | `packages/cherenkov/scanners/` | Autonomous Pipeline |
+| infra | `deploy/`, `.github/`, `Dockerfile*`, `docker-compose*.yml` | Claude Code |
+| docs | `cherno-docs/`, `*.md` at repo root | Jules / Claude Code |
+
+These are hints, not hard locks. Token expired? Any agent can step in —
+just update the claim ticket.
+
+---
+
+## 1g. Touch Budget (per PR)
+
+To keep PRs reviewable and merge-fast (small PRs merge faster → less
+parallel drift → fewer conflicts):
+
+- **≤8 files** changed per PR (excluding lockfiles).
+- **≤400 lines** added+deleted per PR (excluding lockfiles).
+- Enforced by `.github/workflows/pr-budget.yml`.
+- To exceed: maintainer (Moaid) adds the `large-pr-approved` label and
+  the PR description must justify why splitting is not feasible.
+
+If your task is larger than the budget, **split into stacked PRs**:
+land each piece independently, rebase the next on the previous.
+
+---
+
+## 1h. Worktree Spawning
+
+Use `scripts/spawn_agent_worktree.sh <task-slug>` to create an isolated
+worktree. Worktrees are named by **task slug**, not agent identity:
+
+```
+../cherenkov-worktrees/auth-refactor/        ← any agent
+../cherenkov-worktrees/scanner-cve-2024-X/   ← any agent
+```
+
+When one agent's token expires, the next agent `cd`s into the same
+worktree and continues. No file ownership change, no merge.
+
+---
+
 ## 2. Antigravity (Google IDE) — Frontend Agent
 
 **Your domain**: `packages/cherenkov/web/src/`

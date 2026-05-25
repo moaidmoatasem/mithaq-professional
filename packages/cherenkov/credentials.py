@@ -5,8 +5,14 @@ from typing import Optional
 _ENV_PATH = Path.home() / ".cherenkov" / ".env"
 
 _BAD_SECRETS = {
-    "change-me", "admin", "secret", "password", "cherenkov-sovereign-audit-key-2024",
-    "", "CHERENKOV_JWT_SECRET=dev", "CHERENKOV_JWT_SECRET=default",
+    "change-me",
+    "admin",
+    "secret",
+    "password",
+    "cherenkov-sovereign-audit-key-2024",
+    "",
+    "CHERENKOV_JWT_SECRET=dev",
+    "CHERENKOV_JWT_SECRET=default",
 }
 
 

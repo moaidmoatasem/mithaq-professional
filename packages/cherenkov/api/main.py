@@ -385,14 +385,13 @@ async def v1_rotate_password(
         try:
             if secret_source == "credentials":
                 try:
-                    secret = DefaultCredentialsManager.get_jwt_secret()
+                    jwt_secret_val = DefaultCredentialsManager.get_jwt_secret()
                 except RuntimeError:
                     continue
             else:
                 from cherenkov.api.middleware.auth import JWT_SECRET
-
-                secret = JWT_SECRET
-            payload = jwt.decode(session_cookie, secret, algorithms=["HS256"])
+                jwt_secret_val = JWT_SECRET
+            payload = jwt.decode(session_cookie, jwt_secret_val, algorithms=["HS256"])
             username = payload.get("sub")
             break
         except jwt.PyJWTError:
@@ -511,8 +510,8 @@ async def _get_qdrant_vector_count() -> int:
             r = await c.get("http://localhost:6333/collections/cherenkov_findings")
             if r.status_code == 200:
                 return r.json().get("result", {}).get("vectors_count", 0) or 0
-    except Exception:
-        pass
+    except Exception as e:
+        logger.error(f"Error checking webgoat: {e}")
     return 0
 
 
@@ -599,8 +598,8 @@ async def v1_ablation_stats() -> dict:
                     "alert_active": drop_rate > 0.2,
                 }
             }
-    except Exception:
-        pass
+    except Exception as e:
+        logger.error(f"Error checking webgoat: {e}")
     # Fallback: healthy zeros when the bridge is not yet active
     return {
         "session_stats": {
@@ -751,6 +750,10 @@ async def v1_scan_report_sarif(scan_id: str) -> dict:
 @v1.get("/reports/{scan_id}/pdf")
 async def v1_scan_report_pdf(scan_id: str, current_user: AuthUser = Depends(get_current_user)):
     """Download PDF security report."""
+
+
+
+
     from cherenkov.compliance.mapper import ComplianceMapper
     from cherenkov.compliance.reports import PDFReportGenerator
     from cherenkov.core.base_scanner import Finding, ScanResult, Severity

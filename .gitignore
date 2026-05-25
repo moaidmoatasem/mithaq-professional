@@ -34,8 +34,18 @@ qdrant/
 site/
 
 
-# Secrets
+# Secrets & credentials (never commit — see AGENTS.md §1d, CHERENKOV ABLATION)
 .env
+.env.*
+mcp_config.json
+*.key
+*.pem
+credentials.json
+
+# Runtime artifacts — produced by scans/inference, never committed
+data/
+models/
+cherno-docs/
 
 # Node / wrangler
 node_modules/

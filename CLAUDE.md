@@ -1,5 +1,8 @@
 # CHERENKOV AI Developer Directive
 
+> **All agents must also read [`AGENTS.md`](./AGENTS.md)** for branching,
+> worktree, rebase, and multi-agent coordination rules. The invariants below
+> override `AGENTS.md` if they conflict.
 
 ## Core Architectural Invariants (Non-Negotiable)
 1. **Sovereignty First (MEISSNER):** Do not write code that assumes outbound internet access. The execution nodes operate in a 100% air-gapped, fail-closed Docker network.

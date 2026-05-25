@@ -23,8 +23,14 @@ CHERENKOV is built on the **Trident of Truth** — three unyielding components t
 
 | Page | Description |
 |---|---|
-| [System Architecture (Detailed)](SYSTEM_ARCHITECTURE.md) | Multi-agent routing and Arabic AI |
-| [High-Level Design](HLD_DIAGRAM.md) | System topology diagram |
-| [Low-Level Design](LLD_DIAGRAM.md) | Sequence diagram |
+| [System Architecture (Detailed)](system-architecture.md) | Multi-agent routing and Arabic AI |
+| [High-Level Design](hld-diagram.md) | System topology diagram |
+| [Low-Level Design](lld-diagram.md) | Sequence diagram |
 | [System Design & State Machine](system-design.md) | Agent state, orchestration flow, BurhanTrace |
 | [Design Patterns](design-patterns.md) | AgentGovernor, AIMD, Proxy, Command patterns |
+
+```mermaid
+graph TD
+    A[Component] --> B[Subcomponent]
+    B --> C[Implementation Detail]
+```

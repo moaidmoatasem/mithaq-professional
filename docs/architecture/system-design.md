@@ -53,3 +53,9 @@ class BurhanTrace(BaseModel):
 
 ### 2.4 Communication Protocol
 Agents communicate via local HTTP REST APIs with strict rate limiting. If an agent (e.g., local LLM) fails, the AIMD (Additive Increase Multiplicative Decrease) circuit breaker opens, halving the request rate, and slowly increasing it upon success.
+
+```mermaid
+graph TD
+    A[Component] --> B[Subcomponent]
+    B --> C[Implementation Detail]
+```

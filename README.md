@@ -8,10 +8,10 @@
 </p>
 
 <p align="center">
-  <img src="https://img.shields.io/badge/license-MIT_/_Apache_2.0-00A3FF?style=for-the-badge&labelColor=0A0E1A" alt="License">
-  <img src="https://img.shields.io/badge/python-3.11%2B-00A3FF?style=for-the-badge&labelColor=0A0E1A" alt="Python">
+  <img src="https://img.shields.io/badge/license-MIT_/_Apache_2.0-00E0FF?style=for-the-badge&labelColor=0A0E1A" alt="License">
+  <img src="https://img.shields.io/badge/python-3.11%2B-00E0FF?style=for-the-badge&labelColor=0A0E1A" alt="Python">
   <img src="https://img.shields.io/badge/status-alpha-9D00FF?style=for-the-badge&labelColor=0A0E1A" alt="Status">
-  <img src="https://img.shields.io/badge/architecture-air--gapped-00A3FF?style=for-the-badge&labelColor=0A0E1A" alt="Air-Gapped">
+  <img src="https://img.shields.io/badge/architecture-air--gapped-00E0FF?style=for-the-badge&labelColor=0A0E1A" alt="Air-Gapped">
   <img src="https://img.shields.io/badge/security-sovereign-9D00FF?style=for-the-badge&labelColor=0A0E1A" alt="Sovereign">
 </p>
 

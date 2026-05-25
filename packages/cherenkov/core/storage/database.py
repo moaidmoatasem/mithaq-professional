@@ -40,10 +40,11 @@ CREATE TABLE IF NOT EXISTS findings_pending (
 CREATE INDEX IF NOT EXISTS idx_findings_pending_status ON findings_pending(status);
 
 CREATE TABLE IF NOT EXISTS users (
-    id          INTEGER PRIMARY KEY AUTOINCREMENT,
-    username    TEXT    NOT NULL UNIQUE,
-    password    TEXT    NOT NULL,
-    role        INTEGER NOT NULL DEFAULT 1
+    id              INTEGER PRIMARY KEY AUTOINCREMENT,
+    username        TEXT    NOT NULL UNIQUE,
+    password        TEXT    NOT NULL,
+    role            INTEGER NOT NULL DEFAULT 1,
+    token_version   INTEGER NOT NULL DEFAULT 0
 );
 CREATE INDEX IF NOT EXISTS idx_users_username ON users(username);
 

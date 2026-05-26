@@ -17,3 +17,9 @@ TOKAMAK is the validation sandbox. No HIGH or CRITICAL finding is reported witho
 - Non-destructive — PoCs cannot modify persistent state
 - Ephemeral — Sandbox is destroyed after execution
 - Verified — Every finding includes cryptographic proof
+
+```mermaid
+graph TD
+    A[Component] --> B[Subcomponent]
+    B --> C[Implementation Detail]
+```

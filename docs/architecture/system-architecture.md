@@ -19,3 +19,9 @@ Standard LLMs fail in the MENA region due to diglossia and right-to-left (RTL) f
 
 ## 3. Resilience & Routing
 To prevent API timeouts from cascading into system collapse, the platform utilizes **Additive Increase Multiplicative Decrease (AIMD)** circuit breakers across all agent communications. 
+
+```mermaid
+graph TD
+    A[Component] --> B[Subcomponent]
+    B --> C[Implementation Detail]
+```

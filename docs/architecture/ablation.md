@@ -15,3 +15,9 @@ ABLATION is the data redaction engine. In hybrid configurations where cloud AI p
 - Fails-closed on error — if redaction cannot be verified, data is not sent
 - Pattern-based detection with regex and ML-based PII identification
 - Configurable allow/deny lists for domain-specific terms
+
+```mermaid
+graph TD
+    A[Component] --> B[Subcomponent]
+    B --> C[Implementation Detail]
+```

@@ -11,3 +11,9 @@ CHERENKOV classifies all data into strict access tiers. Each agent node can only
 | **T4 — Quarantined** | Live exploit data | TOKAMAK sandbox state | TOKAMAK only |
 
 Data is automatically downgraded through the pipeline. T3 data never reaches cloud agents.
+
+```mermaid
+graph TD
+    A[Component] --> B[Subcomponent]
+    B --> C[Implementation Detail]
+```

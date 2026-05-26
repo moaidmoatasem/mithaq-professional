@@ -785,3 +785,5 @@ def fail_closed() -> None:
 def fail_open() -> None:
     """Restore global network connectivity."""
     meissner_hub.fail_open()
+
+MeissnerCircuitBreaker = Meissner

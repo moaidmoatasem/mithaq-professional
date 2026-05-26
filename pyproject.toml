@@ -1,7 +1,7 @@
 [project]
 name = "cherenkov-core"
 version = "1.1.0"
-description = "cherenkov Security Framework - Precision in Sovereignty"
+description = "Air-gapped security scanner platform — local Ollama inference, zero cloud dependencies"
 authors = [
     {name = "Moaid EL-Moatasem Bellah"}
 ]

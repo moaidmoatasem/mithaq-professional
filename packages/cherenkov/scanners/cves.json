@@ -1,0 +1,47 @@
+[
+  {
+    "cve_id": "CVE-2024-21626",
+    "title": "runc Container Escape",
+    "severity": "CRITICAL",
+    "cwe": "CWE-20",
+    "description": "runc allows escape to the host namespace due to file descriptor leak.",
+    "remediation": "Upgrade runc to version 1.1.12 or later.",
+    "affected_component": "runc"
+  },
+  {
+    "cve_id": "CVE-2024-3094",
+    "title": "XZ Utils Backdoor",
+    "severity": "CRITICAL",
+    "cwe": "CWE-506",
+    "description": "Malicious code was discovered in xz-utils that allows unauthorized SSH access.",
+    "remediation": "Downgrade xz-utils to 5.4.6 or upgrade to non-backdoored version.",
+    "affected_component": "xz-utils"
+  },
+  {
+    "cve_id": "CVE-2023-38606",
+    "title": "Apple iOS Kernel Remote Code Execution",
+    "severity": "HIGH",
+    "cwe": "CWE-269",
+    "description": "A state management vulnerability in Kernel allowing unauthorized modification of hardware state.",
+    "remediation": "Apply latest security updates from Apple.",
+    "affected_component": "ios"
+  },
+  {
+    "cve_id": "CVE-2023-44487",
+    "title": "HTTP/2 Rapid Reset DDoS",
+    "severity": "HIGH",
+    "cwe": "CWE-400",
+    "description": "HTTP/2 protocol allows rapid stream resets leading to denial of service (DDoS).",
+    "remediation": "Apply HTTP/2 rate limiting or disable HTTP/2.",
+    "affected_component": "http2"
+  },
+  {
+    "cve_id": "CVE-2021-44228",
+    "title": "Log4Shell Vulnerability",
+    "severity": "CRITICAL",
+    "cwe": "CWE-502",
+    "description": "Apache Log4j2 JNDI features do not protect against attacker controlled LDAP and other JNDI related endpoints.",
+    "remediation": "Upgrade Log4j2 to version 2.15.0 or later.",
+    "affected_component": "log4j"
+  }
+]

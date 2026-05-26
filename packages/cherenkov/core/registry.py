@@ -16,7 +16,7 @@ class ScannerRegistry:
         self._registry: Dict[str, Type[BaseScanner]] = {}
         self._load_scanners()
 
-        # Explicitly import and register graduated scanners
+        from cherenkov.scanners.cve_database_scanner import CVEDatabaseScanner
         from cherenkov.scanners.file_upload_scanner import FileUploadScanner
         from cherenkov.scanners.mobile.android_scanner import AndroidScanner
         from cherenkov.scanners.mobile.ios_scanner import IOSScanner
@@ -34,6 +34,7 @@ class ScannerRegistry:
         self.register(SSRFScanner)
         self.register(AndroidScanner)
         self.register(IOSScanner)
+        self.register(CVEDatabaseScanner)
 
     def register(self, scanner_class: Type[BaseScanner], explicit_name: str = None):
         """Manually register a scanner class"""

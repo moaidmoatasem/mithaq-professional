@@ -20,6 +20,7 @@ class ScannerRegistry:
         from cherenkov.scanners.file_upload_scanner import FileUploadScanner
         from cherenkov.scanners.mobile.android_scanner import AndroidScanner
         from cherenkov.scanners.mobile.ios_scanner import IOSScanner
+        from cherenkov.scanners.network_vulnerability_scanner import NetworkVulnerabilityScanner
         from cherenkov.scanners.path_traversal_scanner import PathTraversalScanner
         from cherenkov.scanners.sql_injection_scanner import SQLInjectionScanner
         from cherenkov.scanners.ssrf_scanner import SSRFScanner
@@ -34,6 +35,7 @@ class ScannerRegistry:
         self.register(SSRFScanner)
         self.register(AndroidScanner)
         self.register(IOSScanner)
+        self.register(NetworkVulnerabilityScanner)
 
     def register(self, scanner_class: Type[BaseScanner], explicit_name: str = None):
         """Manually register a scanner class"""

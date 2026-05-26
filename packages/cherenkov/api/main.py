@@ -8,6 +8,7 @@ packages/cherenkov/api/static/index.html via FastAPI StaticFiles.
 
 import asyncio
 import json
+import hashlib
 import logging
 import os
 import re
@@ -298,7 +299,6 @@ async def v1_assistant_advice(
             status_code=423,
             detail={"code": "rotation_required", "message": "Password rotation required"},
         )
-    import json
 
     import httpx
 
@@ -993,7 +993,7 @@ async def _run_scan(
     """Core scan logic shared by /api/scan and /api/v1/scan."""
     from cherenkov.core.engine import ScanEngine
     from cherenkov.core.registry import ScannerRegistry
-    from cherenkov.core.storage.database import init_db, save_scan
+    from cherenkov.core.storage.database import init_db, save_scan, save_trace
 
     try:
         parsed = urlparse(request.url)
@@ -1149,6 +1149,10 @@ async def _run_scan(
     # Release dedup lock
     async with _active_scan_lock:
         _active_scan_targets.discard(normalised_target)
+
+    trace_data = json.dumps(result, sort_keys=True).encode()
+    trace_hash = hashlib.sha256(trace_data).hexdigest()
+    save_trace(scan_id, trace_hash, result)
 
     return result
 

@@ -342,3 +342,17 @@ def _row_to_dict(row: sqlite3.Row) -> dict:
     d["findings"] = json.loads(d["findings"])
     d["meta"] = json.loads(d["meta"])
     return d
+
+def save_trace(scan_id: str, trace_hash: str, scan_result: dict, path: Path = _DB_PATH) -> None:
+    now = datetime.now(timezone.utc).isoformat()
+    details_json = json.dumps(scan_result)
+
+    with closing(_connect(path)) as conn:
+        with conn:
+            conn.execute(
+                """
+                INSERT INTO audit_log (timestamp, event_type, user_id, details, trace_hash)
+                VALUES (?, ?, ?, ?, ?)
+                """,
+                (now, 'scan_trace', scan_id, details_json, trace_hash),
+            )

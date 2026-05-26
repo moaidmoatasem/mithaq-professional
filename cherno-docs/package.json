@@ -1,7 +1,7 @@
 {
   "name": "cherno-docs",
-<<<<<<< HEAD
   "version": "1.0.0",
+  "private": true,
   "scripts": {
     "dev": "astro dev",
     "start": "astro dev",
@@ -13,11 +13,5 @@
     "@astrojs/starlight": "^0.32.1",
     "astro": "^5.0.0",
     "typescript": "^5.9.3"
-=======
-  "version": "0.1.0",
-  "private": true,
-  "scripts": {
-    "build": "echo 'Mock build success'"
->>>>>>> origin/main
   }
 }

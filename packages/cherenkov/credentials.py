@@ -38,6 +38,8 @@ class DefaultCredentialsManager:
 
     @classmethod
     def is_rotation_required(cls) -> bool:
+        if os.environ.get("CHERENKOV_FORCE_ROTATION") == "true":
+            return True
         path = cls.get_env_path()
         flag_file = path.parent / "rotation_required"
         if flag_file.exists():
@@ -109,3 +111,9 @@ class DefaultCredentialsManager:
         if os.name == "posix":
             os.chmod(path, 0o600)
         cls.clear_rotation_flag()
+
+    @classmethod
+    def enforce_credentials_rotation(cls, new_hash: str) -> None:
+        if os.environ.get("CHERENKOV_FORCE_ROTATION") == "true":
+            os.environ["CHERENKOV_FORCE_ROTATION"] = "false"
+        cls.set_jwt_secret(new_hash)

@@ -40,7 +40,7 @@ All code generated must align with the Tri-Partite Engine:
 When generating or modifying documentation:
 
 1. **Structure**: Follow the Writing Style Guide (`docs/development/writing-style.md`)
-2. **Cross-References**: All `[text](path)` links must resolve. Run `doc_gate.py validate` before committing.
+2. **Cross-References**: All `[Reference](#reference)` links must resolve. Run `doc_gate.py validate` before committing.
 3. **Diagrams**: Every architecture doc MUST include at least one Mermaid diagram.
 4. **Manifest**: Every new doc MUST be registered in `docs/manifest.json`.
 5. **Naming**: File names must be `kebab-case.md`. Titles must match H1.

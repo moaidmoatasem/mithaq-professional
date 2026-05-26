@@ -14,7 +14,7 @@ CHERENKOV is scoped as an air-gapped, sovereign security intelligence stack orga
 | **ABLATION** | Redaction / sanitization when data crosses trust boundaries. |
 | **TOKAMAK** | Isolated validation and cryptographically attributable evidence for findings. |
 
-**Read next:** [Product roadmap](development/roadmap-detailed.md) for release phases and goals, then [System architecture](architecture/SYSTEM_ARCHITECTURE.md) for cognitive routing and the Trident model.
+**Read next:** [Product roadmap](development/roadmap-detailed.md) for release phases and goals, then [System architecture](architecture/system-architecture.md) for cognitive routing and the Trident model.
 
 ---
 
@@ -25,7 +25,7 @@ CHERENKOV is scoped as an air-gapped, sovereign security intelligence stack orga
 | **TPM / roadmap** | Strategy, phases, milestones | [development/roadmap-detailed.md](development/roadmap-detailed.md), [development/sovereign-roadmap.md](development/sovereign-roadmap.md), [development/releases.md](development/releases.md) |
 | **Execution plans** | Sprints and deep phased plan | [development/sprint-plan.md](development/sprint-plan.md) |
 | **Progress timeline** | Gantt-style phased view | [development/roadmap.md](development/roadmap.md) |
-| **Architecture** | System design and diagrams | [architecture/SYSTEM_ARCHITECTURE.md](architecture/SYSTEM_ARCHITECTURE.md), [architecture/HLD_DIAGRAM.md](architecture/HLD_DIAGRAM.md), [architecture/LLD_DIAGRAM.md](architecture/LLD_DIAGRAM.md) |
+| **Architecture** | System design and diagrams | [architecture/system-architecture.md](architecture/system-architecture.md), [architecture/hld-diagram.md](architecture/hld-diagram.md), [architecture/lld-diagram.md](architecture/lld-diagram.md) |
 | **System design & patterns** | HLD/LLD narrative, patterns | [architecture/system-design.md](architecture/system-design.md), [architecture/design-patterns.md](architecture/design-patterns.md) |
 | **Processes** | Engineering workflow | [development/workflow.md](development/workflow.md) |
 | **Living backlog / status** | Checklists and headline status | [development/roadmap.md](development/roadmap.md) |

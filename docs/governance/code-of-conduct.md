@@ -1,60 +1,34 @@
-# Code of Conduct — The Shield of Conduct
+> *This page is auto-synced from [`CODE_OF_CONDUCT.md`](https://github.com/moaidmoatasem/cherenkov-professional/blob/main/CODE_OF_CONDUCT.md). Edit that file, not this copy.*
 
-> *"Accuracy is the root of sovereignty."*
+# CHERENKOV Code of Conduct | Sovereign Security Integrity
 
 ## 1. Our Pledge
+In the interest of fostering an open and welcoming environment, we as contributors and maintainers pledge to making participation in our project and our community a harassment-free experience for everyone, regardless of age, body size, disability, ethnicity, gender identity and expression, level of experience, nationality, personal appearance, race, religion, or sexual identity and orientation.
 
-We as members, contributors, and maintainers of CHERENKOV pledge to make participation in our project and community a harassment-free experience for everyone, regardless of age, body size, disability, ethnicity, gender identity, level of experience, nationality, personal appearance, race, religion, or sexual identity and orientation.
+## 2. Sovereign Standards
+As a security project focused on **Sovereignty (Ablation)**, we adhere to a higher standard of technical integrity:
 
-## 2. The Sovereign Standards
+- **Local-First**: We prioritize local computation over cloud-dependent services.
+- **Fail-Closed**: Security features must fail-closed. A system that cannot guarantee safety must halt.
+- **Forensic Truth**: Findings must be backed by evidence (Tokamak). We do not report "guesses"; we report "proofs."
+- **Privacy by Design**: We never transmit PII, credentials, or proprietary source code to external entities without explicit, redacted (Ablation) consent.
 
-As a security platform built on the **Trident of Truth**, we adhere to higher technical and ethical standards:
+## 3. Our Responsibilities
+Project maintainers are responsible for clarifying the standards of acceptable behavior and are expected to take appropriate and fair corrective action in response to any instances of unacceptable behavior.
 
-- **Local-First**: Prioritise local computation over cloud-dependent services. No telemetry, no surveillance.
-- **Fail-Closed**: Security features must fail closed. A system that cannot guarantee safety must halt — not degrade.
-- **Forensic Truth**: Findings must be backed by evidence (TOKAMAK). We report proofs, not guesses.
-- **Privacy by Design**: Never transmit PII, credentials, or proprietary source code without explicit, redacted (ABLATION) consent.
-- **Zero-Egress**: Execution nodes are air-gapped. No outbound internet access without explicit audit.
+Maintainers have the right and responsibility to remove, edit, or reject comments, commits, code, wiki edits, issues, and other contributions that are not aligned to this Code of Conduct, or to ban temporarily or permanently any contributor for other behaviors that they deem inappropriate, threatening, offensive, or harmful.
 
-## 3. Expected Behaviour
+## 4. Scope
+This Code of Conduct applies both within project spaces and in public spaces when an individual is representing the project or its community. Examples of representing a project or community include using an official project e-mail address, posting via an official social media account, or acting as an appointed representative at an online or offline event. Representation of a project may be further defined and clarified by project maintainers.
 
-- **Be precise.** Technical accuracy matters more than speed.
-- **Assume good intent.** Disagree by committing to evidence.
-- **Respect boundaries.** Cryptographic proof is the arbiter, not ego.
-- **Document your trace.** Every contribution must leave a verifiable audit trail.
+## 5. Agent and Human Interactions
+CHERENKOV relies heavily on AI agents. The following rules govern interactions:
+- **Agent Autonomy:** Agents are permitted to operate autonomously within predefined bounds (e.g., executing established scanners, writing standard code).
+- **Human-in-the-Loop (HITL):** Critical security changes (e.g., modifications to TOKAMAK, ABLATION, TOKAMAK, or core orchestration) **REQUIRE** explicit human review and cryptographic approval. Agents must halt and wait for this approval.
+- **Agent Handoffs:** Agents must communicate clearly defined state and context during handoffs, adhering to the `AgentState` schema to prevent context pollution.
 
-## 4. Unacceptable Behaviour
-
-- Harassment, discrimination, or personal attacks in any form.
-- Introducing backdoors, telemetry, or surveillance capabilities.
-- Bypassing MEISSNER, ABLATION, or TOKAMAK invariants.
-- Committing secrets, credentials, or PII to the repository.
-- Merging code that fails the pre-commit gate or validation pipeline.
-
-## 5. Enforcement
-
-Project maintainers are responsible for clarifying and enforcing standards. Instances of unacceptable behaviour may be reported to **info@cherenkov-security.com**. All complaints will be reviewed and investigated with confidentiality.
-
-### Enforcement Escalation
-
-| Level | Violation | Consequence |
-|---|---|---|
-| 1 | Minor conduct violation | Private warning |
-| 2 | Repeated violation | Temporary ban (30 days) |
-| 3 | Sovereign breach (bypassing invariants) | Permanent ban + Shred Receipt of all contributions |
-
-## 6. Scope
-
-This Code of Conduct applies within all project spaces — issues, PRs, discussions, wiki, and documentation — and in public spaces when representing the project.
-
-## 7. Agent and Human Interactions
-
-CHERENKOV relies on AI agents bound by the same standards:
-
-- **Agent Autonomy**: Agents operate autonomously within predefined bounds (established scanners, standard code).
-- **HITL (Human-in-the-Loop)**: Critical changes (TOKAMAK, ABLATION, MEISSNER) require explicit human review and cryptographic approval.
-- **Agent Handoffs**: Agents must communicate clear state and context using the `AgentState` schema. Context pollution is a sovereign breach.
+## 6. Enforcement
+Instances of abusive, harassing, or otherwise unacceptable behavior may be reported by contacting the project team. All complaints will be reviewed and investigated and will result in a response that is deemed necessary and appropriate to the circumstances. The project team will maintain confidentiality with regard to the reporter of an incident. 
 
 ---
-
-*CHERENKOV: Precision in Sovereignty.*
+*CHERENKOV: Accuracy is the root of sovereignty.*

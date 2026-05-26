@@ -57,7 +57,7 @@ def validate_trace(trace_id: str) -> bool:
 | External URL | Full URL | `[docs.cherenkov-security.com](https://docs.cherenkov-security.com)` |
 | GitHub Issues | `#NNN` | `[#368](https://github.com/moaidmoatasem/cherenkov-professional/issues/368)` |
 
-- Never use `[text](path)` where `path` is a Windows-style path.
+- Never use `[Reference](#reference)` where `path` is a Windows-style path.
 - All paths must resolve. Run `doc_gate.py validate` before committing.
 
 ## 6. Diagrams
@@ -92,7 +92,7 @@ Every AI-generated document MUST include a frontmatter comment:
 
 All of the following are validated by `doc_gate.py`:
 
-- [ ] All `[text](path)` links resolve to existing files
+- [Reference](#reference)` links resolve to existing files
 - [ ] No broken anchors (anchor checking is best-effort)
 - [ ] Every architecture doc has >= 1 Mermaid diagram
 - [ ] File names match manifest entries

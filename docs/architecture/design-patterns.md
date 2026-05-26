@@ -43,3 +43,9 @@ The UI must be built using Atomic Design principles to ensure reusability and a 
 * **Formatters:** Ruff and Black must be used.
 * **Typing:** Strict type hints (`mypy`) are required for all new code.
 * **Docstrings:** Google Python Style Guide must be used for all classes and public functions.
+
+```mermaid
+graph TD
+    A[Component] --> B[Subcomponent]
+    B --> C[Implementation Detail]
+```

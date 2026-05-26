@@ -81,3 +81,6 @@ validation_results.json
 # coordination artifacts, not throwaway session scratchpads.
 build/
 .aider*
+
+# Local HLD preview (not source)
+.preview-hld/

@@ -18,7 +18,7 @@
 ---
 
 # CHERENKOV · The Sovereign Security Standard
-**Precision in Sovereignty**
+**Air-gapped security scanner platform — local Ollama inference, zero cloud dependencies**
 
 CHERENKOV is an air-gapped, sovereign AI security and quality intelligence platform. Designed explicitly for highly regulated infrastructures (EGY-FIN CSF, SAMA CSF, DORA), it tests traditional software, mobile applications, and embedded AI systems entirely on local hardware.
 

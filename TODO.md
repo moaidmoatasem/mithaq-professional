@@ -51,7 +51,7 @@
 
 ### P1 — Remaining Phase 2
 
-- [ ] #231 GitHub repo metadata
+- [x] #231 GitHub repo metadata
 - [ ] #233 Align GEMINI.md with AGENTS.md roster
 - [ ] #235 Canonicalize CHANGELOG
 

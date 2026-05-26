@@ -174,6 +174,26 @@ class CircuitBreaker:
                 return False
             return True
 
+    def check_state(self) -> None:
+        """Check if circuit is available for requests. Raises CircuitOpenError if not."""
+        if not self.is_available():
+            with self._lock:
+                elapsed = time.time() - (self._last_failure_time or 0)
+                raise CircuitOpenError(
+                    f"Circuit '{self.config.name}' is OPEN. "
+                    f"Try again in {max(0.0, self.config.recovery_timeout - elapsed):.1f}s"
+                )
+
+    def record_success(self) -> None:
+        """Public alias for recording success (used by manual instrumentation)."""
+        with self._lock:
+            self._record_success(0.0)
+
+    def record_failure(self, exc: Optional[Exception] = None) -> None:
+        """Public alias for recording failure (used by manual instrumentation)."""
+        with self._lock:
+            self._record_failure(exc or Exception("Manual failure"), 0.0)
+
     def _is_failure_exception(self, exc: Exception) -> bool:
         """Check if an exception should count as a failure."""
         if self.config.ignored_exceptions and isinstance(exc, self.config.ignored_exceptions):
@@ -786,7 +806,5 @@ def fail_open() -> None:
     """Restore global network connectivity."""
     meissner_hub.fail_open()
 
-# Added a backward compatible alias to fix an ImportError
-
-
+# Compatibility alias
 MeissnerCircuitBreaker = Meissner

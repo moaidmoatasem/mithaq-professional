@@ -148,9 +148,10 @@ async def post_run_scan(payload: Dict[str, str]):
         client = UnifiedLLMClient(backend=backend, model_name=model_name, max_retries=1)
         
         # 1. Audit Secrets Stage (Stage 3 Gate check integration)
-        from cherenkov.ablation.sanitizer import AblationSanitizer
-        sanitized_code = AblationSanitizer.sanitize(code_to_scan)
-        secrets_redacted = (sanitized_code != code_to_scan)
+        from cherenkov.core.ablation.sanitizer import Sanitizer
+        res = Sanitizer().sanitize(code_to_scan)
+        sanitized_code = res.sanitized_text
+        secrets_redacted = res.sanitization_applied
         
         active_scan_logs.append("[TENSOR-AUDIT] Initializing static code audit...")
         if secrets_redacted:

@@ -83,6 +83,12 @@ class DefaultCredentialsManager:
         return secret
 
     @classmethod
+    def enforce_credentials_rotation(cls, new_secret: str) -> None:
+        """Enforces rotation of first-run credentials and clears the blocker flag."""
+        cls.set_jwt_secret(new_secret)
+        cls.clear_rotation_flag()
+
+    @classmethod
     def set_jwt_secret(cls, new_secret: str) -> None:
         path = cls.get_env_path()
         path.parent.mkdir(parents=True, exist_ok=True)
@@ -99,7 +105,7 @@ class DefaultCredentialsManager:
         if not found:
             new_lines.append(f"CHERENKOV_JWT_SECRET={new_secret}\n")
         content = "".join(new_lines)
+        path.write_text(content)
         if os.name == "posix":
             os.chmod(path, 0o600)
-        path.write_text(content)
         cls.clear_rotation_flag()

@@ -7,8 +7,8 @@ packages/cherenkov/api/static/index.html via FastAPI StaticFiles.
 """
 
 import asyncio
-import json
 import hashlib
+import json
 import logging
 import os
 import re
@@ -330,18 +330,6 @@ async def v1_assistant_advice(
         return {"advice": f"Assistant error: {exc}", "status": "error"}
 
 
-@app.post("/api/v1/auth/token")
-async def login(credentials: dict):
-    if credentials.get("username") == "admin" and credentials.get("password") == "admin":
-        from cherenkov.api.middleware.auth import Role, create_access_token
-
-        token = create_access_token(
-            {"sub": credentials.get("username", "admin"), "role": int(Role.ADMIN)}
-        )
-        return {"access_token": token, "token_type": "bearer"}
-    raise HTTPException(status_code=401, detail="Invalid credentials")
-
-
 @v1.post("/auth/token")
 async def v1_auth_token(request: AuthRequest) -> dict:
     """Authenticate a user and return a JWT token."""
@@ -390,6 +378,7 @@ async def v1_rotate_password(
                     continue
             else:
                 from cherenkov.api.middleware.auth import JWT_SECRET
+
                 jwt_secret_val = JWT_SECRET
             payload = jwt.decode(session_cookie, jwt_secret_val, algorithms=["HS256"])
             username = payload.get("sub")

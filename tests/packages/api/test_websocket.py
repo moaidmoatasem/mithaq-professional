@@ -1,10 +1,10 @@
+from unittest.mock import patch
+
 import pytest
 from cherenkov.api.main import app
+from fastapi import WebSocketDisconnect
 from fastapi.testclient import TestClient
 
-
-from unittest.mock import patch
-from fastapi import WebSocketDisconnect
 
 @patch("asyncio.sleep", side_effect=WebSocketDisconnect)
 def test_websocket_live(mock_sleep):

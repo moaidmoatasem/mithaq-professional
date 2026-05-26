@@ -12,11 +12,11 @@ jobs:
       issues: write
       pull-requests: write
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v3
 
       - name: Auto-label new issues by content
         if: github.event_name == 'issues' && github.event.action == 'opened'
-        uses: actions/github-script@v7
+        uses: actions/github-script@v6
         with:
           script: |
             const body = context.payload.issue.body || '';
@@ -45,7 +45,7 @@ jobs:
 
       - name: Auto-set priority:critical for security issues
         if: github.event_name == 'issues' && github.event.action == 'labeled'
-        uses: actions/github-script@v7
+        uses: actions/github-script@v6
         with:
           script: |
             if (context.payload.label.name === 'security') {
@@ -57,7 +57,7 @@ jobs:
 
       - name: Auto-close issues linked to merged PRs
         if: github.event_name == 'pull_request' && github.event.action == 'closed' && github.event.pull_request.merged
-        uses: actions/github-script@v7
+        uses: actions/github-script@v6
         with:
           script: |
             const body = context.payload.pull_request.body || '';

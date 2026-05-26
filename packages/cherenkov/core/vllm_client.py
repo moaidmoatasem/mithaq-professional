@@ -10,7 +10,7 @@ import logging
 from typing import Dict, Any, Optional
 from openai import OpenAI
 
-from cherenkov.core.circuit_breaker import MeissnerCircuitBreaker, CircuitBreakerError
+from cherenkov.core.circuit_breaker import Meissner, CircuitBreakerError
 
 # Setup logging with modern formatting
 logging.basicConfig(
@@ -66,7 +66,7 @@ class UnifiedLLMClient:
         self.metrics = LLMClientMetrics()
         
         # Instantiate MEISSNER circuit breaker from core
-        self.breaker = MeissnerCircuitBreaker(
+        self.breaker = Meissner(
             failure_threshold=failure_threshold,
             cooldown_seconds=cooldown_seconds
         )

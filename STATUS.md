@@ -50,7 +50,7 @@
 | Issue | Description | Priority | Status |
 |-------|-------------|----------|--------|
 | #230 | Remove cloud configs (MEISSNER) | 🔴 critical | ✅ Merged (`fix/230-meissner-cloud-configs`) |
-| #234 | Harden .gitignore | 🟠 high | Open |
+| #234 | Harden .gitignore | 🟠 high | ✅ Merged (`fix/234-gitignore`) |
 | #236 | Scanner registry auto-discovery | 🟠 high | In progress (PR exists) |
 | #237 | Scan result aggregation pipeline | 🟠 high | In progress |
 | #238 | Wire POST /api/v1/scan (depends #236, #237) | 🟠 high | Blocked |

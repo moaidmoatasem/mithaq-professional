@@ -14,9 +14,9 @@ jobs:
   scan:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
       - name: Set up Python
-        uses: actions/setup-python@v4
+        uses: actions/setup-python@v5
         with:
           python-version: '3.11'
       - name: Install dependencies
@@ -28,7 +28,7 @@ jobs:
           TARGET="${{ github.event.inputs.target || 'http://localhost' }}"
           python -m cherenkov.cli.main scan "$TARGET" --output sarif > results.sarif
       - name: Upload SARIF results
-        uses: github/codeql-action/upload-sarif@v3
+        uses: github/codeql-action/upload-sarif@v4
         continue-on-error: true
         if: hashFiles('results.sarif') != ''
         with:

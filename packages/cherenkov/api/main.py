@@ -9,7 +9,6 @@ packages/cherenkov/api/static/index.html via FastAPI StaticFiles.
 import asyncio
 import json
 import hashlib
-import json
 import logging
 import os
 import re
@@ -300,7 +299,6 @@ async def v1_assistant_advice(
             status_code=423,
             detail={"code": "rotation_required", "message": "Password rotation required"},
         )
-    import json
 
     import httpx
 

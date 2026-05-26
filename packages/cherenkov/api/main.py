@@ -633,7 +633,7 @@ async def v1_sandbox_execute(
 
 
 @v1.get("/sandbox/status")
-async def v1_sandbox_status(req: Request = Depends(require_rotated_credentials)) -> dict:
+async def v1_sandbox_status(req=Depends(require_rotated_credentials)) -> dict:
     """Return the status of the Tokamak sandbox."""
     return {"status": "ready"}
 

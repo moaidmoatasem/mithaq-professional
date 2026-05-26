@@ -10,7 +10,7 @@ import logging
 from typing import Dict, Any, Optional
 from openai import OpenAI
 
-from cherenkov.core.circuit_breaker import MeissnerCircuitBreaker, CircuitBreakerError
+from cherenkov.core.circuit_breaker import Meissner as MeissnerCircuitBreaker, CircuitBreakerError
 
 # Setup logging with modern formatting
 logging.basicConfig(

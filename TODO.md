@@ -80,7 +80,7 @@
 
 - [ ] #240 Graduate NetworkVulnerabilityScanner
 - [ ] #241 Verify XXE scanner contract
-- [ ] #245 Verify SSRF scanner contract
+- [x] #245 Verify SSRF scanner contract
 
 ### P2 — Scanner graduation (medium)
 

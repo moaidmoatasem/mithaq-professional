@@ -1,4 +1,5 @@
 """Session-based JWT authentication using cookies."""
+
 import os
 
 import jwt

@@ -85,9 +85,7 @@ app.add_exception_handler(RateLimitExceeded, _rate_limit_exceeded_handler)
 # 1. Public Frontend - NO AUTH
 # Vite dist files served as static content
 if os.path.exists("packages/cherenkov/web/dist"):
-    app.mount(
-        "/app", StaticFiles(directory="packages/cherenkov/web/dist", html=True), name="app"
-    )
+    app.mount("/app", StaticFiles(directory="packages/cherenkov/web/dist", html=True), name="app")
 
 # 2. Protected API - AUTH REQUIRED
 # All routes mounted under /api require valid X-Cherenkov-Token
@@ -248,9 +246,7 @@ async def v1_frida_generate(
 ) -> dict:
     """Generate Frida scripts for mobile runtime analysis."""
 
-    script = (
-        f"/* CHERENKOV FRIDA GENERATOR // PLATFORM: {request.platform.upper()} */\n\n"
-    )
+    script = f"/* CHERENKOV FRIDA GENERATOR // PLATFORM: {request.platform.upper()} */\n\n"
 
     if request.platform == "android":
         if "ssl_pinning" in request.hooks:
@@ -306,7 +302,7 @@ async def v1_assistant_advice(
     if DefaultCredentialsManager.is_rotation_required():
         raise HTTPException(
             status_code=423,
-            detail={"code": "rotation_required", "message": "Password rotation required"}
+            detail={"code": "rotation_required", "message": "Password rotation required"},
         )
     import json
 
@@ -342,10 +338,7 @@ async def v1_assistant_advice(
 
 @app.post("/api/v1/auth/token")
 async def login(credentials: dict):
-    if (
-        credentials.get("username") == "admin"
-        and credentials.get("password") == "admin"
-    ):
+    if credentials.get("username") == "admin" and credentials.get("password") == "admin":
         from cherenkov.api.middleware.auth import Role, create_access_token
 
         token = create_access_token(
@@ -365,9 +358,7 @@ async def v1_auth_token(request: AuthRequest) -> dict:
             detail="Incorrect username or password",
         )
 
-    access_token = create_access_token(
-        data={"sub": request.username, "role": user_data["role"]}
-    )
+    access_token = create_access_token(data={"sub": request.username, "role": user_data["role"]})
     return {"access_token": access_token, "token_type": "bearer"}
 
 
@@ -513,9 +504,7 @@ async def _check_qdrant() -> str:
 def _get_active_scans_count() -> int:
     try:
         with sqlite3.connect(_DB_PATH) as conn:
-            return conn.execute(
-                "SELECT count(*) FROM scans WHERE status = 'running'"
-            ).fetchone()[0]
+            return conn.execute("SELECT count(*) FROM scans WHERE status = 'running'").fetchone()[0]
     except Exception:
         return 0
 
@@ -602,9 +591,7 @@ async def v1_ablation_stats() -> dict:
     try:
         from cherenkov.core.ablation.bridge import AblationBridge
 
-        bridge = (
-            AblationBridge.instance() if hasattr(AblationBridge, "instance") else None
-        )
+        bridge = AblationBridge.instance() if hasattr(AblationBridge, "instance") else None
         if bridge and hasattr(bridge, "telemetry"):
             t = bridge.telemetry
             drop_rate = t.drops / t.attempts if t.attempts else 0.0
@@ -638,7 +625,7 @@ async def v1_sandbox_execute(
     if DefaultCredentialsManager.is_rotation_required():
         raise HTTPException(
             status_code=423,
-            detail={"code": "rotation_required", "message": "Password rotation required"}
+            detail={"code": "rotation_required", "message": "Password rotation required"},
         )
     result = await asyncio.to_thread(Tokamak.execute, command)
     return {
@@ -671,7 +658,7 @@ async def v1_scan(
     if DefaultCredentialsManager.is_rotation_required():
         raise HTTPException(
             status_code=423,
-            detail={"code": "rotation_required", "message": "Password rotation required"}
+            detail={"code": "rotation_required", "message": "Password rotation required"},
         )
     """Proxy to the core scan engine; broadcasts a live event on completion.
 
@@ -766,9 +753,7 @@ async def v1_scan_report_sarif(scan_id: str) -> dict:
 
 
 @v1.get("/reports/{scan_id}/pdf")
-async def v1_scan_report_pdf(
-    scan_id: str, current_user: AuthUser = Depends(get_current_user)
-):
+async def v1_scan_report_pdf(scan_id: str, current_user: AuthUser = Depends(get_current_user)):
     """Download PDF security report."""
     from fastapi.responses import Response
 
@@ -816,9 +801,7 @@ async def v1_scan_report_pdf(
     return Response(
         content=pdf_bytes,
         media_type="application/pdf",
-        headers={
-            "Content-Disposition": f"attachment; filename=cherenkov_report_{scan_id}.pdf"
-        },
+        headers={"Content-Disposition": f"attachment; filename=cherenkov_report_{scan_id}.pdf"},
     )
 
 
@@ -844,9 +827,7 @@ async def v1_get_process(process_id: str) -> dict:
 
 
 @v1.get("/processes/{process_id}/controls")
-async def v1_get_process_controls(
-    process_id: str, framework: Optional[str] = None
-) -> dict:
+async def v1_get_process_controls(process_id: str, framework: Optional[str] = None) -> dict:
     """Get security controls for a process, optionally filtered by compliance framework."""
     from cherenkov.compliance.process_mapper import ProcessMapper
 
@@ -890,7 +871,7 @@ async def v1_approve_finding(
     if DefaultCredentialsManager.is_rotation_required():
         raise HTTPException(
             status_code=423,
-            detail={"code": "rotation_required", "message": "Password rotation required"}
+            detail={"code": "rotation_required", "message": "Password rotation required"},
         )
     from cherenkov.core.storage.database import init_db, update_finding_status
 
@@ -907,9 +888,7 @@ async def v1_approve_finding(
 
         return {"status": "success", "finding_id": finding_id, "new_status": "approved"}
     except Exception as exc:
-        raise HTTPException(
-            status_code=500, detail=f"Failed to approve finding: {exc}"
-        ) from exc
+        raise HTTPException(status_code=500, detail=f"Failed to approve finding: {exc}") from exc
 
 
 @v1.post("/findings/{finding_id}/reject")
@@ -926,7 +905,7 @@ async def v1_reject_finding(
     if DefaultCredentialsManager.is_rotation_required():
         raise HTTPException(
             status_code=423,
-            detail={"code": "rotation_required", "message": "Password rotation required"}
+            detail={"code": "rotation_required", "message": "Password rotation required"},
         )
     from cherenkov.core.lattice_bridge import label_false_positive
     from cherenkov.core.storage.database import init_db, update_finding_status
@@ -947,9 +926,7 @@ async def v1_reject_finding(
 
         return {"status": "success", "finding_id": finding_id, "new_status": "rejected"}
     except Exception as exc:
-        raise HTTPException(
-            status_code=500, detail=f"Failed to reject finding: {exc}"
-        ) from exc
+        raise HTTPException(status_code=500, detail=f"Failed to reject finding: {exc}") from exc
 
 
 # Serve the static dashboard assets
@@ -1030,9 +1007,7 @@ async def _run_scan(
         raise HTTPException(status_code=400, detail=f"Invalid URL: {exc}") from exc
 
     if parsed.scheme not in ("http", "https"):
-        raise HTTPException(
-            status_code=400, detail="Only http/https URLs are supported"
-        )
+        raise HTTPException(status_code=400, detail="Only http/https URLs are supported")
     if not parsed.netloc:
         raise HTTPException(status_code=400, detail="Invalid URL: missing hostname")
 
@@ -1065,9 +1040,7 @@ async def _run_scan(
         logger.error("ScanEngine failed for %s: %s", request.url, exc)
         async with _active_scan_lock:
             _active_scan_targets.discard(normalised_target)
-        raise HTTPException(
-            status_code=500, detail=f"Scan execution failed: {exc}"
-        ) from exc
+        raise HTTPException(status_code=500, detail=f"Scan execution failed: {exc}") from exc
 
     vulnerabilities: list[dict] = []
     for scanner_name, result in scan_results.items():
@@ -1161,9 +1134,7 @@ async def _run_scan(
 
     # Trigger SIEM forwarding
     try:
-        asyncio.get_running_loop().create_task(
-            _forward_to_siem(vulnerabilities, request.url)
-        )
+        asyncio.get_running_loop().create_task(_forward_to_siem(vulnerabilities, request.url))
     except RuntimeError:
         pass  # No running loop — skip SIEM forwarding in this context
 
@@ -1282,7 +1253,7 @@ async def v1_lattice_similar(
     if DefaultCredentialsManager.is_rotation_required():
         raise HTTPException(
             status_code=423,
-            detail={"code": "rotation_required", "message": "Password rotation required"}
+            detail={"code": "rotation_required", "message": "Password rotation required"},
         )
     from cherenkov.core.lattice_bridge import query_similar_targets
 
@@ -1316,7 +1287,7 @@ async def v1_lattice_stats(current_user: AuthUser = Depends(get_current_user)) -
     if DefaultCredentialsManager.is_rotation_required():
         raise HTTPException(
             status_code=423,
-            detail={"code": "rotation_required", "message": "Password rotation required"}
+            detail={"code": "rotation_required", "message": "Password rotation required"},
         )
     from cherenkov.core.lattice_bridge import vector_count
 
@@ -1334,7 +1305,7 @@ async def v1_mesh_nodes(current_user: AuthUser = Depends(get_current_user)) -> d
     if DefaultCredentialsManager.is_rotation_required():
         raise HTTPException(
             status_code=423,
-            detail={"code": "rotation_required", "message": "Password rotation required"}
+            detail={"code": "rotation_required", "message": "Password rotation required"},
         )
     import socket
 

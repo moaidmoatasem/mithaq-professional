@@ -575,9 +575,7 @@ class Meissner(CircuitBreaker):
                 # on recovery (fail_open) by matching the comment string.
                 _MEISSNER_RULE = "cherenkov-meissner-egress-block"
                 # Allow loopback and Docker internal bridge
-                subprocess.run(
-                    ["iptables", "-A", "OUTPUT", "-o", "lo", "-j", "ACCEPT"], check=True
-                )
+                subprocess.run(["iptables", "-A", "OUTPUT", "-o", "lo", "-j", "ACCEPT"], check=True)
                 subprocess.run(
                     ["iptables", "-A", "OUTPUT", "-o", "docker0", "-j", "ACCEPT"], check=True
                 )
@@ -585,15 +583,18 @@ class Meissner(CircuitBreaker):
                 subprocess.run(
                     [
                         "iptables",
-                        "-A", "OUTPUT",
-                        "-m", "comment", "--comment", _MEISSNER_RULE,
-                        "-j", "DROP",
+                        "-A",
+                        "OUTPUT",
+                        "-m",
+                        "comment",
+                        "--comment",
+                        _MEISSNER_RULE,
+                        "-j",
+                        "DROP",
                     ],
                     check=True,
                 )
-                logger.info(
-                    "Linux iptables: External egress blocked (lo/docker0 preserved)."
-                )
+                logger.info("Linux iptables: External egress blocked (lo/docker0 preserved).")
             elif system == "windows":
                 # Use netsh to block all outgoing traffic
                 # First ensure firewall is on, then set default to block outbound
@@ -638,15 +639,18 @@ class Meissner(CircuitBreaker):
                 subprocess.run(
                     [
                         "iptables",
-                        "-D", "OUTPUT",
-                        "-m", "comment", "--comment", _MEISSNER_RULE,
-                        "-j", "DROP",
+                        "-D",
+                        "OUTPUT",
+                        "-m",
+                        "comment",
+                        "--comment",
+                        _MEISSNER_RULE,
+                        "-j",
+                        "DROP",
                     ],
                     check=True,
                 )
-                subprocess.run(
-                    ["iptables", "-D", "OUTPUT", "-o", "lo", "-j", "ACCEPT"], check=True
-                )
+                subprocess.run(["iptables", "-D", "OUTPUT", "-o", "lo", "-j", "ACCEPT"], check=True)
                 subprocess.run(
                     ["iptables", "-D", "OUTPUT", "-o", "docker0", "-j", "ACCEPT"], check=True
                 )

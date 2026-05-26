@@ -110,8 +110,6 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: '22'
-          cache: 'npm'
-          cache-dependency-path: cherno-docs/package-lock.json
       - name: Install docs dependencies
         working-directory: cherno-docs
         run: npm ci

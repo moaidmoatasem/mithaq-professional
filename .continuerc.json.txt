@@ -1,0 +1,8 @@
+{
+  allowAnonymousTelemetry false,
+  tabAutocompleteOptions {
+    useCache true,
+    maxPromptTokens 2048,
+    disable false
+  }
+}

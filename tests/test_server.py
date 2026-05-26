@@ -25,6 +25,17 @@ class TestCherenkovAPIServer(unittest.TestCase):
     def setUpClass(cls):
         os.environ["CI"] = "true"
         os.environ["CHERENKOV_FORCE_ROTATION"] = "true"
+        # Isolate credentials for testing
+        test_env = Path("/tmp/cherenkov_test_server.env")
+        if test_env.exists():
+            test_env.unlink()
+        flag = test_env.parent / "rotation_required"
+        if flag.exists():
+            flag.unlink()
+            
+        os.environ["ROTATION_ENV_PATH"] = str(test_env)
+        DefaultCredentialsManager.set_rotation_flag()
+        
         cls.client = TestClient(app)
 
     def test_01_health_diagnostics_route(self):

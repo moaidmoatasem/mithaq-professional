@@ -23,3 +23,9 @@ This guarantees:
 - Auto-discovery via the `ScannerRegistry`.
 - Standardized execution through the `scan()` interface.
 - Consistent output formatting (`ScanResult`).
+
+```mermaid
+graph TD
+    A[Component] --> B[Subcomponent]
+    B --> C[Implementation Detail]
+```

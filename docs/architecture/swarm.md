@@ -16,3 +16,9 @@ CHERENKOV uses a multi-agent Cognitive Swarm governed by the **Agent Governor** 
 - **AIMD Circuit Breaker** — Prevents cascading failures
 - **Agent Governor** — Routes tasks, tracks state, enforces data access levels
 - **Session Protocol** — End-to-end encrypted communication between nodes
+
+```mermaid
+graph TD
+    A[Component] --> B[Subcomponent]
+    B --> C[Implementation Detail]
+```

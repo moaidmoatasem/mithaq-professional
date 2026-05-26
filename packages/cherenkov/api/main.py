@@ -751,9 +751,6 @@ async def v1_scan_report_sarif(scan_id: str) -> dict:
 async def v1_scan_report_pdf(scan_id: str, current_user: AuthUser = Depends(get_current_user)):
     """Download PDF security report."""
 
-
-
-
     from cherenkov.compliance.mapper import ComplianceMapper
     from cherenkov.compliance.reports import PDFReportGenerator
     from cherenkov.core.base_scanner import Finding, ScanResult, Severity

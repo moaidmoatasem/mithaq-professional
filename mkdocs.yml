@@ -35,7 +35,7 @@ nav:
     - index.md
     - Quick Start: quickstart.md
     - What is CHERENKOV?: what-is-cherenkov.md
-    - Project Briefing: PROJECT_BRIEFING.md
+    - Project Briefing: project-briefing.md
   - Architecture:
     - architecture/index.md
     - Architecture Overview: architecture/overview.md
@@ -46,9 +46,9 @@ nav:
     - Cognitive Swarm: architecture/swarm.md
     - Data Tiers: architecture/data-tiers.md
     - Adaptive Learning: architecture/adaptive-learning.md
-    - System Architecture (Detailed): architecture/SYSTEM_ARCHITECTURE.md
-    - High-Level Design: architecture/HLD_DIAGRAM.md
-    - Low-Level Design: architecture/LLD_DIAGRAM.md
+    - System Architecture (Detailed): architecture/system-architecture.md
+    - High-Level Design: architecture/hld-diagram.md
+    - Low-Level Design: architecture/lld-diagram.md
     - System Design & State Machine: architecture/system-design.md
     - Design Patterns: architecture/design-patterns.md
     - SSOT: architecture/ssot.md

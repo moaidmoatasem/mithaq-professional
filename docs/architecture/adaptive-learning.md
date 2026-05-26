@@ -15,3 +15,9 @@ CHERENKOV learns from every scan through the **LATTICE** memory system — a loc
 - **Faster scans** — Prioritizes attack vectors that worked before
 - **Compliance mapping** — Automatically maps findings to regulatory frameworks
 - **Dialect-aware** — Supports Arabic diglossia via dialect-to-MSA RAG pipeline
+
+```mermaid
+graph TD
+    A[Component] --> B[Subcomponent]
+    B --> C[Implementation Detail]
+```

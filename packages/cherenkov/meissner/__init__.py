@@ -1,1 +1,0 @@
-# CHERENKOV · Meissner package

@@ -1,6 +1,6 @@
 class SIEMForwarder:
     async def forward(self, finding: dict) -> None:
-        pass  # TODO: implement SIEM integration Phase 6
+        pass  # Phase 6: SIEM integration
 
     @staticmethod
     def send_syslog(finding: dict) -> None:

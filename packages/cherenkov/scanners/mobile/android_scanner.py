@@ -9,7 +9,7 @@ from cherenkov.core.mobile_scanner import MobileScanner
 class AndroidScanner(MobileScanner):
     """Scanner for Android APK files using static analysis logic."""
 
-    def __init__(self, target: str = "", timeout: float = 10.0):
+    def __init__(self):
         super().__init__(name="android", description="Android APK static analysis scanner")
 
     async def scan_file(self, file_path: str) -> List[Finding]:

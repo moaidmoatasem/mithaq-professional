@@ -9,7 +9,7 @@ from cherenkov.core.mobile_scanner import MobileScanner
 class IOSScanner(MobileScanner):
     """Scanner for iOS IPA files using static analysis logic."""
 
-    def __init__(self, target: str = "", timeout: float = 10.0):
+    def __init__(self):
         super().__init__(name="ios", description="iOS IPA static analysis scanner")
 
     async def scan_file(self, file_path: str) -> List[Finding]:

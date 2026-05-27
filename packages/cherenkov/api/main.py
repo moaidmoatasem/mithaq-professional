@@ -1160,15 +1160,6 @@ async def _run_scan(
 
     try:
         init_db()
-        # Deduplication Issue #435
-        unique_vulns = []
-        seen_cwe_type = set()
-        for vuln in vulnerabilities:
-            key = (vuln.get("cwe"), vuln.get("type"))
-            if key not in seen_cwe_type:
-                seen_cwe_type.add(key)
-                unique_vulns.append(vuln)
-        vulnerabilities = unique_vulns
 
         save_scan(
             scan_id,

@@ -46,6 +46,7 @@ class PathTraversalScanner(BaseScanner):
                                 description=f"The application is vulnerable to Path Traversal. Using payload '{payload}', local file contents (/etc/passwd) were exposed.",
                                 cwe="CWE-22",
                                 remediation="Ensure user input is strictly validated. Use secure APIs for accessing files, avoid using direct file paths, or use functions like os.path.abspath and ensure it starts with the intended base directory.",
+                                scanner="path_traversal",
                             )
                         )
                         # Stop after the first finding to avoid duplicate reports

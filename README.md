@@ -88,13 +88,17 @@ cd cherenkov-professional
 # 2. Configure environment
 cp .env.example .env
 
-# 3. Start all services
-ln -sf $(pwd)/scripts/start_cherenkov.sh ~/start_cherenkov.sh
-~/start_cherenkov.sh
+# 3. One-command boot (Qdrant, Ollama, LiteLLM, API, DVWA)
+./scripts/start_cherenkov.sh
 
-# 4. Run your first scan (against DVWA included in compose)
-cherenkov scan http://localhost/dvwa --output table
+# 4. Run your first scan (against DVWA)
+c2 scan http://localhost/dvwa --output table
 ```
+
+> The orchestrator automatically generates a JWT secret, health-checks every
+> service (✓/✗), performs a JWT smoke test with `admin/admin`, and registers
+> the `c2` alias idempotently. Optional services that are down (e.g. DVWA)
+> do not cause a non-zero exit.
 
 ## ⚖️ Licensing & The Ethical Open-Core
 We refuse to utilize the "SSO Wall of Shame." Core security features (SSO, RBAC, audit logging, local scanning) are provided under **MIT/Apache**. The proprietary multi-agent orchestrator and advanced Arabic RTL/OCR modules are dual-licensed (**AGPLv3/BSL**) to protect localized intelligence from hyperscaler cannibalization.

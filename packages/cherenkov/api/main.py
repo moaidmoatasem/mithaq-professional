@@ -612,7 +612,25 @@ async def v1_sandbox_execute(
             status_code=423,
             detail={"code": "rotation_required", "message": "Password rotation required"},
         )
+    from cherenkov.core.storage.database import save_tokamak_trace
+
     result = await asyncio.to_thread(Tokamak.execute, command)
+
+    # Persist forensic trace
+    try:
+        save_tokamak_trace(
+            finding_id=command.scanner_name or f"manual-{int(time.time())}",
+            exploit_command=command.payload,
+            stdout=result.stdout,
+            stderr=result.stderr,
+            exit_code=result.exit_code,
+            trace_hash=result.trace_hash,
+            timestamp=datetime.now(timezone.utc).isoformat(),
+            shred_receipt=result.shred_receipt,
+        )
+    except Exception as exc:
+        logger.error("Failed to persist sandbox trace: %s", exc)
+
     return {
         "stdout": result.stdout,
         "stderr": result.stderr,

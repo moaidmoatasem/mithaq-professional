@@ -27,6 +27,7 @@ class AndroidScanner(MobileScanner):
                 description="The APK has 'android:debuggable=true' in AndroidManifest.xml.",
                 cwe="CWE-489",
                 remediation="Set 'android:debuggable=false' in the manifest before production release.",
+                scanner="drozer_exploit",
             )
         )
 

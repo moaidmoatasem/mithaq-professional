@@ -182,6 +182,7 @@ class SSRFScanner(BaseScanner):
                                 "Use an egress proxy that enforces this allowlist. "
                                 "Never forward raw user-supplied URLs to internal HTTP clients."
                             ),
+                            scanner="ssrf_basic",
                         )
                     )
                     break  # One confirmed SSRF finding per target is sufficient

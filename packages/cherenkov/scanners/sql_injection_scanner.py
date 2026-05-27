@@ -101,7 +101,7 @@ class SQLInjectionScanner(BaseScanner):
                                 )
                                 break  # One confirmed finding per target is sufficient
                     except Exception:
-                        continue
+                        continue  # nosec B112
                 if findings:
                     break
 

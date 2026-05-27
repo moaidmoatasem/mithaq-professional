@@ -49,6 +49,7 @@ export interface ScanResult {
   timestamp: string;
   vulnerabilities: Vulnerability[];
   count: number;
+  trace_hash?: string;
 }
 
 export interface Vulnerability {

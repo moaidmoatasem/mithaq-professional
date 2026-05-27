@@ -69,6 +69,7 @@ export function ThreatIntelPanel() {
   const [copied, setCopied] = useState(false);
   const [selectedThreat, setSelectedThreat] = useState<Threat | null>(null);
   const [liveThreats, setLiveThreats] = useState<Threat[]>([]);
+  const [currentTraceHash, setCurrentTraceHash] = useState<string>('');
 
   // Listen for scan results broadcast from TacticalOperationsPanel
   useEffect(() => {
@@ -77,6 +78,9 @@ export function ThreatIntelPanel() {
       if (detail?.vulnerabilities) {
         setTarget(detail.target);
         setLiveThreats(vulnsToThreats(detail));
+        if (detail.trace_hash) {
+          setCurrentTraceHash(detail.trace_hash);
+        }
       }
     };
     window.addEventListener('cherenkov:scan_complete', handler);
@@ -90,16 +94,19 @@ export function ThreatIntelPanel() {
         const latest = scans[0];
         setTarget(latest.target);
         setLiveThreats(vulnsToThreats(latest));
+        if (latest.trace_hash) {
+          setCurrentTraceHash(latest.trace_hash);
+        }
       }
     }).catch(() => {});
   }, []);
 
   const displayThreats = liveThreats.length > 0 ? liveThreats : MOCK_THREATS;
 
-  const fullHash = "7d2b4f8c1d8e4a9c8f2d1e0c9b8a7f6e5d4c3b2a1f0e9d8c7b6a5f4e3d2c1b0a";
+  const activeTraceHash = currentTraceHash || "7d2b4f8c1d8e4a9c8f2d1e0c9b8a7f6e5d4c3b2a1f0e9d8c7b6a5f4e3d2c1b0a";
 
   const handleCopyHash = () => {
-    navigator.clipboard.writeText(fullHash);
+    navigator.clipboard.writeText(activeTraceHash);
     setCopied(true);
     setTimeout(() => setCopied(false), 2000);
   };
@@ -116,7 +123,7 @@ export function ThreatIntelPanel() {
         scanner: threat.scanner,
         traceId: threat.traceId || 'N/A'
       },
-      forensic_signature: fullHash,
+      forensic_signature: activeTraceHash,
       verification_status: 'VERIFIED'
     };
 
@@ -320,7 +327,7 @@ export function ThreatIntelPanel() {
             {copied ? <Check size={10} className="text-hud-mint" /> : <Copy size={10} className="text-fg3 opacity-0 group-hover:opacity-100 transition-opacity" />}
           </div>
           <span className="text-[10px] font-mono text-white/60 break-all leading-relaxed">
-            {fullHash.slice(0, 20)}...{fullHash.slice(-10)}
+            {activeTraceHash.slice(0, 20)}...{activeTraceHash.slice(-10)}
           </span>
         </div>
         

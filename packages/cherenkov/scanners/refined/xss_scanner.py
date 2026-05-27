@@ -38,7 +38,7 @@ class XSSScanner(BaseScanner):
 
         try:
             async with httpx.AsyncClient(
-                timeout=timeout, verify=False, follow_redirects=True
+                timeout=timeout, verify=self.verify_ssl, follow_redirects=True
             ) as client:
                 parsed = urlparse(target)
                 params = parse_qs(parsed.query)

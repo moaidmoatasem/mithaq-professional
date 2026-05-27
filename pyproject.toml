@@ -23,6 +23,7 @@ dependencies = [
     "sentence-transformers",
     "slowapi>=0.1.9",
     "ollama>=0.1.0",
+    "litellm>=1.40.0",
     "fpdf2>=2.7.0",
     "defusedxml>=0.7.1",
 ]
@@ -46,6 +47,7 @@ dev = [
     "crewai>=0.1.0",
     "groq>=0.4.0",
     "ollama>=0.1.0",
+    "litellm>=1.40.0",
     "qdrant-client>=1.9.0",
     "sentence-transformers",
     "slowapi>=0.1.9",

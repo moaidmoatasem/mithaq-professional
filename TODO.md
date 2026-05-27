@@ -64,6 +64,10 @@
 - [x] #246 TOKAMAK SQLite WAL logger
 - [x] #247 Wire Cherenkov Trace signing (Verified)
 
+### P2 — Security Architect agent
+
+- [ ] #438 Security Architect agent via LiteLLM proxy
+
 ### P1 — Scanner graduation (high)
 
 - [x] #240 Graduate NetworkVulnerabilityScanner

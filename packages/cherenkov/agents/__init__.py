@@ -1,5 +1,6 @@
 """Cherenkov security agents package."""
 
+from cherenkov.agents.architect import SecurityArchitect
 from cherenkov.agents.architect_agent import ArchitectAgent, ArchitectAgentConfig
 from cherenkov.agents.base_agent import BaseAgent, BaseAgentConfig
 from cherenkov.agents.developer_agent import DeveloperAgent, DeveloperAgentConfig
@@ -9,6 +10,7 @@ from cherenkov.agents.tester_agent import TesterAgent, TesterAgentConfig
 
 __all__ = [
     "BaseAgent",
+    "SecurityArchitect",
     "BaseAgentConfig",
     "ArchitectAgent",
     "ArchitectAgentConfig",

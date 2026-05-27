@@ -13,12 +13,14 @@ from cherenkov.core.base_scanner import ScanResult
 try:
     import arabic_reshaper
     from bidi.algorithm import get_display
+
     ARABIC_SUPPORT = True
 except ImportError:
     ARABIC_SUPPORT = False
 
 # Regex to detect Arabic characters
-arabic_pattern = re.compile(r'[\u0600-\u06FF\u0750-\u077F\u08A0-\u08FF\uFB50-\uFDFF\uFE70-\uFEFF]')
+arabic_pattern = re.compile(r"[\u0600-\u06FF\u0750-\u077F\u08A0-\u08FF\uFB50-\uFDFF\uFE70-\uFEFF]")
+
 
 def contains_arabic(text):
     return bool(arabic_pattern.search(text))
@@ -274,14 +276,14 @@ class SARIFExporter:
     def __init__(
         self,
         scan_result: ScanResult,
-        compliance_mapper: Optional[Any] = None,
         chk_id: str = "CHK-???",
     ):
         self.result = scan_result
-        self.mapper = compliance_mapper
         self.chk_id = chk_id
 
     def generate(self) -> dict:
+        from cherenkov.compliance.registry import ComplianceRegistry
+
         """Emit SARIF 2.1.0 JSON."""
         results = []
         rules = []
@@ -321,8 +323,10 @@ class SARIFExporter:
                 "trace_id": self.chk_id,
             }
 
-            if self.mapper and f.cwe:
-                properties["compliance"] = self.mapper.map_all(f.cwe)
+            if f.cwe:
+                mappings = ComplianceRegistry.get_cwe_mappings(f.cwe)
+                if mappings:
+                    properties["compliance"] = mappings
 
             results.append(
                 {

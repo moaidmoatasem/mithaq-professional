@@ -161,3 +161,71 @@ class PDFReportGenerator:
         self._write_findings()
         self._write_forensic_anchor()
         return self.pdf.output()
+
+
+class SARIFExporter:
+    """Generates SARIF 2.1.0 reports for CI/CD integration."""
+
+    def __init__(
+        self,
+        scan_result: ScanResult,
+        compliance_mapper: Optional[any] = None,
+        chk_id: str = "CHK-???",
+    ):
+        self.result = scan_result
+        self.mapper = compliance_mapper
+        self.chk_id = chk_id
+
+    def generate(self) -> dict:
+        """Emit SARIF 2.1.0 JSON."""
+        results = []
+        for f in self.result.findings:
+            severity = f.severity.value.upper()
+            if severity in ("CRITICAL", "HIGH"):
+                level = "error"
+            elif severity == "MEDIUM":
+                level = "warning"
+            else:
+                level = "note"
+
+            properties = {
+                "remediation": f.remediation,
+                "trace_id": self.chk_id,
+            }
+
+            if self.mapper and f.cwe:
+                properties["compliance"] = self.mapper.map_all(f.cwe)
+
+            results.append(
+                {
+                    "ruleId": f.cwe or f.title.replace(" ", "-").lower() or "unknown",
+                    "level": level,
+                    "message": {"text": f.description or f.title},
+                    "properties": properties,
+                    "locations": [
+                        {
+                            "physicalLocation": {
+                                "artifactLocation": {"uri": self.result.target},
+                                "region": {"startLine": 1},
+                            }
+                        }
+                    ],
+                }
+            )
+
+        return {
+            "version": "2.1.0",
+            "$schema": "https://json.schemastore.org/sarif-2.1.0.json",
+            "runs": [
+                {
+                    "tool": {
+                        "driver": {
+                            "name": "Cherenkov Scanner",
+                            "version": "1.1.0",
+                            "informationUri": "https://github.com/moaidmoatasem/cherenkov-professional",
+                        }
+                    },
+                    "results": results,
+                }
+            ],
+        }

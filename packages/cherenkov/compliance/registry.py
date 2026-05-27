@@ -66,6 +66,27 @@ class ComplianceRegistry:
         ]
 
     @classmethod
+    def list_framework_ids(cls) -> list[str]:
+        """Lists IDs of all registered compliance frameworks."""
+        cls._discover()
+        return list(cls._registry.keys())
+
+    @classmethod
+    def get_cwe_mappings(cls, cwe: str) -> dict[str, list[str]]:
+        """Provides a unified mapping of a given CWE to control IDs across all frameworks.
+
+        Returns:
+            A dictionary mapping framework IDs to lists of mapped control IDs.
+        """
+        cls._discover()
+        mappings = {}
+        for fw_id, fw in cls._registry.items():
+            control_ids = fw.cwe_map.get(cwe)
+            if control_ids:
+                mappings[fw_id] = control_ids
+        return mappings
+
+    @classmethod
     def generate_report(cls, framework_id: str, findings: list[dict], scan_id: str):
         """Generates a compliance report for a specific framework.
 

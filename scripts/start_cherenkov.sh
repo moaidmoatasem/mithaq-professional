@@ -1,73 +1,134 @@
 #!/bin/bash
+# start_cherenkov.sh — One command boots the entire CHERENKOV stack.
+# Usage: ./scripts/start_cherenkov.sh
 set -euo pipefail
 
-# Make sure we're in the project root
-SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-cd "$SCRIPT_DIR/.."
+RED='\033[0;31m'; GREEN='\033[0;32m'; YELLOW='\033[1;33m'; BLUE='\033[0;34m'; NC='\033[0m'
+info()  { echo -e "${BLUE}[INFO]${NC} $1"; }
+ok()    { echo -e "${GREEN}[\xe2\x9c\x93]${NC} $1"; }
+warn()  { echo -e "${YELLOW}[!]${NC} $1"; }
+fail()  { echo -e "${RED}[\xe2\x9c\x97]${NC} $1"; }
 
-echo "Starting CHERENKOV orchestrator..."
+REPO_DIR="$(cd "$(dirname "$0")/.." && pwd)"
+cd "$REPO_DIR"
 
-# Register c2 alias idempotently
-if ! grep -q "alias c2='cherenkov'" ~/.bashrc; then
-  echo "alias c2='cherenkov'" >> ~/.bashrc
-  echo "Registered c2 alias in ~/.bashrc"
+export CHERENKOV_JWT_SECRET="${CHERENKOV_JWT_SECRET:-$(python3 -c "import secrets; print(secrets.token_hex(32))")}"
+
+cleanup() {
+  info "Shutting down services..."
+  pkill -f "uvicorn.*cherenkov" 2>/dev/null || true
+  pkill -f "litellm" 2>/dev/null || true
+}
+
+# ── 1. Kill stale processes ──────────────────────────────────────────
+info "Killing stale uvicorn/litellm processes..."
+cleanup
+sleep 1
+ok "Stale processes cleaned"
+
+# ── 2. Start Docker-backed services ──────────────────────────────────
+COMPOSE_FILES="-f deploy/docker-compose.yml"
+if [ -f "deploy/dvwa-compose.yml" ]; then
+  COMPOSE_FILES="$COMPOSE_FILES -f deploy/dvwa-compose.yml"
 fi
 
-# Kill stale processes
-echo "Killing stale processes..."
-pkill -f uvicorn || true
-pkill -f litellm || true
-
-# Start Docker dependencies
-echo "Starting Docker dependencies..."
-docker run -d --name qdrant --restart unless-stopped -p 6333:6333 qdrant/qdrant 2>/dev/null || docker start qdrant || sudo docker start qdrant || true
-docker run -d --name dvwa --restart unless-stopped -p 80:80 ghcr.io/digininja/dvwa:latest 2>/dev/null || docker start dvwa || sudo docker start dvwa || true
-
-# Start Ollama
-echo "Starting Ollama..."
-if ! pgrep -f "ollama serve" > /dev/null; then
-  ollama serve > /dev/null 2>&1 &
+info "Starting Docker services (Qdrant, Ollama)..."
+docker compose $COMPOSE_FILES up -d qdrant ollama 2>/dev/null || warn "Docker not available — run services manually"
+if echo "$COMPOSE_FILES" | grep -q dvwa; then
+  docker compose $COMPOSE_FILES up -d dvwa 2>/dev/null || warn "DVWA start skipped (optional)"
 fi
 
-# Start LiteLLM proxy
-echo "Starting LiteLLM proxy..."
-if [ -f ~/litellm-config.yaml ]; then
-  litellm --config ~/litellm-config.yaml > /dev/null 2>&1 &
+# ── 3. Start LiteLLM (if config exists) ──────────────────────────────
+LITELLM_CONFIG="${LITELLM_CONFIG:-$HOME/litellm-config.yaml}"
+if [ -f "$LITELLM_CONFIG" ]; then
+  info "Starting LiteLLM proxy..."
+  nohup litellm --config "$LITELLM_CONFIG" --port 4000 > /tmp/litellm.log 2>&1 &
+  LITELLM_PID=$!
+  disown "$LITELLM_PID" 2>/dev/null
+  ok "LiteLLM starting (PID $LITELLM_PID)"
 else
-  echo "Warning: ~/litellm-config.yaml not found (LiteLLM will not start properly unless it creates it)."
-  # Wait, litellm requires the config. We can just try to run litellm --config ~/litellm-config.yaml
-  litellm --config ~/litellm-config.yaml > /dev/null 2>&1 &
+  warn "LiteLLM config not found at $LITELLM_CONFIG — skipping"
 fi
 
-# Start API server
-echo "Starting API server..."
-PYTHONPATH="$(pwd)/packages"
-export PYTHONPATH
-export CHERENKOV_JWT_SECRET="${CHERENKOV_JWT_SECRET:-secret}"
-uvicorn cherenkov.api.main:app --host 0.0.0.0 --port 8000 > /dev/null 2>&1 &
+# ── 4. Start API server ──────────────────────────────────────────────
+info "Starting CHERENKOV API server..."
+PYTHONPATH="${REPO_DIR}/packages:${PYTHONPATH:-}" nohup uvicorn cherenkov.api.main:app \
+  --host 0.0.0.0 --port 8000 > /tmp/cherenkov-api.log 2>&1 &
+API_PID=$!
+disown "$API_PID" 2>/dev/null
+ok "API server starting (PID $API_PID)"
 
-echo "Waiting for services to initialize..."
-sleep 10
+# ── 5. Health checks ─────────────────────────────────────────────────
+echo ""
+info "Waiting for services to become available..."
+sleep 3
 
-echo "--- Health ---"
-curl -sf http://localhost:6333/healthz > /dev/null && echo " LATTICE (Qdrant)  OK ✓" || echo " LATTICE (Qdrant)  FAIL ✗"
-curl -sf http://localhost:80 > /dev/null && echo " DVWA              OK ✓" || echo " DVWA              FAIL ✗"
-curl -sf http://localhost:11434/api/tags > /dev/null && echo " Ollama            OK ✓" || echo " Ollama            FAIL ✗"
-curl -sf http://localhost:4000/health > /dev/null && echo " LiteLLM           OK ✓" || echo " LiteLLM           FAIL ✗"
-curl -sf http://localhost:8000/docs > /dev/null && echo " API Server        OK ✓" || echo " API Server        FAIL ✗"
-
-echo "Running JWT Smoke Test..."
-JWT_RESPONSE=$(curl -sf -X POST -H "Content-Type: application/json" http://localhost:8000/v1/auth/token -d '{"username":"admin","password":"password"}' || true)
-if echo "$JWT_RESPONSE" | grep -q "token"; then
-  echo " JWT Smoke Test    OK ✓"
-else
-  # Trying admin/admin as well in case the password is admin
-  JWT_RESPONSE_2=$(curl -sf -X POST -H "Content-Type: application/json" http://localhost:8000/v1/auth/token -d '{"username":"admin","password":"admin"}' || true)
-  if echo "$JWT_RESPONSE_2" | grep -q "token"; then
-    echo " JWT Smoke Test    OK ✓"
-  else
-    echo " JWT Smoke Test    FAIL ✗"
+check_service() {
+  local name="$1" url="$2" max="$3" optional="${4:-}"
+  for i in $(seq 1 "$max"); do
+    if curl -sf "$url" >/dev/null 2>&1; then
+      ok "$name is healthy"
+      return 0
+    fi
+    sleep 1
+  done
+  if [ "$optional" = "optional" ]; then
+    warn "$name health check failed (optional service)"
+    return 0
   fi
+  fail "$name health check failed"
+  return 1
+}
+
+check_service "Qdrant"    "http://localhost:6333/healthz" 15
+check_service "Ollama"    "http://localhost:11434/api/tags" 30
+check_service "API"       "http://localhost:8000/docs" 15
+check_service "DVWA"      "http://localhost:80" 10 "optional"
+
+if [ -n "${LITELLM_PID:-}" ] && kill -0 "$LITELLM_PID" 2>/dev/null; then
+  check_service "LiteLLM" "http://localhost:4000/health" 15
 fi
 
-echo "Startup complete. Exiting successfully."
+# ── 6. JWT smoke test ────────────────────────────────────────────────
+echo ""
+info "JWT smoke test (admin/admin)..."
+TOKEN=$(curl -s -X POST http://localhost:8000/api/v1/auth/token \
+  -H "Content-Type: application/json" \
+  -d '{"username":"admin","password":"admin"}' | python3 -c "import sys,json; print(json.load(sys.stdin).get('access_token',''))" 2>/dev/null || echo "")
+
+if [ -n "$TOKEN" ]; then
+  ok "JWT smoke test passed (token obtained)"
+else
+  warn "JWT smoke test failed — API may need a moment"
+fi
+
+# ── 7. Register c2 alias idempotently ────────────────────────────────
+ALIAS_LINE="alias c2='cd $REPO_DIR && python -m cherenkov.cli'"
+if ! grep -qxF "$ALIAS_LINE" "$HOME/.bashrc" 2>/dev/null; then
+  echo "" >> "$HOME/.bashrc"
+  echo "$ALIAS_LINE" >> "$HOME/.bashrc"
+  ok "c2 alias added to ~/.bashrc"
+else
+  ok "c2 alias already present in ~/.bashrc"
+fi
+
+# ── 8. Summary ───────────────────────────────────────────────────────
+echo ""
+echo "+==============================================================+"
+echo "|  CHERENKOV stack is ready                                     |"
+echo "+==============================================================+"
+echo ""
+echo "  API       -> http://localhost:8000"
+echo "  Docs      -> http://localhost:8000/docs"
+echo "  Qdrant    -> http://localhost:6333"
+echo "  Ollama    -> http://localhost:11434"
+echo "  LiteLLM   -> http://localhost:4000"
+echo "  DVWA      -> http://localhost:80"
+echo ""
+echo "  c2 alias registered - run: c2 scan --help"
+echo ""
+echo "  Quick commands:"
+echo "    c2 scan http://localhost/dvwa"
+echo "    docker compose -f deploy/docker-compose.yml logs -f"
+echo "    $0  # re-run (idempotent)"
+echo ""

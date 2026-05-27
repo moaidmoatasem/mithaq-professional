@@ -1,11 +1,12 @@
-import pytest
-from unittest.mock import patch, MagicMock
+from unittest.mock import MagicMock, patch
 
-from cherenkov.ai.lattice_bridge import embed_and_store, query_similar_targets, label_false_positive
+import pytest
+from cherenkov.ai.lattice_bridge import embed_and_store, label_false_positive, query_similar_targets
+
 
 @pytest.mark.asyncio
-@patch('cherenkov.ai.lattice_bridge._client')
-@patch('cherenkov.ai.lattice_bridge._model')
+@patch("cherenkov.ai.lattice_bridge._client")
+@patch("cherenkov.ai.lattice_bridge._model")
 async def test_embed_and_store_success(mock_model, mock_client):
     mock_qdrant = MagicMock()
     mock_client.return_value = mock_qdrant
@@ -21,9 +22,10 @@ async def test_embed_and_store_success(mock_model, mock_client):
     mock_qdrant.upsert.assert_called_once()
     mock_qdrant.get_collection.assert_called_once()
 
+
 @pytest.mark.asyncio
-@patch('cherenkov.ai.lattice_bridge._client')
-@patch('cherenkov.ai.lattice_bridge._model')
+@patch("cherenkov.ai.lattice_bridge._client")
+@patch("cherenkov.ai.lattice_bridge._model")
 async def test_query_similar_targets_success(mock_model, mock_client):
     mock_qdrant = MagicMock()
 
@@ -43,8 +45,9 @@ async def test_query_similar_targets_success(mock_model, mock_client):
     assert results[0] == {"id": 1, "target": "test"}
     mock_qdrant.search.assert_called_once()
 
+
 @pytest.mark.asyncio
-@patch('cherenkov.ai.lattice_bridge._client')
+@patch("cherenkov.ai.lattice_bridge._client")
 async def test_label_false_positive_success(mock_client):
     mock_qdrant = MagicMock()
     mock_client.return_value = mock_qdrant
@@ -53,11 +56,12 @@ async def test_label_false_positive_success(mock_client):
 
     mock_qdrant.set_payload.assert_called_once()
     _, kwargs = mock_qdrant.set_payload.call_args
-    assert kwargs['payload'] == {'is_false_positive': True}
-    assert kwargs['points'] == [12345]
+    assert kwargs["payload"] == {"is_false_positive": True}
+    assert kwargs["points"] == [12345]
+
 
 @pytest.mark.asyncio
-@patch('cherenkov.ai.lattice_bridge._client')
+@patch("cherenkov.ai.lattice_bridge._client")
 async def test_graceful_qdrant_failure(mock_client):
     mock_client.side_effect = Exception("Connection refused")
 

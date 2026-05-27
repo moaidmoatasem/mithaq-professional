@@ -5,22 +5,22 @@ Asserts server health routes, authorization status updates, credential rotation 
 JWT token signatures, and rate limiting rules.
 """
 
-import sys
 import os
+import sys
 import unittest
 from pathlib import Path
+
 from fastapi.testclient import TestClient
 
 # Add packages to path
 sys.path.append(str(Path(__file__).parent.parent / "packages"))
 sys.path.append(str(Path(__file__).parent.parent))
 
-from cherenkov.meissner.server import app
 from cherenkov.credentials import DefaultCredentialsManager
+from cherenkov.meissner.server import app
 
 
 class TestCherenkovAPIServer(unittest.TestCase):
-    
     @classmethod
     def setUpClass(cls):
         os.environ["CI"] = "true"
@@ -42,7 +42,7 @@ class TestCherenkovAPIServer(unittest.TestCase):
         """Verify the diagnostics endpoints serve correct operational state."""
         response = self.client.get("/api/health")
         self.assertEqual(response.status_code, 200)
-        
+
         data = response.json()
         self.assertIn("status", data)
         self.assertIn("rotation_required", data)
@@ -79,26 +79,42 @@ class TestCherenkovAPIServer(unittest.TestCase):
         self.assertEqual(response_status.json()["rotation_required"], False)
 
         # 4. Trigger scan after unlocked -> successfully proceeds
-        response_scan_unlocked = self.client.post("/api/scan", json={"code": "safe_method()", "backend": "ollama"})
+        response_scan_unlocked = self.client.post(
+            "/api/scan", json={"code": "safe_method()", "backend": "ollama"}
+        )
         self.assertEqual(response_scan_unlocked.status_code, 200)
         self.assertEqual(response_scan_unlocked.json()["status"], "SUCCESS")
 
     def test_05_rate_limiting(self):
         """Assert rate limiter correctly intercepts excessive spamming scan attempts."""
+        # Perform rotation to unlock
+        self.client.post("/api/auth/rotate", json={"hash": "sha256_mocked_hash"})
         # Clean request state
         from cherenkov.meissner.server import rate_limiter
+
         rate_limiter.requests.clear()
 
-        
+        # Override window so it doesn't expire during long fallbacks
+        old_window = rate_limiter.window_seconds
+        rate_limiter.window_seconds = 100.0
+
         # Make 10 allowed requests (limit is 10)
         for i in range(10):
-            response = self.client.post("/api/scan", json={"code": "safe_method()"})
+            response = self.client.post(
+                "/api/scan",
+                json={"code": "safe_method()"},
+                headers={"x-forwarded-for": "127.0.0.1"},
+            )
             self.assertEqual(response.status_code, 200)
 
         # 11th request triggers 429 Too Many Requests
-        response_spam = self.client.post("/api/scan", json={"code": "spam_method()"})
+        response_spam = self.client.post(
+            "/api/scan", json={"code": "spam_method()"}, headers={"x-forwarded-for": "127.0.0.1"}
+        )
         self.assertEqual(response_spam.status_code, 429)
         self.assertIn("Rate limit exceeded", response_spam.json()["detail"])
+        rate_limiter.window_seconds = old_window
+
 
 if __name__ == "__main__":
     unittest.main()

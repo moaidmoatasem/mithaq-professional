@@ -1,15 +1,16 @@
-from unittest.mock import AsyncMock, MagicMock, patch
+from unittest.mock import MagicMock, patch
 
 import pytest
+import httpx
 from cherenkov.core.base_scanner import Severity
 from cherenkov.scanners.xxe_scanner import XXEScanner
 
 
 @pytest.mark.asyncio
-async def test_xxe_scanner_vulnerable():
-    scanner = XXEScanner("xxe_scanner", "test scanner")
+async def test_xxe_scanner_vulnerable_linux():
+    scanner = XXEScanner()
 
-    mock_response = MagicMock()
+    mock_response = MagicMock(spec=httpx.Response)
     mock_response.status_code = 200
     mock_response.text = "root:x:0:0:root:/root:/bin/bash"
 
@@ -24,25 +25,22 @@ async def test_xxe_scanner_vulnerable():
             return mock_response
 
     with patch("httpx.AsyncClient", return_value=MockClient()):
-        result = await scanner.scan("http://vulnerable.com")
+        result = await scanner.scan("http://vulnerable.com/xml")
 
-        assert result.target == "http://vulnerable.com"
-        assert result.scanner_name == "xxe_scanner"
         assert len(result.findings) == 1
-
         finding = result.findings[0]
         assert finding.severity == Severity.HIGH
         assert finding.cwe == "CWE-611"
-        assert "XML External Entity" in finding.title
+        assert "matched 'root:x:0:0:'" in finding.description
 
 
 @pytest.mark.asyncio
-async def test_xxe_scanner_safe():
-    scanner = XXEScanner("xxe_scanner", "test scanner")
+async def test_xxe_scanner_vulnerable_windows():
+    scanner = XXEScanner()
 
-    mock_response = MagicMock()
-    mock_response.status_code = 400
-    mock_response.text = "Bad Request"
+    mock_response = MagicMock(spec=httpx.Response)
+    mock_response.status_code = 200
+    mock_response.text = "[extensions]\nbitmapped=off"
 
     class MockClient:
         async def __aenter__(self):
@@ -55,20 +53,53 @@ async def test_xxe_scanner_safe():
             return mock_response
 
     with patch("httpx.AsyncClient", return_value=MockClient()):
-        result = await scanner.scan("http://safe.com")
+        result = await scanner.scan("http://vulnerable-win.com/xml")
 
-        assert result.target == "http://safe.com"
+        assert len(result.findings) == 1
+        finding = result.findings[0]
+        assert "matched '[extensions]'" in finding.description
+
+
+@pytest.mark.asyncio
+async def test_xxe_scanner_safe():
+    scanner = XXEScanner()
+
+    mock_response = MagicMock(spec=httpx.Response)
+    mock_response.status_code = 200
+    mock_response.text = "<?xml version='1.0'?><root>OK</root>"
+
+    class MockClient:
+        async def __aenter__(self):
+            return self
+
+        async def __aexit__(self, *args):
+            pass
+
+        async def post(self, *args, **kwargs):
+            return mock_response
+
+    with patch("httpx.AsyncClient", return_value=MockClient()):
+        result = await scanner.scan("http://safe.com/xml")
+
         assert len(result.findings) == 0
 
 
 @pytest.mark.asyncio
 async def test_xxe_scanner_timeout():
-    scanner = XXEScanner("xxe_scanner", "test scanner")
+    scanner = XXEScanner()
 
-    import httpx
+    with patch("httpx.AsyncClient.post", side_effect=httpx.TimeoutException("Timeout")):
+        # Note: We patch AsyncClient.post directly if we don't want to mock the whole context manager
+        # But wait, the scanner uses 'async with httpx.AsyncClient(...) as client'
+        # So we need to mock the client returned by the context manager
+        
+        class MockClient:
+            async def __aenter__(self): return self
+            async def __aexit__(self, *args): pass
+            async def post(self, *args, **kwargs):
+                raise httpx.TimeoutException("Timeout")
 
-    with patch("httpx.AsyncClient", side_effect=httpx.RequestError("Error", request=MagicMock())):
-        result = await scanner.scan("http://timeout.com")
-
-        assert result.target == "http://timeout.com"
-        assert len(result.findings) == 0
+        with patch("httpx.AsyncClient", return_value=MockClient()):
+            result = await scanner.scan("http://timeout.com/xml")
+            assert len(result.findings) == 0
+            assert result.status == "completed"

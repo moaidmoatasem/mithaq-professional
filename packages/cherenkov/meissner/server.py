@@ -61,7 +61,12 @@ active_scan_logs: List[str] = []
 async def rate_limiting_middleware(request: Request, call_next):
     """Enforces SlidingWindowRateLimiter for scanning routes."""
     if request.url.path == "/api/scan":
-        client_ip = request.client.host if request.client else "127.0.0.1"
+        client_ip = "127.0.0.1"
+        if request.client and request.client.host:
+            client_ip = request.client.host
+        if request.headers.get("x-forwarded-for"):
+            client_ip = request.headers.get("x-forwarded-for")
+
         allowed, remaining = rate_limiter.is_allowed(client_ip)
         if not allowed:
             logger.warning(f"Rate limit exceeded for IP: {client_ip}")
@@ -165,7 +170,6 @@ async def post_run_scan(payload: Dict[str, str]):
         res = Sanitizer().sanitize(code_to_scan)
         sanitized_code = res.sanitized_text
         secrets_redacted = res.sanitization_applied
-
         active_scan_logs.append("[TENSOR-AUDIT] Initializing static code audit...")
         if secrets_redacted:
             active_scan_logs.append(

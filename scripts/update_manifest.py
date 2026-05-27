@@ -2,8 +2,8 @@
 """Update manifest.json with missing documentation files."""
 
 import json
-import os
 from pathlib import Path
+
 
 def update_manifest():
     manifest_path = Path("docs/manifest.json")
@@ -19,7 +19,11 @@ def update_manifest():
 
     # Find files not in manifest
     existing_sources = {e["source"] for e in manifest.get("entries", [])}
-    missing_files = [f for f in all_md_files if f not in existing_sources and not f.startswith("docs/governance/")]
+    missing_files = [
+        f
+        for f in all_md_files
+        if f not in existing_sources and not f.startswith("docs/governance/")
+    ]
 
     # Add missing files to manifest
     new_entries = []
@@ -31,19 +35,25 @@ def update_manifest():
         # Determine section from path
         if file_path.startswith("docs/architecture/"):
             section = "architecture"
-            topic = file_path.replace("docs/architecture/", "").replace(".md", "").replace("-", " ").title()
+            topic = (
+                file_path.replace("docs/architecture/", "")
+                .replace(".md", "")
+                .replace("-", " ")
+                .title()
+            )
         elif file_path.startswith("docs/development/"):
             section = "development"
-            topic = file_path.replace("docs/development/", "").replace(".md", "").replace("-", " ").title()
+            topic = (
+                file_path.replace("docs/development/", "")
+                .replace(".md", "")
+                .replace("-", " ")
+                .title()
+            )
         else:
             section = "misc"
             topic = file_path.replace("docs/", "").replace(".md", "").replace("-", " ").title()
 
-        new_entries.append({
-            "topic": topic,
-            "source": file_path,
-            "section": section
-        })
+        new_entries.append({"topic": topic, "source": file_path, "section": section})
 
     if new_entries:
         manifest["entries"].extend(new_entries)
@@ -57,6 +67,7 @@ def update_manifest():
     else:
         print("No missing files found")
         return False
+
 
 if __name__ == "__main__":
     update_manifest()

@@ -61,27 +61,30 @@ class DefaultCredentialsManager:
 
     @classmethod
     def get_jwt_secret(cls) -> str:
+        import secrets
+
         path = cls.get_env_path()
         if not path.exists():
+            # Generate a secure random secret on first run
+            new_secret = secrets.token_urlsafe(32)
+            cls.set_jwt_secret(new_secret)
             cls.set_rotation_flag()
-            raise RuntimeError(
-                "CHERENKOV_JWT_SECRET not configured. "
-                "A new secret was generated and stored in .env. "
-                "Run /auth/rotate-password to complete initial setup."
-            )
+            return new_secret
+
         content = path.read_text()
+        secret = ""
         for line in content.splitlines():
             if line.strip().startswith("CHERENKOV_JWT_SECRET="):
                 secret = line.split("CHERENKOV_JWT_SECRET=", 1)[-1].strip()
                 break
-        else:
-            secret = ""
+
         if not secret or secret in _BAD_SECRETS:
+            # Regenerate if secret is missing or insecure
+            new_secret = secrets.token_urlsafe(32)
+            cls.set_jwt_secret(new_secret)
             cls.set_rotation_flag()
-            raise RuntimeError(
-                "CHERENKOV_JWT_SECRET is a known-bad/default value. "
-                "Run /auth/rotate-password to set a secure password and regenerate the secret."
-            )
+            return new_secret
+
         return secret
 
     @classmethod

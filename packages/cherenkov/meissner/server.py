@@ -113,8 +113,10 @@ async def post_generate_token(payload: Dict[str, str]):
     # Sign with settings JWT Secret and standard HS256 algorithm
     try:
         secret_key = DefaultCredentialsManager.get_jwt_secret()
-    except Exception:
-        secret_key = "sovereign_secret_key"
+    except Exception as e:
+        logger.error(f"Failed to retrieve JWT secret for token encoding: {e}")
+        raise HTTPException(status_code=500, detail="Security gateway misconfiguration.")
+
     token_payload = {
         "sub": username,
         "role": "admin",
@@ -257,5 +259,10 @@ async def websocket_endpoint(
 if __name__ == "__main__":
     import uvicorn
 
-    # Bind to all interfaces to support wsl port forwarding out of the box
-    uvicorn.run("server:app", host="0.0.0.0", port=8080, reload=True)
+    # Bind to host from environment or default to localhost for security
+    # Use 0.0.0.0 if running in a container or WSL2 with external access required
+    host = os.getenv("CHERENKOV_HOST", "127.0.0.1")
+    port = int(os.getenv("CHERENKOV_PORT", "8080"))
+
+    logger.info(f"Starting Meissner server on {host}:{port}")
+    uvicorn.run("server:app", host=host, port=port, reload=True)

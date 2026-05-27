@@ -1,39 +1,83 @@
-"""EGY-FIN CSF Compliance Mapper"""
+"""EGY-FIN CSF Compliance Framework plugin for CHERENKOV."""
 
 from __future__ import annotations
 
-EGY_FIN_CSF_MAPPING: dict[str, list[str]] = {
-    "CWE-79": ["CBE-2.1.4"],
-    "CWE-89": ["CBE-2.1.4"],
-    "CWE-22": ["CBE-2.2.1"],
-    "CWE-352": ["CBE-2.1.5"],
-    "CWE-611": ["CBE-2.3.1"],
-    "CWE-287": ["CBE-2.4.1"],
-    "CWE-798": ["CBE-2.4.2"],
-    "CWE-502": ["CBE-2.5.1"],
-    "CWE-200": ["CBE-2.6.1"],
-    "CWE-918": ["CBE-2.7.1"],
-    "CWE-77": ["CBE-2.1.6"],
-    "CWE-78": ["CBE-2.1.6"],
-    "CWE-94": ["CBE-2.1.4"],
-    "CWE-306": ["CBE-2.2.2"],
-    "CWE-312": ["CBE-2.8.1"],
-    "CWE-319": ["CBE-2.8.2"],
-    "CWE-434": ["CBE-2.2.3"],
-    "CWE-601": ["CBE-2.2.4"],
-    "CWE-732": ["CBE-2.2.5"],
-}
+from .base import ComplianceControl, ComplianceFramework
 
 
-class EgyFinCsfMapper:
-    """Mapper for EGY-FIN CSF compliance framework."""
+class EgyFinCSF(ComplianceFramework):
+    """EGY-FIN CSF Compliance Framework definition."""
 
-    @staticmethod
-    def get_controls(cwe_id: str) -> list[str]:
-        """Get EGY-FIN CSF controls for a given CWE ID."""
-        return EGY_FIN_CSF_MAPPING.get(cwe_id, [])
+    framework_id = "egyfincsf"
+    framework_name = "EGY-FIN CSF"
+    framework_version = "1.0"
+    regulator = "Central Bank of Egypt (CBE)"
 
-    @staticmethod
-    def list_all_mappings() -> dict[str, list[str]]:
-        """Return the complete CWE to EGY-FIN CSF mapping."""
-        return EGY_FIN_CSF_MAPPING.copy()
+    @property
+    def controls(self) -> list[ComplianceControl]:
+        """All controls in EGY-FIN CSF."""
+        return [
+            ComplianceControl(
+                "GV-01",
+                "Cybersecurity Governance",
+                "Govern",
+                "Establish cybersecurity policies",
+                [],
+                3,
+            ),
+            ComplianceControl(
+                "ID-01",
+                "Asset Management",
+                "Identify",
+                "Inventory assets",
+                ["CWE-200", "CWE-1021"],
+                3,
+            ),
+            ComplianceControl(
+                "ID-02", "Risk Assessment", "Identify", "Assess risks", ["CWE-693", "CWE-16"], 4
+            ),
+            ComplianceControl(
+                "PR-01",
+                "Access Control",
+                "Protect",
+                "Manage access",
+                ["CWE-284", "CWE-285", "CWE-306", "CWE-307", "CWE-308"],
+                5,
+            ),
+            ComplianceControl(
+                "PR-02",
+                "Data Security",
+                "Protect",
+                "Protect data at rest and transit",
+                ["CWE-319", "CWE-311", "CWE-312", "CWE-327", "CWE-523"],
+                5,
+            ),
+            ComplianceControl(
+                "PR-03",
+                "Secure Configuration",
+                "Protect",
+                "Maintain secure configurations",
+                ["CWE-16", "CWE-693", "CWE-749", "CWE-1021"],
+                4,
+            ),
+            ComplianceControl(
+                "PR-04",
+                "Vulnerability Management",
+                "Protect",
+                "Identify and remediate vulnerabilities",
+                ["CWE-89", "CWE-79", "CWE-78", "CWE-22", "CWE-434", "CWE-611"],
+                5,
+            ),
+            ComplianceControl(
+                "DE-01",
+                "Continuous Monitoring",
+                "Detect",
+                "Monitor for events",
+                ["CWE-778", "CWE-200", "CWE-1021"],
+                4,
+            ),
+            ComplianceControl(
+                "RS-01", "Incident Response", "Respond", "Respond to incidents", [], 4
+            ),
+            ComplianceControl("RC-01", "Recovery", "Recover", "Restore operations", [], 3),
+        ]

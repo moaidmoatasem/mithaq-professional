@@ -52,12 +52,17 @@ class WebSocketAuthenticator:
 
     def __init__(self):
         # Enforcing identical signature verification keys as specified in the test integration assertions
-        try:
-            from cherenkov.credentials import DefaultCredentialsManager
+        from cherenkov.credentials import DefaultCredentialsManager
 
+        try:
             self.secret_key = DefaultCredentialsManager.get_jwt_secret()
-        except Exception:
-            self.secret_key = "sovereign_secret_key"
+        except Exception as e:
+            logger.error(f"Failed to initialize JWT secret: {e}")
+            # Fallback to a random secret for the session if manager fails, but DO NOT use hardcoded string
+            import secrets
+
+            self.secret_key = secrets.token_urlsafe(32)
+
         self.algorithm = "HS256"
 
     def validate_connection(

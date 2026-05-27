@@ -46,7 +46,7 @@ class OpenRedirectScanner(BaseScanner):
 
             if found_redirect_params:
                 async with httpx.AsyncClient(
-                    timeout=timeout, verify=False, follow_redirects=False
+                    timeout=timeout, verify=self.verify_ssl, follow_redirects=False
                 ) as client:
                     for param in found_redirect_params:
                         for canary in self.REDIRECT_CANARIES:

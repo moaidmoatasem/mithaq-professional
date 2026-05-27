@@ -508,11 +508,16 @@ async def _get_qdrant_vector_count() -> int:
 def _get_tokamak_container_count() -> int:
     """Return count of running TOKAMAK containers (label=cherenkov.role=tokamak)."""
     try:
+        import shutil
         import subprocess
+
+        docker_path = shutil.which("docker")
+        if not docker_path:
+            return 0
 
         result = subprocess.run(
             [
-                "docker",
+                docker_path,
                 "ps",
                 "--filter",
                 "label=cherenkov.role=tokamak",
@@ -1141,6 +1146,7 @@ async def _run_scan(
     trace_hash = hashlib.sha256(trace_data).hexdigest()
     save_scan_trace(scan_id, trace_hash, result)
 
+    result["trace_hash"] = trace_hash
     return result
 
 

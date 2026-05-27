@@ -586,8 +586,15 @@ class Meissner(CircuitBreaker):
         system = platform.system().lower()
         logger.critical(f"MEISSNER FAIL-CLOSED TRIGGERED: Dropping all egress on {system}")
 
+        import shutil
+
         try:
             if system == "linux":
+                iptables_path = shutil.which("iptables")
+                if not iptables_path:
+                    logger.error("iptables not found. Cannot enforce Meissner isolation.")
+                    return
+
                 # Drop outbound traffic to external networks only.
                 # Preserve internal Docker bridge (docker0) and loopback so
                 # the API, dashboard, Ollama, and Qdrant continue to function.
@@ -595,14 +602,14 @@ class Meissner(CircuitBreaker):
                 # on recovery (fail_open) by matching the comment string.
                 meissner_rule = "cherenkov-meissner-egress-block"
                 # Allow loopback and Docker internal bridge
-                subprocess.run(["iptables", "-A", "OUTPUT", "-o", "lo", "-j", "ACCEPT"], check=True)
+                subprocess.run([iptables_path, "-A", "OUTPUT", "-o", "lo", "-j", "ACCEPT"], check=True)
                 subprocess.run(
-                    ["iptables", "-A", "OUTPUT", "-o", "docker0", "-j", "ACCEPT"], check=True
+                    [iptables_path, "-A", "OUTPUT", "-o", "docker0", "-j", "ACCEPT"], check=True
                 )
                 # Block all remaining outbound traffic with a comment marker
                 subprocess.run(
                     [
-                        "iptables",
+                        iptables_path,
                         "-A",
                         "OUTPUT",
                         "-m",
@@ -616,14 +623,19 @@ class Meissner(CircuitBreaker):
                 )
                 logger.info("Linux iptables: External egress blocked (lo/docker0 preserved).")
             elif system == "windows":
+                netsh_path = shutil.which("netsh")
+                if not netsh_path:
+                    logger.error("netsh not found. Cannot enforce Meissner isolation.")
+                    return
+
                 # Use netsh to block all outgoing traffic
                 # First ensure firewall is on, then set default to block outbound
                 subprocess.run(
-                    ["netsh", "advfirewall", "set", "allprofiles", "state", "on"], check=True
+                    [netsh_path, "advfirewall", "set", "allprofiles", "state", "on"], check=True
                 )
                 subprocess.run(
                     [
-                        "netsh",
+                        netsh_path,
                         "advfirewall",
                         "set",
                         "allprofiles",
@@ -652,13 +664,20 @@ class Meissner(CircuitBreaker):
         system = platform.system().lower()
         logger.info(f"MEISSNER RECOVERY: Restoring egress on {system}")
 
+        import shutil
+
         try:
             if system == "linux":
+                iptables_path = shutil.which("iptables")
+                if not iptables_path:
+                    logger.error("iptables not found. Cannot restore connectivity.")
+                    return
+
                 # Remove rules matching the comment marker
                 meissner_rule = "cherenkov-meissner-egress-block"
                 subprocess.run(
                     [
-                        "iptables",
+                        iptables_path,
                         "-D",
                         "OUTPUT",
                         "-m",
@@ -670,16 +689,21 @@ class Meissner(CircuitBreaker):
                     ],
                     check=True,
                 )
-                subprocess.run(["iptables", "-D", "OUTPUT", "-o", "lo", "-j", "ACCEPT"], check=True)
+                subprocess.run([iptables_path, "-D", "OUTPUT", "-o", "lo", "-j", "ACCEPT"], check=True)
                 subprocess.run(
-                    ["iptables", "-D", "OUTPUT", "-o", "docker0", "-j", "ACCEPT"], check=True
+                    [iptables_path, "-D", "OUTPUT", "-o", "docker0", "-j", "ACCEPT"], check=True
                 )
                 logger.info("Linux iptables: External egress restored.")
             elif system == "windows":
+                netsh_path = shutil.which("netsh")
+                if not netsh_path:
+                    logger.error("netsh not found. Cannot restore connectivity.")
+                    return
+
                 # Restore default outbound behavior (allow)
                 subprocess.run(
                     [
-                        "netsh",
+                        netsh_path,
                         "advfirewall",
                         "set",
                         "allprofiles",

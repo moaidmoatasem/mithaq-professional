@@ -147,7 +147,15 @@ def save_scan(
 
 def get_scan(scan_id: str, path: Path = _DB_PATH) -> dict | None:
     with closing(_connect(path)) as conn:
-        row = conn.execute("SELECT * FROM scans WHERE scan_id = ?", (scan_id,)).fetchone()
+        row = conn.execute(
+            """
+            SELECT s.*, a.trace_hash
+            FROM scans s
+            LEFT JOIN audit_log a ON a.user_id = s.scan_id AND a.event_type = 'scan_trace'
+            WHERE s.scan_id = ?
+            """,
+            (scan_id,),
+        ).fetchone()
     if row is None:
         return None
     return _row_to_dict(row)
@@ -156,7 +164,13 @@ def get_scan(scan_id: str, path: Path = _DB_PATH) -> dict | None:
 def list_scans(limit: int = 20, path: Path = _DB_PATH) -> list[dict]:
     with _connect(path) as conn:
         rows = conn.execute(
-            "SELECT * FROM scans ORDER BY started_at DESC LIMIT ?", (limit,)
+            """
+            SELECT s.*, a.trace_hash
+            FROM scans s
+            LEFT JOIN audit_log a ON a.user_id = s.scan_id AND a.event_type = 'scan_trace'
+            ORDER BY s.started_at DESC LIMIT ?
+            """,
+            (limit,),
         ).fetchall()
     return [_row_to_dict(r) for r in rows]
 
@@ -358,7 +372,9 @@ def _row_to_dict(row: sqlite3.Row) -> dict:
     return d
 
 
-def save_scan_trace(scan_id: str, trace_hash: str, scan_result: dict, path: Path = _DB_PATH) -> None:
+def save_scan_trace(
+    scan_id: str, trace_hash: str, scan_result: dict, path: Path = _DB_PATH
+) -> None:
     now = datetime.now(timezone.utc).isoformat()
     details_json = json.dumps(scan_result)
 

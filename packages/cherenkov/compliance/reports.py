@@ -13,12 +13,14 @@ from cherenkov.core.base_scanner import ScanResult
 try:
     import arabic_reshaper
     from bidi.algorithm import get_display
+
     ARABIC_SUPPORT = True
 except ImportError:
     ARABIC_SUPPORT = False
 
 # Regex to detect Arabic characters
-arabic_pattern = re.compile(r'[\u0600-\u06FF\u0750-\u077F\u08A0-\u08FF\uFB50-\uFDFF\uFE70-\uFEFF]')
+arabic_pattern = re.compile(r"[\u0600-\u06FF\u0750-\u077F\u08A0-\u08FF\uFB50-\uFDFF\uFE70-\uFEFF]")
+
 
 def contains_arabic(text):
     return bool(arabic_pattern.search(text))

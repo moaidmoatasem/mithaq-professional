@@ -43,6 +43,11 @@ from slowapi import Limiter, _rate_limit_exceeded_handler
 from slowapi.errors import RateLimitExceeded
 from slowapi.util import get_remote_address
 
+from cherenkov.ai.model_selector import (
+    detect_hardware,
+    generate_litellm_config,
+    recommend_models,
+)
 from cherenkov.api.dependencies import require_rotated_credentials
 from cherenkov.api.init_auth import verify_api_key
 from cherenkov.api.middleware.auth import (
@@ -54,11 +59,6 @@ from cherenkov.api.middleware.auth import (
 )
 from cherenkov.api.middleware.auth import (
     User as AuthUser,
-)
-from cherenkov.ai.model_selector import (
-    detect_hardware,
-    generate_litellm_config,
-    recommend_models,
 )
 from cherenkov.api.routers import ai_orchestrator, c2_hub
 from cherenkov.core.storage.database import (
@@ -746,8 +746,72 @@ async def v1_scan_report_sarif(scan_id: str) -> dict:
     return exporter.generate()
 
 
+@v1.get("/scan/{scan_id}/compliance/{fw}/pdf")
+async def v1_compliance_pdf(
+    scan_id: str,
+    fw: str,
+    current_user: AuthUser = Depends(get_current_user),
+):
+    """Download a signed compliance PDF for a specific framework."""
+    from cherenkov.compliance.mapper import FRAMEWORKS, ComplianceMapper
+    from cherenkov.compliance.pdf_renderer import CompliancePDFRenderer
+    from cherenkov.core.base_scanner import Finding, ScanResult, Severity
+    from cherenkov.core.storage.database import get_scan
+
+    scan = get_scan(scan_id)
+    if not scan:
+        raise HTTPException(status_code=404, detail="Scan not found")
+
+    fw_upper = fw.upper()
+    if fw_upper not in FRAMEWORKS:
+        raise HTTPException(status_code=400, detail=f"Unsupported framework: {fw}")
+
+    findings = []
+    for f in scan.get("findings", []):
+        findings.append(
+            Finding(
+                title=f.get("title", "Unknown"),
+                severity=Severity(str(f.get("severity", "INFO")).upper()),
+                description=f.get("description", ""),
+                cwe=f.get("cwe", ""),
+                remediation=f.get("remediation", ""),
+            )
+        )
+
+    result = ScanResult(
+        target=scan.get("target", ""),
+        scanner_name="Cherenkov Unified",
+        findings=findings,
+        status="completed",
+    )
+
+    compliance_data = {}
+    mapper = ComplianceMapper()
+    for f in findings:
+        if f.cwe:
+            refs = mapper.map(f.cwe, fw_upper)
+            if refs:
+                compliance_data[f.cwe] = refs
+
+    chk_id = scan.get("meta", {}).get("chk_id", f"CHK-{scan_id[:8]}")
+    renderer = CompliancePDFRenderer(result, fw_upper, compliance_data, chk_id=chk_id)
+    pdf_bytes, anchor = renderer.generate()
+
+    return Response(
+        content=pdf_bytes,
+        media_type="application/pdf",
+        headers={
+            "Content-Disposition": f"attachment; filename=cherenkov_{fw_upper}_{scan_id}.pdf",
+            "X-SHA256": anchor.get("sha256", ""),
+            "X-TSA-Status": anchor.get("tsa_status", "skipped"),
+        },
+    )
+
+
 @v1.get("/reports/{scan_id}/pdf")
-async def v1_scan_report_pdf(scan_id: str, language: str = "en", current_user: AuthUser = Depends(get_current_user)):
+async def v1_scan_report_pdf(
+    scan_id: str, language: str = "en", current_user: AuthUser = Depends(get_current_user)
+):
     """Download PDF security report. Supports language parameter for localization (e.g., 'ar' for Arabic)."""
 
     from cherenkov.compliance.mapper import ComplianceMapper

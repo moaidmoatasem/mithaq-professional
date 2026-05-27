@@ -40,10 +40,11 @@ CREATE TABLE IF NOT EXISTS findings_pending (
 CREATE INDEX IF NOT EXISTS idx_findings_pending_status ON findings_pending(status);
 
 CREATE TABLE IF NOT EXISTS users (
-    id          INTEGER PRIMARY KEY AUTOINCREMENT,
-    username    TEXT    NOT NULL UNIQUE,
-    password    TEXT    NOT NULL,
-    role        INTEGER NOT NULL DEFAULT 1
+    id              INTEGER PRIMARY KEY AUTOINCREMENT,
+    username        TEXT    NOT NULL UNIQUE,
+    password        TEXT    NOT NULL,
+    role            INTEGER NOT NULL DEFAULT 1,
+    token_version   INTEGER NOT NULL DEFAULT 0
 );
 CREATE INDEX IF NOT EXISTS idx_users_username ON users(username);
 
@@ -65,6 +66,20 @@ CREATE TABLE IF NOT EXISTS circuit_breaker_state (
     last_failure_time REAL,
     updated_at       TEXT    NOT NULL
 );
+
+CREATE TABLE IF NOT EXISTS cherenkov_traces (
+    id              INTEGER PRIMARY KEY AUTOINCREMENT,
+    finding_id      TEXT    NOT NULL UNIQUE,
+    exploit_command TEXT    NOT NULL,
+    stdout          TEXT    NOT NULL,
+    stderr          TEXT    NOT NULL,
+    exit_code       INTEGER NOT NULL,
+    trace_hash      TEXT    NOT NULL UNIQUE,
+    timestamp       TEXT    NOT NULL,
+    shred_receipt   TEXT    NOT NULL DEFAULT '{}'
+);
+CREATE INDEX IF NOT EXISTS idx_traces_finding_id ON cherenkov_traces(finding_id);
+CREATE INDEX IF NOT EXISTS idx_traces_hash ON cherenkov_traces(trace_hash);
 """
 
 
@@ -340,4 +355,82 @@ def _row_to_dict(row: sqlite3.Row) -> dict:
     d = dict(row)
     d["findings"] = json.loads(d["findings"])
     d["meta"] = json.loads(d["meta"])
+    return d
+
+
+def save_scan_trace(scan_id: str, trace_hash: str, scan_result: dict, path: Path = _DB_PATH) -> None:
+    now = datetime.now(timezone.utc).isoformat()
+    details_json = json.dumps(scan_result)
+
+    with closing(_connect(path)) as conn:
+        with conn:
+            conn.execute(
+                """
+                INSERT INTO audit_log (timestamp, event_type, user_id, details, trace_hash)
+                VALUES (?, ?, ?, ?, ?)
+                """,
+                (now, "scan_trace", scan_id, details_json, trace_hash),
+            )
+
+
+def save_tokamak_trace(
+    finding_id: str,
+    exploit_command: str,
+    stdout: str,
+    stderr: str,
+    exit_code: int,
+    trace_hash: str,
+    timestamp: str,
+    shred_receipt: dict,
+    path: Path | None = None,
+) -> None:
+    """Save a forensic execution trace of a TOKAMAK PoC validation.
+
+    WORM enforcement: once a trace is written, it can never be altered or deleted.
+    """
+    path = path or _DB_PATH
+    with closing(_connect(path)) as conn:
+        with conn:
+            existing = conn.execute(
+                "SELECT 1 FROM cherenkov_traces WHERE finding_id = ?", (finding_id,)
+            ).fetchone()
+            if existing is not None:
+                logger.error(
+                    "WORM violation: attempted overwrite of immutable cherenkov trace record finding_id=%s",
+                    finding_id,
+                )
+                raise StorageError(
+                    f"WORM violation: trace record '{finding_id}' already exists and cannot be overwritten."
+                )
+
+            conn.execute(
+                """
+                INSERT INTO cherenkov_traces (
+                    finding_id, exploit_command, stdout, stderr, exit_code, trace_hash, timestamp, shred_receipt
+                ) VALUES (?, ?, ?, ?, ?, ?, ?, ?)
+                """,
+                (
+                    finding_id,
+                    exploit_command,
+                    stdout,
+                    stderr,
+                    exit_code,
+                    trace_hash,
+                    timestamp,
+                    json.dumps(shred_receipt),
+                ),
+            )
+
+
+def get_tokamak_trace(finding_id: str, path: Path | None = None) -> dict | None:
+    """Retrieve a persisted forensic execution trace."""
+    path = path or _DB_PATH
+    with closing(_connect(path)) as conn:
+        row = conn.execute(
+            "SELECT * FROM cherenkov_traces WHERE finding_id = ?", (finding_id,)
+        ).fetchone()
+    if row is None:
+        return None
+    d = dict(row)
+    d["shred_receipt"] = json.loads(d["shred_receipt"])
     return d

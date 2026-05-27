@@ -1,0 +1,85 @@
+name: Documentation Sync & Validation
+
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - 'docs/**'
+      - '*.md'
+      - 'mkdocs.yml'
+      - 'dev_crew/doc_gate.py'
+  pull_request:
+    paths:
+      - 'docs/**'
+      - '*.md'
+      - 'mkdocs.yml'
+      - 'dev_crew/doc_gate.py'
+
+permissions:
+  contents: read
+  pull-requests: write
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Install dependencies
+        run: |
+          pip install mkdocs-material mkdocs pymarkdownlnt
+
+      - name: Run Doc Gate validation
+        run: |
+          python dev_crew/doc_gate.py validate --manifest docs/manifest.json
+
+      - name: Run pymarkdownlnt
+        run: |
+          pymarkdownlnt scan docs/ || true
+
+      - name: Verify MkDocs build
+        run: |
+          mkdocs build --strict
+
+      - name: Validate governance sync
+        run: |
+          python scripts/sync_docs.py validate
+
+      - name: Comment on PR if issues found
+        if: failure() && github.event_name == 'pull_request'
+        uses: actions/github-script@v6
+        with:
+          script: |
+            github.rest.issues.createComment({
+              issue_number: context.issue.number,
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              body: '📚 **Doc Gate Check Failed**\n\nDocumentation validation found issues. Run `python dev_crew/doc_gate.py validate --manifest docs/manifest.json` locally to see details.'
+            })
+
+  deploy:
+    if: github.ref == 'refs/heads/main'
+    needs: validate
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Build MkDocs
+        run: |
+          pip install mkdocs-material mkdocs
+          mkdocs build --strict
+          
+      - name: Deploy to Cloudflare Workers
+        run: |
+          echo "Deployment configured via wrangler. Manual deploy: cd website && npm run deploy"

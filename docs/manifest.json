@@ -1,0 +1,403 @@
+{
+  "version": 1,
+  "last_updated": "2026-05-26",
+  "description": "Canonical documentation registry for CHERENKOV. Maps every doc topic to its canonical source file.",
+  "issue": "https://github.com/moaidmoatasem/cherenkov-professional/issues/368",
+  "entries": [
+    {
+      "topic": "Home / Index",
+      "source": "docs/index.md",
+      "section": "home"
+    },
+    {
+      "topic": "Quick Start",
+      "source": "docs/quickstart.md",
+      "section": "home"
+    },
+    {
+      "topic": "What is CHERENKOV?",
+      "source": "docs/what-is-cherenkov.md",
+      "section": "home"
+    },
+    {
+      "topic": "Project Briefing",
+      "source": "docs/project-briefing.md",
+      "section": "home"
+    },
+    {
+      "topic": "Architecture Overview",
+      "source": "docs/architecture/index.md",
+      "section": "architecture"
+    },
+    {
+      "topic": "The Trident",
+      "source": "docs/architecture/trident.md",
+      "section": "architecture"
+    },
+    {
+      "topic": "MEISSNER (Shield)",
+      "source": "docs/architecture/meissner.md",
+      "section": "architecture"
+    },
+    {
+      "topic": "ABLATION (Redaction)",
+      "source": "docs/architecture/ablation.md",
+      "section": "architecture"
+    },
+    {
+      "topic": "TOKAMAK (Proof)",
+      "source": "docs/architecture/tokamak.md",
+      "section": "architecture"
+    },
+    {
+      "topic": "Cognitive Swarm",
+      "source": "docs/architecture/swarm.md",
+      "section": "architecture"
+    },
+    {
+      "topic": "Data Tiers",
+      "source": "docs/architecture/data-tiers.md",
+      "section": "architecture"
+    },
+    {
+      "topic": "Adaptive Learning",
+      "source": "docs/architecture/adaptive-learning.md",
+      "section": "architecture"
+    },
+    {
+      "topic": "System Architecture (Detailed)",
+      "source": "docs/architecture/system-architecture.md",
+      "section": "architecture"
+    },
+    {
+      "topic": "High-Level Design",
+      "source": "docs/architecture/hld-diagram.md",
+      "section": "architecture"
+    },
+    {
+      "topic": "Low-Level Design",
+      "source": "docs/architecture/lld-diagram.md",
+      "section": "architecture"
+    },
+    {
+      "topic": "System Design & State Machine",
+      "source": "docs/architecture/system-design.md",
+      "section": "architecture"
+    },
+    {
+      "topic": "Design Patterns",
+      "source": "docs/architecture/design-patterns.md",
+      "section": "architecture"
+    },
+    {
+      "topic": "SSOT",
+      "source": "docs/architecture/ssot.md",
+      "section": "architecture"
+    },
+    {
+      "topic": "Data Flow",
+      "source": "docs/architecture/data-flow.md",
+      "section": "architecture"
+    },
+    {
+      "topic": "Agent State Machine",
+      "source": "docs/architecture/agent-state-machine.md",
+      "section": "architecture"
+    },
+    {
+      "topic": "Deployment Topology",
+      "source": "docs/architecture/deployment-topology.md",
+      "section": "architecture"
+    },
+    {
+      "topic": "Evidence Chain",
+      "source": "docs/architecture/evidence-chain.md",
+      "section": "architecture"
+    },
+    {
+      "topic": "Scanners Overview",
+      "source": "docs/scanners/index.md",
+      "section": "scanners"
+    },
+    {
+      "topic": "Validated Scanners",
+      "source": "docs/scanners/validated.md",
+      "section": "scanners"
+    },
+    {
+      "topic": "Scanner Strategy",
+      "source": "docs/scanners/strategy.md",
+      "section": "scanners"
+    },
+    {
+      "topic": "Writing a Scanner",
+      "source": "docs/scanners/writing.md",
+      "section": "scanners"
+    },
+    {
+      "topic": "Validation Gate",
+      "source": "docs/scanners/validation-gate.md",
+      "section": "scanners"
+    },
+    {
+      "topic": "Third-Party Wrappers",
+      "source": "docs/scanners/third-party.md",
+      "section": "scanners"
+    },
+    {
+      "topic": "Configuration Overview",
+      "source": "docs/configuration/index.md",
+      "section": "configuration"
+    },
+    {
+      "topic": "cherenkov.yaml",
+      "source": "docs/configuration/cherenkov-yaml.md",
+      "section": "configuration"
+    },
+    {
+      "topic": "Deployment Profiles",
+      "source": "docs/configuration/profiles.md",
+      "section": "configuration"
+    },
+    {
+      "topic": "Docker Compose",
+      "source": "docs/configuration/docker.md",
+      "section": "configuration"
+    },
+    {
+      "topic": "Environment Variables",
+      "source": "docs/configuration/env-vars.md",
+      "section": "configuration"
+    },
+    {
+      "topic": "API Overview",
+      "source": "docs/api/index.md",
+      "section": "api"
+    },
+    {
+      "topic": "REST Endpoints",
+      "source": "docs/api/rest.md",
+      "section": "api"
+    },
+    {
+      "topic": "WebSocket Events",
+      "source": "docs/api/websocket.md",
+      "section": "api"
+    },
+    {
+      "topic": "Error Codes",
+      "source": "docs/api/errors.md",
+      "section": "api"
+    },
+    {
+      "topic": "CLI Overview",
+      "source": "docs/cli/index.md",
+      "section": "cli"
+    },
+    {
+      "topic": "Compliance Overview",
+      "source": "docs/compliance/index.md",
+      "section": "compliance"
+    },
+    {
+      "topic": "EGY-FIN CSF",
+      "source": "docs/compliance/egyfincsf.md",
+      "section": "compliance"
+    },
+    {
+      "topic": "SAMA CSF",
+      "source": "docs/compliance/samacsf.md",
+      "section": "compliance"
+    },
+    {
+      "topic": "DORA",
+      "source": "docs/compliance/dora.md",
+      "section": "compliance"
+    },
+    {
+      "topic": "Development Overview",
+      "source": "docs/development/index.md",
+      "section": "development"
+    },
+    {
+      "topic": "Development Workflow",
+      "source": "docs/development/workflow.md",
+      "section": "development"
+    },
+    {
+      "topic": "Sprint Plan",
+      "source": "docs/development/sprint-plan.md",
+      "section": "development"
+    },
+    {
+      "topic": "Code Standards",
+      "source": "docs/development/code-standards.md",
+      "section": "development"
+    },
+    {
+      "topic": "Brand Guidelines",
+      "source": "docs/development/brand-guidelines.md",
+      "section": "development"
+    },
+    {
+      "topic": "Design",
+      "source": "docs/development/design.md",
+      "section": "development"
+    },
+    {
+      "topic": "Design System",
+      "source": "docs/development/design-system.md",
+      "section": "development"
+    },
+    {
+      "topic": "Writing Style Guide",
+      "source": "docs/development/writing-style.md",
+      "section": "development"
+    },
+    {
+      "topic": "Swarm Orchestrator",
+      "source": "docs/development/swarm.md",
+      "section": "development"
+    },
+    {
+      "topic": "Session Protocol",
+      "source": "docs/development/session-protocol.md",
+      "section": "development"
+    },
+    {
+      "topic": "Roadmap",
+      "source": "docs/development/roadmap.md",
+      "section": "development"
+    },
+    {
+      "topic": "Detailed Roadmap",
+      "source": "docs/development/roadmap-detailed.md",
+      "section": "development"
+    },
+    {
+      "topic": "Sovereign Roadmap",
+      "source": "docs/development/sovereign-roadmap.md",
+      "section": "development"
+    },
+    {
+      "topic": "Integrations & Approvals",
+      "source": "docs/development/integrations-approvals.md",
+      "section": "development"
+    },
+    {
+      "topic": "Security Overview",
+      "source": "docs/security/index.md",
+      "section": "security"
+    },
+    {
+      "topic": "Vulnerability Disclosure",
+      "source": "docs/security/disclosure.md",
+      "section": "security"
+    },
+    {
+      "topic": "Code of Conduct",
+      "source": "docs/governance/code-of-conduct.md",
+      "section": "governance"
+    },
+    {
+      "topic": "Security Policy",
+      "source": "docs/governance/security.md",
+      "section": "governance"
+    },
+    {
+      "topic": "Agent Rules",
+      "source": "docs/governance/agent-rules.md",
+      "section": "governance"
+    },
+    {
+      "topic": "HITL Enforcement",
+      "source": "docs/governance/hitl-enforcement.md",
+      "section": "governance"
+    },
+    {
+      "topic": "Contributing",
+      "source": "docs/governance/contributing.md",
+      "section": "governance"
+    },
+    {
+      "topic": "Architecture (Root Reference)",
+      "source": "ARCHITECTURE.md",
+      "section": "reference"
+    },
+    {
+      "topic": "AI Agent Invariants",
+      "source": "CLAUDE.md",
+      "section": "reference"
+    },
+    {
+      "topic": "Agent Coordination",
+      "source": "AGENTS.md",
+      "section": "reference"
+    },
+    {
+      "topic": "Mcp Config Remediation Plan",
+      "source": "docs/mcp-config-remediation-plan.md",
+      "section": "misc"
+    },
+    {
+      "topic": "Secrets Audit Report",
+      "source": "docs/secrets-audit-report.md",
+      "section": "misc"
+    },
+    {
+      "topic": "Overview",
+      "source": "docs/architecture/overview.md",
+      "section": "architecture"
+    },
+    {
+      "topic": "Ci Cd Pipeline",
+      "source": "docs/architecture/ci-cd-pipeline.md",
+      "section": "architecture"
+    },
+    {
+      "topic": "Wiki Index",
+      "source": "docs/development/wiki-index.md",
+      "section": "development"
+    },
+    {
+      "topic": "Contributing",
+      "source": "docs/development/contributing.md",
+      "section": "development"
+    },
+    {
+      "topic": "Sovereign Blueprint",
+      "source": "docs/development/sovereign-blueprint.md",
+      "section": "development"
+    },
+    {
+      "topic": "Ui Requirements",
+      "source": "docs/development/ui-requirements.md",
+      "section": "development"
+    },
+    {
+      "topic": "Master Plan",
+      "source": "docs/development/master-plan.md",
+      "section": "development"
+    },
+    {
+      "topic": "Premortem",
+      "source": "docs/development/premortem.md",
+      "section": "development"
+    },
+    {
+      "topic": "Newsletter Concept",
+      "source": "docs/development/newsletter-concept.md",
+      "section": "development"
+    },
+    {
+      "topic": "Releases",
+      "source": "docs/development/releases.md",
+      "section": "development"
+    },
+    {
+      "topic": "Technical Specification",
+      "source": "docs/development/technical-specification.md",
+      "section": "development"
+    }
+  ]
+}

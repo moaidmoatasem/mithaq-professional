@@ -76,3 +76,9 @@ When writing code, documentation, or CLI outputs, Developers and AI Agents MUST 
 * Do not say *"Testing the payload"*. Say: **"Executing kinetic proof."**
 * Do not say *"Deleting temp files"*. Say: **"Initiating cryptographic shredding."**
 * Do not say *"Report generated"*. Say: **"Cherenkov Trace Signed."**
+
+```mermaid
+graph TD
+    A[Component] --> B[Subcomponent]
+    B --> C[Implementation Detail]
+```

@@ -1,0 +1,58 @@
+name: pr-budget
+
+# Conflict-avoidance guardrail: keep agent PRs small.
+# Fails if a PR exceeds the touch budget unless the maintainer adds
+# the `large-pr-approved` label. See AGENTS.md §1g.
+
+on:
+  pull_request:
+    types: [opened, synchronize, reopened, labeled, unlabeled]
+
+permissions:
+  contents: read
+  pull-requests: read
+
+jobs:
+  budget:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check touch budget
+        uses: actions/github-script@v6
+        with:
+          script: |
+            const MAX_FILES = 8;
+            const MAX_LINES = 400;
+            const OVERRIDE_LABEL = 'large-pr-approved';
+
+            const pr = context.payload.pull_request;
+            const labels = (pr.labels || []).map(l => l.name);
+            if (labels.includes(OVERRIDE_LABEL)) {
+              core.info(`Override label '${OVERRIDE_LABEL}' present — skipping budget check.`);
+              return;
+            }
+
+            const files = await github.paginate(github.rest.pulls.listFiles, {
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              pull_number: pr.number,
+              per_page: 100,
+            });
+
+            // Ignore lockfiles and generated artifacts — they aren't agent intent.
+            const IGNORE = /^(.*\.lock|.*\.lockb|package-lock\.json|pnpm-lock\.yaml|poetry\.lock|cherno-docs\/.*\.svg|.*\.min\.(js|css))$/;
+            const real = files.filter(f => !IGNORE.test(f.filename));
+
+            const fileCount = real.length;
+            const lineCount = real.reduce((s, f) => s + f.additions + f.deletions, 0);
+
+            core.info(`Files changed (excluding lockfiles): ${fileCount} / ${MAX_FILES}`);
+            core.info(`Lines changed (excluding lockfiles): ${lineCount} / ${MAX_LINES}`);
+
+            if (fileCount > MAX_FILES || lineCount > MAX_LINES) {
+              core.setFailed(
+                `PR exceeds touch budget (${fileCount} files, ${lineCount} lines). ` +
+                `Limit: ${MAX_FILES} files / ${MAX_LINES} lines. ` +
+                `Either split the PR into stacked PRs, or add the '${OVERRIDE_LABEL}' label ` +
+                `(maintainer only — justify in the PR description).`
+              );
+            }

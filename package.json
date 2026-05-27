@@ -1,14 +1,30 @@
 {
-  "name": "cherenkov-professional",
-  "version": "1.1.0",
-  "private": true,
-  "description": "CHERENKOV sovereign security platform — static docs site (Cloudflare Workers)",
+  "name": "cherenkov-frontend",
+  "type": "module",
+  "version": "0.2.0-beta",
+  "description": "Air-gapped security scanner platform — local Ollama inference, zero cloud dependencies",
   "scripts": {
-    "build": "pip install -r requirements-docs.txt && mkdocs build",
-    "deploy": "npm run build && wrangler deploy",
-    "dev": "wrangler dev"
+    "dev": "astro dev --host 0.0.0.0 --port 8000",
+    "build": "astro build",
+    "preview": "astro preview",
+    "astro": "astro",
+    "test:unit": "vitest run",
+    "test:e2e": "playwright test"
+  },
+  "dependencies": {
+    "@astrojs/react": "^3.0.0",
+    "astro": "^6.3.7",
+    "lucide-react": "^0.300.0",
+    "react": "^18.2.0",
+    "react-dom": "^18.2.0"
   },
   "devDependencies": {
-    "wrangler": "^3.114.1"
+    "@playwright/test": "^1.40.0",
+    "@testing-library/react": "^14.1.2",
+    "@types/react": "^18.2.43",
+    "@types/react-dom": "^18.2.17",
+    "jsdom": "^23.0.1",
+    "typescript": "^5.3.3",
+    "vitest": "^1.0.0"
   }
 }

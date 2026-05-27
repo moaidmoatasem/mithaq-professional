@@ -1,3 +1,4 @@
+import os
 from datetime import datetime, timedelta, timezone
 from enum import IntEnum
 from typing import Annotated, Optional
@@ -7,8 +8,10 @@ import jwt
 from fastapi import Depends, Header, HTTPException, status
 from pydantic import BaseModel
 
-# Security Constants (In a real app, these should be in .env)
-JWT_SECRET = "cherenkov-sovereign-audit-key-2024"  # Placeholder
+_jwt_secret = os.environ.get("CHERENKOV_JWT_SECRET")
+if not _jwt_secret:
+    raise RuntimeError("CHERENKOV_JWT_SECRET env var not set")
+JWT_SECRET: str = _jwt_secret
 ALGORITHM = "HS256"
 ACCESS_TOKEN_EXPIRE_MINUTES = 60
 
@@ -36,7 +39,7 @@ def create_access_token(data: dict, expires_delta: Optional[timedelta] = None):
     return encoded_jwt
 
 
-async def get_current_user(authorization: Annotated[Optional[str], Header()] = None) -> User:
+async def get_current_user_bearer(authorization: Annotated[Optional[str], Header()] = None) -> User:
     if not authorization:
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
@@ -72,11 +75,15 @@ async def get_current_user(authorization: Annotated[Optional[str], Header()] = N
         )
 
 
+# Alias for backward compatibility
+get_current_user = get_current_user_bearer
+
+
 class RoleChecker:
     def __init__(self, required_role: Role):
         self.required_role = required_role
 
-    def __call__(self, user: User = Depends(get_current_user)):
+    def __call__(self, user: User = Depends(get_current_user_bearer)):
         if user.role < self.required_role:
             raise HTTPException(
                 status_code=status.HTTP_403_FORBIDDEN,

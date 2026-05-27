@@ -1,27 +1,18 @@
-# CHERENKOV GitHub Wiki Index
+# GitHub Wiki — Deprecated
 
-Welcome to the CHERENKOV documentation wiki. This wiki serves as the primary resource for both human developers and AI agents operating within the repository.
+> **The GitHub Wiki is no longer maintained.**
+>
+> All documentation has been consolidated at **[docs.cherenkov-security.com](https://docs.cherenkov-security.com)**.
+>
+> See the [Documentation Alignment epic (#368)](https://github.com/moaidmoatasem/cherenkov-professional/issues/368) for context.
 
-Reader-facing docs are also published at [https://docs.cherenkov-security.com/](https://docs.cherenkov-security.com/).
+## Where to Go
 
-## 1. Getting Started
-* [Project briefing (single entry)](../PROJECT_BRIEFING.md)
-* [Quick Start & Local Deployment](https://github.com/moaidmoatasem/cherenkov-professional/blob/main/README.md)
-* [The Trident of Truth Architecture](../architecture/SYSTEM_ARCHITECTURE.md)
-* [CHERENKOV vs Traditional Scanners](https://github.com/moaidmoatasem/cherenkov-professional/blob/main/README.md)
+| Topic | Location |
+|---|---|
+| Home | [docs.cherenkov-security.com](https://docs.cherenkov-security.com) |
+| Source code | [`docs/`](https://github.com/moaidmoatasem/cherenkov-professional/tree/main/docs) |
+| Architecture | [`docs/architecture/`](https://github.com/moaidmoatasem/cherenkov-professional/tree/main/docs/architecture) |
+| Governance | [`docs/governance/`](https://github.com/moaidmoatasem/cherenkov-professional/tree/main/docs/governance) |
 
-## 2. Technical Product Management (TPM)
-* [Product Roadmap](../development/roadmap-detailed.md)
-* [System Design (HLD & LLD)](../architecture/system-design.md)
-* [Development Plan & Sprints](../development/sprint-plan.md)
-* [Integrations & Feature Approvals](../development/integrations-approvals.md)
-
-## 3. Engineering & Architecture
-* [Design Patterns & Best Practices](../architecture/design-patterns.md)
-* [Agent State & Governance](../architecture/system-design.md#21-agent-state-management)
-* [Human-in-the-Loop (HITL) Enforcement](../architecture/system-design.md#22-orchestration-flow)
-
-## 4. Contributing
-* [Code of Conduct](https://github.com/moaidmoatasem/cherenkov-professional/blob/main/CODE_OF_CONDUCT.md)
-* [Contribution Guidelines](https://github.com/moaidmoatasem/cherenkov-professional/blob/main/CONTRIBUTING.md)
-* [Security Policy](https://github.com/moaidmoatasem/cherenkov-professional/blob/main/SECURITY.md)
+*This file will be removed in a future release once all external references are updated.*

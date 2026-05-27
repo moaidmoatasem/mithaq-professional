@@ -1,7 +1,7 @@
 [project]
 name = "cherenkov-core"
 version = "1.1.0"
-description = "cherenkov Security Framework - Precision in Sovereignty"
+description = "Air-gapped security scanner platform — local Ollama inference, zero cloud dependencies"
 authors = [
     {name = "Moaid EL-Moatasem Bellah"}
 ]
@@ -23,6 +23,8 @@ dependencies = [
     "sentence-transformers",
     "slowapi>=0.1.9",
     "ollama>=0.1.0",
+    "fpdf2>=2.7.0",
+    "defusedxml>=0.7.1",
 ]
 
 [tool.setuptools.packages.find]

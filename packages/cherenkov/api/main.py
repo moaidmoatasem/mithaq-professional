@@ -7,10 +7,12 @@ packages/cherenkov/api/static/index.html via FastAPI StaticFiles.
 """
 
 import asyncio
+import hashlib
 import json
 import logging
 import os
 import re
+import secrets
 import sqlite3
 import time
 import uuid
@@ -21,6 +23,7 @@ from typing import Any, Dict, List, Literal, Optional, Set
 from urllib.parse import urlparse
 
 import httpx
+from dotenv import load_dotenv
 from fastapi import (
     BackgroundTasks,
     Depends,
@@ -32,7 +35,7 @@ from fastapi import (
     status,
 )
 from fastapi.middleware.cors import CORSMiddleware
-from fastapi.responses import FileResponse
+from fastapi.responses import FileResponse, Response
 from fastapi.routing import APIRouter
 from fastapi.staticfiles import StaticFiles
 from pydantic import BaseModel
@@ -40,6 +43,8 @@ from slowapi import Limiter, _rate_limit_exceeded_handler
 from slowapi.errors import RateLimitExceeded
 from slowapi.util import get_remote_address
 
+from cherenkov.api.dependencies import require_rotated_credentials
+from cherenkov.api.init_auth import verify_api_key
 from cherenkov.api.middleware.auth import (
     Role,
     RoleChecker,
@@ -50,6 +55,7 @@ from cherenkov.api.middleware.auth import (
 from cherenkov.api.middleware.auth import (
     User as AuthUser,
 )
+from cherenkov.api.routers import ai_orchestrator, c2_hub
 from cherenkov.core.storage.database import (
     _DB_PATH,
     erase_target_data,
@@ -58,9 +64,37 @@ from cherenkov.core.storage.database import (
     save_audit_entry,
 )
 from cherenkov.core.tokamak import Command, Tokamak
+from cherenkov.credentials import DefaultCredentialsManager
 from cherenkov.orchestration.orchestration_api import orchestrate_workflow
 from cherenkov.orchestration.result_persistence import ResultStore
 from cherenkov.orchestration.workflow_parser import load_workflow
+
+load_dotenv(dotenv_path=".env", override=True)
+
+# Initialize Limiter
+limiter = Limiter(key_func=get_remote_address)
+app = FastAPI(title="CHERENKOV C2 Hub")
+app.state.limiter = limiter
+app.add_exception_handler(RateLimitExceeded, _rate_limit_exceeded_handler)
+
+# 1. Public Frontend - NO AUTH
+# Vite dist files served as static content
+if os.path.exists("packages/cherenkov/web/dist"):
+    app.mount("/app", StaticFiles(directory="packages/cherenkov/web/dist", html=True), name="app")
+
+# 2. Protected API - AUTH REQUIRED
+# All routes mounted under /api require valid X-Cherenkov-Token
+api_app = FastAPI(dependencies=[Depends(verify_api_key)])
+api_app.include_router(ai_orchestrator.router, prefix="/v1")
+api_app.include_router(c2_hub.router, prefix="/v1")
+app.mount("/api", api_app)
+
+
+@app.get("/health")
+def health_check():
+    """Publicly accessible health heartbeat."""
+    return {"status": "operational"}
+
 
 logger = logging.getLogger(__name__)
 
@@ -85,12 +119,25 @@ async def lifespan(app: FastAPI):
     from cherenkov.core.storage.database import get_user, init_db, save_user
 
     init_db()
+    env_path = Path(".env")
+    if not env_path.exists():
+        logger.warning(
+            "Runtime .env not found at %s. "
+            "CHERENKOV_JWT_SECRET must be set via environment variable.",
+            env_path,
+        )
     if not get_user("admin"):
         save_user("admin", hash_password("admin"), Role.ADMIN)
 
     meissner_hub.on_open(
         lambda: asyncio.create_task(
-            _broadcast({"type": "circuit_breaker", "state": "OPEN", "reason": "threshold_exceeded"})
+            _broadcast(
+                {
+                    "type": "circuit_breaker",
+                    "state": "OPEN",
+                    "reason": "threshold_exceeded",
+                }
+            )
         )
     )
     yield
@@ -174,6 +221,11 @@ class AuthRequest(BaseModel):
     password: str
 
 
+class PasswordRotateRequest(BaseModel):
+    old_password: str
+    new_password: str
+
+
 class FridaGenerateRequest(BaseModel):
     platform: str
     hooks: List[str]
@@ -239,10 +291,15 @@ if (ObjC.available) {
 
 @v1.post("/assistant/advice")
 async def v1_assistant_advice(
-    request: AssistantAdviceRequest, current_user: AuthUser = Depends(get_current_user)
+    request: AssistantAdviceRequest,
+    current_user: AuthUser = Depends(get_current_user),
 ) -> dict:
     """Get remediation advice from the AI Studio Assistant (Ollama)."""
-    import json
+    if DefaultCredentialsManager.is_rotation_required():
+        raise HTTPException(
+            status_code=423,
+            detail={"code": "rotation_required", "message": "Password rotation required"},
+        )
 
     import httpx
 
@@ -266,16 +323,12 @@ async def v1_assistant_advice(
                 data = r.json()
                 return {"advice": data.get("response", ""), "status": "ready"}
             else:
-                return {"advice": "Failed to get advice from Ollama.", "status": "error"}
+                return {
+                    "advice": "Failed to get advice from Ollama.",
+                    "status": "error",
+                }
     except Exception as exc:
         return {"advice": f"Assistant error: {exc}", "status": "error"}
-
-
-@app.post("/api/v1/auth/token")
-async def login(credentials: dict):
-    if credentials.get("username") == "admin" and credentials.get("password") == "admin":
-        return {"access_token": "cherenkov-dev-token", "token_type": "bearer"}
-    raise HTTPException(status_code=401, detail="Invalid credentials")
 
 
 @v1.post("/auth/token")
@@ -298,8 +351,85 @@ async def v1_auth_me(current_user: AuthUser = Depends(get_current_user)) -> dict
     return {"username": current_user.username, "role": current_user.role.name}
 
 
+@v1.post("/auth/rotate-password")
+async def v1_rotate_password(
+    request: PasswordRotateRequest,
+    fastapi_request: Request,
+) -> dict:
+    """Rotate admin password and regenerate JWT secret.
+
+    Requires valid session cookie. Clears rotation flag after success.
+    """
+    import jwt
+
+    session_cookie = fastapi_request.cookies.get("session")
+    if not session_cookie:
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Missing session cookie",
+        )
+
+    username = None
+    for secret_source in [None, "credentials"]:
+        try:
+            if secret_source == "credentials":
+                try:
+                    jwt_secret_val = DefaultCredentialsManager.get_jwt_secret()
+                except RuntimeError:
+                    continue
+            else:
+                from cherenkov.api.middleware.auth import JWT_SECRET
+
+                jwt_secret_val = JWT_SECRET
+            payload = jwt.decode(session_cookie, jwt_secret_val, algorithms=["HS256"])
+            username = payload.get("sub")
+            break
+        except jwt.PyJWTError:
+            continue
+
+    if not username:
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Invalid session",
+        )
+
+    user_data = get_user(username)
+    if not user_data:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="User not found",
+        )
+
+    if not verify_password(request.old_password, user_data["password"]):
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Incorrect old password",
+        )
+
+    from cherenkov.api.middleware.auth import hash_password
+    from cherenkov.core.storage.database import save_user
+
+    save_user(username, hash_password(request.new_password), user_data["role"])
+
+    new_secret = secrets.token_urlsafe(32)
+    DefaultCredentialsManager.set_jwt_secret(new_secret)
+    os.environ["CHERENKOV_JWT_SECRET"] = new_secret
+
+    from cherenkov.api.middleware.auth import create_access_token
+
+    new_token = create_access_token(data={"sub": username, "role": user_data["role"]})
+
+    response = {"status": "rotated"}
+    fastapi_request.state.new_token = new_token
+    fastapi_request.state.new_secret = new_secret
+
+    return response
+
+
 @v1.get("/audit")
-async def v1_audit_log(current_user: AuthUser = Depends(RoleChecker(Role.ADMIN))) -> list[dict]:
+async def v1_audit_log(
+    current_user: AuthUser = Depends(RoleChecker(Role.ADMIN)),
+) -> list[dict]:
     """Return the CHERENKOV audit log. Requires ADMIN role."""
     return get_audit_log(100)
 
@@ -370,8 +500,8 @@ async def _get_qdrant_vector_count() -> int:
             r = await c.get("http://localhost:6333/collections/cherenkov_findings")
             if r.status_code == 200:
                 return r.json().get("result", {}).get("vectors_count", 0) or 0
-    except Exception:
-        pass
+    except Exception as e:
+        logger.error(f"Error checking webgoat: {e}")
     return 0
 
 
@@ -381,7 +511,14 @@ def _get_tokamak_container_count() -> int:
         import subprocess
 
         result = subprocess.run(
-            ["docker", "ps", "--filter", "label=cherenkov.role=tokamak", "--format", "{{.ID}}"],
+            [
+                "docker",
+                "ps",
+                "--filter",
+                "label=cherenkov.role=tokamak",
+                "--format",
+                "{{.ID}}",
+            ],
             capture_output=True,
             text=True,
             timeout=2,
@@ -451,8 +588,8 @@ async def v1_ablation_stats() -> dict:
                     "alert_active": drop_rate > 0.2,
                 }
             }
-    except Exception:
-        pass
+    except Exception as e:
+        logger.error(f"Error checking webgoat: {e}")
     # Fallback: healthy zeros when the bridge is not yet active
     return {
         "session_stats": {
@@ -466,10 +603,34 @@ async def v1_ablation_stats() -> dict:
 
 @v1.post("/sandbox/execute")
 async def v1_sandbox_execute(
-    command: Command, current_user: AuthUser = Depends(RoleChecker(Role.OPERATOR))
+    command: Command,
+    current_user: AuthUser = Depends(RoleChecker(Role.OPERATOR)),
 ) -> dict:
     """Execute a payload in the TOKAMAK sandbox. Requires OPERATOR role."""
+    if DefaultCredentialsManager.is_rotation_required():
+        raise HTTPException(
+            status_code=423,
+            detail={"code": "rotation_required", "message": "Password rotation required"},
+        )
+    from cherenkov.core.storage.database import save_tokamak_trace
+
     result = await asyncio.to_thread(Tokamak.execute, command)
+
+    # Persist forensic trace
+    try:
+        save_tokamak_trace(
+            finding_id=command.scanner_name or f"manual-{int(time.time())}",
+            exploit_command=command.payload,
+            stdout=result.stdout,
+            stderr=result.stderr,
+            exit_code=result.exit_code,
+            trace_hash=result.trace_hash,
+            timestamp=datetime.now(timezone.utc).isoformat(),
+            shred_receipt=result.shred_receipt,
+        )
+    except Exception as exc:
+        logger.error("Failed to persist sandbox trace: %s", exc)
+
     return {
         "stdout": result.stdout,
         "stderr": result.stderr,
@@ -480,7 +641,7 @@ async def v1_sandbox_execute(
 
 
 @v1.get("/sandbox/status")
-async def v1_sandbox_status() -> dict:
+async def v1_sandbox_status(req=Depends(require_rotated_credentials)) -> dict:
     """Return the status of the Tokamak sandbox."""
     return {"status": "ready"}
 
@@ -493,6 +654,15 @@ async def v1_scan(
     background_tasks: BackgroundTasks,
     current_user: AuthUser = Depends(get_current_user),
 ) -> dict:
+    """Proxy to the core scan engine; broadcasts a live event on completion.
+
+    Rate-limited to 30 requests/minute per IP to protect Ollama from exhaustion.
+    """
+    if DefaultCredentialsManager.is_rotation_required():
+        raise HTTPException(
+            status_code=423,
+            detail={"code": "rotation_required", "message": "Password rotation required"},
+        )
     """Proxy to the core scan engine; broadcasts a live event on completion.
 
     Rate-limited to 30 requests/minute per IP to protect Ollama from exhaustion.
@@ -530,65 +700,41 @@ async def v1_scan_history() -> list[dict]:
 async def v1_scan_report_sarif(scan_id: str) -> dict:
     """Return a scan report in SARIF 2.1.0 format."""
     from cherenkov.compliance.mapper import ComplianceMapper
+    from cherenkov.compliance.reports import SARIFExporter
+    from cherenkov.core.base_scanner import Finding, ScanResult, Severity
     from cherenkov.core.storage.database import get_scan
 
     scan = get_scan(scan_id)
     if not scan:
         raise HTTPException(status_code=404, detail="Scan not found")
 
-    results = []
+    findings = []
     for f in scan.get("findings", []):
-        severity = str(f.get("severity", "")).upper()
-        if severity in ("CRITICAL", "HIGH"):
-            level = "error"
-        elif severity == "MEDIUM":
-            level = "warning"
-        else:
-            level = "note"
-
-        cwe = f.get("cwe")
-        properties = {
-            "scanner": f.get("scanner", "unknown"),
-            "remediation": f.get("remediation", ""),
-        }
-        if cwe:
-            properties["compliance"] = {
-                "OWASP": ComplianceMapper.map(cwe, "OWASP"),
-                "SAMA_CSF": ComplianceMapper.map(cwe, "SAMA_CSF"),
-                "EGY_FIN_CSF": ComplianceMapper.map(cwe, "EGY_FIN_CSF"),
-                "DORA": ComplianceMapper.map(cwe, "DORA"),
-            }
-
-        results.append(
-            {
-                "ruleId": cwe or f.get("type") or "unknown",
-                "level": level,
-                "message": {"text": f.get("description", "No description provided.")},
-                "properties": properties,
-            }
+        findings.append(
+            Finding(
+                title=f.get("title", "Unknown"),
+                severity=Severity(str(f.get("severity", "INFO")).upper()),
+                description=f.get("description", ""),
+                cwe=f.get("cwe", ""),
+                remediation=f.get("remediation", ""),
+            )
         )
 
-    return {
-        "version": "2.1.0",
-        "$schema": "https://json.schemastore.org/sarif-2.1.0.json",
-        "runs": [
-            {
-                "tool": {
-                    "driver": {
-                        "name": "Cherenkov Scanner",
-                        "version": "1.1.0",
-                    }
-                },
-                "results": results,
-            }
-        ],
-    }
+    result = ScanResult(
+        target=scan.get("target", ""),
+        scanner_name="Cherenkov Unified",
+        findings=findings,
+        status="completed",
+    )
+
+    chk_id = scan.get("meta", {}).get("chk_id", f"CHK-{scan_id[:8]}")
+    exporter = SARIFExporter(result, compliance_mapper=ComplianceMapper(), chk_id=chk_id)
+    return exporter.generate()
 
 
 @v1.get("/reports/{scan_id}/pdf")
 async def v1_scan_report_pdf(scan_id: str, current_user: AuthUser = Depends(get_current_user)):
     """Download PDF security report."""
-    from fastapi.responses import Response
 
     from cherenkov.compliance.mapper import ComplianceMapper
     from cherenkov.compliance.reports import PDFReportGenerator
@@ -628,7 +774,9 @@ async def v1_scan_report_pdf(scan_id: str, current_user: AuthUser = Depends(get_
             framework_dict = mapper.map_all(f.cwe)
             compliance_data[f.cwe] = list(framework_dict.keys())
 
-    generator = PDFReportGenerator(result, compliance_data)
+    chk_id = scan.get("meta", {}).get("chk_id", f"CHK-{scan_id[:8]}")
+    anchor = scan.get("meta", {}).get("anchor")
+    generator = PDFReportGenerator(result, compliance_data, chk_id=chk_id, anchor=anchor)
     pdf_bytes = generator.generate()
 
     return Response(
@@ -697,9 +845,15 @@ async def v1_get_pending_findings() -> list[dict]:
 
 @v1.post("/findings/{finding_id}/approve")
 async def v1_approve_finding(
-    finding_id: str, current_user: AuthUser = Depends(RoleChecker(Role.OPERATOR))
+    finding_id: str,
+    current_user: AuthUser = Depends(RoleChecker(Role.OPERATOR)),
 ) -> dict:
     """Approve a finding. Requires OPERATOR role or higher."""
+    if DefaultCredentialsManager.is_rotation_required():
+        raise HTTPException(
+            status_code=423,
+            detail={"code": "rotation_required", "message": "Password rotation required"},
+        )
     from cherenkov.core.storage.database import init_db, update_finding_status
 
     try:
@@ -729,6 +883,11 @@ async def v1_reject_finding(
     Side-effect: labels the finding in LATTICE so future scans de-rank it
     automatically via cosine similarity scoring.
     """
+    if DefaultCredentialsManager.is_rotation_required():
+        raise HTTPException(
+            status_code=423,
+            detail={"code": "rotation_required", "message": "Password rotation required"},
+        )
     from cherenkov.core.lattice_bridge import label_false_positive
     from cherenkov.core.storage.database import init_db, update_finding_status
 
@@ -821,7 +980,7 @@ async def _run_scan(
     """Core scan logic shared by /api/scan and /api/v1/scan."""
     from cherenkov.core.engine import ScanEngine
     from cherenkov.core.registry import ScannerRegistry
-    from cherenkov.core.storage.database import init_db, save_scan
+    from cherenkov.core.storage.database import init_db, save_scan, save_scan_trace
 
     try:
         parsed = urlparse(request.url)
@@ -977,6 +1136,10 @@ async def _run_scan(
     async with _active_scan_lock:
         _active_scan_targets.discard(normalised_target)
 
+    trace_data = json.dumps(result, sort_keys=True).encode()
+    trace_hash = hashlib.sha256(trace_data).hexdigest()
+    save_scan_trace(scan_id, trace_hash, result)
+
     return result
 
 
@@ -1077,6 +1240,11 @@ async def v1_lattice_similar(
     Used by the dashboard and autonomous agents to surface precedent before
     escalating a new finding.  Excludes false-positives by default.
     """
+    if DefaultCredentialsManager.is_rotation_required():
+        raise HTTPException(
+            status_code=423,
+            detail={"code": "rotation_required", "message": "Password rotation required"},
+        )
     from cherenkov.core.lattice_bridge import query_similar_targets
 
     results = await asyncio.to_thread(
@@ -1106,6 +1274,11 @@ async def v1_lattice_similar(
 @v1.get("/lattice/stats")
 async def v1_lattice_stats(current_user: AuthUser = Depends(get_current_user)) -> dict:
     """Return LATTICE vector store statistics."""
+    if DefaultCredentialsManager.is_rotation_required():
+        raise HTTPException(
+            status_code=423,
+            detail={"code": "rotation_required", "message": "Password rotation required"},
+        )
     from cherenkov.core.lattice_bridge import vector_count
 
     count = await asyncio.to_thread(vector_count)
@@ -1119,6 +1292,11 @@ async def v1_lattice_stats(current_user: AuthUser = Depends(get_current_user)) -
 @v1.get("/mesh/nodes")
 async def v1_mesh_nodes(current_user: AuthUser = Depends(get_current_user)) -> dict:
     """List discovered mesh nodes."""
+    if DefaultCredentialsManager.is_rotation_required():
+        raise HTTPException(
+            status_code=423,
+            detail={"code": "rotation_required", "message": "Password rotation required"},
+        )
     import socket
 
     from cherenkov.core.mesh import MeshManager
@@ -1133,6 +1311,7 @@ async def v1_mesh_nodes(current_user: AuthUser = Depends(get_current_user)) -> d
 
 # Register /api/v1 router
 app.include_router(v1)
+app.include_router(ai_orchestrator.router)
 
 
 if __name__ == "__main__":

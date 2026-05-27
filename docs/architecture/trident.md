@@ -16,3 +16,9 @@ The Trident is the foundational architectural pattern of CHERENKOV — three phy
 2. If cloud analysis is needed → ABLATION sanitizes the data
 3. Vulnerability found → TOKAMAK proves it in isolation
 4. Result signed → SHA-256 cryptographic trace generated
+
+```mermaid
+graph TD
+    A[Component] --> B[Subcomponent]
+    B --> C[Implementation Detail]
+```

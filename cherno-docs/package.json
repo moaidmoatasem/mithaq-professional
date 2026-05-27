@@ -1,0 +1,18 @@
+{
+  "name": "cherno-docs",
+  "version": "1.0.0",
+  "private": true,
+  "scripts": {
+    "dev": "astro dev",
+    "start": "astro dev",
+    "build": "astro check && astro build",
+    "preview": "astro preview",
+    "astro": "astro"
+  },
+  "dependencies": {
+    "@astrojs/starlight": "^0.32.1",
+    "astro": "^5.0.0",
+    "typescript": "^5.9.3"
+  }
+}
+</content>

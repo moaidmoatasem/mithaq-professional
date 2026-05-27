@@ -742,8 +742,8 @@ async def v1_scan_report_sarif(scan_id: str) -> dict:
 
 
 @v1.get("/reports/{scan_id}/pdf")
-async def v1_scan_report_pdf(scan_id: str, current_user: AuthUser = Depends(get_current_user)):
-    """Download PDF security report."""
+async def v1_scan_report_pdf(scan_id: str, language: str = "en", current_user: AuthUser = Depends(get_current_user)):
+    """Download PDF security report. Supports language parameter for localization (e.g., 'ar' for Arabic)."""
 
     from cherenkov.compliance.mapper import ComplianceMapper
     from cherenkov.compliance.reports import PDFReportGenerator
@@ -788,10 +788,16 @@ async def v1_scan_report_pdf(scan_id: str, current_user: AuthUser = Depends(get_
     generator = PDFReportGenerator(result, compliance_data, chk_id=chk_id, anchor=anchor)
     pdf_bytes = generator.generate()
 
+    # Set filename based on language
+    filename = f"cherenkov_report_{scan_id}"
+    if language == "ar":
+        filename += "_ar"
+    filename += ".pdf"
+
     return Response(
         content=pdf_bytes,
         media_type="application/pdf",
-        headers={"Content-Disposition": f"attachment; filename=cherenkov_report_{scan_id}.pdf"},
+        headers={"Content-Disposition": f"attachment; filename={filename}"},
     )
 
 

@@ -237,35 +237,57 @@ Produce the complete fixed file. Python code only. No explanation. No markdown f
         Hard pass/fail. No LLM involved.
         Returns (passed, error_output).
         """
+        import shutil
+
         errors: list[str] = []
 
         # Syntax check
+        python_path = shutil.which("python3")
+        if not python_path:
+            return False, "python3 executable not found"
+
         syn = subprocess.run(
-            ["python3", "-m", "py_compile", str(scanner_file)], capture_output=True, text=True
-        )
+            [python_path, "-m", "py_compile", str(scanner_file)],
+            capture_output=True,
+            text=True,
+            check=False,
+        )  # nosec: B603
         if syn.returncode != 0:
             errors.append(f"SYNTAX ERROR:\n{syn.stderr}")
 
         # Bandit security scan — skip B501 (verify=False is intentional in TLS scanners)
-        ban = subprocess.run(
-            ["bandit", "--severity-level", "medium", "--skip", "B501", str(scanner_file)],
-            capture_output=True,
-            text=True,
-        )
-        if ban.returncode != 0:
-            errors.append(f"BANDIT:\n{ban.stdout}")
+        bandit_path = shutil.which("bandit")
+        if bandit_path:
+            ban = subprocess.run(
+                [bandit_path, "--severity-level", "medium", "--skip", "B501", str(scanner_file)],
+                capture_output=True,
+                text=True,
+                check=False,
+            )  # nosec: B603
+            if ban.returncode != 0:
+                errors.append(f"BANDIT:\n{ban.stdout}")
 
         # Auto-fix trivial issues first (import order, unused imports, formatting)
-        subprocess.run(
-            ["ruff", "check", "--select", "I,F401,F841", "--fix", str(scanner_file)],
-            capture_output=True,
-        )
-        subprocess.run(["ruff", "format", str(scanner_file)], capture_output=True)
+        ruff_path = shutil.which("ruff")
+        if ruff_path:
+            subprocess.run(
+                [ruff_path, "check", "--select", "I,F401,F841", "--fix", str(scanner_file)],
+                capture_output=True,
+                check=False,
+            )  # nosec: B603
+            subprocess.run(
+                [ruff_path, "format", str(scanner_file)], capture_output=True, check=False
+            )  # nosec: B603
 
-        # Ruff lint
-        ruff = subprocess.run(["ruff", "check", str(scanner_file)], capture_output=True, text=True)
-        if ruff.returncode != 0:
-            errors.append(f"RUFF:\n{ruff.stdout}")
+            # Ruff lint
+            ruff = subprocess.run(
+                [ruff_path, "check", str(scanner_file)],
+                capture_output=True,
+                text=True,
+                check=False,
+            )  # nosec: B603
+            if ruff.returncode != 0:
+                errors.append(f"RUFF:\n{ruff.stdout}")
 
         # CWE reference check — accept "CWE-295", "CWE_ID = 295", or "cwe: 295"
         import re as _re

@@ -17,6 +17,7 @@ import hashlib
 import json
 import logging
 import subprocess  # nosec B404 — subprocess is required to manage ephemeral Docker containers (TOKAMAK core)
+import time as time_module
 from contextlib import asynccontextmanager
 from dataclasses import dataclass
 from datetime import datetime, timezone
@@ -271,6 +272,93 @@ class ScanTOKAMAK:
                     "exploitable": False,
                     "evidence": f"PoC timed out after {self.POC_TIMEOUT}s",
                 }
+
+    async def execute_poc(
+        self,
+        payload: str,
+        profile: TOKAMAKProfile = TOKAMAKProfile.STANDARD,
+        timeout: int = 30,
+    ) -> TokamakResult:
+        """
+        Spawn a tokamak container, execute payload, capture stdout/stderr,
+        SHA-256 sign the trace, remove the container.
+
+        Designed for the /sandbox/execute API and one-shot PoC execution.
+        Uses docker-py SDK (not subprocess) for all container lifecycle.
+        Container is always destroyed on exit, regardless of outcome.
+        """
+        start = time_module.monotonic()
+        iso_timestamp = datetime.now(timezone.utc).isoformat()
+        cfg = _PROFILE_CONFIGS[profile]
+        container = None
+
+        try:
+            run_kwargs = {k: v for k, v in cfg.items() if k not in ("audit_note", "image")}
+            container = await asyncio.to_thread(
+                self.client.containers.run,
+                cfg["image"],
+                command=["sh", "-c", payload],
+                detach=True,
+                labels={
+                    "cherenkov.role": "tokamak",
+                    "cherenkov.execute_poc": "true",
+                },
+                environment={
+                    "cherenkov_TIMEOUT": str(timeout),
+                },
+                **run_kwargs,
+            )
+
+            try:
+                wait_result = await asyncio.wait_for(
+                    asyncio.to_thread(container.wait),
+                    timeout=timeout + 5,
+                )
+                exit_code = wait_result.get("StatusCode", -1)
+            except asyncio.TimeoutError:
+                await asyncio.to_thread(container.kill)
+                exit_code = 124
+
+            stdout_raw = await asyncio.to_thread(container.logs, stdout=True, stderr=False)
+            stderr_raw = await asyncio.to_thread(container.logs, stderr=True, stdout=False)
+            stdout = (stdout_raw or b"").decode("utf-8", errors="replace").strip()
+            stderr = (stderr_raw or b"").decode("utf-8", errors="replace").strip()
+
+        except docker.errors.APIError as e:
+            stdout = ""
+            stderr = f"Docker API error: {e}"
+            exit_code = 1
+        except docker.errors.ImageNotFound as e:
+            stdout = ""
+            stderr = f"Docker image not found: {e}"
+            exit_code = 1
+        except Exception as e:
+            stdout = ""
+            stderr = f"TOKAMAK execution error: {e}"
+            exit_code = 1
+        finally:
+            if container:
+                try:
+                    await asyncio.to_thread(container.remove, force=True)
+                except Exception as exc:
+                    logger.warning("Failed to remove tokamak container: %s", exc)
+
+        trace_data = stdout + stderr + iso_timestamp
+        trace_hash = hashlib.sha256(trace_data.encode()).hexdigest()
+        duration_ms = (time_module.monotonic() - start) * 1000
+
+        return TokamakResult(
+            stdout=stdout,
+            stderr=stderr,
+            trace_hash=trace_hash,
+            shred_receipt={
+                "method": "container_removed",
+                "image": cfg["image"],
+                "profile": profile.value,
+            },
+            exit_code=exit_code,
+            duration_ms=duration_ms,
+        )
 
     async def kill_active(self) -> None:
         """

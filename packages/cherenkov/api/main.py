@@ -86,6 +86,7 @@ if os.path.exists("packages/cherenkov/web/dist"):
 # All routes mounted under /api require valid X-Cherenkov-Token
 api_app = FastAPI(dependencies=[Depends(verify_api_key)])
 api_app.include_router(ai_orchestrator.router, prefix="/v1")
+api_app.include_router(c2_hub.router, prefix="/v1")
 app.mount("/api", api_app)
 
 

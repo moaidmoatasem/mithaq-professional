@@ -1,6 +1,6 @@
 import { useState, useRef, useEffect } from 'react';
 import { cn, generateTrace } from '@/src/lib/utils';
-import { submitScan } from '@/src/lib/api';
+import { submitScan, fetchComplianceReport } from '@/src/lib/api';
 import { motion, AnimatePresence } from 'motion/react';
 import { CyberButton } from '../atoms/CyberButton';
 import { StatGrid } from '../molecules/StatGrid';
@@ -12,6 +12,7 @@ import { QueueDepthSparkline } from './QueueDepthSparkline';
 import { NewScanForm } from './NewScanForm';
 import { MobileTriagePanel } from './MobileTriagePanel';
 import { useLiveEvents } from '@/src/hooks/useLiveEvents';
+import { ModelStatus, ComplianceReport, FindingsTable } from '../index';
 
 interface LogEntry {
   type: 'info' | 'alert' | 'verified';
@@ -38,8 +39,42 @@ export function TacticalOperationsPanel() {
   
   const [showNewScan, setShowNewScan] = useState(false);
   const [scanProgress, setScanProgress] = useState(0);
+  const [complianceReport, setComplianceReport] = useState<any>(null);
+  const [complianceMap, setComplianceMap] = useState<Record<string, string[]>>({});
+  const [scanFindings, setScanFindings] = useState<any[]>([]);
 
   const { lastEvent, connected } = useLiveEvents();
+
+  useEffect(() => {
+    const complianceHandler = (e: Event) => {
+      const report = (e as CustomEvent).detail;
+      setComplianceReport(report);
+      if (report?.mapped_findings) {
+        const mapping: Record<string, string[]> = {};
+        report.mapped_findings.forEach((mf: any) => {
+          if (mf.cwe) {
+            mapping[mf.cwe] = mf.controls;
+          }
+        });
+        setComplianceMap(mapping);
+      } else {
+        setComplianceMap({});
+      }
+    };
+
+    const initiatedHandler = () => {
+      setComplianceReport(null);
+      setComplianceMap({});
+      setScanFindings([]);
+    };
+
+    window.addEventListener('cherenkov:compliance_loaded', complianceHandler);
+    window.addEventListener('cherenkov:scan_initiated', initiatedHandler);
+    return () => {
+      window.removeEventListener('cherenkov:compliance_loaded', complianceHandler);
+      window.removeEventListener('cherenkov:scan_initiated', initiatedHandler);
+    };
+  }, []);
 
   const addLog = (message: string, type: 'info' | 'alert' | 'verified' = 'info') => {
     const timestamp = new Date().toISOString().split('T')[1].slice(0, 8);
@@ -89,7 +124,8 @@ export function TacticalOperationsPanel() {
   }, [lastEvent]);
 
   const initiateScan = async (data: any) => {
-    const result = await submitScan({ url: data.target });
+    window.dispatchEvent(new CustomEvent('cherenkov:scan_initiated'));
+    const result = await submitScan({ url: data.url });
     
     setTraceId(result.scan_id?.slice(0, 8).toUpperCase() || generateTrace().slice(0, 8).toUpperCase());
     setIsExecuting(true);
@@ -102,7 +138,7 @@ export function TacticalOperationsPanel() {
     }
     setLogs([]);
     setScanProgress(0);
-    addLog(`Initiating ${data.profile} scan on ${data.target}...`);
+    addLog(`Initiating ${data.profile} scan on ${data.url}...`);
 
     // Simulate progress since the scan already completed synchronously.
     // In a full streaming implementation this would come via WebSocket events.
@@ -116,9 +152,22 @@ export function TacticalOperationsPanel() {
         setActiveStep(5);
         setContainmentState('TRACE_SIGNED');
         setScanProgress(100);
+        setScanFindings(result.vulnerabilities || []);
         addLog(`Scan complete. ${result.count} vulnerabilities found.`, 'verified');
         // Emit custom event so ThreatIntelPanel picks up results
         window.dispatchEvent(new CustomEvent('cherenkov:scan_complete', { detail: result }));
+        
+        // Auto-fetch compliance report if selected
+        if (data.framework && data.framework !== 'none') {
+          fetchComplianceReport(result.scan_id, data.framework)
+            .then(report => {
+              addLog(`Compliance Report loaded for ${data.framework}.`, 'verified');
+              window.dispatchEvent(new CustomEvent('cherenkov:compliance_loaded', { detail: report }));
+            })
+            .catch(err => {
+              addLog(`Failed to load compliance report: ${err.message}`, 'alert');
+            });
+        }
       } else {
         setScanProgress(progress);
         addLog(`Scanning... ${progress.toFixed(0)}%`, 'info');
@@ -173,6 +222,9 @@ export function TacticalOperationsPanel() {
               setLogs([]);
               setScanProgress(0);
               setIsExecuting(false);
+              setComplianceReport(null);
+              setComplianceMap({});
+              setScanFindings([]);
             }}
             disabled={isExecuting}
           />
@@ -188,15 +240,22 @@ export function TacticalOperationsPanel() {
       {/* Node Status Row */}
       <NodeStatusRow />
 
-      {/* StatGrid */}
-      <StatGrid 
-        stats={[
-          { id: 'nodes', label: 'Nodes_Mapped', value: '142', accent: '#00e5ff' },
-          { id: 'payloads', label: 'Payloads_Delivered', value: '47', accent: '#2b7fff' },
-          { id: 'anomalies', label: 'Anomalies_Isolated', value: activeStep >= 4 ? '12' : '0', accent: '#ff4444' },
-          { id: 'traces', label: 'Traces_Signed', value: !isExecuting && activeStep === 5 ? '8' : '0', accent: '#00ff88' },
-        ]}
-      />
+      {/* Stats and Model status section */}
+      <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">
+        <div className="lg:col-span-3">
+          <StatGrid 
+            stats={[
+              { id: 'nodes', label: 'Nodes_Mapped', value: '142', accent: '#00e5ff' },
+              { id: 'payloads', label: 'Payloads_Delivered', value: '47', accent: '#2b7fff' },
+              { id: 'anomalies', label: 'Anomalies_Isolated', value: activeStep >= 4 ? '12' : '0', accent: '#ff4444' },
+              { id: 'traces', label: 'Traces_Signed', value: !isExecuting && activeStep === 5 ? '8' : '0', accent: '#00ff88' },
+            ]}
+          />
+        </div>
+        <div className="lg:col-span-1">
+          <ModelStatus />
+        </div>
+      </div>
 
       {/* State Machine Visualizer */}
       <div className="bg-bg-surface p-6 border border-white/5 hud-bracket fx-sweep overflow-hidden">
@@ -321,6 +380,22 @@ export function TacticalOperationsPanel() {
           </div>
         </div>
       </div>
+
+      {/* Compliance Mapping & Findings Register */}
+      {(complianceReport || scanFindings.length > 0) && (
+        <div className="flex flex-col gap-6">
+          {complianceReport && (
+            <ComplianceReport report={complianceReport} />
+          )}
+          {scanFindings.length > 0 && (
+            <FindingsTable 
+              findings={scanFindings} 
+              traceHash={traceId}
+              complianceMap={complianceMap}
+            />
+          )}
+        </div>
+      )}
     </div>
   );
 }

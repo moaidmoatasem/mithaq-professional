@@ -342,7 +342,7 @@ async def v1_auth_token(request: AuthRequest) -> dict:
         )
 
     access_token = create_access_token(data={"sub": request.username, "role": user_data["role"]})
-    return {"access_token": access_token, "token_type": "bearer"}
+    return {"access_token": access_token, "token_type": "bearer"}  # nosec B105
 
 
 @v1.get("/auth/me")
@@ -372,7 +372,7 @@ async def v1_rotate_password(
     username = None
     for secret_source in [None, "credentials"]:
         try:
-            if secret_source == "credentials":
+            if secret_source == "credentials":  # nosec B105
                 try:
                     jwt_secret_val = DefaultCredentialsManager.get_jwt_secret()
                 except RuntimeError:
@@ -509,7 +509,7 @@ def _get_tokamak_container_count() -> int:
     """Return count of running TOKAMAK containers (label=cherenkov.role=tokamak)."""
     try:
         import shutil
-        import subprocess
+        import subprocess  # nosec B404
 
         docker_path = shutil.which("docker")
         if not docker_path:
@@ -527,7 +527,7 @@ def _get_tokamak_container_count() -> int:
             capture_output=True,
             text=True,
             timeout=2,
-        )
+        )  # nosec: B603
         return len([ln for ln in result.stdout.strip().splitlines() if ln])
     except Exception:
         return 0

@@ -91,6 +91,10 @@ class XXEScanner(BaseScanner):
                                     "Use safe defaults (e.g., defusedxml for Python, or "
                                     "disabling DTDs/external entities in LibXML2/Jackson)."
                                 ),
+<<<<<<< HEAD
+                                scanner="xxe_basic",
+=======
+>>>>>>> main
                             )
                         )
                         break  # One confirmed finding per target is sufficient

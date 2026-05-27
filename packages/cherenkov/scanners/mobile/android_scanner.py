@@ -28,7 +28,21 @@ class AndroidScanner(MobileScanner):
         if not os.path.exists(file_path):
             raise FileNotFoundError(f"APK file not found: {file_path}")
 
+<<<<<<< HEAD
+        # Mock finding: Debug mode enabled
+        findings.append(
+            Finding(
+                title="Android Debug Mode Enabled",
+                severity=Severity.HIGH,
+                description="The APK has 'android:debuggable=true' in AndroidManifest.xml.",
+                cwe="CWE-489",
+                remediation="Set 'android:debuggable=false' in the manifest before production release.",
+                scanner="drozer_exploit",
+            )
+        )
+=======
         findings.extend(await self._run_androguard(file_path))
+>>>>>>> main
 
         findings.extend(await self._run_apktool(file_path))
 

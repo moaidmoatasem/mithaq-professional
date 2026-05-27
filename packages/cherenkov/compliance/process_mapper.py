@@ -238,5 +238,25 @@ class ProcessMapper:
         }
 
     @staticmethod
+    def get_process_controls(process_id: str, framework: Optional[str] = None) -> dict:
+        proc = PROCESSES.get(process_id)
+        if not proc:
+            return {"error": "Process not found"}
+        controls = {}
+        for step in proc.steps:
+            for cwe_id in step.cwe_ids:
+                if cwe_id not in controls:
+                    mapping = ComplianceMapper.map_all(cwe_id)
+                    if framework:
+                        mapping = {framework: mapping.get(framework, [])}
+                    controls[cwe_id] = mapping
+        return {
+            "process_id": proc.process_id,
+            "process_name": proc.name,
+            "controls": controls,
+            "control_count": len(controls),
+        }
+
+    @staticmethod
     def list_categories() -> list[str]:
         return sorted(set(proc.category for proc in PROCESSES.values()))

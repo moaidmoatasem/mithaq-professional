@@ -31,7 +31,10 @@ class RedTeamAgentConfig(BaseAgentConfig):
 
 
 class RedTeamAgent(BaseAgent):
-    """Red Team agent stub for automated offensive operations."""
+    """Red Team agent stub for automated offensive operations.
+
+    WhiteRabbitNeo/RedSage via LiteLLM (model: red-team). Stub for Phase 4.
+    """
 
     def __init__(self, config: RedTeamAgentConfig | None = None):
         """Initialize Red Team agent.

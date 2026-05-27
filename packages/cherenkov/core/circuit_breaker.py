@@ -806,5 +806,6 @@ def fail_open() -> None:
     """Restore global network connectivity."""
     meissner_hub.fail_open()
 
+
 # Compatibility alias
 MeissnerCircuitBreaker = Meissner

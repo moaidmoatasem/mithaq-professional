@@ -55,7 +55,7 @@ from cherenkov.api.middleware.auth import (
 from cherenkov.api.middleware.auth import (
     User as AuthUser,
 )
-from cherenkov.api.routers import ai_orchestrator
+from cherenkov.api.routers import ai_orchestrator, c2_hub
 from cherenkov.core.storage.database import (
     _DB_PATH,
     erase_target_data,
@@ -86,6 +86,7 @@ if os.path.exists("packages/cherenkov/web/dist"):
 # All routes mounted under /api require valid X-Cherenkov-Token
 api_app = FastAPI(dependencies=[Depends(verify_api_key)])
 api_app.include_router(ai_orchestrator.router, prefix="/v1")
+api_app.include_router(c2_hub.router, prefix="/v1")
 app.mount("/api", api_app)
 
 
@@ -681,59 +682,36 @@ async def v1_scan_history() -> list[dict]:
 async def v1_scan_report_sarif(scan_id: str) -> dict:
     """Return a scan report in SARIF 2.1.0 format."""
     from cherenkov.compliance.mapper import ComplianceMapper
+    from cherenkov.compliance.reports import SARIFExporter
+    from cherenkov.core.base_scanner import Finding, ScanResult, Severity
     from cherenkov.core.storage.database import get_scan
 
     scan = get_scan(scan_id)
     if not scan:
         raise HTTPException(status_code=404, detail="Scan not found")
 
-    results = []
+    findings = []
     for f in scan.get("findings", []):
-        severity = str(f.get("severity", "")).upper()
-        if severity in ("CRITICAL", "HIGH"):
-            level = "error"
-        elif severity == "MEDIUM":
-            level = "warning"
-        else:
-            level = "note"
-
-        cwe = f.get("cwe")
-        properties = {
-            "scanner": f.get("scanner", "unknown"),
-            "remediation": f.get("remediation", ""),
-        }
-        if cwe:
-            properties["compliance"] = {
-                "OWASP": ComplianceMapper.map(cwe, "OWASP"),
-                "SAMA_CSF": ComplianceMapper.map(cwe, "SAMA_CSF"),
-                "EGY_FIN_CSF": ComplianceMapper.map(cwe, "EGY_FIN_CSF"),
-                "DORA": ComplianceMapper.map(cwe, "DORA"),
-            }
-
-        results.append(
-            {
-                "ruleId": cwe or f.get("type") or "unknown",
-                "level": level,
-                "message": {"text": f.get("description", "No description provided.")},
-                "properties": properties,
-            }
+        findings.append(
+            Finding(
+                title=f.get("title", "Unknown"),
+                severity=Severity(str(f.get("severity", "INFO")).upper()),
+                description=f.get("description", ""),
+                cwe=f.get("cwe", ""),
+                remediation=f.get("remediation", ""),
+            )
         )
 
-    return {
-        "version": "2.1.0",
-        "$schema": "https://json.schemastore.org/sarif-2.1.0.json",
-        "runs": [
-            {
-                "tool": {
-                    "driver": {
-                        "name": "Cherenkov Scanner",
-                        "version": "1.1.0",
-                    }
-                },
-                "results": results,
-            }
-        ],
-    }
+    result = ScanResult(
+        target=scan.get("target", ""),
+        scanner_name="Cherenkov Unified",
+        findings=findings,
+        status="completed",
+    )
+
+    chk_id = scan.get("meta", {}).get("chk_id", f"CHK-{scan_id[:8]}")
+    exporter = SARIFExporter(result, compliance_mapper=ComplianceMapper(), chk_id=chk_id)
+    return exporter.generate()
 
 
 @v1.get("/reports/{scan_id}/pdf")
@@ -778,7 +756,9 @@ async def v1_scan_report_pdf(scan_id: str, current_user: AuthUser = Depends(get_
             framework_dict = mapper.map_all(f.cwe)
             compliance_data[f.cwe] = list(framework_dict.keys())
 
-    generator = PDFReportGenerator(result, compliance_data)
+    chk_id = scan.get("meta", {}).get("chk_id", f"CHK-{scan_id[:8]}")
+    anchor = scan.get("meta", {}).get("anchor")
+    generator = PDFReportGenerator(result, compliance_data, chk_id=chk_id, anchor=anchor)
     pdf_bytes = generator.generate()
 
     return Response(
@@ -982,7 +962,7 @@ async def _run_scan(
     """Core scan logic shared by /api/scan and /api/v1/scan."""
     from cherenkov.core.engine import ScanEngine
     from cherenkov.core.registry import ScannerRegistry
-    from cherenkov.core.storage.database import init_db, save_scan, save_trace
+    from cherenkov.core.storage.database import init_db, save_scan, save_scan_trace
 
     try:
         parsed = urlparse(request.url)
@@ -1141,7 +1121,7 @@ async def _run_scan(
 
     trace_data = json.dumps(result, sort_keys=True).encode()
     trace_hash = hashlib.sha256(trace_data).hexdigest()
-    save_trace(scan_id, trace_hash, result)
+    save_scan_trace(scan_id, trace_hash, result)
 
     return result
 

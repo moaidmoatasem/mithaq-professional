@@ -387,6 +387,14 @@ def save_scan_trace(
                 """,
                 (now, "scan_trace", scan_id, details_json, trace_hash),
             )
+            conn.execute(
+                """
+                INSERT INTO cherenkov_traces (
+                    finding_id, exploit_command, stdout, stderr, exit_code, trace_hash, timestamp, shred_receipt
+                ) VALUES (?, ?, ?, ?, ?, ?, ?, ?)
+                """,
+                (scan_id, "SCAN_COMPLETION", details_json, "", 0, trace_hash, now, "{}"),
+            )
 
 
 def save_tokamak_trace(

@@ -865,8 +865,13 @@ async def _run_scan(
         raise HTTPException(status_code=500, detail=f"Scan execution failed: {exc}") from exc
 
     vulnerabilities: list[dict] = []
+    seen: set[tuple[str, str]] = set()
     for scanner_name, result in scan_results.items():
         for f in result.findings:
+            key = (f.cwe or "", f.title)
+            if key in seen:
+                continue
+            seen.add(key)
             vulnerabilities.append(
                 {
                     "scanner": scanner_name,

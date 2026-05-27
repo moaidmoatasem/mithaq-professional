@@ -5,12 +5,13 @@ Provides REST-ready diagnostic engines to verify runtime availability,
 database connectivity status, and LLM inference engine liveness.
 """
 
+import logging
 import os
 import time
-import logging
-from typing import Tuple, Dict, Any
+from typing import Any, Dict, Tuple
 
 logger = logging.getLogger("CherenkovHealthDiagnostics")
+
 
 class AutonomicHealthGateway:
     """Enterprise-ready diagnostics manager checking component load and database readiness."""
@@ -22,12 +23,8 @@ class AutonomicHealthGateway:
         """Liveness check confirming that the Cherenkov application runtime is running."""
         uptime = time.time() - self.start_time
         pid = os.getpid()
-        
-        details = {
-            "status": "UP",
-            "uptime_seconds": uptime,
-            "pid": pid
-        }
+
+        details = {"status": "UP", "uptime_seconds": uptime, "pid": pid}
         return True, details
 
     def check_readiness(self) -> Tuple[bool, Dict[str, Any]]:
@@ -35,13 +32,7 @@ class AutonomicHealthGateway:
         # Simulated robust integration checks
         details = {
             "status": "READY",
-            "database": {
-                "status": "OK",
-                "latency_ms": 1.2
-            },
-            "inference_runtime": {
-                "status": "OK",
-                "latency_ms": 2.5
-            }
+            "database": {"status": "OK", "latency_ms": 1.2},
+            "inference_runtime": {"status": "OK", "latency_ms": 2.5},
         }
         return True, details

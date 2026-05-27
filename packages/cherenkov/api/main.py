@@ -7,8 +7,8 @@ packages/cherenkov/api/static/index.html via FastAPI StaticFiles.
 """
 
 import asyncio
-import json
 import hashlib
+import json
 import logging
 import os
 import re
@@ -390,6 +390,7 @@ async def v1_rotate_password(
                     continue
             else:
                 from cherenkov.api.middleware.auth import JWT_SECRET
+
                 jwt_secret_val = JWT_SECRET
             payload = jwt.decode(session_cookie, jwt_secret_val, algorithms=["HS256"])
             username = payload.get("sub")

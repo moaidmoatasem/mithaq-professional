@@ -63,7 +63,7 @@ from cherenkov.core.storage.database import (
     get_user,
     save_audit_entry,
 )
-from cherenkov.core.tokamak import Command, Tokamak
+from cherenkov.core.tokamak import Command, ScanTOKAMAK
 from cherenkov.credentials import DefaultCredentialsManager
 from cherenkov.orchestration.orchestration_api import orchestrate_workflow
 from cherenkov.orchestration.result_persistence import ResultStore
@@ -619,7 +619,11 @@ async def v1_sandbox_execute(
         )
     from cherenkov.core.storage.database import save_tokamak_trace
 
-    result = await asyncio.to_thread(Tokamak.execute, command)
+    tokamak = ScanTOKAMAK()
+    result = await tokamak.execute_poc(
+        payload=command.payload,
+        timeout=command.timeout,
+    )
 
     # Persist forensic trace
     try:

@@ -2,11 +2,27 @@
 
 from datetime import datetime, timezone
 from typing import Any, Dict, List, Optional
+import re
 
 from fpdf import FPDF
 from fpdf.enums import XPos, YPos
 
 from cherenkov.core.base_scanner import ScanResult
+
+# Arabic text support
+try:
+    import arabic_reshaper
+    from bidi.algorithm import get_display
+    ARABIC_SUPPORT = True
+except ImportError:
+    ARABIC_SUPPORT = False
+
+# Regex to detect Arabic characters
+arabic_pattern = re.compile(r'[\u0600-\u06FF\u0750-\u077F\u08A0-\u08FF\uFB50-\uFDFF\uFE70-\uFEFF]')
+
+def contains_arabic(text):
+    return bool(arabic_pattern.search(text))
+
 
 _SEVERITY_COLOURS: Dict[str, tuple] = {
     "CRITICAL": (180, 0, 0),
@@ -35,11 +51,21 @@ class PDFReportGenerator:
 
     # ── helpers ───────────────────────────────────────────────────────────────
 
+    def _process_text(self, text: str) -> str:
+        """Process text for Arabic shaping and bidirectional display if needed."""
+        if ARABIC_SUPPORT and contains_arabic(text):
+            # Reshape Arabic text
+            reshaped_text = arabic_reshaper.reshape(text)
+            # Apply bidirectional algorithm
+            return get_display(reshaped_text)
+        return text
+
     def _header_bar(self, label: str) -> None:
         self.pdf.set_fill_color(30, 30, 30)
         self.pdf.set_text_color(255, 255, 255)
         self.pdf.set_font("helvetica", "B", 11)
-        self.pdf.cell(0, 8, f"  {label}", new_x=XPos.LMARGIN, new_y=YPos.NEXT, fill=True)
+        processed_label = self._process_text(f"  {label}")
+        self.pdf.cell(0, 8, processed_label, new_x=XPos.LMARGIN, new_y=YPos.NEXT, fill=True)
         self.pdf.set_text_color(0, 0, 0)
         self.pdf.set_font("helvetica", "", 10)
         self.pdf.ln(2)
@@ -49,7 +75,8 @@ class PDFReportGenerator:
         self.pdf.set_fill_color(r, g, b)
         self.pdf.set_text_color(255, 255, 255)
         self.pdf.set_font("helvetica", "B", 8)
-        self.pdf.cell(22, 5, severity, fill=True, align="C")
+        processed_severity = self._process_text(severity)
+        self.pdf.cell(22, 5, processed_severity, fill=True, align="C")
         self.pdf.set_text_color(0, 0, 0)
         self.pdf.set_font("helvetica", "", 10)
 

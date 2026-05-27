@@ -2,6 +2,9 @@ import asyncio
 import time
 
 import pytest
+
+pytestmark = pytest.mark.integration
+
 from cherenkov.core.base_scanner import BaseScanner, ScanResult
 from cherenkov.core.engine import ScanEngine
 from cherenkov.core.registry import ScannerRegistry

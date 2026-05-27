@@ -107,4 +107,9 @@ packages/cherenkov/
 
 ---
 
+**Status:** OPERATIONAL — C2 Hub coordination layer active
+abase.py` |
+
+---
+
 **Status:** READY FOR DEVELOPMENT — C2 Hub handover in progress

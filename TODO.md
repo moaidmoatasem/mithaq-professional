@@ -85,7 +85,7 @@
 ### P2 — Scanner graduation (medium)
 
 - [ ] #242 Graduate CVE Database Scanner
-- [ ] #243 Graduate CI/CD Integration Scanner
+- [x] #243 Graduate CI/CD Integration Scanner
 - [x] #244 Graduate AttackChainDetector
 
 ---

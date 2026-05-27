@@ -23,11 +23,8 @@ dependencies = [
     "sentence-transformers",
     "slowapi>=0.1.9",
     "ollama>=0.1.0",
-<<<<<<< HEAD
     "fpdf2>=2.7.0",
-=======
     "defusedxml>=0.7.1",
->>>>>>> main
 ]
 
 [tool.setuptools.packages.find]

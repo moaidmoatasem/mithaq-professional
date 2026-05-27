@@ -261,7 +261,7 @@ class SARIFExporter:
                 {
                     "ruleId": rule_id,
                     "level": level,
-                    "message": {"text": f.title},
+                    "message": {"text": f.description or f.title},
                     "locations": [
                         {
                             "physicalLocation": {

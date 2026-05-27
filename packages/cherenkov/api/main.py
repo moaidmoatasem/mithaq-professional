@@ -1048,6 +1048,16 @@ async def _run_scan(
 
     try:
         init_db()
+        # Deduplication Issue #435
+        unique_vulns = []
+        seen_cwe_type = set()
+        for vuln in vulnerabilities:
+            key = (vuln.get("cwe"), vuln.get("type"))
+            if key not in seen_cwe_type:
+                seen_cwe_type.add(key)
+                unique_vulns.append(vuln)
+        vulnerabilities = unique_vulns
+
         save_scan(
             scan_id,
             request.url,
@@ -1057,7 +1067,7 @@ async def _run_scan(
             finished_at=finished,
         )
 
-        from cherenkov.core.lattice_bridge import embed_and_store
+        from cherenkov.ai.lattice_bridge import embed_and_store
         from cherenkov.core.storage.database import save_pending_finding
 
         for v in vulnerabilities:
@@ -1066,32 +1076,27 @@ async def _run_scan(
             # Index every finding in LATTICE for similarity recall and FP learning.
             # Use BackgroundTasks so the work runs after response delivery and
             # doesn't leak asyncio tasks into subsequent test event loops.
+            trace_dict = {
+                "findings": f"{v['title']} {v.get('description', '')}",
+                "trace_id": finding_id,
+                "target": request.url,
+                "scanner": v["scanner"],
+                "severity": v["severity"],
+                "cwe": v.get("cwe", ""),
+            }
+
+            async def safe_embed(t: dict):
+                try:
+                    await embed_and_store(t)
+                except Exception as e:
+                    logger.error("LATTICE embed failed: %s", e)
+
             if background_tasks is not None:
-                background_tasks.add_task(
-                    embed_and_store,
-                    finding_id,
-                    v["title"],
-                    v.get("description", ""),
-                    request.url,
-                    v["scanner"],
-                    v["severity"],
-                    v.get("cwe", ""),
-                )
+                background_tasks.add_task(safe_embed, trace_dict)
             else:
                 # Fallback for callers that don't supply background_tasks
                 try:
-                    asyncio.get_running_loop().create_task(
-                        asyncio.to_thread(
-                            embed_and_store,
-                            finding_id,
-                            v["title"],
-                            v.get("description", ""),
-                            request.url,
-                            v["scanner"],
-                            v["severity"],
-                            v.get("cwe", ""),
-                        )
-                    )
+                    asyncio.get_running_loop().create_task(safe_embed(trace_dict))
                 except RuntimeError:
                     pass  # No running loop — skip indexing in this context
 

@@ -1139,6 +1139,7 @@ async def _run_scan(
 
     trace_data = json.dumps(result, sort_keys=True).encode()
     trace_hash = hashlib.sha256(trace_data).hexdigest()
+    result["trace_hash"] = trace_hash
     save_scan_trace(scan_id, trace_hash, result)
 
     return result

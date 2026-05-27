@@ -32,7 +32,7 @@ def isolate_db(tmp_path: Path):
     init_db(test_db)
     from cherenkov.api.middleware.auth import hash_password
 
-    db.save_user("admin", hash_password("admin"), 3)
+    db.save_user("admin", hash_password("admin"), 3, path=test_db)
     yield
     db._DB_PATH = original_db
 

@@ -358,7 +358,9 @@ def _row_to_dict(row: sqlite3.Row) -> dict:
     return d
 
 
-def save_scan_trace(scan_id: str, trace_hash: str, scan_result: dict, path: Path = _DB_PATH) -> None:
+def save_scan_trace(
+    scan_id: str, trace_hash: str, scan_result: dict, path: Path = _DB_PATH
+) -> None:
     now = datetime.now(timezone.utc).isoformat()
     details_json = json.dumps(scan_result)
 
@@ -370,6 +372,14 @@ def save_scan_trace(scan_id: str, trace_hash: str, scan_result: dict, path: Path
                 VALUES (?, ?, ?, ?, ?)
                 """,
                 (now, "scan_trace", scan_id, details_json, trace_hash),
+            )
+            conn.execute(
+                """
+                INSERT INTO cherenkov_traces (
+                    finding_id, exploit_command, stdout, stderr, exit_code, trace_hash, timestamp, shred_receipt
+                ) VALUES (?, ?, ?, ?, ?, ?, ?, ?)
+                """,
+                (scan_id, "SCAN_COMPLETION", details_json, "", 0, trace_hash, now, "{}"),
             )
 
 

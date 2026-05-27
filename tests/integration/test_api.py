@@ -1,20 +1,3 @@
-import sys
-from unittest.mock import MagicMock
-
-class MockPsutil:
-    def __init__(self):
-        self.__spec__ = MagicMock()
-    def cpu_count(self, logical=False):
-        return 8
-    def virtual_memory(self):
-        class Mem:
-            total = 16e9
-        return Mem()
-sys.modules['psutil'] = MockPsutil()
-
-
-
-
 import asyncio
 from pathlib import Path
 

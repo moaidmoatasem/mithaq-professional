@@ -66,7 +66,7 @@
 
 ### P2 — Security Architect agent
 
-- [ ] #438 Security Architect agent via LiteLLM proxy
+- [x] #438 Security Architect agent via LiteLLM proxy
 
 ### P1 — Scanner graduation (high)
 

@@ -2,6 +2,9 @@ import os
 import tempfile
 
 import pytest
+
+pytestmark = pytest.mark.integration
+
 from cherenkov.api.main import app
 from cherenkov.credentials import DefaultCredentialsManager
 from fastapi.testclient import TestClient

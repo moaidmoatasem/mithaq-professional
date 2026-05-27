@@ -326,3 +326,42 @@ Violations of these rules are **Sovereign Breaches** and will block PRs via the 
 | `AGENT_MEMORY.md` | Claude Code (coordinating) | After architectural decisions |
 | `AGENTS.md` | Claude Code (coordinating) | When agent roster changes |
 | `CHANGELOG.md` | Automated (release-drafter) | On release |
+
+---
+
+## 9. In-Product AI Agents (Phase 3 — under construction)
+
+These are **runtime** agents that the CHERENKOV platform itself invokes during
+a scan. They are distinct from the **developer** agents above (Jules, Claude
+Code, Antigravity), which only write code. Runtime agents live under
+`packages/cherenkov/agents/` and are routed via the LiteLLM proxy at
+`http://localhost:4000`.
+
+| Agent | Role | Model (alias → backing) | File |
+|---|---|---|---|
+| **Security Architect** | Engagement planning, reasoning over findings | `architect` → `foundation-sec-8b-reasoning` | `agents/architect.py` |
+| **Red Team** | Offensive task generation, exploit PoC drafting | `red-team` → `redsage-dpo` / WhiteRabbitNeo | `agents/red_team.py` |
+| **SecOps** | Compliance mapping (EGY-FIN CSF, OWASP), defensive recs | `secops` → Trendyol-Cybersecurity | `agents/secops.py` |
+| **KINETIC executor** | Local code generation for scanner automation | `code-smart` → `qwen2.5-coder:7b` | inline |
+| **LATTICE embedder** | Vectorize scan traces into Qdrant | `embed` → `nomic-embed-text` | `ai/lattice_bridge.py` |
+
+### Runtime agent rules
+
+1. **All model calls route through LiteLLM** (`http://localhost:4000`). Never
+   call Ollama directly from product code — model swaps must be config-only.
+2. **External LLMs (TENSOR tier) require ABLATION first.** No raw payload
+   leaves the perimeter. Cloud fallback (`cloud-fallback` alias) is gated.
+3. **Red Team output is untrusted** until TOKAMAK executes the proposed PoC
+   in an isolated container and produces a SHA-256 proof hash.
+4. **SecOps output is advisory** until a human compliance officer signs off
+   (HITL approval, surfaced via `PendingApprovalsPanel`).
+5. **Engagement plans from the Architect** are persisted to the
+   `cherenkov_traces` table alongside their resulting scan.
+
+### Authoritative prompt library
+
+The full, copy-paste session prompts (context block, per-section briefs,
+GitHub issue scripts, Open WebUI preset) live in
+[`docs/AGENT_PROMPTS.md`](./docs/AGENT_PROMPTS.md). Treat it as the SSOT for
+agent task wording. Update it when prompts change — do not maintain
+per-agent prompt copies.

@@ -89,8 +89,8 @@ cd cherenkov-professional
 cp .env.example .env
 
 # 3. Start all services
-docker-compose -f deploy/docker-compose.yml up -d
-ollama pull qwen2.5-coder:3b
+ln -sf $(pwd)/scripts/start_cherenkov.sh ~/start_cherenkov.sh
+~/start_cherenkov.sh
 
 # 4. Run your first scan (against DVWA included in compose)
 cherenkov scan http://localhost/dvwa --output table

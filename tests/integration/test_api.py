@@ -8,12 +8,21 @@ from cherenkov.core.storage.database import init_db
 from fastapi.testclient import TestClient
 
 
+import os
+
 @pytest.fixture(autouse=True)
 def bypass_rate_limit():
     app.state.limiter.enabled = False
     yield
     app.state.limiter.enabled = True
 
+
+@pytest.fixture(autouse=True)
+def mock_jwt_secret(monkeypatch, tmp_path):
+    env_file = tmp_path / ".env"
+    env_file.write_text("CHERENKOV_JWT_SECRET=super_secret_test_key_1234567890\n")
+    monkeypatch.setenv("ROTATION_ENV_PATH", str(env_file))
+    yield
 
 @pytest.fixture(autouse=True)
 def isolate_db(tmp_path: Path):

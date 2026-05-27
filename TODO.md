@@ -79,7 +79,7 @@
 ### P1 — Scanner graduation (high)
 
 - [ ] #240 Graduate NetworkVulnerabilityScanner
-- [ ] #241 Verify XXE scanner contract
+- [x] #241 Verify XXE scanner contract
 - [x] #245 Verify SSRF scanner contract
 
 ### P2 — Scanner graduation (medium)

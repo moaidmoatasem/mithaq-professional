@@ -37,6 +37,7 @@ class TOKAMAKProfile(str, Enum):
     STANDARD = "standard"  # web, infra — strict
     MOBILE = "mobile"  # APK, Frida — controlled exceptions
     KALI = "kali"  # Kali rolling — active/web vuln scanning
+    DROZER = "drozer"  # Drozer console — dynamic Android analysis
 
 
 # ──────────────────────────────────────────────
@@ -83,6 +84,24 @@ _PROFILE_CONFIGS: dict[TOKAMAKProfile, dict] = {
             "Reviewed in security audit v0.X.X. "
             "Justification: Frida requires ptrace for instrumentation. "
             "Mitigation: separate docker network, no egress to prod."
+        ),
+    },
+    TOKAMAKProfile.DROZER: {
+        "image": "mwrlabs/drozer",  # or a custom drozer3 image
+        "mem_limit": "1g",
+        "cpu_period": 100_000,
+        "cpu_quota": 60_000,  # 60% CPU
+        "read_only": False,
+        "tmpfs": {"/tmp": "size=128m"},  # nosec B108
+        "security_opt": [
+            "no-new-privileges",
+        ],
+        "cap_drop": ["ALL"],
+        "cap_add": ["NET_BIND_SERVICE"],
+        "network_mode": "cherenkov-mobile-net",
+        "audit_note": (
+            "Drozer PoC executor — dynamic Android analysis. "
+            "Uses cherenkov-mobile-net for connectivity."
         ),
     },
     TOKAMAKProfile.KALI: {

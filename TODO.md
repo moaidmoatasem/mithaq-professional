@@ -98,7 +98,7 @@
 
 ## v2.5.0 — Ecosystem Integration (Phase 5) — ⏳ 2027
 
-- [ ] #100 Local PDF Report Generator
+- [x] #100 Local PDF Report Generator
 - [ ] #101 SARIF Exporter for CI/CD Integration
 
 ---

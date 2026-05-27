@@ -43,11 +43,6 @@ from slowapi import Limiter, _rate_limit_exceeded_handler
 from slowapi.errors import RateLimitExceeded
 from slowapi.util import get_remote_address
 
-from cherenkov.ai.model_selector import (
-    detect_hardware,
-    generate_litellm_config,
-    recommend_models,
-)
 from cherenkov.api.dependencies import require_rotated_credentials
 from cherenkov.api.init_auth import verify_api_key
 from cherenkov.api.middleware.auth import (
@@ -59,6 +54,11 @@ from cherenkov.api.middleware.auth import (
 )
 from cherenkov.api.middleware.auth import (
     User as AuthUser,
+)
+from cherenkov.ai.model_selector import (
+    detect_hardware,
+    generate_litellm_config,
+    recommend_models,
 )
 from cherenkov.api.routers import ai_orchestrator, c2_hub
 from cherenkov.core.storage.database import (
@@ -745,67 +745,6 @@ async def v1_scan_report_sarif(scan_id: str) -> dict:
     return exporter.generate()
 
 
-@v1.get("/scan/{scan_id}/compliance/{fw}/pdf")
-async def v1_compliance_pdf(
-    scan_id: str,
-    fw: str,
-    current_user: AuthUser = Depends(get_current_user),
-):
-    """Download a signed compliance PDF for a specific framework."""
-    from cherenkov.compliance.pdf_renderer import CompliancePDFRenderer
-    from cherenkov.compliance.registry import ComplianceRegistry
-    from cherenkov.core.base_scanner import Finding, ScanResult, Severity
-    from cherenkov.core.storage.database import get_scan
-
-    fw_lower = fw.lower()
-    if fw_lower not in ComplianceRegistry.list_framework_ids():
-        raise HTTPException(status_code=400, detail=f"Unsupported framework: {fw}")
-
-    scan = get_scan(scan_id)
-    if not scan:
-        raise HTTPException(status_code=404, detail="Scan not found")
-
-    fw_upper = fw.upper()
-
-    findings = []
-    for f in scan.get("findings", []):
-        findings.append(
-            Finding(
-                title=f.get("title", "Unknown"),
-                severity=Severity(str(f.get("severity", "INFO")).upper()),
-                description=f.get("description", ""),
-                cwe=f.get("cwe", ""),
-                remediation=f.get("remediation", ""),
-            )
-        )
-
-    result = ScanResult(
-        target=scan.get("target", ""),
-        scanner_name="Cherenkov Unified",
-        findings=findings,
-        status="completed",
-    )
-
-    compliance_data = {}
-    fw_lower = fw.lower()
-    if fw_lower not in ComplianceRegistry.list_framework_ids():
-            if refs:
-                compliance_data[f.cwe] = refs
-
-    chk_id = scan.get("meta", {}).get("chk_id", f"CHK-{scan_id[:8]}")
-    renderer = CompliancePDFRenderer(result, fw_upper, compliance_data, chk_id=chk_id)
-    pdf_bytes, anchor = renderer.generate()
-
-    return Response(
-        content=bytes(pdf_bytes),
-        media_type="application/pdf",
-        headers={
-            "Content-Disposition": f"attachment; filename=cherenkov_{fw_upper}_{scan_id}.pdf",
-            "X-SHA256": anchor.get("sha256", ""),
-            "X-TSA-Status": anchor.get("tsa_status", "skipped"),
-        },
-    )
-
 
 @v1.get("/reports/{scan_id}/pdf")
 async def v1_scan_report_pdf(
@@ -1115,6 +1054,15 @@ async def _run_scan(
 
     try:
         init_db()
+        # Deduplication Issue #435
+        unique_vulns = []
+        seen_cwe_type = set()
+        for vuln in vulnerabilities:
+            key = (vuln.get("cwe"), vuln.get("type"))
+            if key not in seen_cwe_type:
+                seen_cwe_type.add(key)
+                unique_vulns.append(vuln)
+        vulnerabilities = unique_vulns
 
         save_scan(
             scan_id,

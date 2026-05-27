@@ -1,0 +1,10 @@
+feat: migrate legacy compliance modules to plugins
+
+Closes #483
+
+- Migrated legacy DORA mappings from mapper.py into a new plugin.
+- Added get_cwe_mappings to ComplianceRegistry.
+- Updated SARIFExporter, api/main.py, and cli/main.py.
+- Removed deprecated/unused ProcessMapper.
+- Deleted legacy mapper files.
+- Cleaned up exports and tests.

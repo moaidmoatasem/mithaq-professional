@@ -1,0 +1,732 @@
+Run started:2026-05-27 23:50:28.226114+00:00
+
+Test results:
+>> Issue: [B105:hardcoded_password_string] Possible hardcoded password: 'YOUR_SLACK_WEB_SOCKET_API_TOKEN'
+   Severity: Low   Confidence: Medium
+   CWE: CWE-259 (https://cwe.mitre.org/data/definitions/259.html)
+   More Info: https://bandit.readthedocs.io/en/1.9.4/plugins/b105_hardcoded_password_string.html
+   Location: packages/cherenkov/autonomous_generated/api/asyncslack.py:68:22
+67	    async def main():
+68	        slack_token = "YOUR_SLACK_WEB_SOCKET_API_TOKEN"
+69	
+
+--------------------------------------------------
+>> Issue: [B101:assert_used] Use of assert detected. The enclosed code will be removed when compiling to optimised byte code.
+   Severity: Low   Confidence: High
+   CWE: CWE-703 (https://cwe.mitre.org/data/definitions/703.html)
+   More Info: https://bandit.readthedocs.io/en/1.9.4/plugins/b101_assert_used.html
+   Location: packages/cherenkov/autonomous_generated/api/automatedexploitgenerator.py:95:4
+94	
+95	    assert fake_validate("invalid_template") == False
+96	    assert fake_validate(generator.generate_exploit("CVE-2019-5736")) == True
+
+--------------------------------------------------
+>> Issue: [B101:assert_used] Use of assert detected. The enclosed code will be removed when compiling to optimised byte code.
+   Severity: Low   Confidence: High
+   CWE: CWE-703 (https://cwe.mitre.org/data/definitions/703.html)
+   More Info: https://bandit.readthedocs.io/en/1.9.4/plugins/b101_assert_used.html
+   Location: packages/cherenkov/autonomous_generated/api/automatedexploitgenerator.py:96:4
+95	    assert fake_validate("invalid_template") == False
+96	    assert fake_validate(generator.generate_exploit("CVE-2019-5736")) == True
+97	
+
+--------------------------------------------------
+>> Issue: [B101:assert_used] Use of assert detected. The enclosed code will be removed when compiling to optimised byte code.
+   Severity: Low   Confidence: High
+   CWE: CWE-703 (https://cwe.mitre.org/data/definitions/703.html)
+   More Info: https://bandit.readthedocs.io/en/1.9.4/plugins/b101_assert_used.html
+   Location: packages/cherenkov/autonomous_generated/api/cveintegrationtool.py:96:8
+95	        all_response = api_method()
+96	        assert isinstance(all_response, dict)
+97	
+
+--------------------------------------------------
+>> Issue: [B101:assert_used] Use of assert detected. The enclosed code will be removed when compiling to optimised byte code.
+   Severity: Low   Confidence: High
+   CWE: CWE-703 (https://cwe.mitre.org/data/definitions/703.html)
+   More Info: https://bandit.readthedocs.io/en/1.9.4/plugins/b101_assert_used.html
+   Location: packages/cherenkov/autonomous_generated/api/slackconnector.py:117:4
+116	    result = slack.send_message(expected_channel_id, "This is a test message")
+117	    assert result["ok"]
+118	
+
+--------------------------------------------------
+>> Issue: [B101:assert_used] Use of assert detected. The enclosed code will be removed when compiling to optimised byte code.
+   Severity: Low   Confidence: High
+   CWE: CWE-703 (https://cwe.mitre.org/data/definitions/703.html)
+   More Info: https://bandit.readthedocs.io/en/1.9.4/plugins/b101_assert_used.html
+   Location: packages/cherenkov/autonomous_generated/api/slackconnector.py:130:12
+129	            result = self.slack.send_message(expected_channel_id, "This is a test message")
+130	            assert result["ok"]
+131	
+
+--------------------------------------------------
+>> Issue: [B105:hardcoded_password_string] Possible hardcoded password: 'Valid Token'
+   Severity: Low   Confidence: Medium
+   CWE: CWE-259 (https://cwe.mitre.org/data/definitions/259.html)
+   More Info: https://bandit.readthedocs.io/en/1.9.4/plugins/b105_hardcoded_password_string.html
+   Location: packages/cherenkov/autonomous_generated/api/slackdiscordconnector.py:91:39
+90	                response = slack_client.test_api_call()
+91	                self.SLACK_API_TOKEN = "Valid Token"  # Dummy value, actual should be validated
+92	                if response is not None and len(response) > 0:
+
+--------------------------------------------------
+>> Issue: [B105:hardcoded_password_string] Possible hardcoded password: 'your_slack_api_token'
+   Severity: Low   Confidence: Medium
+   CWE: CWE-259 (https://cwe.mitre.org/data/definitions/259.html)
+   More Info: https://bandit.readthedocs.io/en/1.9.4/plugins/b105_hardcoded_password_string.html
+   Location: packages/cherenkov/autonomous_generated/api/slackdiscordconnector.py:138:19
+137	        # Example Usage: Enables integration and checks status for Slack and Discord
+138	        os.environ["SLACK_API_TOKEN"] = "your_slack_api_token"
+139	        os.environ["DISCORD_WEBHOOK_URL"] = "your_discord_webhook_url"
+
+--------------------------------------------------
+>> Issue: [B101:assert_used] Use of assert detected. The enclosed code will be removed when compiling to optimised byte code.
+   Severity: Low   Confidence: High
+   CWE: CWE-703 (https://cwe.mitre.org/data/definitions/703.html)
+   More Info: https://bandit.readthedocs.io/en/1.9.4/plugins/b101_assert_used.html
+   Location: packages/cherenkov/autonomous_generated/api/slackdiscordintegration.py:63:4
+62	    # Check integrations initially (if any existed)
+63	    assert bot.check_slack_integration(), "Slack integration is missing. Please add it."
+64	    assert bot.check_discord_integration(), "Discord integration is missing. Please add it."
+
+--------------------------------------------------
+>> Issue: [B101:assert_used] Use of assert detected. The enclosed code will be removed when compiling to optimised byte code.
+   Severity: Low   Confidence: High
+   CWE: CWE-703 (https://cwe.mitre.org/data/definitions/703.html)
+   More Info: https://bandit.readthedocs.io/en/1.9.4/plugins/b101_assert_used.html
+   Location: packages/cherenkov/autonomous_generated/api/slackdiscordintegration.py:64:4
+63	    assert bot.check_slack_integration(), "Slack integration is missing. Please add it."
+64	    assert bot.check_discord_integration(), "Discord integration is missing. Please add it."
+65	
+
+--------------------------------------------------
+>> Issue: [B101:assert_used] Use of assert detected. The enclosed code will be removed when compiling to optimised byte code.
+   Severity: Low   Confidence: High
+   CWE: CWE-703 (https://cwe.mitre.org/data/definitions/703.html)
+   More Info: https://bandit.readthedocs.io/en/1.9.4/plugins/b101_assert_used.html
+   Location: packages/cherenkov/autonomous_generated/api/slackdiscordintegration.py:72:8
+71	        # Check the updated integrations
+72	        assert bot.check_slack_integration(), "Slack integration check failed."
+73	        assert bot.check_discord_integration(), "Discord integration check failed."
+
+--------------------------------------------------
+>> Issue: [B101:assert_used] Use of assert detected. The enclosed code will be removed when compiling to optimised byte code.
+   Severity: Low   Confidence: High
+   CWE: CWE-703 (https://cwe.mitre.org/data/definitions/703.html)
+   More Info: https://bandit.readthedocs.io/en/1.9.4/plugins/b101_assert_used.html
+   Location: packages/cherenkov/autonomous_generated/api/slackdiscordintegration.py:73:8
+72	        assert bot.check_slack_integration(), "Slack integration check failed."
+73	        assert bot.check_discord_integration(), "Discord integration check failed."
+74	    except Exception as e:
+
+--------------------------------------------------
+>> Issue: [B101:assert_used] Use of assert detected. The enclosed code will be removed when compiling to optimised byte code.
+   Severity: Low   Confidence: High
+   CWE: CWE-703 (https://cwe.mitre.org/data/definitions/703.html)
+   More Info: https://bandit.readthedocs.io/en/1.9.4/plugins/b101_assert_used.html
+   Location: packages/cherenkov/autonomous_generated/api/smartretryclient.py:88:4
+87	    # The following call should work and print the server status
+88	    assert "Health check successful." in SmartRetryClient().make_request(
+89	        requests.get, url_suffix="/health"
+90	    ), "The response was not as expected."
+91	
+
+--------------------------------------------------
+>> Issue: [B101:assert_used] Use of assert detected. The enclosed code will be removed when compiling to optimised byte code.
+   Severity: Low   Confidence: High
+   CWE: CWE-703 (https://cwe.mitre.org/data/definitions/703.html)
+   More Info: https://bandit.readthedocs.io/en/1.9.4/plugins/b101_assert_used.html
+   Location: packages/cherenkov/autonomous_generated/api/webhooknotifier.py:93:4
+92	    response_mock_get = {"status": "success"}
+93	    assert notifier_get.send_notification({"key1": "value1"}).json() == response_mock_get
+94	
+
+--------------------------------------------------
+>> Issue: [B101:assert_used] Use of assert detected. The enclosed code will be removed when compiling to optimised byte code.
+   Severity: Low   Confidence: High
+   CWE: CWE-703 (https://cwe.mitre.org/data/definitions/703.html)
+   More Info: https://bandit.readthedocs.io/en/1.9.4/plugins/b101_assert_used.html
+   Location: packages/cherenkov/autonomous_generated/api/webhooknotifier.py:101:4
+100	    response_mock_post = {"status": "success", "event": "test_event"}
+101	    assert post_notifer.send_notification(event_payload_example).json() == response_mock_post
+102	
+
+--------------------------------------------------
+>> Issue: [B101:assert_used] Use of assert detected. The enclosed code will be removed when compiling to optimised byte code.
+   Severity: Low   Confidence: High
+   CWE: CWE-703 (https://cwe.mitre.org/data/definitions/703.html)
+   More Info: https://bandit.readthedocs.io/en/1.9.4/plugins/b101_assert_used.html
+   Location: packages/cherenkov/autonomous_generated/detectors/attackchaindetector.py:94:4
+93	    # Parse file paths
+94	    assert all(
+95	        Path(lf).exists() for lf in log_files_list
+96	    ), "One or more provided log files do not exist."
+97	
+
+--------------------------------------------------
+>> Issue: [B101:assert_used] Use of assert detected. The enclosed code will be removed when compiling to optimised byte code.
+   Severity: Low   Confidence: High
+   CWE: CWE-703 (https://cwe.mitre.org/data/definitions/703.html)
+   More Info: https://bandit.readthedocs.io/en/1.9.4/plugins/b101_assert_used.html
+   Location: packages/cherenkov/autonomous_generated/detectors/detector.py:69:8
+68	        """
+69	        assert isinstance(attacker_id, int), "Attacker ID must be an integer"
+70	
+
+--------------------------------------------------
+>> Issue: [B101:assert_used] Use of assert detected. The enclosed code will be removed when compiling to optimised byte code.
+   Severity: Low   Confidence: High
+   CWE: CWE-703 (https://cwe.mitre.org/data/definitions/703.html)
+   More Info: https://bandit.readthedocs.io/en/1.9.4/plugins/b101_assert_used.html
+   Location: packages/cherenkov/autonomous_generated/detectors/for.py:156:4
+155	
+156	    assert (
+157	        len(detected_vulns) == detections_target_to_vulnerabilities_count
+158	    ), f"Unexpected number of vulnerabilities found: {len(detected_vulns)}"
+
+--------------------------------------------------
+>> Issue: [B101:assert_used] Use of assert detected. The enclosed code will be removed when compiling to optimised byte code.
+   Severity: Low   Confidence: High
+   CWE: CWE-703 (https://cwe.mitre.org/data/definitions/703.html)
+   More Info: https://bandit.readthedocs.io/en/1.9.4/plugins/b101_assert_used.html
+   Location: packages/cherenkov/autonomous_generated/misc/automatedexploitgenerator.py:104:8
+103	        parsed_data = generator.find_and_parse_vulnerability("test_dir")  # Mocked data
+104	        assert isinstance(parsed_data, dict), "The result should be a dictionary."
+105	
+
+--------------------------------------------------
+>> Issue: [B404:blacklist] Consider possible security implications associated with the subprocess module.
+   Severity: Low   Confidence: High
+   CWE: CWE-78 (https://cwe.mitre.org/data/definitions/78.html)
+   More Info: https://bandit.readthedocs.io/en/1.9.4/blacklists/blacklist_imports.html#b404-import-subprocess
+   Location: packages/cherenkov/autonomous_generated/misc/cicdintegration.py:7:0
+6	
+7	from subprocess import check_call
+8	import shlex
+
+--------------------------------------------------
+>> Issue: [B603:subprocess_without_shell_equals_true] subprocess call - check for execution of untrusted input.
+   Severity: Low   Confidence: High
+   CWE: CWE-78 (https://cwe.mitre.org/data/definitions/78.html)
+   More Info: https://bandit.readthedocs.io/en/1.9.4/plugins/b603_subprocess_without_shell_equals_true.html
+   Location: packages/cherenkov/autonomous_generated/misc/cicdintegration.py:46:34
+45	        try:
+46	            self.process_result = check_call(shlex.split(test_command), shell=False)
+47	            if not self.process_result == 0:
+
+--------------------------------------------------
+>> Issue: [B101:assert_used] Use of assert detected. The enclosed code will be removed when compiling to optimised byte code.
+   Severity: Low   Confidence: High
+   CWE: CWE-703 (https://cwe.mitre.org/data/definitions/703.html)
+   More Info: https://bandit.readthedocs.io/en/1.9.4/plugins/b101_assert_used.html
+   Location: packages/cherenkov/autonomous_generated/misc/multiretryerror.py:105:4
+104	    retry_mgr = RetryManager()
+105	    assert retry_mgr.execute_with_retry(risky_function, (), 1) == 0
+106	
+
+--------------------------------------------------
+>> Issue: [B101:assert_used] Use of assert detected. The enclosed code will be removed when compiling to optimised byte code.
+   Severity: Low   Confidence: High
+   CWE: CWE-703 (https://cwe.mitre.org/data/definitions/703.html)
+   More Info: https://bandit.readthedocs.io/en/1.9.4/plugins/b101_assert_used.html
+   Location: packages/cherenkov/autonomous_generated/misc/multiretryerror.py:112:8
+111	    except MultiRetryError as error:
+112	        assert str(error).startswith(
+113	            "Max retry attempts reached (3)"
+114	        ) and "Simulated exception" not in str(error)  # Ensures last exception is caught.
+115	        del error
+
+--------------------------------------------------
+>> Issue: [B101:assert_used] Use of assert detected. The enclosed code will be removed when compiling to optimised byte code.
+   Severity: Low   Confidence: High
+   CWE: CWE-703 (https://cwe.mitre.org/data/definitions/703.html)
+   More Info: https://bandit.readthedocs.io/en/1.9.4/plugins/b101_assert_used.html
+   Location: packages/cherenkov/autonomous_generated/misc/multiretryerror.py:120:4
+119	    retry_mgr = RetryManager(attempt_limit=3)
+120	    assert retry_mgr.execute_with_retry(risky_function, (), 1) == 1
+121	
+
+--------------------------------------------------
+>> Issue: [B404:blacklist] Consider possible security implications associated with the subprocess module.
+   Severity: Low   Confidence: High
+   CWE: CWE-78 (https://cwe.mitre.org/data/definitions/78.html)
+   More Info: https://bandit.readthedocs.io/en/1.9.4/blacklists/blacklist_imports.html#b404-import-subprocess
+   Location: packages/cherenkov/autonomous_generated/misc/scantask.py:8:0
+7	# Importing necessary libraries for testing and code execution
+8	from subprocess import CalledProcessError, check_output
+9	
+
+--------------------------------------------------
+>> Issue: [B603:subprocess_without_shell_equals_true] subprocess call - check for execution of untrusted input.
+   Severity: Low   Confidence: High
+   CWE: CWE-78 (https://cwe.mitre.org/data/definitions/78.html)
+   More Info: https://bandit.readthedocs.io/en/1.9.4/plugins/b603_subprocess_without_shell_equals_true.html
+   Location: packages/cherenkov/autonomous_generated/misc/scantask.py:47:21
+46	            command = f"flask test --test-module={self.source_path}"
+47	            result = check_output(command.split(), stderr=True)
+48	            return result.decode().strip()
+
+--------------------------------------------------
+>> Issue: [B106:hardcoded_password_funcarg] Possible hardcoded password: 'your_slack_bot_token'
+   Severity: Low   Confidence: Medium
+   CWE: CWE-259 (https://cwe.mitre.org/data/definitions/259.html)
+   More Info: https://bandit.readthedocs.io/en/1.9.4/plugins/b106_hardcoded_password_funcarg.html
+   Location: packages/cherenkov/autonomous_generated/misc/slackintegration.py:12:22
+11	    def __init__(self):
+12	        self.client = slack_sdk.WebClient(token="your_slack_bot_token")
+13	
+
+--------------------------------------------------
+>> Issue: [B101:assert_used] Use of assert detected. The enclosed code will be removed when compiling to optimised byte code.
+   Severity: Low   Confidence: High
+   CWE: CWE-703 (https://cwe.mitre.org/data/definitions/703.html)
+   More Info: https://bandit.readthedocs.io/en/1.9.4/plugins/b101_assert_used.html
+   Location: packages/cherenkov/autonomous_generated/misc/vulnerabilityassessment.py:140:4
+139	
+140	    assert not set(actual_result_low).isdisjoint(expected_severities_low)
+141	
+
+--------------------------------------------------
+>> Issue: [B101:assert_used] Use of assert detected. The enclosed code will be removed when compiling to optimised byte code.
+   Severity: Low   Confidence: High
+   CWE: CWE-703 (https://cwe.mitre.org/data/definitions/703.html)
+   More Info: https://bandit.readthedocs.io/en/1.9.4/plugins/b101_assert_used.html
+   Location: packages/cherenkov/autonomous_generated/misc/vulnerabilityassessment.py:158:4
+157	
+158	    assert not set(actual_result_high).isdisjoint(expected_severities_high)
+159	
+
+--------------------------------------------------
+>> Issue: [B101:assert_used] Use of assert detected. The enclosed code will be removed when compiling to optimised byte code.
+   Severity: Low   Confidence: High
+   CWE: CWE-703 (https://cwe.mitre.org/data/definitions/703.html)
+   More Info: https://bandit.readthedocs.io/en/1.9.4/plugins/b101_assert_used.html
+   Location: packages/cherenkov/autonomous_generated/misc/vulnerabilityseverityscraper.py:89:4
+88	
+89	    assert len(severe_vulnerabilities) == 0, "Expected no severe vulnerabilities"
+90	
+
+--------------------------------------------------
+>> Issue: [B101:assert_used] Use of assert detected. The enclosed code will be removed when compiling to optimised byte code.
+   Severity: Low   Confidence: High
+   CWE: CWE-703 (https://cwe.mitre.org/data/definitions/703.html)
+   More Info: https://bandit.readthedocs.io/en/1.9.4/plugins/b101_assert_used.html
+   Location: packages/cherenkov/autonomous_generated/misc/webhooknotificationmanager.py:100:4
+99	    """
+100	    assert WebhookNotifier.validate_webhook("https://webhooktest.com") == True, "Test Failed"
+101	    assert WebhookNotifier.validate_webhook("notvalidurl") == False, "Test Failed"
+
+--------------------------------------------------
+>> Issue: [B101:assert_used] Use of assert detected. The enclosed code will be removed when compiling to optimised byte code.
+   Severity: Low   Confidence: High
+   CWE: CWE-703 (https://cwe.mitre.org/data/definitions/703.html)
+   More Info: https://bandit.readthedocs.io/en/1.9.4/plugins/b101_assert_used.html
+   Location: packages/cherenkov/autonomous_generated/misc/webhooknotificationmanager.py:101:4
+100	    assert WebhookNotifier.validate_webhook("https://webhooktest.com") == True, "Test Failed"
+101	    assert WebhookNotifier.validate_webhook("notvalidurl") == False, "Test Failed"
+102	
+
+--------------------------------------------------
+>> Issue: [B101:assert_used] Use of assert detected. The enclosed code will be removed when compiling to optimised byte code.
+   Severity: Low   Confidence: High
+   CWE: CWE-703 (https://cwe.mitre.org/data/definitions/703.html)
+   More Info: https://bandit.readthedocs.io/en/1.9.4/plugins/b101_assert_used.html
+   Location: packages/cherenkov/autonomous_generated/misc/webhooknotificationmanager.py:113:8
+112	
+113	        assert mock_send.called is True
+114	
+
+--------------------------------------------------
+>> Issue: [B101:assert_used] Use of assert detected. The enclosed code will be removed when compiling to optimised byte code.
+   Severity: Low   Confidence: High
+   CWE: CWE-703 (https://cwe.mitre.org/data/definitions/703.html)
+   More Info: https://bandit.readthedocs.io/en/1.9.4/plugins/b101_assert_used.html
+   Location: packages/cherenkov/autonomous_generated/misc/webhooknotifications.py:97:4
+96	    # Simple test setup and verification (mock function usage if needed with assertions)
+97	    assert "200" in example_usage()
+98	
+
+--------------------------------------------------
+>> Issue: [B101:assert_used] Use of assert detected. The enclosed code will be removed when compiling to optimised byte code.
+   Severity: Low   Confidence: High
+   CWE: CWE-703 (https://cwe.mitre.org/data/definitions/703.html)
+   More Info: https://bandit.readthedocs.io/en/1.9.4/plugins/b101_assert_used.html
+   Location: packages/cherenkov/autonomous_generated/ml/mlbasedvulnerabilityprediction.py:94:4
+93	    test_model = MLBasedVulnerabilityPrediction(load_file_path="vulnerability_data.csv")
+94	    assert "predictions" in test_model.predict_vulnerability(
+95	        mock_data
+96	    ), "Test failed: Predictions dictionary should contain predictions keys"
+97	    if len(test_model.predict_vulnerability(mock_data)) >= 1:
+
+--------------------------------------------------
+>> Issue: [B101:assert_used] Use of assert detected. The enclosed code will be removed when compiling to optimised byte code.
+   Severity: Low   Confidence: High
+   CWE: CWE-703 (https://cwe.mitre.org/data/definitions/703.html)
+   More Info: https://bandit.readthedocs.io/en/1.9.4/plugins/b101_assert_used.html
+   Location: packages/cherenkov/autonomous_generated/ml/pdfreportgenerator.py:118:8
+117	            pdf_generator.generate_pdf(report_data=self.report_data_1)
+118	        assert "required dict key" in str(error.exception).lower()
+119	
+
+--------------------------------------------------
+>> Issue: [B101:assert_used] Use of assert detected. The enclosed code will be removed when compiling to optimised byte code.
+   Severity: Low   Confidence: High
+   CWE: CWE-703 (https://cwe.mitre.org/data/definitions/703.html)
+   More Info: https://bandit.readthedocs.io/en/1.9.4/plugins/b101_assert_used.html
+   Location: packages/cherenkov/autonomous_generated/ml/pdfreportgenerator.py:125:8
+124	            pdf_generator.generate_pdf(report_data=self.report_data_2)
+125	        assert "not exist" in str(error.exception).lower()
+
+--------------------------------------------------
+>> Issue: [B105:hardcoded_password_string] Possible hardcoded password: 'TEST_SLACK_API_TOKEN'
+   Severity: Low   Confidence: Medium
+   CWE: CWE-259 (https://cwe.mitre.org/data/definitions/259.html)
+   More Info: https://bandit.readthedocs.io/en/1.9.4/plugins/b105_hardcoded_password_string.html
+   Location: packages/cherenkov/autonomous_generated/reporting/slackdiscordintegration.py:76:12
+75	        {
+76	            "SLACK_BOT_TOKEN": "TEST_SLACK_API_TOKEN",
+77	            "DISCORD_WEBHOOK_URL": "https://hooks.discord.com/my_webhook_url",
+78	        },
+79	    )
+80	    def test_integration(self):
+
+--------------------------------------------------
+>> Issue: [B101:assert_used] Use of assert detected. The enclosed code will be removed when compiling to optimised byte code.
+   Severity: Low   Confidence: High
+   CWE: CWE-703 (https://cwe.mitre.org/data/definitions/703.html)
+   More Info: https://bandit.readthedocs.io/en/1.9.4/plugins/b101_assert_used.html
+   Location: packages/cherenkov/autonomous_generated/reporting/unknownclass.py:74:8
+73	        pdf_path, gen_errors = create_pdf_report(["Section1", "Section2"])
+74	        assert gen_errors == [], f"Test failed with expected: [] - received {gen_errors}"
+75	        print("Test Case 1 Passed for normal data to generate PDF.")
+
+--------------------------------------------------
+>> Issue: [B101:assert_used] Use of assert detected. The enclosed code will be removed when compiling to optimised byte code.
+   Severity: Low   Confidence: High
+   CWE: CWE-703 (https://cwe.mitre.org/data/definitions/703.html)
+   More Info: https://bandit.readthedocs.io/en/1.9.4/plugins/b101_assert_used.html
+   Location: packages/cherenkov/autonomous_generated/reporting/unknownclass.py:79:8
+78	        pdf_path, gen_errors = create_pdf_report(["Section1", 67890])
+79	        assert "wrong type detected in input sections." in "".join(
+80	            gen_errors
+81	        ), "Test Case 2 for mixed data types failed."
+82	        print("Test Case 2 Passed: Mixed data types successfully caught and reported.")
+
+--------------------------------------------------
+>> Issue: [B101:assert_used] Use of assert detected. The enclosed code will be removed when compiling to optimised byte code.
+   Severity: Low   Confidence: High
+   CWE: CWE-703 (https://cwe.mitre.org/data/definitions/703.html)
+   More Info: https://bandit.readthedocs.io/en/1.9.4/plugins/b101_assert_used.html
+   Location: packages/cherenkov/autonomous_generated/scanners/examplemodel.py:85:4
+84	    response = await test_client.post("/scans", json=input_data)
+85	    assert response.status_code == status.HTTP_201_CREATED
+86	    assert response.json() == {**input_data, "response_status": "success"}
+
+--------------------------------------------------
+>> Issue: [B101:assert_used] Use of assert detected. The enclosed code will be removed when compiling to optimised byte code.
+   Severity: Low   Confidence: High
+   CWE: CWE-703 (https://cwe.mitre.org/data/definitions/703.html)
+   More Info: https://bandit.readthedocs.io/en/1.9.4/plugins/b101_assert_used.html
+   Location: packages/cherenkov/autonomous_generated/scanners/examplemodel.py:86:4
+85	    assert response.status_code == status.HTTP_201_CREATED
+86	    assert response.json() == {**input_data, "response_status": "success"}
+87	
+
+--------------------------------------------------
+>> Issue: [B101:assert_used] Use of assert detected. The enclosed code will be removed when compiling to optimised byte code.
+   Severity: Low   Confidence: High
+   CWE: CWE-703 (https://cwe.mitre.org/data/definitions/703.html)
+   More Info: https://bandit.readthedocs.io/en/1.9.4/plugins/b101_assert_used.html
+   Location: packages/cherenkov/autonomous_generated/scanners/examplemodel.py:91:4
+90	    response = test_client.get("/scans")
+91	    assert len(response.json()) > 0
+92	
+
+--------------------------------------------------
+>> Issue: [B101:assert_used] Use of assert detected. The enclosed code will be removed when compiling to optimised byte code.
+   Severity: Low   Confidence: High
+   CWE: CWE-703 (https://cwe.mitre.org/data/definitions/703.html)
+   More Info: https://bandit.readthedocs.io/en/1.9.4/plugins/b101_assert_used.html
+   Location: packages/cherenkov/autonomous_generated/scanners/featurescanner.py:109:4
+108	    summary = executor.generate_summary(title="Example")
+109	    assert len(summary) == 2, "Unexpected number of keys in the summary dictionary"
+110	    assert "title" in summary.keys(), "Title key is missing."
+
+--------------------------------------------------
+>> Issue: [B101:assert_used] Use of assert detected. The enclosed code will be removed when compiling to optimised byte code.
+   Severity: Low   Confidence: High
+   CWE: CWE-703 (https://cwe.mitre.org/data/definitions/703.html)
+   More Info: https://bandit.readthedocs.io/en/1.9.4/plugins/b101_assert_used.html
+   Location: packages/cherenkov/autonomous_generated/scanners/featurescanner.py:110:4
+109	    assert len(summary) == 2, "Unexpected number of keys in the summary dictionary"
+110	    assert "title" in summary.keys(), "Title key is missing."
+111	    assert "summary" in summary.keys(), "Summary text is missing."
+
+--------------------------------------------------
+>> Issue: [B101:assert_used] Use of assert detected. The enclosed code will be removed when compiling to optimised byte code.
+   Severity: Low   Confidence: High
+   CWE: CWE-703 (https://cwe.mitre.org/data/definitions/703.html)
+   More Info: https://bandit.readthedocs.io/en/1.9.4/plugins/b101_assert_used.html
+   Location: packages/cherenkov/autonomous_generated/scanners/featurescanner.py:111:4
+110	    assert "title" in summary.keys(), "Title key is missing."
+111	    assert "summary" in summary.keys(), "Summary text is missing."
+112	    assert "details" in summary.keys(), "Details list is missing."
+
+--------------------------------------------------
+>> Issue: [B101:assert_used] Use of assert detected. The enclosed code will be removed when compiling to optimised byte code.
+   Severity: Low   Confidence: High
+   CWE: CWE-703 (https://cwe.mitre.org/data/definitions/703.html)
+   More Info: https://bandit.readthedocs.io/en/1.9.4/plugins/b101_assert_used.html
+   Location: packages/cherenkov/autonomous_generated/scanners/featurescanner.py:112:4
+111	    assert "summary" in summary.keys(), "Summary text is missing."
+112	    assert "details" in summary.keys(), "Details list is missing."
+113	
+
+--------------------------------------------------
+>> Issue: [B101:assert_used] Use of assert detected. The enclosed code will be removed when compiling to optimised byte code.
+   Severity: Low   Confidence: High
+   CWE: CWE-703 (https://cwe.mitre.org/data/definitions/703.html)
+   More Info: https://bandit.readthedocs.io/en/1.9.4/plugins/b101_assert_used.html
+   Location: packages/cherenkov/autonomous_generated/scanners/featurescanner.py:119:4
+118	    summary = executor.generate_summary_with_features(title="Example", features=["Up", "Down"])
+119	    assert len(summary) == 3, "Unexpected number of keys in the summary dictionary"
+120	    assert "title" in summary.keys(), "Title key is missing."
+
+--------------------------------------------------
+>> Issue: [B101:assert_used] Use of assert detected. The enclosed code will be removed when compiling to optimised byte code.
+   Severity: Low   Confidence: High
+   CWE: CWE-703 (https://cwe.mitre.org/data/definitions/703.html)
+   More Info: https://bandit.readthedocs.io/en/1.9.4/plugins/b101_assert_used.html
+   Location: packages/cherenkov/autonomous_generated/scanners/featurescanner.py:120:4
+119	    assert len(summary) == 3, "Unexpected number of keys in the summary dictionary"
+120	    assert "title" in summary.keys(), "Title key is missing."
+121	    assert "summary" in summary.keys(), "Summary text is missing."
+
+--------------------------------------------------
+>> Issue: [B101:assert_used] Use of assert detected. The enclosed code will be removed when compiling to optimised byte code.
+   Severity: Low   Confidence: High
+   CWE: CWE-703 (https://cwe.mitre.org/data/definitions/703.html)
+   More Info: https://bandit.readthedocs.io/en/1.9.4/plugins/b101_assert_used.html
+   Location: packages/cherenkov/autonomous_generated/scanners/featurescanner.py:121:4
+120	    assert "title" in summary.keys(), "Title key is missing."
+121	    assert "summary" in summary.keys(), "Summary text is missing."
+122	    assert "details" in summary.keys(), "Details list is missing."
+
+--------------------------------------------------
+>> Issue: [B101:assert_used] Use of assert detected. The enclosed code will be removed when compiling to optimised byte code.
+   Severity: Low   Confidence: High
+   CWE: CWE-703 (https://cwe.mitre.org/data/definitions/703.html)
+   More Info: https://bandit.readthedocs.io/en/1.9.4/plugins/b101_assert_used.html
+   Location: packages/cherenkov/autonomous_generated/scanners/featurescanner.py:122:4
+121	    assert "summary" in summary.keys(), "Summary text is missing."
+122	    assert "details" in summary.keys(), "Details list is missing."
+123	
+
+--------------------------------------------------
+>> Issue: [B101:assert_used] Use of assert detected. The enclosed code will be removed when compiling to optimised byte code.
+   Severity: Low   Confidence: High
+   CWE: CWE-703 (https://cwe.mitre.org/data/definitions/703.html)
+   More Info: https://bandit.readthedocs.io/en/1.9.4/plugins/b101_assert_used.html
+   Location: packages/cherenkov/autonomous_generated/scanners/mlvulnerabilitypredictor.py:175:8
+174	
+175	        assert (
+176	            min(prediction_probabilities) >= 0 and max(prediction_probabilities) <= 1
+177	        ), "Probabilites should be in the range [0, 1]"
+178	
+
+--------------------------------------------------
+>> Issue: [B101:assert_used] Use of assert detected. The enclosed code will be removed when compiling to optimised byte code.
+   Severity: Low   Confidence: High
+   CWE: CWE-703 (https://cwe.mitre.org/data/definitions/703.html)
+   More Info: https://bandit.readthedocs.io/en/1.9.4/plugins/b101_assert_used.html
+   Location: packages/cherenkov/autonomous_generated/scanners/scanner.py:78:12
+77	            print(f"Scan results for {target}:\n{findings}")
+78	            assert isinstance(findings, dict), "Output is expected to be a dictionary"
+79	
+
+--------------------------------------------------
+>> Issue: [B101:assert_used] Use of assert detected. The enclosed code will be removed when compiling to optimised byte code.
+   Severity: Low   Confidence: High
+   CWE: CWE-703 (https://cwe.mitre.org/data/definitions/703.html)
+   More Info: https://bandit.readthedocs.io/en/1.9.4/plugins/b101_assert_used.html
+   Location: packages/cherenkov/autonomous_generated/scanners/scannerinterface.py:91:8
+90	    def verify_tests():
+91	        assert os.path.isfile(
+92	            "example_project/example.py"
+93	        ), "Project directory does not contain a file."
+94	
+
+--------------------------------------------------
+>> Issue: [B101:assert_used] Use of assert detected. The enclosed code will be removed when compiling to optimised byte code.
+   Severity: Low   Confidence: High
+   CWE: CWE-703 (https://cwe.mitre.org/data/definitions/703.html)
+   More Info: https://bandit.readthedocs.io/en/1.9.4/plugins/b101_assert_used.html
+   Location: packages/cherenkov/autonomous_generated/scanners/scanneroptimization.py:66:8
+65	        optimized_test_data = self.optimize_scanner(test_data)
+66	        assert optimized_test_data[:3] == [
+67	            "DATA1",
+68	            "DATA2",
+69	            "DATA3",
+70	        ], "Optimization did not preserve original order or case."
+71	        return True
+
+--------------------------------------------------
+>> Issue: [B101:assert_used] Use of assert detected. The enclosed code will be removed when compiling to optimised byte code.
+   Severity: Low   Confidence: High
+   CWE: CWE-703 (https://cwe.mitre.org/data/definitions/703.html)
+   More Info: https://bandit.readthedocs.io/en/1.9.4/plugins/b101_assert_used.html
+   Location: packages/cherenkov/autonomous_generated/scanners/scanneroptimization.py:80:4
+79	    optimized_output = scanner_optimizer.optimize_scanner(example_input)
+80	    assert len(optimized_output) <= len(example_input), "No data should have been removed."
+81	    print("Example optimization works as expected:", optimized_output[:5])
+
+--------------------------------------------------
+>> Issue: [B607:start_process_with_partial_path] Starting a process with a partial executable path
+   Severity: Low   Confidence: High
+   CWE: CWE-78 (https://cwe.mitre.org/data/definitions/78.html)
+   More Info: https://bandit.readthedocs.io/en/1.9.4/plugins/b607_start_process_with_partial_path.html
+   Location: packages/cherenkov/autonomous_generated/scanners/testfeaturescanner.py:16:20
+15	        # Example code to simulate running Coverage reports and passing in the 'PATH_FEATURES' environment variable.
+16	        exit_code = run(
+17	            ["coverage", "run", "--omit=venv/*", '--include="*py"', f"{PATH_FEATURES}*"]
+18	        ).returncode
+19	        self.assertEqual(exit_code, 0)
+
+--------------------------------------------------
+>> Issue: [B603:subprocess_without_shell_equals_true] subprocess call - check for execution of untrusted input.
+   Severity: Low   Confidence: High
+   CWE: CWE-78 (https://cwe.mitre.org/data/definitions/78.html)
+   More Info: https://bandit.readthedocs.io/en/1.9.4/plugins/b603_subprocess_without_shell_equals_true.html
+   Location: packages/cherenkov/autonomous_generated/scanners/testfeaturescanner.py:16:20
+15	        # Example code to simulate running Coverage reports and passing in the 'PATH_FEATURES' environment variable.
+16	        exit_code = run(
+17	            ["coverage", "run", "--omit=venv/*", '--include="*py"', f"{PATH_FEATURES}*"]
+18	        ).returncode
+19	        self.assertEqual(exit_code, 0)
+
+--------------------------------------------------
+>> Issue: [B101:assert_used] Use of assert detected. The enclosed code will be removed when compiling to optimised byte code.
+   Severity: Low   Confidence: High
+   CWE: CWE-703 (https://cwe.mitre.org/data/definitions/703.html)
+   More Info: https://bandit.readthedocs.io/en/1.9.4/plugins/b101_assert_used.html
+   Location: packages/cherenkov/autonomous_generated/scanners/unknownclass.py:43:4
+42	    print("Testing with a safe path (no '../' sequence):")
+43	    assert not path_traversal_scanner(
+44	        "/usr/local/bin/bash"
+45	    ), "Test failed - unexpected vulnerability found in /usr/local/bin/bash"
+46	
+
+--------------------------------------------------
+>> Issue: [B101:assert_used] Use of assert detected. The enclosed code will be removed when compiling to optimised byte code.
+   Severity: Low   Confidence: High
+   CWE: CWE-703 (https://cwe.mitre.org/data/definitions/703.html)
+   More Info: https://bandit.readthedocs.io/en/1.9.4/plugins/b101_assert_used.html
+   Location: packages/cherenkov/autonomous_generated/scanners/unknownclass.py:48:4
+47	    print("Testing with a path containing '/../':")
+48	    assert path_traversal_scanner(
+49	        "/usr/./local/file.txt"
+50	    ), "Test failed - no vulnerability found in '/usr/./local/file.txt'."
+51	
+
+--------------------------------------------------
+>> Issue: [B101:assert_used] Use of assert detected. The enclosed code will be removed when compiling to optimised byte code.
+   Severity: Low   Confidence: High
+   CWE: CWE-703 (https://cwe.mitre.org/data/definitions/703.html)
+   More Info: https://bandit.readthedocs.io/en/1.9.4/plugins/b101_assert_used.html
+   Location: packages/cherenkov/autonomous_generated/scanners/unsafenames.py:92:4
+91	
+92	    assert len(list(filter(is_command_injection_safe, safe_expressions))) == len(safe_expressions)
+93	    assert len(list(filter(is_command_injection_safe, unsafe_expressions))) > 0
+
+--------------------------------------------------
+>> Issue: [B101:assert_used] Use of assert detected. The enclosed code will be removed when compiling to optimised byte code.
+   Severity: Low   Confidence: High
+   CWE: CWE-703 (https://cwe.mitre.org/data/definitions/703.html)
+   More Info: https://bandit.readthedocs.io/en/1.9.4/plugins/b101_assert_used.html
+   Location: packages/cherenkov/autonomous_generated/scanners/unsafenames.py:93:4
+92	    assert len(list(filter(is_command_injection_safe, safe_expressions))) == len(safe_expressions)
+93	    assert len(list(filter(is_command_injection_safe, unsafe_expressions))) > 0
+
+--------------------------------------------------
+>> Issue: [B101:assert_used] Use of assert detected. The enclosed code will be removed when compiling to optimised byte code.
+   Severity: Low   Confidence: High
+   CWE: CWE-703 (https://cwe.mitre.org/data/definitions/703.html)
+   More Info: https://bandit.readthedocs.io/en/1.9.4/plugins/b101_assert_used.html
+   Location: packages/cherenkov/autonomous_generated/scanners/vulnerabilityscanner.py:78:8
+77	        print(f"Test failed: {ve}")
+78	        assert False
+79	
+
+--------------------------------------------------
+>> Issue: [B101:assert_used] Use of assert detected. The enclosed code will be removed when compiling to optimised byte code.
+   Severity: Low   Confidence: High
+   CWE: CWE-703 (https://cwe.mitre.org/data/definitions/703.html)
+   More Info: https://bandit.readthedocs.io/en/1.9.4/plugins/b101_assert_used.html
+   Location: packages/cherenkov/autonomous_generated/scanners/vulnerabilityseverity.py:75:4
+74	    score_7_5 = calculate_severity_score("CVE-2023-1111")
+75	    assert round(score_7_5, 1) == 7.5
+76	
+
+--------------------------------------------------
+>> Issue: [B101:assert_used] Use of assert detected. The enclosed code will be removed when compiling to optimised byte code.
+   Severity: Low   Confidence: High
+   CWE: CWE-703 (https://cwe.mitre.org/data/definitions/703.html)
+   More Info: https://bandit.readthedocs.io/en/1.9.4/plugins/b101_assert_used.html
+   Location: packages/cherenkov/autonomous_generated/scanners/vulnerabilityseverity.py:78:4
+77	    score_9 = calculate_severity_score("CVE-2023-2222")
+78	    assert round(score_9, 1) == 9.0
+79	
+
+--------------------------------------------------
+>> Issue: [B101:assert_used] Use of assert detected. The enclosed code will be removed when compiling to optimised byte code.
+   Severity: Low   Confidence: High
+   CWE: CWE-703 (https://cwe.mitre.org/data/definitions/703.html)
+   More Info: https://bandit.readthedocs.io/en/1.9.4/plugins/b101_assert_used.html
+   Location: packages/cherenkov/autonomous_generated/scanners/xxess.py:121:8
+120	        valid_xml = b'<?xml version="1.0" encoding="UTF-8"?><root>Valid content</root>'
+121	        assert self.check_external_entity(valid_xml) is False
+122	
+
+--------------------------------------------------
+>> Issue: [B101:assert_used] Use of assert detected. The enclosed code will be removed when compiling to optimised byte code.
+   Severity: Low   Confidence: High
+   CWE: CWE-703 (https://cwe.mitre.org/data/definitions/703.html)
+   More Info: https://bandit.readthedocs.io/en/1.9.4/plugins/b101_assert_used.html
+   Location: packages/cherenkov/autonomous_generated/scanners/xxess.py:128:8
+127	        result = self.check_external_entity(encoded_malicious_xml)
+128	        assert (
+129	            isinstance(result, bool) and result is True
+130	        )  # This should fail the check because it's not a valid or decoded XML.
+131	
+
+--------------------------------------------------
+>> Issue: [B101:assert_used] Use of assert detected. The enclosed code will be removed when compiling to optimised byte code.
+   Severity: Low   Confidence: High
+   CWE: CWE-703 (https://cwe.mitre.org/data/definitions/703.html)
+   More Info: https://bandit.readthedocs.io/en/1.9.4/plugins/b101_assert_used.html
+   Location: packages/cherenkov/autonomous_generated/scanners/xxess.py:153:12
+152	            result = scanner.check_external_entity(xml_input)
+153	            assert result == expected_result
+154	        except ValueError:
+
+--------------------------------------------------
+
+Code scanned:
+	Total lines of code: 9230
+	Total lines skipped (#nosec): 0
+	Total potential issues skipped due to specifically being disabled (e.g., #nosec BXXX): 4
+
+Run metrics:
+	Total issues (by severity):
+		Undefined: 0
+		Low: 68
+		Medium: 0
+		High: 0
+	Total issues (by confidence):
+		Undefined: 0
+		Low: 0
+		Medium: 5
+		High: 63
+Files skipped (1):
+	packages/cherenkov/autonomous_generated/scanners/xmlschemavalidator.py (syntax error while parsing AST from file)

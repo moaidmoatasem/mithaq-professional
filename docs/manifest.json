@@ -399,16 +399,5 @@
       "source": "docs/development/technical-specification.md",
       "section": "development"
     }
-    ,
-    {
-      "topic": "Agent Prompts",
-      "source": "docs/agent-prompts.md",
-      "section": "development"
-    },
-    {
-      "topic": "Agentic Handover Protocol",
-      "source": "docs/development/agentic-handover-protocol.md",
-      "section": "development"
-    }
   ]
 }

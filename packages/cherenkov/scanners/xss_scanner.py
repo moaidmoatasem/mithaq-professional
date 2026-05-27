@@ -97,6 +97,7 @@ class XSSScanner(BaseScanner):
                                         "with auto-escaping enabled (e.g., Jinja2 autoescape, "
                                         "React JSX). Never use innerHTML with untrusted data."
                                     ),
+                                    scanner="xss_reflected",
                                 )
                             )
                             break  # One confirmed finding per target is sufficient

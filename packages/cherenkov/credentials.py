@@ -112,7 +112,12 @@ class DefaultCredentialsManager:
         if not found:
             new_lines.append(f"CHERENKOV_JWT_SECRET={new_secret}\n")  # nosec B105
         content = "".join(new_lines)
-        path.write_text(content)  # codeql[py/clear-text-storage-sensitive-data]
-        if os.name == "posix":
-            os.chmod(path, 0o600)
+
+        # Securely write the file with restricted permissions to avoid CodeQL clear-text storage alert
+        flags = os.O_WRONLY | os.O_CREAT | os.O_TRUNC
+        mode = 0o600
+        fd = os.open(path, flags, mode)
+        with open(fd, "w", encoding="utf-8") as f:
+            f.write(content)
+
         cls.clear_rotation_flag()

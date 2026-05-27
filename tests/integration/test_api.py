@@ -10,6 +10,8 @@ from fastapi.testclient import TestClient
 
 import os
 
+pytestmark = pytest.mark.integration
+
 @pytest.fixture(autouse=True)
 def bypass_rate_limit():
     app.state.limiter.enabled = False

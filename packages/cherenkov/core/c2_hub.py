@@ -14,9 +14,14 @@ Any agent can "assume" the C2 Hub role to act as the primary coordinator.
 import logging
 from datetime import datetime, timezone
 from pathlib import Path
-from typing import Any, Dict, List, Optional
+from typing import Any, Dict, Optional
 
-from cherenkov.core.agent_state_store import AgentState, AgentStatus, AgentStateStore, default_state_store
+from cherenkov.core.agent_state_store import (
+    AgentState,
+    AgentStateStore,
+    AgentStatus,
+    default_state_store,
+)
 
 logger = logging.getLogger(__name__)
 

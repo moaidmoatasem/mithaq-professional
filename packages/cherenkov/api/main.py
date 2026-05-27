@@ -1338,6 +1338,47 @@ async def v1_architect_plan(
     return result
 
 
+@v1.get("/compliance/frameworks")
+async def list_frameworks(current_user: AuthUser = Depends(get_current_user)):
+    """List all supported compliance frameworks."""
+    if DefaultCredentialsManager.is_rotation_required():
+        raise HTTPException(
+            status_code=423,
+            detail={"code": "rotation_required", "message": "Password rotation required"},
+        )
+    from cherenkov.compliance import ComplianceRegistry
+
+    return {"frameworks": ComplianceRegistry.list_frameworks()}
+
+
+@v1.get("/scan/{scan_id}/compliance/{framework_id}")
+async def get_compliance_report(
+    scan_id: str,
+    framework_id: str,
+    current_user: AuthUser = Depends(get_current_user),
+):
+    """Retrieve compliance report for a specific scan and framework."""
+    if DefaultCredentialsManager.is_rotation_required():
+        raise HTTPException(
+            status_code=423,
+            detail={"code": "rotation_required", "message": "Password rotation required"},
+        )
+    from cherenkov.compliance import ComplianceRegistry
+
+    with sqlite3.connect(_DB_PATH) as conn:
+        row = conn.execute("SELECT findings FROM scans WHERE scan_id=?", (scan_id,)).fetchone()
+
+    if not row:
+        raise HTTPException(404, "Scan not found")
+
+    findings = json.loads(row[0] or "[]")
+    try:
+        report = ComplianceRegistry.generate_report(framework_id, findings, scan_id)
+        return report.__dict__ if hasattr(report, "__dict__") else report
+    except ValueError as e:
+        raise HTTPException(400, str(e))
+
+
 @v1.get("/mesh/nodes")
 async def v1_mesh_nodes(current_user: AuthUser = Depends(get_current_user)) -> dict:
     """List discovered mesh nodes."""

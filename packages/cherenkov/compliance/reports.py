@@ -60,18 +60,27 @@ class PDFReportGenerator:
         self.pdf.set_text_color(30, 30, 30)
         self.pdf.cell(0, 20, "CHERENKOV", new_x=XPos.LMARGIN, new_y=YPos.NEXT, align="C")
         self.pdf.set_font("helvetica", "", 12)
-        self.pdf.cell(0, 6, "Sovereign Compliance Intelligence", new_x=XPos.LMARGIN, new_y=YPos.NEXT, align="C")
+        self.pdf.cell(
+            0,
+            6,
+            "Sovereign Compliance Intelligence",
+            new_x=XPos.LMARGIN,
+            new_y=YPos.NEXT,
+            align="C",
+        )
         self.pdf.ln(10)
-        
+
         self.pdf.set_draw_color(30, 30, 30)
         self.pdf.set_line_width(0.5)
         self.pdf.line(10, self.pdf.get_y(), 200, self.pdf.get_y())
         self.pdf.ln(10)
 
         self.pdf.set_font("helvetica", "B", 16)
-        self.pdf.cell(0, 10, "Security Audit Report", new_x=XPos.LMARGIN, new_y=YPos.NEXT, align="C")
+        self.pdf.cell(
+            0, 10, "Security Audit Report", new_x=XPos.LMARGIN, new_y=YPos.NEXT, align="C"
+        )
         self.pdf.ln(8)
-        
+
         # Meta table-like structure
         self.pdf.set_fill_color(245, 245, 245)
         ts = datetime.now(timezone.utc).strftime("%Y-%m-%d %H:%M UTC")
@@ -82,7 +91,7 @@ class PDFReportGenerator:
             ("Generated", ts),
             ("Total Findings", str(len(self.result.findings))),
         ]
-        
+
         for label, value in meta:
             self.pdf.set_font("helvetica", "B", 10)
             self.pdf.cell(45, 8, f" {label}", border="B", fill=True)
@@ -92,15 +101,15 @@ class PDFReportGenerator:
 
     def _write_summary(self) -> None:
         self._header_bar("EXECUTIVE SUMMARY")
-        
+
         counts = {"CRITICAL": 0, "HIGH": 0, "MEDIUM": 0, "LOW": 0, "INFO": 0}
         for f in self.result.findings:
             sev = f.severity.value.upper()
             counts[sev] = counts.get(sev, 0) + 1
-            
+
         self.pdf.set_font("helvetica", "B", 10)
         self.pdf.cell(0, 8, "Findings by Severity:", new_x=XPos.LMARGIN, new_y=YPos.NEXT)
-        
+
         # Draw a small bar chart or just colored boxes
         for sev, count in counts.items():
             if count == 0:
@@ -108,18 +117,30 @@ class PDFReportGenerator:
             self._severity_pill(sev)
             self.pdf.set_font("helvetica", "B", 10)
             self.pdf.cell(15, 6, f" {count}", new_x=XPos.LMARGIN, new_y=YPos.NEXT)
-        
+
         self.pdf.ln(6)
-        
+
         if counts["CRITICAL"] > 0 or counts["HIGH"] > 0:
             self.pdf.set_font("helvetica", "B", 10)
             self.pdf.set_text_color(180, 0, 0)
-            self.pdf.multi_cell(0, 6, "IMMEDIATE ACTION REQUIRED: High-risk vulnerabilities were identified that may compromise the target system's integrity or confidentiality.", new_x=XPos.LMARGIN, new_y=YPos.NEXT)
+            self.pdf.multi_cell(
+                0,
+                6,
+                "IMMEDIATE ACTION REQUIRED: High-risk vulnerabilities were identified that may compromise the target system's integrity or confidentiality.",
+                new_x=XPos.LMARGIN,
+                new_y=YPos.NEXT,
+            )
             self.pdf.set_text_color(0, 0, 0)
         else:
             self.pdf.set_font("helvetica", "I", 10)
-            self.pdf.multi_cell(0, 6, "No critical or high-severity vulnerabilities were detected during this scan.", new_x=XPos.LMARGIN, new_y=YPos.NEXT)
-        
+            self.pdf.multi_cell(
+                0,
+                6,
+                "No critical or high-severity vulnerabilities were detected during this scan.",
+                new_x=XPos.LMARGIN,
+                new_y=YPos.NEXT,
+            )
+
         self.pdf.ln(8)
 
     def _write_findings(self) -> None:
@@ -142,9 +163,13 @@ class PDFReportGenerator:
             self.pdf.set_x(18)
             self.pdf.multi_cell(0, 5, f"CWE: {finding.cwe}", new_x=XPos.LMARGIN, new_y=YPos.NEXT)
             self.pdf.set_x(18)
-            self.pdf.multi_cell(0, 5, f"Description: {finding.description}", new_x=XPos.LMARGIN, new_y=YPos.NEXT)
+            self.pdf.multi_cell(
+                0, 5, f"Description: {finding.description}", new_x=XPos.LMARGIN, new_y=YPos.NEXT
+            )
             self.pdf.set_x(18)
-            self.pdf.multi_cell(0, 5, f"Remediation: {finding.remediation}", new_x=XPos.LMARGIN, new_y=YPos.NEXT)
+            self.pdf.multi_cell(
+                0, 5, f"Remediation: {finding.remediation}", new_x=XPos.LMARGIN, new_y=YPos.NEXT
+            )
 
             mapped = self.compliance.get(finding.cwe, {})
             if mapped:
@@ -156,7 +181,13 @@ class PDFReportGenerator:
                     frameworks = list(mapped)
                 self.pdf.set_x(18)
                 self.pdf.set_font("helvetica", "I", 8)
-                self.pdf.multi_cell(0, 4, "Compliance: " + " | ".join(frameworks), new_x=XPos.LMARGIN, new_y=YPos.NEXT)
+                self.pdf.multi_cell(
+                    0,
+                    4,
+                    "Compliance: " + " | ".join(frameworks),
+                    new_x=XPos.LMARGIN,
+                    new_y=YPos.NEXT,
+                )
 
             self.pdf.ln(2)
 
@@ -167,17 +198,25 @@ class PDFReportGenerator:
         self.pdf.set_font("courier", "", 8)
 
         sha = self.anchor.get("sha256", "—")
-        self.pdf.multi_cell(0, 5, f"SHA-256 (findings):  {sha}", new_x=XPos.LMARGIN, new_y=YPos.NEXT)
+        self.pdf.multi_cell(
+            0, 5, f"SHA-256 (findings):  {sha}", new_x=XPos.LMARGIN, new_y=YPos.NEXT
+        )
 
         tsa_status = self.anchor.get("tsa_status", "skipped")
         if tsa_status == "ok":
             token = self.anchor.get("tsa_token", "")
             server = self.anchor.get("tsa_server", "")
-            self.pdf.multi_cell(0, 5, f"TSA Server:          {server}", new_x=XPos.LMARGIN, new_y=YPos.NEXT)
+            self.pdf.multi_cell(
+                0, 5, f"TSA Server:          {server}", new_x=XPos.LMARGIN, new_y=YPos.NEXT
+            )
             # Show only first 64 chars of the base64 token — the full token is in the DB
-            self.pdf.multi_cell(0, 5, f"RFC 3161 Token:      {token[:64]}…", new_x=XPos.LMARGIN, new_y=YPos.NEXT)
+            self.pdf.multi_cell(
+                0, 5, f"RFC 3161 Token:      {token[:64]}…", new_x=XPos.LMARGIN, new_y=YPos.NEXT
+            )
         else:
-            self.pdf.multi_cell(0, 5, f"RFC 3161 Status:     {tsa_status}", new_x=XPos.LMARGIN, new_y=YPos.NEXT)
+            self.pdf.multi_cell(
+                0, 5, f"RFC 3161 Status:     {tsa_status}", new_x=XPos.LMARGIN, new_y=YPos.NEXT
+            )
             if tsa_status == "unavailable":
                 self.pdf.set_font("helvetica", "I", 8)
                 self.pdf.multi_cell(
@@ -185,7 +224,8 @@ class PDFReportGenerator:
                     4,
                     "Note: TSA call skipped (air-gapped node). SHA-256 anchor is binding. "
                     "Trusted timestamp can be added post-scan via an online node.",
-                    new_x=XPos.LMARGIN, new_y=YPos.NEXT,
+                    new_x=XPos.LMARGIN,
+                    new_y=YPos.NEXT,
                 )
         self.pdf.ln(4)
 

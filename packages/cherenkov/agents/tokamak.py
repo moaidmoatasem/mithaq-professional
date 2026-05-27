@@ -119,6 +119,8 @@ class PoCPrimitive:
         "idor_basic": "resource_id + 1",
         # Open redirect: redirect to controlled domain
         "open_redirect": "https://probe.cherenkov.internal/callback",
+        # Drozer: dynamic Android analysis
+        "drozer_exploit": 'drozer console connect --command "run app.package.info -a $cherenkov_TARGET"',
     }
 
     @classmethod
@@ -369,8 +371,17 @@ class TokamakAgent:
         """
         if self.tokamak is None:
             raise EnvironmentError("No tokamak executor configured")
-        print(f"[TOKAMAK] Executing PoC for {technique} on {target}...")
-        return await self.tokamak.run_poc(target, technique, payload)
+
+        from ..core.tokamak import TOKAMAKProfile
+
+        profile = TOKAMAKProfile.STANDARD
+        if technique == "drozer_exploit":
+            profile = TOKAMAKProfile.DROZER
+        elif technique.startswith("mobile_"):
+            profile = TOKAMAKProfile.MOBILE
+
+        print(f"[TOKAMAK] Executing PoC for {technique} on {target} using {profile} profile...")
+        return await self.tokamak.run_poc(target, technique, payload, profile=profile)
 
     async def _kill_stalled_container(self) -> None:
         """

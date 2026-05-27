@@ -156,22 +156,28 @@ def scan(
             )
         )
     elif output == OutputFormat.sarif:
-        sarif_results = [
-            {
-                "ruleId": f.get("cwe", ""),
-                "message": {"text": f.get("title", "")},
-                "level": f.get("severity", "none").lower(),
-            }
+        from cherenkov.compliance.mapper import ComplianceMapper
+        from cherenkov.compliance.reports import SARIFExporter
+        from cherenkov.core.base_scanner import Finding, ScanResult, Severity
+
+        scan_findings = [
+            Finding(
+                title=f.get("title", "Unknown"),
+                severity=Severity(str(f.get("severity", "INFO")).upper()),
+                description=f.get("description", ""),
+                cwe=f.get("cwe", ""),
+                remediation=f.get("remediation", ""),
+            )
             for f in findings
         ]
-        sarif = {
-            "version": "2.1.0",
-            "$schema": "https://json.schemastore.org/sarif-2.1.0.json",
-            "runs": [
-                {"tool": {"driver": {"name": "cherenkov", "rules": []}}, "results": sarif_results}
-            ],
-        }
-        console.print_json(json.dumps(sarif))
+        result = ScanResult(
+            target=target,
+            scanner_name="Cherenkov CLI",
+            findings=scan_findings,
+            status="completed",
+        )
+        exporter = SARIFExporter(result, compliance_mapper=ComplianceMapper(), chk_id=chk_id)
+        console.print_json(json.dumps(exporter.generate()))
     else:
         t = Table(
             "Finding", "Severity", "CWE", "Scanner", title=f"Cherenkov Trace {chk_id} — {target}"

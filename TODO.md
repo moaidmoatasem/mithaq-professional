@@ -43,7 +43,7 @@
 
 - [x] #230 Remove cloud configs — MEISSNER enforcement (MERGED)
 - [x] #232 Root cleanup — remove stale root artifacts (MERGED)
-- [ ] #234 Harden .gitignore
+- [x] #234 Harden .gitignore
 - [/] #236 Scanner registry auto-discovery (PR in progress)
 - [/] #237 Scan result aggregation pipeline (PR in progress)
 - [ ] #238 Wire POST /api/v1/scan (BLOCKED — depends on #236 + #237)
@@ -58,7 +58,7 @@
 ### Dependency Order
 
 ```
-#230 ✅ → #234 → #236 → ┐
+#230 ✅ → #234 ✅ → #236 → ┐
                          ├→ #238 → #239
                   #237 → ┘
 #232 ✅ (independent)
@@ -79,14 +79,14 @@
 ### P1 — Scanner graduation (high)
 
 - [ ] #240 Graduate NetworkVulnerabilityScanner
-- [ ] #241 Verify XXE scanner contract
+- [x] #241 Verify XXE scanner contract
 - [x] #245 Verify SSRF scanner contract
 
 ### P2 — Scanner graduation (medium)
 
 - [ ] #242 Graduate CVE Database Scanner
-- [ ] #243 Graduate CI/CD Integration Scanner
-- [ ] #244 Graduate AttackChainDetector
+- [x] #243 Graduate CI/CD Integration Scanner
+- [x] #244 Graduate AttackChainDetector
 
 ---
 
@@ -112,7 +112,7 @@
 - [x] 6 PM automation workflows
 - [x] Agentic Handover Protocol (`docs/development/agentic-handover-protocol.md`)
 - [x] AgentStateStore (`agent_state/*.json`)
-- [ ] C2 Hub (Control Tower) — agent-agnostic coordination layer (this handover)
+- [x] C2 Hub (Control Tower) — agent-agnostic coordination layer (this handover)
 
 ## Technical Debt / Quick Wins
 

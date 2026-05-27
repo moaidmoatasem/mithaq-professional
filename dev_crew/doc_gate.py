@@ -43,13 +43,12 @@ class DocGate:
                 continue
             full_path = (self.repo_root / source).resolve()
             if not full_path.exists():
-                self.issues.append(
-                    f"MANIFEST_BROKEN: {entry.get('topic')} -> {source} (not found)"
-                )
+                self.issues.append(f"MANIFEST_BROKEN: {entry.get('topic')} -> {source} (not found)")
                 all_ok = False
 
         manifest_sources = {
-            e["source"] for e in manifest.get("entries", [])
+            e["source"]
+            for e in manifest.get("entries", [])
             if not e["source"].startswith("https://")
         }
         for md_file in (self.repo_root / "docs").rglob("*.md"):
@@ -88,9 +87,7 @@ class DocGate:
                     base = link.split("#")[0]
                     link_path = (path.parent / base).resolve()
                     if not link_path.exists():
-                        self.issues.append(
-                            f"BROKEN_LINK: {rel_path} -> {link} (base not found)"
-                        )
+                        self.issues.append(f"BROKEN_LINK: {rel_path} -> {link} (base not found)")
                         all_ok = False
                 else:
                     self.issues.append(f"BROKEN_LINK: {rel_path} -> {link} (not found)")
@@ -109,9 +106,7 @@ class DocGate:
         # Check: File name is kebab-case
         filename = path.name
         if not re.match(r"^[a-z0-9-]+\.md$", filename):
-            self.issues.append(
-                f"NAMING_INVALID: {rel_path} — file name must be kebab-case"
-            )
+            self.issues.append(f"NAMING_INVALID: {rel_path} — file name must be kebab-case")
             all_ok = False
 
         return all_ok

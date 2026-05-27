@@ -11,7 +11,7 @@ from typing import Any, Dict, Optional
 
 from openai import OpenAI
 
-from cherenkov.core.circuit_breaker import CircuitBreakerError, Meissner
+from cherenkov.core.circuit_breaker import Meissner
 
 # Setup logging with modern formatting
 logging.basicConfig(
@@ -72,7 +72,9 @@ class UnifiedLLMClient:
 
         self.breaker = Meissner(
             config=CircuitBreakerConfig(
-                failure_threshold=failure_threshold, recovery_timeout=cooldown_seconds
+                name=f"llm_{backend}",
+                failure_threshold=failure_threshold,
+                recovery_timeout=cooldown_seconds,
             )
         )
 
@@ -114,11 +116,9 @@ class UnifiedLLMClient:
         start_time = time.time()
 
         # Verify circuit status before proceeding
-        try:
-            self.breaker.check_state()
-        except CircuitBreakerError as breaker_err:
+        if not self.breaker.is_available():
             logger.warning(
-                f"Inference request blocked by circuit breaker. Attempting rule-based fallback: {breaker_err}"
+                "Inference request blocked by circuit breaker. Attempting rule-based fallback: Circuit open"
             )
             return self._fallback_triage(prompt)
 
@@ -127,13 +127,11 @@ class UnifiedLLMClient:
         if os.getenv("CI") == "true":
             logger.info("CI mode active: returning mock inference response")
             return "### [CI MOCK] Security report generated in mock mode."
-
         messages = [
             {"role": "system", "content": system_prompt},
             {"role": "user", "content": prompt},
         ]
 
-        last_error = None
         for attempt in range(1, self.max_retries + 1):
             try:
                 logger.debug(f"Sending inference request (Attempt {attempt}/{self.max_retries})")
@@ -154,7 +152,7 @@ class UnifiedLLMClient:
                 self.metrics.record(estimated_tokens, latency)
 
                 # Record success to circuit breaker
-                self.breaker.record_success()
+                self.breaker._record_success(latency)
 
                 logger.info(
                     f"Request successful | Latency: {latency:.2f}s | Est. Tokens: {estimated_tokens} | "
@@ -164,14 +162,13 @@ class UnifiedLLMClient:
 
             except Exception as e:
                 logger.warning(f"Inference attempt {attempt} failed: {str(e)}")
-                last_error = e
                 if attempt < self.max_retries:
                     # Exponential backoff: 1s, 2s, 4s...
                     sleep_time = 2 ** (attempt - 1)
                     time.sleep(sleep_time)
 
         # If we reach here, all retries failed. Record failure on circuit breaker.
-        self.breaker.record_failure()
+        self.breaker._record_failure(Exception("All attempts failed"), 0.0)
 
         logger.error(
             "All inference attempts failed. Endpoint unreachable or overloaded. Dropping to fallback triage."

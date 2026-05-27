@@ -84,3 +84,8 @@ build/
 
 # Local HLD preview (not source)
 .preview-hld/
+*.db
+*.sqlite
+*.wal
+*_receipt*.json
+*_trace*.json

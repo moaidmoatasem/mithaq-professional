@@ -17,11 +17,13 @@ class Severity(str, Enum):
 
 
 class Finding(BaseModel):
+    id: str = ""
     title: str
     severity: Severity
     description: str
     cwe: str
     remediation: str
+    scanner: str = ""
 
 
 class ScanResult(BaseModel):

@@ -103,7 +103,8 @@ class ValidationGate:
         try:
             rc, out, err = self._run(
                 [
-                    sys.executable, "-c",
+                    sys.executable,
+                    "-c",
                     f"import importlib,sys; "
                     f"sys.path.insert(0, 'packages'); "
                     f"m = importlib.import_module('candidates.generated_scanners.{self._module_name()}'); "

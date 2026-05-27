@@ -79,7 +79,7 @@
 ### P1 — Scanner graduation (high)
 
 - [ ] #240 Graduate NetworkVulnerabilityScanner
-- [ ] #241 Verify XXE scanner contract
+- [x] #241 Verify XXE scanner contract
 - [x] #245 Verify SSRF scanner contract
 
 ### P2 — Scanner graduation (medium)
@@ -112,7 +112,7 @@
 - [x] 6 PM automation workflows
 - [x] Agentic Handover Protocol (`docs/development/agentic-handover-protocol.md`)
 - [x] AgentStateStore (`agent_state/*.json`)
-- [ ] C2 Hub (Control Tower) — agent-agnostic coordination layer (this handover)
+- [x] C2 Hub (Control Tower) — agent-agnostic coordination layer (this handover)
 
 ## Technical Debt / Quick Wins
 

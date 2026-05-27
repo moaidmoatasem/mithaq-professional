@@ -742,7 +742,9 @@ async def v1_scan_report_sarif(scan_id: str) -> dict:
 
 
 @v1.get("/reports/{scan_id}/pdf")
-async def v1_scan_report_pdf(scan_id: str, language: str = "en", current_user: AuthUser = Depends(get_current_user)):
+async def v1_scan_report_pdf(
+    scan_id: str, language: str = "en", current_user: AuthUser = Depends(get_current_user)
+):
     """Download PDF security report. Supports language parameter for localization (e.g., 'ar' for Arabic)."""
 
     from cherenkov.compliance.mapper import ComplianceMapper
@@ -1062,15 +1064,6 @@ async def _run_scan(
 
     try:
         init_db()
-        # Deduplication Issue #435
-        unique_vulns = []
-        seen_cwe_type = set()
-        for vuln in vulnerabilities:
-            key = (vuln.get("cwe"), vuln.get("type"))
-            if key not in seen_cwe_type:
-                seen_cwe_type.add(key)
-                unique_vulns.append(vuln)
-        vulnerabilities = unique_vulns
 
         save_scan(
             scan_id,

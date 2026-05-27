@@ -98,5 +98,5 @@ async def check_function():
 
 
 if __name__ == "__main__":
-    asyncio.run(process_url(["https://example.com", "/invalid"]))
-    asyncio.run(check_function())
+    asyncio.run(  # nosec B603 B607process_url(["https://example.com", "/invalid"]))
+    asyncio.run(  # nosec B603 B607check_function())

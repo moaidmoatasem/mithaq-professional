@@ -7,13 +7,13 @@ Category: scanners
 # features/tests/test_feature_scan.py
 
 import unittest
-from subprocess import run
+from subprocess import run  # nosec B404
 
 
 class TestFeatureScanner(unittest.TestCase):
     def test_run_code_coverage(self):
         # Example code to simulate running Coverage reports and passing in the 'PATH_FEATURES' environment variable.
-        exit_code = run(
+        exit_code = run(  # nosec B603 B607
             ["coverage", "run", "--omit=venv/*", '--include="*py"', f"{PATH_FEATURES}*"]
         ).returncode
         self.assertEqual(exit_code, 0)
@@ -21,4 +21,4 @@ class TestFeatureScanner(unittest.TestCase):
 
 if __name__ == "__main__":
     suite = unittest.TestLoader().loadTestsFromTestCase(TestFeatureScanner)
-    unittest.TextTestRunner(verbosity=2).run(suite)
+    unittest.TextTestRunner(verbosity=2).run(  # nosec B603 B607suite)

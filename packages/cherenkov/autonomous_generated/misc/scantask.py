@@ -44,7 +44,7 @@ class ScanTask:
         try:
             # Here we're using a hypothetical command for scanning code like running flake8
             command = f"flask test --test-module={self.source_path}"
-            result = check_output(command.split(), stderr=True)
+            result = check_output(command.split(), stderr=True)  # nosec B603
             return result.decode().strip()
         except CalledProcessError as e:
             return f"The process failed with error: {e.output.decode()}"

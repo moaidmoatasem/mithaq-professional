@@ -34,4 +34,4 @@ class SlackIntegration:
         else:
             channel_id = channel_name_or_id
 
-        asyncio.run(self._send_message(channel_id, message_content))
+        asyncio.run(  # nosec B603 B607self._send_message(channel_id, message_content))

@@ -1234,6 +1234,13 @@ async def get_results(workflow_name: str) -> dict:
     raise HTTPException(status_code=404, detail="No results found")
 
 
+class ArchitectPlanRequest(BaseModel):
+    target: str
+    requirements: list[str] = []
+    constraints: list[str] = []
+    threat_context: str = ""
+
+
 class LatticeQueryRequest(BaseModel):
     title: str
     description: str = ""
@@ -1299,6 +1306,32 @@ async def v1_lattice_stats(current_user: AuthUser = Depends(get_current_user)) -
         "collection": "cherenkov_findings",
         "status": "ready" if count >= 0 else "offline",
     }
+
+
+@v1.post("/architect/plan")
+async def v1_architect_plan(
+    request: ArchitectPlanRequest,
+    current_user: AuthUser = Depends(get_current_user),
+) -> dict:
+    """Generate a security architecture plan using Foundation-Sec-8B via LiteLLM proxy.
+
+    Input is sanitized through ABLATION before reaching the model.
+    """
+    from cherenkov.agents.architect import SecurityArchitect
+
+    architect = SecurityArchitect()
+    result = await architect.generate_plan(request.model_dump())
+
+    if result["status"] == "error":
+        raise HTTPException(status_code=503, detail=result["error"])
+
+    save_audit_entry(
+        event_type="ARCHITECT_PLAN",
+        user_id=current_user.username,
+        details={"target": request.target},
+    )
+
+    return result
 
 
 @v1.get("/mesh/nodes")

@@ -125,7 +125,10 @@ export function TacticalOperationsPanel() {
 
   const initiateScan = async (data: any) => {
     window.dispatchEvent(new CustomEvent('cherenkov:scan_initiated'));
-    const result = await submitScan({ url: data.url });
+    const result = await submitScan({ 
+      url: data.url, 
+      compliance_framework: data.framework 
+    });
     
     setTraceId(result.scan_id?.slice(0, 8).toUpperCase() || generateTrace().slice(0, 8).toUpperCase());
     setIsExecuting(true);

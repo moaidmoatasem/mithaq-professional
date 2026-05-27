@@ -276,14 +276,14 @@ class SARIFExporter:
     def __init__(
         self,
         scan_result: ScanResult,
-        compliance_mapper: Optional[Any] = None,
         chk_id: str = "CHK-???",
     ):
         self.result = scan_result
-        self.mapper = compliance_mapper
         self.chk_id = chk_id
 
     def generate(self) -> dict:
+        from cherenkov.compliance.registry import ComplianceRegistry
+
         """Emit SARIF 2.1.0 JSON."""
         results = []
         rules = []
@@ -323,8 +323,10 @@ class SARIFExporter:
                 "trace_id": self.chk_id,
             }
 
-            if self.mapper and f.cwe:
-                properties["compliance"] = self.mapper.map_all(f.cwe)
+            if f.cwe:
+                mappings = ComplianceRegistry.get_cwe_mappings(f.cwe)
+                if mappings:
+                    properties["compliance"] = mappings
 
             results.append(
                 {

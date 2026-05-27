@@ -261,29 +261,30 @@ class SARIFExporter:
                 {
                     "ruleId": rule_id,
                     "level": level,
-                    "message": {"text": f.description or f.title},
-                    "properties": properties,
+                    "message": {"text": f.title},
                     "locations": [
                         {
                             "physicalLocation": {
-                                "artifactLocation": {"uri": self.result.target},
+                                "artifactLocation": {
+                                    "uri": self.result.target,
+                                },
                                 "region": {"startLine": 1},
                             }
                         }
                     ],
+                    "properties": properties,
                 }
             )
 
         return {
+            "$schema": "https://schemastore.org/schemas/json/sarif-2.1.0-rtm.5.json",
             "version": "2.1.0",
-            "$schema": "https://json.schemastore.org/sarif-2.1.0.json",
             "runs": [
                 {
                     "tool": {
                         "driver": {
                             "name": "Cherenkov Scanner",
                             "version": "1.1.0",
-                            "informationUri": "https://github.com/moaidmoatasem/cherenkov-professional",
                             "rules": rules,
                         }
                     },

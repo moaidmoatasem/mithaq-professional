@@ -37,3 +37,32 @@ __pycache__/
 *.sqlite-wal
 *.sqlite-shm
 forensic_traces/
+
+# ---------------------------------------------------------------------------
+# Per-agent domain boundaries (advisory; agents MUST self-honor)
+# ---------------------------------------------------------------------------
+# See AGENTS.md §1f for routing hints and §1e for the claim-ticket protocol
+# that resolves ownership when these denies would otherwise block legitimate
+# cross-domain work.
+
+[antigravity]
+# Frontend-only. No Python edits from the web IDE.
+allow = packages/cherenkov/web/**
+deny  = **
+
+[jules]
+# API, scanners, tests, CI. Architecture and frontend are off-limits.
+deny = packages/cherenkov/web/**
+deny = docs/architecture/**
+deny = .github/workflows/**
+
+[claude-code]
+# Architecture, agent layer, multi-file refactors. Frontend off-limits.
+# Workflow changes require an explicit task and Moaid review.
+deny = packages/cherenkov/web/**
+deny = .github/workflows/**
+
+[autonomous-pipeline]
+# Scanner factory output only.
+allow = packages/cherenkov/autonomous_generated/scanners/**
+deny  = **

@@ -44,12 +44,13 @@ def _next_chk_id() -> str:
 
 def _write_pdf(chk_id: str, target: str, findings: list[dict], anchor: dict) -> Path:
     """Generate a signed PDF report and return its path."""
-    from cherenkov.compliance.mapper import ComplianceMapper
+    from cherenkov.compliance.registry import ComplianceRegistry
     from cherenkov.compliance.reports import PDFReportGenerator
     from cherenkov.core.base_scanner import Finding, ScanResult, Severity
 
-    mapper = ComplianceMapper()
-    compliance_data = {f["cwe"]: mapper.map_all(f["cwe"]) for f in findings if f.get("cwe")}
+    compliance_data = {
+        f["cwe"]: ComplianceRegistry.get_cwe_mappings(f["cwe"]) for f in findings if f.get("cwe")
+    }
 
     scan_findings = []
     for f in findings:
@@ -156,7 +157,6 @@ def scan(
             )
         )
     elif output == OutputFormat.sarif:
-        from cherenkov.compliance.mapper import ComplianceMapper
         from cherenkov.compliance.reports import SARIFExporter
         from cherenkov.core.base_scanner import Finding, ScanResult, Severity
 
@@ -176,7 +176,7 @@ def scan(
             findings=scan_findings,
             status="completed",
         )
-        exporter = SARIFExporter(result, compliance_mapper=ComplianceMapper(), chk_id=chk_id)
+        exporter = SARIFExporter(result, chk_id=chk_id)
         console.print_json(json.dumps(exporter.generate()))
     else:
         t = Table(

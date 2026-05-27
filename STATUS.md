@@ -53,6 +53,7 @@
 | #234 | Harden .gitignore | 🟠 high | ✅ Merged (`fix/234-gitignore`) |
 | #236 | Scanner registry auto-discovery | 🟠 high | In progress (PR exists) |
 | #237 | Scan result aggregation pipeline | 🟠 high | In progress |
+| #243 | Graduate CI/CD Integration Scanner | 🟠 high | ✅ Merged |
 | #238 | Wire POST /api/v1/scan (depends #236, #237) | 🟠 high | Blocked |
 | #239 | CI matrix 146+ tests pass | 🟠 high | Open |
 

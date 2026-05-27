@@ -752,19 +752,20 @@ async def v1_compliance_pdf(
     current_user: AuthUser = Depends(get_current_user),
 ):
     """Download a signed compliance PDF for a specific framework."""
-    fw_lower = fw.lower()
-    if fw_lower not in ComplianceRegistry.list_framework_ids():
+    from cherenkov.compliance.pdf_renderer import CompliancePDFRenderer
+    from cherenkov.compliance.registry import ComplianceRegistry
     from cherenkov.core.base_scanner import Finding, ScanResult, Severity
     from cherenkov.core.storage.database import get_scan
+
+    fw_lower = fw.lower()
+    if fw_lower not in ComplianceRegistry.list_framework_ids():
+        raise HTTPException(status_code=400, detail=f"Unsupported framework: {fw}")
 
     scan = get_scan(scan_id)
     if not scan:
         raise HTTPException(status_code=404, detail="Scan not found")
 
     fw_upper = fw.upper()
-    fw_lower = fw.lower()
-    if fw_lower not in ComplianceRegistry.list_framework_ids():
-        raise HTTPException(status_code=400, detail=f"Unsupported framework: {fw}")
 
     findings = []
     for f in scan.get("findings", []):
@@ -796,7 +797,7 @@ async def v1_compliance_pdf(
     pdf_bytes, anchor = renderer.generate()
 
     return Response(
-        content=pdf_bytes,
+        content=bytes(pdf_bytes),
         media_type="application/pdf",
         headers={
             "Content-Disposition": f"attachment; filename=cherenkov_{fw_upper}_{scan_id}.pdf",

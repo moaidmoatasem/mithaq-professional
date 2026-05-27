@@ -1,14 +1,14 @@
 # CHERENKOV Framework — Current Status
 
-> Last updated: 2026-05-24 by Antigravity (C2 Hub handover)
+> Last updated: 2026-05-27 by Jules (Project Alignment)
 
 ## OPERATIONAL
 
-**Build:** 1.0.0-rc2 (STABLE)
-**Tests:** 183/183 pass (unit + integration, excluding `ai_generated`)
+**Build:** 1.1.0 (STABLE)
+**Tests:** 222/222 pass (unit + integration, excluding `ai_generated`)
 **Security:** Hardened (MEISSNER zero-egress enforced)
 **Coverage:** fail_under = 25% (see `pyproject.toml`)
-**Current Phase:** Phase 2 — Swarm Optimization (v1.1.0), Sprint 2
+**Current Phase:** Phase 2 — Swarm Optimization (v1.1.0), Sprint 2 — COMPLETED
 
 ---
 
@@ -25,11 +25,12 @@
 - [x] Memory-Efficient Parallel Execution
 - [x] Security Scanner Suite (header, unified, HTTP methods, TLS detection)
 - [x] CLI Interface (typer-based)
-- [x] Report Generation
+- [x] Report Generation (PDF/SARIF)
 - [x] Batch Processing
 - [x] GitHub Project Management — Fully operational
 - [x] Agentic Handover Protocol — Documented in `docs/development/agentic-handover-protocol.md`
 - [x] AgentStateStore — Serialized state in `agent_state/`
+- [x] C2 Hub (Control Tower) — Agent-agnostic coordination layer implemented
 
 ### GitHub PM Infrastructure — LIVE
 
@@ -43,36 +44,40 @@
 
 ---
 
-### Active Sprint — Phase 2 (v1.1.0)
+### Phase 2 (v1.1.0) — ✅ COMPLETE
 
-**P0 — Critical blockers (do first):**
+**P0 — Critical blockers:**
 
 | Issue | Description | Priority | Status |
 |-------|-------------|----------|--------|
-| #230 | Remove cloud configs (MEISSNER) | 🔴 critical | ✅ Merged (`fix/230-meissner-cloud-configs`) |
-| #234 | Harden .gitignore | 🟠 high | ✅ Merged (`fix/234-gitignore`) |
-| #236 | Scanner registry auto-discovery | 🟠 high | In progress (PR exists) |
-| #237 | Scan result aggregation pipeline | 🟠 high | In progress |
+| #230 | Remove cloud configs (MEISSNER) | 🔴 critical | ✅ Merged |
+| #234 | Harden .gitignore | 🟠 high | ✅ Merged |
+| #236 | Scanner registry auto-discovery | 🟠 high | ✅ Merged |
+| #237 | Scan result aggregation pipeline | 🟠 high | ✅ Merged |
 | #243 | Graduate CI/CD Integration Scanner | 🟠 high | ✅ Merged |
-| #238 | Wire POST /api/v1/scan (depends #236, #237) | 🟠 high | Blocked |
-| #239 | CI matrix 146+ tests pass | 🟠 high | Open |
+| #238 | Wire POST /api/v1/scan | 🟠 high | ✅ Merged |
+| #239 | CI matrix 222+ tests pass | 🟠 high | ✅ COMPLETE |
 
 **P1 — Remaining Phase 2:**
 
 | Issue | Description | Priority | Status |
 |-------|-------------|----------|--------|
-| #231 | GitHub repo metadata | 🟡 medium | Open |
-| #232 | Root cleanup | 🟡 medium | ✅ Merged (`fix/232-root-cleanup`) |
-| #233 | Align GEMINI.md | 🟡 medium | Open |
-| #235 | Canonicalize CHANGELOG | 🔵 low | Open |
+| #231 | GitHub repo metadata | 🟡 medium | ✅ COMPLETE |
+| #232 | Root cleanup | 🟡 medium | ✅ Merged |
+| #233 | Align GEMINI.md | 🟡 medium | ✅ COMPLETE |
+| #235 | Canonicalize CHANGELOG | 🔵 low | ✅ COMPLETE |
 
-**Phase 3 (v1.5.0) — Next, after all Phase 2 P0 items:**
+**Phase 3 (v1.5.0) — 🔄 IN PROGRESS:**
 
-| Issue | Description | Priority |
-|-------|-------------|----------|
-| #246 | TOKAMAK SQLite WAL logger | 🔴 critical |
-| #247 | Wire Cherenkov Trace signing | 🔴 critical |
-| #240-#245 | Scanner graduation batch | 🟠-🟡 |
+| Issue | Description | Priority | Status |
+|-------|-------------|----------|--------|
+| #246 | TOKAMAK SQLite WAL logger | 🔴 critical | ✅ Merged |
+| #247 | Wire Cherenkov Trace signing | 🔴 critical | ✅ Merged |
+| #240 | Graduate NetworkVulnerabilityScanner | 🟠 high | ✅ Merged |
+| #241 | Verify XXE scanner contract | 🟠 high | ✅ Merged |
+| #245 | Verify SSRF scanner contract | 🟠 high | ✅ Merged |
+| #242 | Graduate CVE Database Scanner | 🟡 medium | ✅ Merged |
+| #244 | Graduate AttackChainDetector | 🟡 medium | ✅ Merged |
 
 ---
 
@@ -80,10 +85,10 @@
 
 ```
 packages/cherenkov/
-├── core/             — BaseScanner, Registry, Engine, Events, Exceptions, Storage
+├── core/             — BaseScanner, Registry, Engine, Events, Exceptions, Storage, C2 Hub
 ├── scanners/         — header_scanner, unified_scanner, scan_runner, etc.
 ├── orchestration/    — orchestration_api, AgentRegistry, WorkflowScheduler
-├── agents/           — architect_agent, developer_agent, tester_agent
+├── agents/           — architect_agent, developer_agent, tester_agent, Tokamak
 ├── crews/            — autonomous_developer_crew, security_crew
 ├── api/              — FastAPI REST server + WebSocket
 ├── cli/              — Typer CLI
@@ -98,19 +103,4 @@ packages/cherenkov/
 
 ---
 
-### Open PRs
-
-| PR | Branch | Status |
-|----|--------|--------|
-| #298 | (conflict resolution) | Merged/resolved |
-| #300 | (handover protocol) | Open — `docs/development/agentic-handover-protocol.md` |
-| #351 | `pr-351` | Has merge conflict in `database.py` |
-
----
-
-**Status:** OPERATIONAL — C2 Hub coordination layer active
-abase.py` |
-
----
-
-**Status:** READY FOR DEVELOPMENT — C2 Hub handover in progress
+**Status:** OPERATIONAL — Phase 2 complete, Phase 3 in progress.

@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { API_BASE } from '@/src/lib/api';
+import { API_BASE, getAuthHeaders } from '@/src/lib/api';
 import type { FindingApproval } from '@/src/lib/api';
 
 export function useHealth(intervalMs = 5000) {
@@ -10,7 +10,7 @@ export function useHealth(intervalMs = 5000) {
     let mounted = true;
     const fetchHealth = async () => {
       try {
-        const res = await fetch(`${API_BASE}/health`);
+        const res = await fetch(`${API_BASE}/health`, { headers: getAuthHeaders() });
         if (!res.ok) throw new Error('Backend offline');
         const json = await res.json();
         if (mounted) {
@@ -43,7 +43,7 @@ export function useAblationStats(intervalMs = 10000) {
     let mounted = true;
     const fetchStats = async () => {
       try {
-        const res = await fetch(`${API_BASE}/ablation/stats`);
+        const res = await fetch(`${API_BASE}/ablation/stats`, { headers: getAuthHeaders() });
         if (!res.ok) throw new Error('Backend offline');
         const json = await res.json();
         if (mounted) {
@@ -76,7 +76,7 @@ export function useQueueDepth(intervalMs = 5000) {
     let mounted = true;
     const fetchHealth = async () => {
       try {
-        const res = await fetch(`${API_BASE}/health`);
+        const res = await fetch(`${API_BASE}/health`, { headers: getAuthHeaders() });
         if (!res.ok) return;
         const json = await res.json();
         if (mounted) {
@@ -112,7 +112,7 @@ export function usePendingApprovals(intervalMs = 5000) {
     let mounted = true;
     const fetchApprovals = async () => {
       try {
-        const res = await fetch(`${API_BASE}/findings/pending`);
+        const res = await fetch(`${API_BASE}/findings/pending`, { headers: getAuthHeaders() });
         if (!res.ok) throw new Error('Failed to fetch pending approvals');
         const json = await res.json();
         if (mounted) {

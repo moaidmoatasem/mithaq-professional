@@ -33,15 +33,15 @@ jobs:
 
       - name: Install dependencies
         run: |
-          pip install mkdocs-material mkdocs markdownlint
+          pip install mkdocs-material mkdocs pymarkdownlnt
 
       - name: Run Doc Gate validation
         run: |
           python dev_crew/doc_gate.py validate --manifest docs/manifest.json
 
-      - name: Run markdownlint
+      - name: Run pymarkdownlnt
         run: |
-          markdownlint docs/ --ignore docs/assets/ --ignore node_modules 2>&1 || true
+          pymarkdownlnt scan docs/ || true
 
       - name: Verify MkDocs build
         run: |

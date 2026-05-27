@@ -55,6 +55,11 @@ from cherenkov.api.middleware.auth import (
 from cherenkov.api.middleware.auth import (
     User as AuthUser,
 )
+from cherenkov.ai.model_selector import (
+    detect_hardware,
+    generate_litellm_config,
+    recommend_models,
+)
 from cherenkov.api.routers import ai_orchestrator, c2_hub
 from cherenkov.core.storage.database import (
     _DB_PATH,
@@ -842,6 +847,35 @@ async def v1_get_process_report(process_id: str) -> dict:
     if "error" in report:
         raise HTTPException(status_code=404, detail=report["error"])
     return report
+
+
+# ── Model endpoints ──────────────────────────────────────────────────────
+
+
+@v1.get("/models/recommend")
+async def v1_models_recommend(current_user: AuthUser = Depends(get_current_user)) -> dict:
+    """Detect hardware and recommend the best Ollama models for this machine."""
+    hw = detect_hardware()
+    return recommend_models(hw)
+
+
+@v1.get("/models/litellm-config")
+async def v1_models_litellm_config(current_user: AuthUser = Depends(get_current_user)) -> dict:
+    """Generate a LiteLLM proxy config YAML for the recommended models."""
+    recs = recommend_models()
+    config = generate_litellm_config(recs)
+    return {"config": config, "apply_command": "bash ~/start-litellm.sh"}
+
+
+@v1.get("/models/available")
+async def v1_models_available(current_user: AuthUser = Depends(get_current_user)) -> dict:
+    """List models currently available in the local Ollama instance."""
+    try:
+        async with httpx.AsyncClient(timeout=5) as client:
+            resp = await client.get("http://localhost:11434/api/tags")
+            return resp.json()
+    except Exception:
+        return {"models": [], "error": "Ollama not reachable"}
 
 
 @v1.get("/findings/pending")

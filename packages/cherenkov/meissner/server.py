@@ -166,6 +166,7 @@ async def post_run_scan(payload: Dict[str, str]):
 
         # 1. Audit Secrets Stage (Stage 3 Gate check integration)
         from cherenkov.core.ablation.sanitizer import Sanitizer
+
         res = Sanitizer().sanitize(code_to_scan)
         sanitized_code = res.sanitized_text
         secrets_redacted = res.sanitization_applied

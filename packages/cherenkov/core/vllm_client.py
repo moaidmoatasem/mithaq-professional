@@ -123,6 +123,7 @@ class UnifiedLLMClient:
             return self._fallback_triage(prompt)
 
         import os
+
         if os.getenv("CI") == "true":
             logger.info("CI mode active: returning mock inference response")
             return "### [CI MOCK] Security report generated in mock mode."

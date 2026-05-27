@@ -21,7 +21,7 @@ DEFAULT_CVES = [
         "cwe": "CWE-20",
         "description": "runc allows escape to the host namespace due to file descriptor leak.",
         "remediation": "Upgrade runc to version 1.1.12 or later.",
-        "affected_component": "runc"
+        "affected_component": "runc",
     },
     {
         "cve_id": "CVE-2024-3094",
@@ -30,7 +30,7 @@ DEFAULT_CVES = [
         "cwe": "CWE-506",
         "description": "Malicious code was discovered in xz-utils that allows unauthorized SSH access.",
         "remediation": "Downgrade xz-utils to 5.4.6 or upgrade to non-backdoored version.",
-        "affected_component": "xz-utils"
+        "affected_component": "xz-utils",
     },
     {
         "cve_id": "CVE-2023-38606",
@@ -39,7 +39,7 @@ DEFAULT_CVES = [
         "cwe": "CWE-269",
         "description": "A state management vulnerability in Kernel allowing unauthorized modification of hardware state.",
         "remediation": "Apply latest security updates from Apple.",
-        "affected_component": "ios"
+        "affected_component": "ios",
     },
     {
         "cve_id": "CVE-2023-44487",
@@ -48,7 +48,7 @@ DEFAULT_CVES = [
         "cwe": "CWE-400",
         "description": "HTTP/2 protocol allows rapid stream resets leading to denial of service (DDoS).",
         "remediation": "Apply HTTP/2 rate limiting or disable HTTP/2.",
-        "affected_component": "http2"
+        "affected_component": "http2",
     },
     {
         "cve_id": "CVE-2021-44228",
@@ -57,8 +57,8 @@ DEFAULT_CVES = [
         "cwe": "CWE-502",
         "description": "Apache Log4j2 JNDI features do not protect against attacker controlled LDAP and other JNDI related endpoints.",
         "remediation": "Upgrade Log4j2 to version 2.15.0 or later.",
-        "affected_component": "log4j"
-    }
+        "affected_component": "log4j",
+    },
 ]
 
 
@@ -71,7 +71,8 @@ class CVEDatabaseScanner(BaseScanner):
     def __init__(self, name: str = "", description: str = ""):
         super().__init__(
             name=name or "CVEDatabaseScanner",
-            description=description or "Local-only CVE database scanner verifying against bundled CVE feed."
+            description=description
+            or "Local-only CVE database scanner verifying against bundled CVE feed.",
         )
         self.cves: List[Dict] = []
         self._load_cve_database()
@@ -85,16 +86,21 @@ class CVEDatabaseScanner(BaseScanner):
                     self.cves = json.load(f)
                 logger.info("Loaded %d CVEs from local feed.", len(self.cves))
             else:
-                logger.warning("Local cves.json not found at %s. Falling back to embedded default list.", db_path)
+                logger.warning(
+                    "Local cves.json not found at %s. Falling back to embedded default list.",
+                    db_path,
+                )
                 self.cves = DEFAULT_CVES.copy()
         except Exception as e:
-            logger.error("Failed to load local cves.json: %s. Falling back to embedded default list.", e)
+            logger.error(
+                "Failed to load local cves.json: %s. Falling back to embedded default list.", e
+            )
             self.cves = DEFAULT_CVES.copy()
 
     def get_vulnerabilities(self, max_results: int = 50, severity: str = None) -> List[Dict]:
         """
         Legacy-compatible method to retrieve vulnerabilities from the local database.
-        
+
         :param max_results: (int) Maximum number of items to retrieve.
         :param severity: (str) If specified, filters results by severity level.
         :returns List[Dict]: List of matching CVE entries.
@@ -113,7 +119,7 @@ class CVEDatabaseScanner(BaseScanner):
     async def scan(self, target: str, timeout: float = 10.0) -> ScanResult:
         """
         Execute the CVE matching scan against a target components string, host, or URL.
-        
+
         Checks if the target or target hostname contains names of vulnerable components.
         """
         start_time = time.time()
@@ -156,7 +162,7 @@ class CVEDatabaseScanner(BaseScanner):
                             severity=severity_val,
                             description=cve.get("description", "No description available."),
                             cwe=cve.get("cwe", "CWE-999"),
-                            remediation=cve.get("remediation", "Update component immediately.")
+                            remediation=cve.get("remediation", "Update component immediately."),
                         )
                     )
         except Exception as e:
@@ -170,7 +176,7 @@ class CVEDatabaseScanner(BaseScanner):
             scanner_name=self.name,
             findings=findings,
             duration_ms=duration_ms,
-            status=status
+            status=status,
         )
 
     def __str__(self) -> str:

@@ -11,11 +11,11 @@ interface NewScanFormProps {
 }
 
 export function NewScanForm({ onSubmit, onClose, isOpen }: NewScanFormProps) {
-  const [target, setTarget] = useState('https://target.example.com');
+  const [url, setUrl] = useState('https://target.example.com');
   const [profile, setProfile] = useState('web');
   const [rps, setRps] = useState(5);
   const [burhan, setBurhan] = useState(true);
-  const [compliance, setCompliance] = useState('egyfincsf');
+  const [framework, setFramework] = useState('egyfincsf');
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
 
@@ -25,11 +25,11 @@ export function NewScanForm({ onSubmit, onClose, isOpen }: NewScanFormProps) {
     setError(null);
     try {
       await onSubmit({
-        target,
+        url,
         profile,
         rps,
         burhan,
-        compliance_framework: compliance
+        framework
       });
       onClose();
     } catch (err) {
@@ -75,8 +75,9 @@ export function NewScanForm({ onSubmit, onClose, isOpen }: NewScanFormProps) {
                 <label className="text-[10px] font-mono text-fg2 uppercase tracking-widest">Target URL</label>
                 <input 
                   type="text" 
-                  value={target}
-                  onChange={(e) => setTarget(e.target.value)}
+                  name="url"
+                  value={url}
+                  onChange={(e) => setUrl(e.target.value)}
                   className="w-full bg-black/40 border border-white/10 p-2 text-xs font-mono text-white outline-none focus:border-hud-cyan transition-colors"
                   required
                 />
@@ -103,14 +104,15 @@ export function NewScanForm({ onSubmit, onClose, isOpen }: NewScanFormProps) {
                 <div className="space-y-1">
                   <label className="text-[10px] font-mono text-fg2 uppercase tracking-widest">Compliance</label>
                   <select 
-                    value={compliance}
-                    onChange={(e) => setCompliance(e.target.value)}
+                    name="framework"
+                    value={framework}
+                    onChange={(e) => setFramework(e.target.value)}
                     className="w-full bg-black/40 border border-white/10 p-2 text-xs font-mono text-fg1 outline-none focus:border-hud-cyan transition-colors appearance-none"
                   >
-                    <option value="egyfincsf">EGY-FIN CSF</option>
-                    <option value="samacsf">SAMA CSF</option>
-                    <option value="dora">DORA</option>
-                    <option value="owasp">OWASP Top 10</option>
+                    <option value="egyfincsf">EGY-FIN CSF (Egypt)</option>
+                    <option value="samacsf">SAMA CSF (Saudi)</option>
+                    <option value="owasp2021">OWASP Top 10</option>
+                    <option value="none">No Framework</option>
                   </select>
                 </div>
               </div>

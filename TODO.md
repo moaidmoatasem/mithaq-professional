@@ -43,7 +43,7 @@
 
 - [x] #230 Remove cloud configs — MEISSNER enforcement (MERGED)
 - [x] #232 Root cleanup — remove stale root artifacts (MERGED)
-- [ ] #234 Harden .gitignore
+- [x] #234 Harden .gitignore
 - [/] #236 Scanner registry auto-discovery (PR in progress)
 - [/] #237 Scan result aggregation pipeline (PR in progress)
 - [ ] #238 Wire POST /api/v1/scan (BLOCKED — depends on #236 + #237)
@@ -58,7 +58,7 @@
 ### Dependency Order
 
 ```
-#230 ✅ → #234 → #236 → ┐
+#230 ✅ → #234 ✅ → #236 → ┐
                          ├→ #238 → #239
                   #237 → ┘
 #232 ✅ (independent)
@@ -86,7 +86,7 @@
 
 - [ ] #242 Graduate CVE Database Scanner
 - [ ] #243 Graduate CI/CD Integration Scanner
-- [ ] #244 Graduate AttackChainDetector
+- [x] #244 Graduate AttackChainDetector
 
 ---
 

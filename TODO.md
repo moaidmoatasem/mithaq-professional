@@ -86,7 +86,7 @@
 
 - [ ] #242 Graduate CVE Database Scanner
 - [ ] #243 Graduate CI/CD Integration Scanner
-- [ ] #244 Graduate AttackChainDetector
+- [x] #244 Graduate AttackChainDetector
 
 ---
 

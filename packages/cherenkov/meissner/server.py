@@ -1,3 +1,4 @@
+
 #!/usr/bin/env python3
 """
 CHERENKOV — Sovereign Security API & WebSocket Server
@@ -7,6 +8,7 @@ and core dynamic scanning triggers into a high-concurrency web gateway.
 
 import json
 import logging
+import os
 import sys
 from pathlib import Path
 from typing import Dict, List

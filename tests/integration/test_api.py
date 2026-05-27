@@ -176,3 +176,34 @@ def test_error_cases(client):
     # 404: Not found
     response_404 = client.get("/api/v1/non_existent_route")
     assert response_404.status_code == 404
+
+def test_architect_plan_post(client, monkeypatch):
+    # Mock SecurityArchitect.generate_plan to return a dummy result
+    async def mock_generate_plan(self, context):
+        return {
+            "status": "success",
+            "plan": "Generated secure plan",
+            "model": "architect"
+        }
+
+    from cherenkov.agents.architect import SecurityArchitect
+    monkeypatch.setattr(SecurityArchitect, "generate_plan", mock_generate_plan)
+
+    # Need authentication for v1_architect_plan
+    auth_data = {"username": "admin", "password": "admin"}
+    token_response = client.post("/api/v1/auth/token", json=auth_data)
+    token = token_response.json()["access_token"]
+    headers = {"Authorization": f"Bearer {token}"}
+
+    payload = {
+        "target": "mobile app",
+        "requirements": ["encryption"],
+        "constraints": ["low latency"],
+        "threat_context": "DDoS attacks"
+    }
+    response = client.post("/api/v1/architect/plan", json=payload, headers=headers)
+
+    assert response.status_code == 200
+    data = response.json()
+    assert data["status"] == "success"
+    assert data["plan"] == "Generated secure plan"

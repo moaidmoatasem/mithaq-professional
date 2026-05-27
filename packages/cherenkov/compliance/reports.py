@@ -1,8 +1,8 @@
 """Compliance Report Generation (PDF/SARIF)"""
 
+import re
 from datetime import datetime, timezone
 from typing import Any, Dict, List, Optional
-import re
 
 from fpdf import FPDF
 from fpdf.enums import XPos, YPos

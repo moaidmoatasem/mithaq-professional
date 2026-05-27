@@ -2,11 +2,10 @@
 C2 Hub Router - API endpoints for agent coordination and control tower.
 """
 
-from typing import Any, Dict, List, Optional
-from fastapi import APIRouter, Depends, HTTPException, status
+from fastapi import APIRouter, Depends, HTTPException
 from pydantic import BaseModel
 
-from cherenkov.api.middleware.auth import Role, RoleChecker, get_current_user, User
+from cherenkov.api.middleware.auth import Role, RoleChecker, User, get_current_user
 from cherenkov.core.c2_hub import default_c2_hub
 
 router = APIRouter(prefix="/c2", tags=["C2 Hub"])

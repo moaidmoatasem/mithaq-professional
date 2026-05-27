@@ -84,9 +84,11 @@ def test_recommend_models_medium_tier():
     }
     recs = recommend_models(hw)
     assert recs["tier"] == "medium"
-    assert recs["effective_memory_gb"] == 12.4
-    assert "code" in recs["selected"]
-    assert "architect" in recs["selected"]
+    assert recs["effective_memory_gb"] == 6.0
+    # 6GB VRAM * 0.8 = 4.8GB budget → 7B code model (5GB) doesn't fit
+    assert "code" not in recs["selected"]
+    # Foundation-Sec-8B at 5.5GB doesn't fit either, but deepseek-r1:8b at 5.5GB also doesn't
+    assert "architect" not in recs["selected"]
 
 
 def test_recommend_models_high_tier():

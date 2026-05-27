@@ -112,7 +112,7 @@
 - [x] 6 PM automation workflows
 - [x] Agentic Handover Protocol (`docs/development/agentic-handover-protocol.md`)
 - [x] AgentStateStore (`agent_state/*.json`)
-- [ ] C2 Hub (Control Tower) — agent-agnostic coordination layer (this handover)
+- [x] C2 Hub (Control Tower) — agent-agnostic coordination layer (this handover)
 
 ## Technical Debt / Quick Wins
 

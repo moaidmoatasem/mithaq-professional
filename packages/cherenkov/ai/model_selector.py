@@ -124,6 +124,7 @@ def detect_hardware() -> dict:
     except Exception:
         pass
     effective = hw["vram_gb"] + (hw["ram_gb"] * 0.4) if hw["has_gpu"] else hw["ram_gb"] * 0.4
+    hw["effective_memory_gb"] = effective
     if effective >= 10:
         hw["tier"] = "high"
     elif effective >= 5:

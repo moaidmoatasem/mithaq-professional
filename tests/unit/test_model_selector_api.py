@@ -1,24 +1,7 @@
-import sys
-from unittest.mock import MagicMock
-
-class MockPsutil:
-    def __init__(self):
-        self.__spec__ = MagicMock()
-    def cpu_count(self, logical=False):
-        return 8
-    def virtual_memory(self):
-        class Mem:
-            total = 16e9
-        return Mem()
-sys.modules['psutil'] = MockPsutil()
-
-
-
-
 """Unit tests for model selector API endpoints."""
 
 import os
-from unittest.mock import patch
+from unittest.mock import MagicMock, patch
 
 import pytest
 from cherenkov.api.main import app
@@ -117,7 +100,16 @@ class TestModelLiteLLMConfig:
 
 class TestModelAvailable:
     def test_ollama_offline(self, client):
-        resp = client.get("/api/v1/models/available")
+        mock_client = MagicMock()
+        mock_client.__aenter__.return_value = mock_client
+        
+        async def mock_get(*args, **kwargs):
+            raise Exception("Connection refused")
+            
+        mock_client.get.side_effect = mock_get
+        
+        with patch("cherenkov.api.main.httpx.AsyncClient", return_value=mock_client):
+            resp = client.get("/api/v1/models/available")
         assert resp.status_code == 200
         data = resp.json()
         assert data == {"models": [], "error": "Ollama not reachable"}

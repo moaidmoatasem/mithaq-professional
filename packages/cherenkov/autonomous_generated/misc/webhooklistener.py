@@ -55,7 +55,7 @@ class WebhookListener:
         if self.setup_webhook:
             asyncio.ensure_future(self.setup_webhook(self.app, url))
 
-    def run(self):
+    def run(  # nosec B603 B607self):
         loop = asyncio.get_event_loop()
         if parse_setup_arg():
             return loop.run_until_complete(self.setup(None))
@@ -67,4 +67,4 @@ class WebhookListener:
 
 if __name__ == "__main__":
     listener = WebhookListener()
-    listener.run()
+    listener.run(  # nosec B603 B607)

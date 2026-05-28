@@ -42,8 +42,19 @@ export function TacticalOperationsPanel() {
   const [complianceReport, setComplianceReport] = useState<any>(null);
   const [complianceMap, setComplianceMap] = useState<Record<string, string[]>>({});
   const [scanFindings, setScanFindings] = useState<any[]>([]);
+  const scanIntervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
 
   const { lastEvent, connected } = useLiveEvents();
+
+  // Cleanup scan simulation interval on unmount
+  useEffect(() => {
+    return () => {
+      if (scanIntervalRef.current) {
+        clearInterval(scanIntervalRef.current);
+        scanIntervalRef.current = null;
+      }
+    };
+  }, []);
 
   useEffect(() => {
     const complianceHandler = (e: Event) => {
@@ -125,7 +136,10 @@ export function TacticalOperationsPanel() {
 
   const initiateScan = async (data: any) => {
     window.dispatchEvent(new CustomEvent('cherenkov:scan_initiated'));
-    const result = await submitScan({ url: data.url });
+    const result = await submitScan({ 
+      url: data.url, 
+      compliance_framework: data.framework 
+    });
     
     setTraceId(result.scan_id?.slice(0, 8).toUpperCase() || generateTrace().slice(0, 8).toUpperCase());
     setIsExecuting(true);
@@ -143,11 +157,12 @@ export function TacticalOperationsPanel() {
     // Simulate progress since the scan already completed synchronously.
     // In a full streaming implementation this would come via WebSocket events.
     let progress = 0;
-    const interval = setInterval(() => {
+    scanIntervalRef.current = setInterval(() => {
       progress += Math.random() * 20 + 10;
       if (progress >= 100) {
         progress = 100;
-        clearInterval(interval);
+        clearInterval(scanIntervalRef.current!);
+        scanIntervalRef.current = null;
         setIsExecuting(false);
         setActiveStep(5);
         setContainmentState('TRACE_SIGNED');

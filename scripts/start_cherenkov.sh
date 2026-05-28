@@ -33,8 +33,10 @@ if [ -f "deploy/dvwa-compose.yml" ]; then
 fi
 
 info "Starting Docker services (Qdrant, Ollama)..."
+# shellcheck disable=SC2086
 docker compose $COMPOSE_FILES up -d qdrant ollama 2>/dev/null || warn "Docker not available — run services manually"
 if echo "$COMPOSE_FILES" | grep -q dvwa; then
+  # shellcheck disable=SC2086
   docker compose $COMPOSE_FILES up -d dvwa 2>/dev/null || warn "DVWA start skipped (optional)"
 fi
 
@@ -65,7 +67,7 @@ sleep 3
 
 check_service() {
   local name="$1" url="$2" max="$3" optional="${4:-}"
-  for i in $(seq 1 "$max"); do
+  for _ in $(seq 1 "$max"); do
     if curl -sf "$url" >/dev/null 2>&1; then
       ok "$name is healthy"
       return 0

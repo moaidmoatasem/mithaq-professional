@@ -1,4 +1,3 @@
-
 #!/usr/bin/env python3
 """
 CHERENKOV — Sovereign Security API & WebSocket Server

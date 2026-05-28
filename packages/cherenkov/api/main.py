@@ -43,6 +43,11 @@ from slowapi import Limiter, _rate_limit_exceeded_handler
 from slowapi.errors import RateLimitExceeded
 from slowapi.util import get_remote_address
 
+from cherenkov.ai.model_selector import (
+    detect_hardware,
+    generate_litellm_config,
+    recommend_models,
+)
 from cherenkov.api.dependencies import require_rotated_credentials
 from cherenkov.api.init_auth import verify_api_key
 from cherenkov.api.middleware.auth import (
@@ -54,11 +59,6 @@ from cherenkov.api.middleware.auth import (
 )
 from cherenkov.api.middleware.auth import (
     User as AuthUser,
-)
-from cherenkov.ai.model_selector import (
-    detect_hardware,
-    generate_litellm_config,
-    recommend_models,
 )
 from cherenkov.api.routers import ai_orchestrator, c2_hub
 from cherenkov.core.storage.database import (
@@ -785,9 +785,8 @@ async def v1_scan_report_pdf(
     for f in findings:
         if f.cwe:
             mappings = ComplianceRegistry.get_cwe_mappings(f.cwe)
-            refs = mappings.get(fw_upper, [])
-            if refs:
-                compliance_data[f.cwe] = refs
+            if mappings:
+                compliance_data[f.cwe] = mappings
 
     chk_id = scan.get("meta", {}).get("chk_id", f"CHK-{scan_id[:8]}")
     anchor = scan.get("meta", {}).get("anchor")

@@ -752,8 +752,8 @@ async def v1_compliance_pdf(
     current_user: AuthUser = Depends(get_current_user),
 ):
     """Download a signed compliance PDF for a specific framework."""
-    from cherenkov.compliance.mapper import FRAMEWORKS, ComplianceMapper
     from cherenkov.compliance.pdf_renderer import CompliancePDFRenderer
+    from cherenkov.compliance.registry import ComplianceRegistry
     from cherenkov.core.base_scanner import Finding, ScanResult, Severity
     from cherenkov.core.storage.database import get_scan
 
@@ -761,8 +761,9 @@ async def v1_compliance_pdf(
     if not scan:
         raise HTTPException(status_code=404, detail="Scan not found")
 
-    fw_upper = fw.upper()
-    if fw_upper not in FRAMEWORKS:
+    fw_lower = fw.lower()
+    framework = ComplianceRegistry.get(fw_lower)
+    if not framework:
         raise HTTPException(status_code=400, detail=f"Unsupported framework: {fw}")
 
     findings = []
@@ -785,22 +786,21 @@ async def v1_compliance_pdf(
     )
 
     compliance_data = {}
-    mapper = ComplianceMapper()
     for f in findings:
         if f.cwe:
-            refs = mapper.map(f.cwe, fw_upper)
+            refs = framework.cwe_map.get(f.cwe)
             if refs:
                 compliance_data[f.cwe] = refs
 
     chk_id = scan.get("meta", {}).get("chk_id", f"CHK-{scan_id[:8]}")
-    renderer = CompliancePDFRenderer(result, fw_upper, compliance_data, chk_id=chk_id)
+    renderer = CompliancePDFRenderer(result, framework.framework_id, compliance_data, chk_id=chk_id)
     pdf_bytes, anchor = renderer.generate()
 
     return Response(
-        content=pdf_bytes,
+        content=bytes(pdf_bytes),
         media_type="application/pdf",
         headers={
-            "Content-Disposition": f"attachment; filename=cherenkov_{fw_upper}_{scan_id}.pdf",
+            "Content-Disposition": f"attachment; filename=cherenkov_{framework.framework_id.upper()}_{scan_id}.pdf",
             "X-SHA256": anchor.get("sha256", ""),
             "X-TSA-Status": anchor.get("tsa_status", "skipped"),
         },

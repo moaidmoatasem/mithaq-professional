@@ -60,6 +60,7 @@ class PDFReportGenerator:
         self.chk_id = chk_id
         self.anchor = anchor or {}
         self.pdf = FPDF()
+        self.pdf.set_compression(False)
 
     # ── helpers ───────────────────────────────────────────────────────────────
 

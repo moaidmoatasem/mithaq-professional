@@ -9,6 +9,7 @@ import pytest
 def mock_no_gpu():
     with (
         patch("psutil.virtual_memory") as mock_mem,
+        patch("psutil.cpu_count", return_value=8),
         patch("subprocess.run") as mock_run,
     ):
         mock_mem.return_value.total = 8e9
@@ -20,6 +21,7 @@ def mock_no_gpu():
 def mock_high_end_gpu():
     with (
         patch("psutil.virtual_memory") as mock_mem,
+        patch("psutil.cpu_count", return_value=8),
         patch("subprocess.run") as mock_run,
     ):
         mock_mem.return_value.total = 32e9

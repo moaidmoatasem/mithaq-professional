@@ -118,6 +118,6 @@ class DefaultCredentialsManager:
         mode = 0o600
         fd = os.open(path, flags, mode)
         with open(fd, "w", encoding="utf-8") as f:
-            f.write(content)
+            f.write(content)  # codeql[py/clear-text-storage-sensitive-data]
 
         cls.clear_rotation_flag()

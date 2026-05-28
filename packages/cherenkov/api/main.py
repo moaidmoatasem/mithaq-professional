@@ -785,9 +785,10 @@ async def v1_scan_report_pdf(
     compliance_data = {}
     for f in findings:
         if f.cwe:
-            # Flatten the map_all result to list of framework names for simplicity in PDF
-            framework_dict = ComplianceRegistry.get_cwe_mappings(f.cwe)
-            compliance_data[f.cwe] = list(framework_dict.keys())
+            mappings = ComplianceRegistry.get_cwe_mappings(f.cwe)
+            refs = mappings.get(fw_upper, [])
+            if refs:
+                compliance_data[f.cwe] = refs
 
     chk_id = scan.get("meta", {}).get("chk_id", f"CHK-{scan_id[:8]}")
     anchor = scan.get("meta", {}).get("anchor")

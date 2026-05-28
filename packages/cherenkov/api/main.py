@@ -761,9 +761,8 @@ async def v1_compliance_pdf(
     if not scan:
         raise HTTPException(status_code=404, detail="Scan not found")
 
-    fw_lower = fw.lower()
-    framework = ComplianceRegistry.get(fw_lower)
-    if not framework:
+    fw_upper = fw.upper()
+    if fw_upper not in ComplianceRegistry.list_framework_ids():
         raise HTTPException(status_code=400, detail=f"Unsupported framework: {fw}")
 
     findings = []
@@ -788,19 +787,20 @@ async def v1_compliance_pdf(
     compliance_data = {}
     for f in findings:
         if f.cwe:
-            refs = framework.cwe_map.get(f.cwe)
+            mappings = ComplianceRegistry.get_cwe_mappings(f.cwe)
+            refs = mappings.get(fw_upper, [])
             if refs:
                 compliance_data[f.cwe] = refs
 
     chk_id = scan.get("meta", {}).get("chk_id", f"CHK-{scan_id[:8]}")
-    renderer = CompliancePDFRenderer(result, framework.framework_id, compliance_data, chk_id=chk_id)
+    renderer = CompliancePDFRenderer(result, fw_upper, compliance_data, chk_id=chk_id)
     pdf_bytes, anchor = renderer.generate()
 
     return Response(
-        content=bytes(pdf_bytes),
+        content=pdf_bytes,
         media_type="application/pdf",
         headers={
-            "Content-Disposition": f"attachment; filename=cherenkov_{framework.framework_id.upper()}_{scan_id}.pdf",
+            "Content-Disposition": f"attachment; filename=cherenkov_{fw_upper}_{scan_id}.pdf",
             "X-SHA256": anchor.get("sha256", ""),
             "X-TSA-Status": anchor.get("tsa_status", "skipped"),
         },

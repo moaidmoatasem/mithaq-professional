@@ -42,7 +42,7 @@ export function ModelStatus() {
   const ramGb = (healthData?.nodes?.kinetic?.ram_gb || 0) + (healthData?.nodes?.aegis?.ram_gb || 0) || 16;
   const hardwareTier = ramGb >= 16 ? 'HIGH' : ramGb >= 8 ? 'MEDIUM' : 'LOW';
 
-  const displayData = recommendations || {
+  const displayData = recommendations?.active_models ? recommendations : {
     hardware_tier: hardwareTier,
     ram_detected: `${ramGb} GB (Sovereign Virtualised)`,
     vram_detected: ramGb >= 16 ? '8 GB Dedicated' : 'Shared System Allocation',

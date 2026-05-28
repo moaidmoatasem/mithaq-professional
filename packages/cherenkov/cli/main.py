@@ -236,5 +236,32 @@ def list_scanners() -> None:
     console.print(t)
 
 
+@app.command()
+def verify(
+    pdf_path: str = typer.Argument(..., help="Path to the signed PDF report to verify"),
+) -> None:
+    """Verify the forensic anchor embedded in a signed PDF."""
+    import os
+
+    from cherenkov.compliance.pdf_renderer import verify_pdf_signature
+
+    if not os.path.exists(pdf_path):
+        console.print(f"[red]Error:[/red] File not found: {pdf_path}")
+        raise typer.Exit(code=1)
+
+    result = verify_pdf_signature(pdf_path)
+    if result.get("valid"):
+        console.print("[green]Signature status: VALID[/green]")
+        console.print(f"  SHA-256 (findings):  {result['sha256']}")
+        console.print(f"  RFC 3161 Status:     {result['tsa_status']}")
+        if "tsa_token_prefix" in result:
+            console.print(f"  RFC 3161 Token Pref: {result['tsa_token_prefix'][:32]}...")
+        console.print(f"  PDF File SHA-256:    {result['pdf_sha256']}")
+    else:
+        console.print("[red]Signature status: INVALID[/red]")
+        console.print(f"  Reason: {result.get('error')}")
+        raise typer.Exit(code=1)
+
+
 if __name__ == "__main__":
     app()

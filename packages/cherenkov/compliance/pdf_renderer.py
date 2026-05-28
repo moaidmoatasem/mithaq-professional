@@ -230,12 +230,28 @@ class CompliancePDFRenderer:
 
 def verify_pdf_signature(pdf_path: str) -> dict:
     """Extract and verify the forensic anchor embedded in a signed PDF."""
+    try:
+        import pypdfium2 as pdfium
+
+        pdf = pdfium.PdfDocument(pdf_path)
+        text = ""
+        for i in range(len(pdf)):
+            page = pdf[i]
+            textpage = page.get_textpage()
+            text += textpage.get_text_bounded()
+    except ImportError:
+        # Fallback if pypdfium2 isn't available
+        import PyPDF2
+
+        reader = PyPDF2.PdfReader(pdf_path)
+        text = "\n".join([page.extract_text() for page in reader.pages])
+
+    sha_match = re.search(r"SHA-256 \(findings\):\s*([a-f0-9]{64})", text)
+    tsa_match = re.search(r"RFC 3161 Status:\s*(\S+)", text)
+    token_match = re.search(r"RFC 3161 Token:\s*(\S+)", text)
+
     with open(pdf_path, "rb") as f:
         content = f.read()
-    text = content.decode("latin-1", errors="replace")
-    sha_match = re.search(r"SHA-256 \(findings\):\s+([a-f0-9]{64})", text)
-    tsa_match = re.search(r"RFC 3161 Status:\s+(\S+)", text)
-    token_match = re.search(r"RFC 3161 Token:\s+(\S+)", text)
     if not sha_match:
         return {"valid": False, "error": "No SHA-256 anchor found in PDF"}
     embedded_hash = sha_match.group(1)

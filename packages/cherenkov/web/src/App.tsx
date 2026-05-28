@@ -1,10 +1,11 @@
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import { MainLayout } from './components/templates/MainLayout';
 import { LoginPage } from './components/templates/LoginPage';
 import { ForensicHeader } from './components/organisms/ForensicHeader';
 import { TacticalOperationsPanel } from './components/organisms/TacticalOperationsPanel';
 import { ThreatIntelPanel } from './components/organisms/ThreatIntelPanel';
 import { LogoKit, AssistantWidget } from './components/organisms';
+import { ErrorBoundary } from './components/ErrorBoundary';
 import { AnimatePresence } from 'motion/react';
 
 export default function App() {
@@ -17,11 +18,13 @@ export default function App() {
 
   return (
     <>
-      <MainLayout
-        header={<ForensicHeader />}
-        content={<TacticalOperationsPanel />}
-        sidebar={<ThreatIntelPanel />}
-      />
+      <ErrorBoundary>
+        <MainLayout
+          header={<ForensicHeader />}
+          content={<TacticalOperationsPanel />}
+          sidebar={<ThreatIntelPanel />}
+        />
+      </ErrorBoundary>
 
       {/* Legacy LogoKit Support (updated check) */}
       <AnimatePresence>

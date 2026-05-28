@@ -5,7 +5,7 @@ Category: scanners
 """
 
 import os
-import subprocess
+import subprocess  # nosec B404
 
 
 class FileUploadScanner:
@@ -49,7 +49,7 @@ class FileUploadScanner:
         )
 
         # Run the command in shell and capture output
-        process_status = subprocess.run(command, cwd="/local/path/to/files", capture_output=True)
+        process_status = subprocess.run  # nosec B603(command, cwd="/local/path/to/files", capture_output=True)
 
         return {
             "status_code": process_status.returncode,

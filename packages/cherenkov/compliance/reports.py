@@ -6,6 +6,17 @@ from typing import Dict, List, Optional
 
 from fpdf import FPDF
 
+# Attempt to import position enums; provide fallbacks if unavailable
+try:
+    from fpdf.enums import XPos, YPos
+except ImportError:
+
+    class _Pos:
+        LMARGIN = 0
+        NEXT = 0
+
+    XPos = YPos = _Pos
+
 from cherenkov.core.base_scanner import ScanResult
 
 # Arabic text support
@@ -185,13 +196,9 @@ class PDFReportGenerator:
             self.pdf.set_x(18)
             self.pdf.multi_cell(0, 5, f"CWE: {finding.cwe}")
             self.pdf.set_x(18)
-            self.pdf.multi_cell(
-                0, 5, f"Description: {finding.description}"
-            )
+            self.pdf.multi_cell(0, 5, f"Description: {finding.description}")
             self.pdf.set_x(18)
-            self.pdf.multi_cell(
-                0, 5, f"Remediation: {finding.remediation}"
-            )
+            self.pdf.multi_cell(0, 5, f"Remediation: {finding.remediation}")
 
             mapped = self.compliance.get(finding.cwe, {})
             if mapped:
@@ -203,11 +210,7 @@ class PDFReportGenerator:
                     frameworks = list(mapped)
                 self.pdf.set_x(18)
                 self.pdf.set_font("helvetica", "I", 8)
-                self.pdf.multi_cell(
-                    0,
-                    4,
-                    "Compliance: " + " | ".join(frameworks)
-                )
+                self.pdf.multi_cell(0, 4, "Compliance: " + " | ".join(frameworks))
 
             self.pdf.ln(2)
 
@@ -218,25 +221,17 @@ class PDFReportGenerator:
         self.pdf.set_font("courier", "", 8)
 
         sha = self.anchor.get("sha256", "—")
-        self.pdf.multi_cell(
-            0, 5, f"SHA-256 (findings):  {sha}"
-        )
+        self.pdf.multi_cell(0, 5, f"SHA-256 (findings):  {sha}")
 
         tsa_status = self.anchor.get("tsa_status", "skipped")
         if tsa_status == "ok":
             token = self.anchor.get("tsa_token", "")
             server = self.anchor.get("tsa_server", "")
-            self.pdf.multi_cell(
-                0, 5, f"TSA Server:          {server}"
-            )
+            self.pdf.multi_cell(0, 5, f"TSA Server:          {server}")
             # Show only first 64 chars of the base64 token — the full token is in the DB
-            self.pdf.multi_cell(
-                0, 5, f"RFC 3161 Token:      {token[:64]}…"
-            )
+            self.pdf.multi_cell(0, 5, f"RFC 3161 Token:      {token[:64]}…")
         else:
-            self.pdf.multi_cell(
-                0, 5, f"RFC 3161 Status:     {tsa_status}"
-            )
+            self.pdf.multi_cell(0, 5, f"RFC 3161 Status:     {tsa_status}")
             if tsa_status == "unavailable":
                 self.pdf.set_font("helvetica", "I", 8)
                 self.pdf.multi_cell(

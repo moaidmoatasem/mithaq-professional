@@ -1,7 +1,7 @@
 """Unit tests for model selector API endpoints."""
 
 import os
-from unittest.mock import patch
+from unittest.mock import MagicMock, patch
 
 import pytest
 from cherenkov.api.main import app

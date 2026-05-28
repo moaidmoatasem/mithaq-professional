@@ -49,7 +49,6 @@ from cherenkov.ai.model_selector import (
     recommend_models,
 )
 from cherenkov.api.dependencies import require_rotated_credentials
-from cherenkov.api.init_auth import verify_api_key
 from cherenkov.api.middleware.auth import (
     Role,
     RoleChecker,
@@ -76,30 +75,6 @@ from cherenkov.orchestration.workflow_parser import load_workflow
 
 load_dotenv(dotenv_path=".env", override=True)
 
-# Initialize Limiter
-limiter = Limiter(key_func=get_remote_address)
-app = FastAPI(title="CHERENKOV C2 Hub")
-app.state.limiter = limiter
-app.add_exception_handler(RateLimitExceeded, _rate_limit_exceeded_handler)
-
-# 1. Public Frontend - NO AUTH
-# Vite dist files served as static content
-if os.path.exists("packages/cherenkov/web/dist"):
-    app.mount("/app", StaticFiles(directory="packages/cherenkov/web/dist", html=True), name="app")
-
-# 2. Protected API - AUTH REQUIRED
-# All routes mounted under /api require valid X-Cherenkov-Token
-api_app = FastAPI(dependencies=[Depends(verify_api_key)])
-api_app.include_router(ai_orchestrator.router, prefix="/v1")
-api_app.include_router(c2_hub.router, prefix="/v1")
-app.mount("/api", api_app)
-
-
-@app.get("/health")
-def health_check():
-    """Publicly accessible health heartbeat."""
-    return {"status": "operational"}
-
 
 logger = logging.getLogger(__name__)
 
@@ -111,8 +86,6 @@ _SCAN_RATE = os.getenv("CHERENKOV_SCAN_RATE_LIMIT", "30/minute")
 _WORKFLOW_RATE = os.getenv("CHERENKOV_WORKFLOW_RATE_LIMIT", "10/minute")
 
 limiter = Limiter(key_func=get_remote_address)
-# Keep _limiter as alias so decorator references below stay consistent
-_limiter = limiter
 
 _START_TIME = time.time()
 
@@ -171,6 +144,17 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
+v1 = APIRouter()
+
+# ── Public static mounts ─────────────────────────────────────────────────
+
+if os.path.exists("packages/cherenkov/web/dist"):
+    app.mount("/app", StaticFiles(directory="packages/cherenkov/web/dist", html=True), name="app")
+
+if _STATIC_DIR.exists():
+    app.mount("/static", StaticFiles(directory=str(_STATIC_DIR)), name="static")
+
+
 # ── WebSocket live-event broadcast ───────────────────────────────────────────
 
 _ws_clients: Set[WebSocket] = set()
@@ -216,9 +200,6 @@ async def _broadcast(event: dict) -> None:
 class SandboxExecuteRequest(BaseModel):
     payload: str
     timeout: int = 30
-
-
-v1 = APIRouter(prefix="/api/v1")
 
 
 class AuthRequest(BaseModel):
@@ -1449,9 +1430,10 @@ async def v1_mesh_nodes(current_user: AuthUser = Depends(get_current_user)) -> d
     return {"nodes": nodes, "count": len(nodes)}
 
 
-# Register /api/v1 router
-app.include_router(v1)
-app.include_router(ai_orchestrator.router)
+# Register API routers (must be after all @v1.* decorators)
+app.include_router(ai_orchestrator.router, prefix="/api/v1")
+app.include_router(c2_hub.router, prefix="/api/v1")
+app.include_router(v1, prefix="/api/v1")
 
 
 if __name__ == "__main__":

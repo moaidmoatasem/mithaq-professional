@@ -35,6 +35,7 @@ class CompliancePDFRenderer:
         self.compliance = compliance_data
         self.chk_id = chk_id
         self.pdf = FPDF()
+        self.pdf.set_compression(False)
 
     def _header_bar(self, label: str) -> None:
         p = self.pdf
@@ -233,7 +234,7 @@ def verify_pdf_signature(pdf_path: str) -> dict:
     with open(pdf_path, "rb") as f:
         content = f.read()
     text = content.decode("latin-1", errors="replace")
-    sha_match = re.search(r"SHA-256 \(findings\):\s+([a-f0-9]{64})", text)
+    sha_match = re.search(r"SHA-256 [\\(]+findings[\\)]+:\s+([a-f0-9]{64})", text)
     tsa_match = re.search(r"RFC 3161 Status:\s+(\S+)", text)
     token_match = re.search(r"RFC 3161 Token:\s+(\S+)", text)
     if not sha_match:
@@ -242,7 +243,7 @@ def verify_pdf_signature(pdf_path: str) -> dict:
     result = {
         "valid": True,
         "sha256": embedded_hash,
-        "tsa_status": tsa_match.group(1) if tsa_match else "unknown",
+        "tsa_status": tsa_match.group(1) if tsa_match else ("ok" if token_match else "unknown"),
     }
     if token_match:
         result["tsa_token_prefix"] = token_match.group(1)

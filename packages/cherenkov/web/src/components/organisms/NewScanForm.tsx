@@ -48,6 +48,7 @@ export function NewScanForm({ onSubmit, onClose, isOpen }: NewScanFormProps) {
       {isOpen && (
         <div className="fixed inset-0 z-[600] flex items-center justify-center p-4 bg-black/80 backdrop-blur-md">
           <motion.div 
+            id="new-scan-form-modal"
             initial={{ opacity: 0, scale: 0.95, y: 10 }}
             animate={{ opacity: 1, scale: 1, y: 0 }}
             exit={{ opacity: 0, scale: 0.95, y: 10 }}

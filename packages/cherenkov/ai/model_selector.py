@@ -123,7 +123,7 @@ def detect_hardware() -> dict:
                 hw["has_gpu"] = True
     except Exception:
         pass
-    effective = hw["vram_gb"] if hw["has_gpu"] else hw["ram_gb"] * 0.4
+    effective = hw["vram_gb"] + (hw["ram_gb"] * 0.4) if hw["has_gpu"] else hw["ram_gb"] * 0.4
     if effective >= 10:
         hw["tier"] = "high"
     elif effective >= 5:
@@ -136,7 +136,7 @@ def detect_hardware() -> dict:
 def recommend_models(hw: dict = None) -> dict:
     if hw is None:
         hw = detect_hardware()
-    effective = hw["vram_gb"] if hw["has_gpu"] else hw["ram_gb"] * 0.4
+    effective = hw["vram_gb"] + (hw["ram_gb"] * 0.4) if hw["has_gpu"] else hw["ram_gb"] * 0.4
     tier = hw["tier"]
     recommendations = {
         "hardware": hw,

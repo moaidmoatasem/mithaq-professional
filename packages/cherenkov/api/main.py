@@ -713,7 +713,6 @@ async def v1_scan_history() -> list[dict]:
 @v1.get("/reports/{scan_id}/sarif")
 async def v1_scan_report_sarif(scan_id: str) -> dict:
     """Return a scan report in SARIF 2.1.0 format."""
-    from cherenkov.compliance.mapper import ComplianceMapper
     from cherenkov.compliance.reports import SARIFExporter
     from cherenkov.core.base_scanner import Finding, ScanResult, Severity
     from cherenkov.core.storage.database import get_scan
@@ -742,7 +741,7 @@ async def v1_scan_report_sarif(scan_id: str) -> dict:
     )
 
     chk_id = scan.get("meta", {}).get("chk_id", f"CHK-{scan_id[:8]}")
-    exporter = SARIFExporter(result, compliance_mapper=ComplianceMapper(), chk_id=chk_id)
+    exporter = SARIFExporter(result, chk_id=chk_id)
     return exporter.generate()
 
 
@@ -753,8 +752,8 @@ async def v1_compliance_pdf(
     current_user: AuthUser = Depends(get_current_user),
 ):
     """Download a signed compliance PDF for a specific framework."""
-    from cherenkov.compliance.mapper import FRAMEWORKS, ComplianceMapper
-    from cherenkov.compliance.pdf_renderer import CompliancePDFRenderer
+    fw_lower = fw.lower()
+    if fw_lower not in ComplianceRegistry.list_framework_ids():
     from cherenkov.core.base_scanner import Finding, ScanResult, Severity
     from cherenkov.core.storage.database import get_scan
 
@@ -763,7 +762,8 @@ async def v1_compliance_pdf(
         raise HTTPException(status_code=404, detail="Scan not found")
 
     fw_upper = fw.upper()
-    if fw_upper not in FRAMEWORKS:
+    fw_lower = fw.lower()
+    if fw_lower not in ComplianceRegistry.list_framework_ids():
         raise HTTPException(status_code=400, detail=f"Unsupported framework: {fw}")
 
     findings = []
@@ -786,10 +786,8 @@ async def v1_compliance_pdf(
     )
 
     compliance_data = {}
-    mapper = ComplianceMapper()
-    for f in findings:
-        if f.cwe:
-            refs = mapper.map(f.cwe, fw_upper)
+    fw_lower = fw.lower()
+    if fw_lower not in ComplianceRegistry.list_framework_ids():
             if refs:
                 compliance_data[f.cwe] = refs
 
@@ -814,7 +812,7 @@ async def v1_scan_report_pdf(
 ):
     """Download PDF security report. Supports language parameter for localization (e.g., 'ar' for Arabic)."""
 
-    from cherenkov.compliance.mapper import ComplianceMapper
+    from cherenkov.compliance.registry import ComplianceRegistry
     from cherenkov.compliance.reports import PDFReportGenerator
     from cherenkov.core.base_scanner import Finding, ScanResult, Severity
     from cherenkov.core.storage.database import get_scan
@@ -825,7 +823,6 @@ async def v1_scan_report_pdf(
 
     # Map database scan dict to ScanResult model
     findings = []
-    mapper = ComplianceMapper()
 
     for f in scan.get("findings", []):
         findings.append(
@@ -849,7 +846,7 @@ async def v1_scan_report_pdf(
     for f in findings:
         if f.cwe:
             # Flatten the map_all result to list of framework names for simplicity in PDF
-            framework_dict = mapper.map_all(f.cwe)
+            framework_dict = ComplianceRegistry.get_cwe_mappings(f.cwe)
             compliance_data[f.cwe] = list(framework_dict.keys())
 
     chk_id = scan.get("meta", {}).get("chk_id", f"CHK-{scan_id[:8]}")
@@ -868,49 +865,6 @@ async def v1_scan_report_pdf(
         media_type="application/pdf",
         headers={"Content-Disposition": f"attachment; filename={filename}"},
     )
-
-
-@v1.get("/processes")
-async def v1_list_processes(category: Optional[str] = None) -> dict:
-    """List available business processes for security mapping."""
-    from cherenkov.compliance.process_mapper import ProcessMapper
-
-    processes = ProcessMapper.list_processes(category)
-    categories = ProcessMapper.list_categories()
-    return {"processes": processes, "categories": categories, "count": len(processes)}
-
-
-@v1.get("/processes/{process_id}")
-async def v1_get_process(process_id: str) -> dict:
-    """Get a business process with steps and mapped security controls."""
-    from cherenkov.compliance.process_mapper import ProcessMapper
-
-    process = ProcessMapper.get_process(process_id)
-    if not process:
-        raise HTTPException(status_code=404, detail="Process not found")
-    return process
-
-
-@v1.get("/processes/{process_id}/controls")
-async def v1_get_process_controls(process_id: str, framework: Optional[str] = None) -> dict:
-    """Get security controls for a process, optionally filtered by compliance framework."""
-    from cherenkov.compliance.process_mapper import ProcessMapper
-
-    result = ProcessMapper.get_process_controls(process_id, framework)
-    if "error" in result:
-        raise HTTPException(status_code=404, detail=result["error"])
-    return result
-
-
-@v1.get("/processes/{process_id}/report")
-async def v1_get_process_report(process_id: str) -> dict:
-    """Generate a comprehensive risk report for a business process."""
-    from cherenkov.compliance.process_mapper import ProcessMapper
-
-    report = ProcessMapper.generate_risk_report(process_id)
-    if "error" in report:
-        raise HTTPException(status_code=404, detail=report["error"])
-    return report
 
 
 # ── Model endpoints ──────────────────────────────────────────────────────

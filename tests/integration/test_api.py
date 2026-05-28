@@ -226,3 +226,58 @@ def test_architect_plan_post(client, monkeypatch):
     data = response.json()
     assert data["status"] == "success"
     assert data["plan"] == "Generated secure plan"
+
+def test_compliance_frameworks(client: TestClient):
+    """Test getting list of compliance frameworks."""
+    auth_data = {"username": "admin", "password": "admin"}
+    token_response = client.post("/api/v1/auth/token", json=auth_data)
+    token = token_response.json()["access_token"]
+    response = client.get(
+        "/api/v1/compliance/frameworks", headers={"Authorization": f"Bearer {token}"}
+    )
+    assert response.status_code == 200
+    data = response.json()
+    assert "frameworks" in data
+    assert len(data["frameworks"]) >= 3
+
+
+def test_compliance_report_unknown_framework(client: TestClient):
+    """Test getting compliance report with unknown framework ID."""
+    auth_data = {"username": "admin", "password": "admin"}
+    token_response = client.post("/api/v1/auth/token", json=auth_data)
+    token = token_response.json()["access_token"]
+
+    import cherenkov.core.storage.database as db
+    try:
+        db.save_scan("test-scan-123", "http://target", [])
+    except Exception:
+        pass
+
+    response = client.get(
+        "/api/v1/scan/test-scan-123/compliance/unknown_framework",
+        headers={"Authorization": f"Bearer {token}"},
+    )
+    assert response.status_code == 400
+    assert "Unknown framework" in response.text
+
+
+def test_compliance_report_success(client: TestClient):
+    """Test getting compliance report for a valid framework."""
+    auth_data = {"username": "admin", "password": "admin"}
+    token_response = client.post("/api/v1/auth/token", json=auth_data)
+    token = token_response.json()["access_token"]
+
+    import cherenkov.core.storage.database as db
+    try:
+        db.save_scan("test-scan-456", "http://target", [{"cwe": "CWE-89", "title": "SQL Injection", "severity": "CRITICAL"}])
+    except Exception:
+        pass
+
+    response = client.get(
+        "/api/v1/scan/test-scan-456/compliance/egyfincsf",
+        headers={"Authorization": f"Bearer {token}"},
+    )
+    assert response.status_code == 200
+    data = response.json()
+    assert data["framework_id"] == "egyfincsf"
+    assert "coverage_pct" in data

@@ -745,7 +745,6 @@ async def v1_scan_report_sarif(scan_id: str) -> dict:
     return exporter.generate()
 
 
-
 @v1.get("/reports/{scan_id}/pdf")
 async def v1_scan_report_pdf(
     scan_id: str, language: str = "en", current_user: AuthUser = Depends(get_current_user)

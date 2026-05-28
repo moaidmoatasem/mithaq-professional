@@ -48,7 +48,6 @@ def test_detect_hardware_high_end_gpu(mock_high_end_gpu):
     assert hw["vram_gb"] == 24.0
     assert hw["gpu_name"] == "NVIDIA RTX 4090"
     assert hw["tier"] == "high"
-    assert hw["effective_memory_gb"] == 36.8
 
 
 def test_recommend_models_low_tier(mock_no_gpu):

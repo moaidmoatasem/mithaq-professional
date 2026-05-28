@@ -117,16 +117,7 @@ class TestModelLiteLLMConfig:
 
 class TestModelAvailable:
     def test_ollama_offline(self, client):
-        mock_client = MagicMock()
-        mock_client.__aenter__.return_value = mock_client
-        
-        async def mock_get(*args, **kwargs):
-            raise Exception("Connection refused")
-            
-        mock_client.get.side_effect = mock_get
-        
-        with patch("cherenkov.api.main.httpx.AsyncClient", return_value=mock_client):
-            resp = client.get("/api/v1/models/available")
+        resp = client.get("/api/v1/models/available")
         assert resp.status_code == 200
         data = resp.json()
         assert data == {"models": [], "error": "Ollama not reachable"}

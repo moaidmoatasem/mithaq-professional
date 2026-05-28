@@ -104,8 +104,18 @@ async def lifespan(app: FastAPI):
             "CHERENKOV_JWT_SECRET must be set via environment variable.",
             env_path,
         )
+    admin_password = os.environ.get("CHERENKOV_ADMIN_PASSWORD")
+    if not admin_password:
+        raise RuntimeError(
+            "CHERENKOV_ADMIN_PASSWORD environment variable is required at startup. "
+            "Set it to a strong password and never use the default."
+        )
+    if admin_password == "admin":
+        raise RuntimeError(
+            "CHERENKOV_ADMIN_PASSWORD must not be 'admin'. Choose a strong, unique password."
+        )
     if not get_user("admin"):
-        save_user("admin", hash_password("admin"), Role.ADMIN)
+        save_user("admin", hash_password(admin_password), Role.ADMIN)
 
     meissner_hub.on_open(
         lambda: asyncio.create_task(

@@ -1,3 +1,20 @@
+import sys
+from unittest.mock import MagicMock
+
+class MockPsutil:
+    def __init__(self):
+        self.__spec__ = MagicMock()
+    def cpu_count(self, logical=False):
+        return 8
+    def virtual_memory(self):
+        class Mem:
+            total = 16e9
+        return Mem()
+sys.modules['psutil'] = MockPsutil()
+
+
+
+
 import asyncio
 from pathlib import Path
 
@@ -178,3 +195,89 @@ def test_error_cases(client):
     # 404: Not found
     response_404 = client.get("/api/v1/non_existent_route")
     assert response_404.status_code == 404
+
+def test_architect_plan_post(client, monkeypatch):
+    # Mock SecurityArchitect.generate_plan to return a dummy result
+    async def mock_generate_plan(self, context):
+        return {
+            "status": "success",
+            "plan": "Generated secure plan",
+            "model": "architect"
+        }
+
+    from cherenkov.agents.architect import SecurityArchitect
+    monkeypatch.setattr(SecurityArchitect, "generate_plan", mock_generate_plan)
+
+    # Need authentication for v1_architect_plan
+    auth_data = {"username": "admin", "password": "admin"}
+    token_response = client.post("/api/v1/auth/token", json=auth_data)
+    token = token_response.json()["access_token"]
+    headers = {"Authorization": f"Bearer {token}"}
+
+    payload = {
+        "target": "mobile app",
+        "requirements": ["encryption"],
+        "constraints": ["low latency"],
+        "threat_context": "DDoS attacks"
+    }
+    response = client.post("/api/v1/architect/plan", json=payload, headers=headers)
+
+    assert response.status_code == 200
+    data = response.json()
+    assert data["status"] == "success"
+    assert data["plan"] == "Generated secure plan"
+
+def test_compliance_frameworks(client: TestClient):
+    """Test getting list of compliance frameworks."""
+    auth_data = {"username": "admin", "password": "admin"}
+    token_response = client.post("/api/v1/auth/token", json=auth_data)
+    token = token_response.json()["access_token"]
+    response = client.get(
+        "/api/v1/compliance/frameworks", headers={"Authorization": f"Bearer {token}"}
+    )
+    assert response.status_code == 200
+    data = response.json()
+    assert "frameworks" in data
+    assert len(data["frameworks"]) >= 3
+
+
+def test_compliance_report_unknown_framework(client: TestClient):
+    """Test getting compliance report with unknown framework ID."""
+    auth_data = {"username": "admin", "password": "admin"}
+    token_response = client.post("/api/v1/auth/token", json=auth_data)
+    token = token_response.json()["access_token"]
+
+    import cherenkov.core.storage.database as db
+    try:
+        db.save_scan("test-scan-123", "http://target", [])
+    except Exception:
+        pass
+
+    response = client.get(
+        "/api/v1/scan/test-scan-123/compliance/unknown_framework",
+        headers={"Authorization": f"Bearer {token}"},
+    )
+    assert response.status_code == 400
+    assert "Unknown framework" in response.text
+
+
+def test_compliance_report_success(client: TestClient):
+    """Test getting compliance report for a valid framework."""
+    auth_data = {"username": "admin", "password": "admin"}
+    token_response = client.post("/api/v1/auth/token", json=auth_data)
+    token = token_response.json()["access_token"]
+
+    import cherenkov.core.storage.database as db
+    try:
+        db.save_scan("test-scan-456", "http://target", [{"cwe": "CWE-89", "title": "SQL Injection", "severity": "CRITICAL"}])
+    except Exception:
+        pass
+
+    response = client.get(
+        "/api/v1/scan/test-scan-456/compliance/egyfincsf",
+        headers={"Authorization": f"Bearer {token}"},
+    )
+    assert response.status_code == 200
+    data = response.json()
+    assert data["framework_id"] == "egyfincsf"
+    assert "coverage_pct" in data

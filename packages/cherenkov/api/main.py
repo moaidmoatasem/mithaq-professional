@@ -43,6 +43,11 @@ from slowapi import Limiter, _rate_limit_exceeded_handler
 from slowapi.errors import RateLimitExceeded
 from slowapi.util import get_remote_address
 
+from cherenkov.ai.model_selector import (
+    detect_hardware,
+    generate_litellm_config,
+    recommend_models,
+)
 from cherenkov.api.dependencies import require_rotated_credentials
 from cherenkov.api.init_auth import verify_api_key
 from cherenkov.api.middleware.auth import (
@@ -708,7 +713,6 @@ async def v1_scan_history() -> list[dict]:
 @v1.get("/reports/{scan_id}/sarif")
 async def v1_scan_report_sarif(scan_id: str) -> dict:
     """Return a scan report in SARIF 2.1.0 format."""
-    from cherenkov.compliance.mapper import ComplianceMapper
     from cherenkov.compliance.reports import SARIFExporter
     from cherenkov.core.base_scanner import Finding, ScanResult, Severity
     from cherenkov.core.storage.database import get_scan
@@ -737,15 +741,79 @@ async def v1_scan_report_sarif(scan_id: str) -> dict:
     )
 
     chk_id = scan.get("meta", {}).get("chk_id", f"CHK-{scan_id[:8]}")
-    exporter = SARIFExporter(result, compliance_mapper=ComplianceMapper(), chk_id=chk_id)
+    exporter = SARIFExporter(result, chk_id=chk_id)
     return exporter.generate()
 
 
-@v1.get("/reports/{scan_id}/pdf")
-async def v1_scan_report_pdf(scan_id: str, current_user: AuthUser = Depends(get_current_user)):
-    """Download PDF security report."""
+@v1.get("/scan/{scan_id}/compliance/{fw}/pdf")
+async def v1_compliance_pdf(
+    scan_id: str,
+    fw: str,
+    current_user: AuthUser = Depends(get_current_user),
+):
+    """Download a signed compliance PDF for a specific framework."""
+    from cherenkov.compliance.pdf_renderer import CompliancePDFRenderer
+    from cherenkov.compliance.registry import ComplianceRegistry
+    from cherenkov.core.base_scanner import Finding, ScanResult, Severity
+    from cherenkov.core.storage.database import get_scan
 
-    from cherenkov.compliance.mapper import ComplianceMapper
+    fw_lower = fw.lower()
+    if fw_lower not in ComplianceRegistry.list_framework_ids():
+        raise HTTPException(status_code=400, detail=f"Unsupported framework: {fw}")
+
+    scan = get_scan(scan_id)
+    if not scan:
+        raise HTTPException(status_code=404, detail="Scan not found")
+
+    fw_upper = fw.upper()
+
+    findings = []
+    for f in scan.get("findings", []):
+        findings.append(
+            Finding(
+                title=f.get("title", "Unknown"),
+                severity=Severity(str(f.get("severity", "INFO")).upper()),
+                description=f.get("description", ""),
+                cwe=f.get("cwe", ""),
+                remediation=f.get("remediation", ""),
+            )
+        )
+
+    result = ScanResult(
+        target=scan.get("target", ""),
+        scanner_name="Cherenkov Unified",
+        findings=findings,
+        status="completed",
+    )
+
+    compliance_data = {}
+    fw_lower = fw.lower()
+    if fw_lower not in ComplianceRegistry.list_framework_ids():
+            if refs:
+                compliance_data[f.cwe] = refs
+
+    chk_id = scan.get("meta", {}).get("chk_id", f"CHK-{scan_id[:8]}")
+    renderer = CompliancePDFRenderer(result, fw_upper, compliance_data, chk_id=chk_id)
+    pdf_bytes, anchor = renderer.generate()
+
+    return Response(
+        content=bytes(pdf_bytes),
+        media_type="application/pdf",
+        headers={
+            "Content-Disposition": f"attachment; filename=cherenkov_{fw_upper}_{scan_id}.pdf",
+            "X-SHA256": anchor.get("sha256", ""),
+            "X-TSA-Status": anchor.get("tsa_status", "skipped"),
+        },
+    )
+
+
+@v1.get("/reports/{scan_id}/pdf")
+async def v1_scan_report_pdf(
+    scan_id: str, language: str = "en", current_user: AuthUser = Depends(get_current_user)
+):
+    """Download PDF security report. Supports language parameter for localization (e.g., 'ar' for Arabic)."""
+
+    from cherenkov.compliance.registry import ComplianceRegistry
     from cherenkov.compliance.reports import PDFReportGenerator
     from cherenkov.core.base_scanner import Finding, ScanResult, Severity
     from cherenkov.core.storage.database import get_scan
@@ -756,7 +824,6 @@ async def v1_scan_report_pdf(scan_id: str, current_user: AuthUser = Depends(get_
 
     # Map database scan dict to ScanResult model
     findings = []
-    mapper = ComplianceMapper()
 
     for f in scan.get("findings", []):
         findings.append(
@@ -780,7 +847,7 @@ async def v1_scan_report_pdf(scan_id: str, current_user: AuthUser = Depends(get_
     for f in findings:
         if f.cwe:
             # Flatten the map_all result to list of framework names for simplicity in PDF
-            framework_dict = mapper.map_all(f.cwe)
+            framework_dict = ComplianceRegistry.get_cwe_mappings(f.cwe)
             compliance_data[f.cwe] = list(framework_dict.keys())
 
     chk_id = scan.get("meta", {}).get("chk_id", f"CHK-{scan_id[:8]}")
@@ -788,54 +855,46 @@ async def v1_scan_report_pdf(scan_id: str, current_user: AuthUser = Depends(get_
     generator = PDFReportGenerator(result, compliance_data, chk_id=chk_id, anchor=anchor)
     pdf_bytes = generator.generate()
 
+    # Set filename based on language
+    filename = f"cherenkov_report_{scan_id}"
+    if language == "ar":
+        filename += "_ar"
+    filename += ".pdf"
+
     return Response(
         content=pdf_bytes,
         media_type="application/pdf",
-        headers={"Content-Disposition": f"attachment; filename=cherenkov_report_{scan_id}.pdf"},
+        headers={"Content-Disposition": f"attachment; filename={filename}"},
     )
 
 
-@v1.get("/processes")
-async def v1_list_processes(category: Optional[str] = None) -> dict:
-    """List available business processes for security mapping."""
-    from cherenkov.compliance.process_mapper import ProcessMapper
-
-    processes = ProcessMapper.list_processes(category)
-    categories = ProcessMapper.list_categories()
-    return {"processes": processes, "categories": categories, "count": len(processes)}
+# ── Model endpoints ──────────────────────────────────────────────────────
 
 
-@v1.get("/processes/{process_id}")
-async def v1_get_process(process_id: str) -> dict:
-    """Get a business process with steps and mapped security controls."""
-    from cherenkov.compliance.process_mapper import ProcessMapper
-
-    process = ProcessMapper.get_process(process_id)
-    if not process:
-        raise HTTPException(status_code=404, detail="Process not found")
-    return process
+@v1.get("/models/recommend")
+async def v1_models_recommend(current_user: AuthUser = Depends(get_current_user)) -> dict:
+    """Detect hardware and recommend the best Ollama models for this machine."""
+    hw = detect_hardware()
+    return recommend_models(hw)
 
 
-@v1.get("/processes/{process_id}/controls")
-async def v1_get_process_controls(process_id: str, framework: Optional[str] = None) -> dict:
-    """Get security controls for a process, optionally filtered by compliance framework."""
-    from cherenkov.compliance.process_mapper import ProcessMapper
-
-    result = ProcessMapper.get_process_controls(process_id, framework)
-    if "error" in result:
-        raise HTTPException(status_code=404, detail=result["error"])
-    return result
+@v1.get("/models/litellm-config")
+async def v1_models_litellm_config(current_user: AuthUser = Depends(get_current_user)) -> dict:
+    """Generate a LiteLLM proxy config YAML for the recommended models."""
+    recs = recommend_models()
+    config = generate_litellm_config(recs)
+    return {"config": config, "apply_command": "bash ~/start-litellm.sh"}
 
 
-@v1.get("/processes/{process_id}/report")
-async def v1_get_process_report(process_id: str) -> dict:
-    """Generate a comprehensive risk report for a business process."""
-    from cherenkov.compliance.process_mapper import ProcessMapper
-
-    report = ProcessMapper.generate_risk_report(process_id)
-    if "error" in report:
-        raise HTTPException(status_code=404, detail=report["error"])
-    return report
+@v1.get("/models/available")
+async def v1_models_available(current_user: AuthUser = Depends(get_current_user)) -> dict:
+    """List models currently available in the local Ollama instance."""
+    try:
+        async with httpx.AsyncClient(timeout=5) as client:
+            resp = await client.get("http://localhost:11434/api/tags")
+            return resp.json()
+    except Exception:
+        return {"models": [], "error": "Ollama not reachable"}
 
 
 @v1.get("/findings/pending")
@@ -1056,15 +1115,6 @@ async def _run_scan(
 
     try:
         init_db()
-        # Deduplication Issue #435
-        unique_vulns = []
-        seen_cwe_type = set()
-        for vuln in vulnerabilities:
-            key = (vuln.get("cwe"), vuln.get("type"))
-            if key not in seen_cwe_type:
-                seen_cwe_type.add(key)
-                unique_vulns.append(vuln)
-        vulnerabilities = unique_vulns
 
         save_scan(
             scan_id,
@@ -1075,38 +1125,39 @@ async def _run_scan(
             finished_at=finished,
         )
 
-        from cherenkov.ai.lattice_bridge import embed_and_store
+        from cherenkov.core.lattice_bridge import embed_and_store
         from cherenkov.core.storage.database import save_pending_finding
 
         for v in vulnerabilities:
             finding_id = str(uuid.uuid4())
 
-            # Index every finding in LATTICE for similarity recall and FP learning.
-            # Use BackgroundTasks so the work runs after response delivery and
-            # doesn't leak asyncio tasks into subsequent test event loops.
-            trace_dict = {
-                "findings": f"{v['title']} {v.get('description', '')}",
-                "trace_id": finding_id,
-                "target": request.url,
-                "scanner": v["scanner"],
-                "severity": v["severity"],
-                "cwe": v.get("cwe", ""),
-            }
-
-            async def safe_embed(t: dict):
-                try:
-                    await embed_and_store(t)
-                except Exception as e:
-                    logger.error("LATTICE embed failed: %s", e)
-
             if background_tasks is not None:
-                background_tasks.add_task(safe_embed, trace_dict)
+                background_tasks.add_task(
+                    embed_and_store,
+                    finding_id,
+                    v["title"],
+                    v.get("description", ""),
+                    request.url,
+                    v["scanner"],
+                    v["severity"],
+                    v.get("cwe", ""),
+                )
             else:
-                # Fallback for callers that don't supply background_tasks
                 try:
-                    asyncio.get_running_loop().create_task(safe_embed(trace_dict))
+                    asyncio.get_running_loop().create_task(
+                        asyncio.to_thread(
+                            embed_and_store,
+                            finding_id,
+                            v["title"],
+                            v.get("description", ""),
+                            request.url,
+                            v["scanner"],
+                            v["severity"],
+                            v.get("cwe", ""),
+                        )
+                    )
                 except RuntimeError:
-                    pass  # No running loop — skip indexing in this context
+                    pass
 
             if v["severity"] in ("CRITICAL", "HIGH"):
                 save_pending_finding(

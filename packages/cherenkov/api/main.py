@@ -745,68 +745,6 @@ async def v1_scan_report_sarif(scan_id: str) -> dict:
     return exporter.generate()
 
 
-@v1.get("/scan/{scan_id}/compliance/{fw}/pdf")
-async def v1_compliance_pdf(
-    scan_id: str,
-    fw: str,
-    current_user: AuthUser = Depends(get_current_user),
-):
-    """Download a signed compliance PDF for a specific framework."""
-    from cherenkov.compliance.pdf_renderer import CompliancePDFRenderer
-    from cherenkov.compliance.registry import ComplianceRegistry
-    from cherenkov.core.base_scanner import Finding, ScanResult, Severity
-    from cherenkov.core.storage.database import get_scan
-
-    fw_lower = fw.lower()
-    if fw_lower not in ComplianceRegistry.list_framework_ids():
-        raise HTTPException(status_code=400, detail=f"Unsupported framework: {fw}")
-
-    scan = get_scan(scan_id)
-    if not scan:
-        raise HTTPException(status_code=404, detail="Scan not found")
-
-    fw_upper = fw.upper()
-
-    findings = []
-    for f in scan.get("findings", []):
-        findings.append(
-            Finding(
-                title=f.get("title", "Unknown"),
-                severity=Severity(str(f.get("severity", "INFO")).upper()),
-                description=f.get("description", ""),
-                cwe=f.get("cwe", ""),
-                remediation=f.get("remediation", ""),
-            )
-        )
-
-    result = ScanResult(
-        target=scan.get("target", ""),
-        scanner_name="Cherenkov Unified",
-        findings=findings,
-        status="completed",
-    )
-
-    compliance_data = {}
-    fw_lower = fw.lower()
-    if fw_lower not in ComplianceRegistry.list_framework_ids():
-            if refs:
-                compliance_data[f.cwe] = refs
-
-    chk_id = scan.get("meta", {}).get("chk_id", f"CHK-{scan_id[:8]}")
-    renderer = CompliancePDFRenderer(result, fw_upper, compliance_data, chk_id=chk_id)
-    pdf_bytes, anchor = renderer.generate()
-
-    return Response(
-        content=bytes(pdf_bytes),
-        media_type="application/pdf",
-        headers={
-            "Content-Disposition": f"attachment; filename=cherenkov_{fw_upper}_{scan_id}.pdf",
-            "X-SHA256": anchor.get("sha256", ""),
-            "X-TSA-Status": anchor.get("tsa_status", "skipped"),
-        },
-    )
-
-
 @v1.get("/reports/{scan_id}/pdf")
 async def v1_scan_report_pdf(
     scan_id: str, language: str = "en", current_user: AuthUser = Depends(get_current_user)
@@ -846,9 +784,9 @@ async def v1_scan_report_pdf(
     compliance_data = {}
     for f in findings:
         if f.cwe:
-            # Flatten the map_all result to list of framework names for simplicity in PDF
-            framework_dict = ComplianceRegistry.get_cwe_mappings(f.cwe)
-            compliance_data[f.cwe] = list(framework_dict.keys())
+            mappings = ComplianceRegistry.get_cwe_mappings(f.cwe)
+            if mappings:
+                compliance_data[f.cwe] = mappings
 
     chk_id = scan.get("meta", {}).get("chk_id", f"CHK-{scan_id[:8]}")
     anchor = scan.get("meta", {}).get("anchor")
@@ -1115,6 +1053,15 @@ async def _run_scan(
 
     try:
         init_db()
+        # Deduplication Issue #435
+        unique_vulns = []
+        seen_cwe_type = set()
+        for vuln in vulnerabilities:
+            key = (vuln.get("cwe"), vuln.get("type"))
+            if key not in seen_cwe_type:
+                seen_cwe_type.add(key)
+                unique_vulns.append(vuln)
+        vulnerabilities = unique_vulns
 
         save_scan(
             scan_id,

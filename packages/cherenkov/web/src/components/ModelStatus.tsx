@@ -11,10 +11,6 @@ export function ModelStatus() {
   const { data: healthData } = useHealth(8000);
   const [recommendations, setRecommendations] = useState<any>(null);
   const [loading, setLoading] = useState(true);
-  const [showOptimizeModal, setShowOptimizeModal] = useState(false);
-  const [optimizationStep, setOptimizationStep] = useState(0);
-  const [optimizeLogs, setOptimizeLogs] = useState<string[]>([]);
-  const [isOptimizing, setIsOptimizing] = useState(false);
 
   useEffect(() => {
     let mounted = true;
@@ -53,36 +49,6 @@ export function ModelStatus() {
     }
   };
 
-  const runSimulatedOptimization = () => {
-    setIsOptimizing(true);
-    setOptimizationStep(0);
-    setOptimizeLogs([]);
-
-    const steps = [
-      'Initializing CHERENKOV Quantization Suite...',
-      'Detecting hardware capability... AMD/Intel Ryzen CPU with NPU features detected.',
-      'Checking Ollama status... Online (127.0.0.1:11434).',
-      'Optimizing Llama 3.1 8B Model... Applying 4-bit AWQ tensor quantization.',
-      'quantization: [====================] 100% complete (Llama-3.1-8b-Q4_K_M)',
-      'Optimizing Qwen2.5 3B Model... CPU threading aligned to Ryzen core topology.',
-      'quantization: [====================] 100% complete (Qwen2.5-3b-Q4_K_M)',
-      'LATTICE Vector database compaction completed successfully.',
-      'Verifying Zero-Egress boundary state... ENFORCED.',
-      'ALL SOVEREIGN MODELS FULLY OPTIMISED FOR MENA FINANCIAL OPERATIONS.'
-    ];
-
-    let current = 0;
-    const interval = setInterval(() => {
-      if (current < steps.length) {
-        setOptimizeLogs(prev => [...prev, `[+] ${steps[current]}`]);
-        setOptimizationStep(current + 1);
-        current++;
-      } else {
-        clearInterval(interval);
-        setIsOptimizing(false);
-      }
-    }, 1200);
-  };
 
   if (loading) {
     return (
@@ -143,91 +109,9 @@ export function ModelStatus() {
           </div>
         </div>
 
-        {/* Action Button */}
-        <div className="pt-2 z-10">
-          <CyberButton 
-            variant="ghost" 
-            className="w-full flex items-center justify-center gap-1.5 py-1 text-[9px] tracking-widest"
-            onClick={() => {
-              setShowOptimizeModal(true);
-              runSimulatedOptimization();
-            }}
-          >
-            <Settings size={12} className="animate-spin-slow" />
-            OPTIMISE SOVEREIGN MODELS
-          </CyberButton>
-        </div>
+
       </div>
 
-      {/* Optimization Terminal Modal */}
-      <AnimatePresence>
-        {showOptimizeModal && (
-          <div className="fixed inset-0 z-[3000] flex items-center justify-center p-4 bg-black/90 backdrop-blur-md">
-            <motion.div 
-              initial={{ opacity: 0, scale: 0.95 }}
-              animate={{ opacity: 1, scale: 1 }}
-              exit={{ opacity: 0, scale: 0.95 }}
-              className="w-full max-w-2xl bg-[#030303] border border-hud-cyan/30 p-6 relative shadow-[0_0_80px_rgba(0,210,255,0.2)] font-mono"
-            >
-              {/* Header */}
-              <div className="flex items-center justify-between border-b border-hud-cyan/20 pb-3 mb-4">
-                <div className="flex items-center gap-2">
-                  <Terminal className="text-hud-cyan w-4 h-4 animate-pulse" />
-                  <span className="text-xs text-hud-cyan uppercase tracking-widest font-bold">
-                    CHERENKOV // OPTIMISE_MODELS.SH
-                  </span>
-                </div>
-                <button 
-                  onClick={() => {
-                    if (!isOptimizing) setShowOptimizeModal(false);
-                  }}
-                  disabled={isOptimizing}
-                  className="text-fg3 hover:text-white disabled:opacity-30 transition-colors"
-                >
-                  <X size={16} />
-                </button>
-              </div>
-
-              {/* Terminal Logs */}
-              <div className="bg-black border border-white/5 rounded p-4 h-[320px] overflow-y-auto custom-scrollbar flex flex-col gap-1 text-[11px] leading-relaxed">
-                {optimizeLogs.map((log, index) => (
-                  <div key={index} className={cn(
-                    "font-mono",
-                    log.includes('complete') || log.includes('SUCCESS') ? "text-hud-mint" :
-                    log.includes('Optimising') ? "text-hud-cyan animate-pulse" : "text-fg2"
-                  )}>
-                    {log}
-                  </div>
-                ))}
-                {isOptimizing && (
-                  <div className="flex items-center gap-1.5 text-hud-cyan mt-1 animate-pulse">
-                    <span>{'>'} Processing operational directives...</span>
-                    <span className="w-1.5 h-3 bg-hud-cyan animate-ping" />
-                  </div>
-                )}
-                {!isOptimizing && optimizeLogs.length > 0 && (
-                  <div className="text-hud-mint font-bold uppercase tracking-widest border border-hud-mint/30 bg-hud-mint/10 p-3 mt-4 text-center">
-                    ✓ OPTIMISATION SEQUENCE SUCCESSFULLY COMPLETED
-                  </div>
-                )}
-              </div>
-
-              {/* Action Info Footer */}
-              <div className="flex justify-between items-center mt-6 pt-4 border-t border-white/5 text-[9px] text-fg3 uppercase tracking-wider">
-                <span>execution: local Ryzen C2 Hub</span>
-                <CyberButton 
-                  variant="ghost" 
-                  disabled={isOptimizing}
-                  onClick={() => setShowOptimizeModal(false)}
-                  className="px-6"
-                >
-                  {isOptimizing ? 'RUNNING...' : 'DISMISS TERMINAL'}
-                </CyberButton>
-              </div>
-            </motion.div>
-          </div>
-        )}
-      </AnimatePresence>
     </>
   );
 }

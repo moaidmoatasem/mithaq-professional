@@ -245,7 +245,7 @@ export function TacticalOperationsPanel() {
         <div className="lg:col-span-3">
           <StatGrid 
             stats={[
-              { id: 'nodes', label: 'Nodes_Mapped', value: '142', accent: '#00e5ff' },
+              { id: 'nodes', label: 'Nodes_Mapped', value: '5+', accent: '#00e5ff' },
               { id: 'payloads', label: 'Payloads_Delivered', value: '47', accent: '#2b7fff' },
               { id: 'anomalies', label: 'Anomalies_Isolated', value: activeStep >= 4 ? '12' : '0', accent: '#ff4444' },
               { id: 'traces', label: 'Traces_Signed', value: !isExecuting && activeStep === 5 ? '8' : '0', accent: '#00ff88' },

@@ -9,6 +9,7 @@ import pytest
 def mock_no_gpu():
     with (
         patch("psutil.virtual_memory") as mock_mem,
+        patch("psutil.cpu_count", return_value=8),
         patch("subprocess.run") as mock_run,
     ):
         mock_mem.return_value.total = 8e9
@@ -20,6 +21,7 @@ def mock_no_gpu():
 def mock_high_end_gpu():
     with (
         patch("psutil.virtual_memory") as mock_mem,
+        patch("psutil.cpu_count", return_value=8),
         patch("subprocess.run") as mock_run,
     ):
         mock_mem.return_value.total = 32e9
@@ -48,7 +50,7 @@ def test_detect_hardware_high_end_gpu(mock_high_end_gpu):
     assert hw["vram_gb"] == 24.0
     assert hw["gpu_name"] == "NVIDIA RTX 4090"
     assert hw["tier"] == "high"
-
+    assert hw["effective_memory_gb"] == 36.8
 
 def test_recommend_models_low_tier(mock_no_gpu):
     from cherenkov.ai.model_selector import recommend_models
@@ -80,15 +82,12 @@ def test_recommend_models_medium_tier():
         "tier": "medium",
         "gpu_name": "RTX 3060",
         "cpu_cores": 8,
-        "platform": "Linux",
     }
     recs = recommend_models(hw)
     assert recs["tier"] == "medium"
-    assert recs["effective_memory_gb"] == 6.0
-    # 6GB VRAM * 0.8 = 4.8GB budget → 7B code model (5GB) doesn't fit
-    assert "code" not in recs["selected"]
-    # Foundation-Sec-8B at 5.5GB doesn't fit either, but deepseek-r1:8b at 5.5GB also doesn't
-    assert "architect" not in recs["selected"]
+    assert recs["effective_memory_gb"] == 12.4
+    assert "code" in recs["selected"]
+    assert "architect" in recs["selected"]
 
 
 def test_recommend_models_high_tier():

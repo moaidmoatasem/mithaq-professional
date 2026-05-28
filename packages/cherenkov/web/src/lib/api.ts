@@ -120,6 +120,7 @@ export async function submitScan(payload: ScanRequestPayload): Promise<ScanResul
       rps: payload.rps,
       burhan: payload.burhan,
       compliance_framework: payload.compliance_framework,
+      framework: payload.compliance_framework,
     }),
   });
 

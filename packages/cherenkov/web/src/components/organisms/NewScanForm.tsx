@@ -29,7 +29,7 @@ export function NewScanForm({ onSubmit, onClose, isOpen }: NewScanFormProps) {
         profile,
         rps,
         burhan,
-        framework
+        compliance_framework: framework
       });
       onClose();
     } catch (err) {

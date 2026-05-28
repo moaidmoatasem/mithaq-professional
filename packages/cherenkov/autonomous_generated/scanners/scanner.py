@@ -54,7 +54,7 @@ class FasterScanner(Scanner):
 
         return {"total_vuln": len(vulnerable_components), "details": vulnerable_components}
 
-    def run(  # nosec B603 B607self) -> tuple:
+    def run(self) -> tuple:
         self.validate_target(target)
         # Assuming the actual scan logic is complex and time-consuming.
         # For demonstration purpose, we'll mock it as a longer function without adding an overhead in real codebase

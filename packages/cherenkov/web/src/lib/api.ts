@@ -7,7 +7,9 @@
 
 // In development, Vite proxies /api and /ws to http://127.0.0.1:8000.
 // In production, same-origin requests work directly.
-export const API_BASE = import.meta.env.VITE_API_BASE || `${window.location.origin}/api/v1`;
+export const API_BASE =
+  import.meta.env.VITE_API_BASE ||
+  (window.location.origin.endsWith('/api/v1') ? window.location.origin : `${window.location.origin}/api/v1`);
 
 /**
  * Derive the correct WebSocket base URL from the current origin.
@@ -114,14 +116,7 @@ export async function submitScan(payload: ScanRequestPayload): Promise<ScanResul
   const res = await fetch(`${API_BASE}/scan`, {
     method: 'POST',
     headers: getAuthHeaders(),
-    body: JSON.stringify({
-      url: payload.url,
-      profile: payload.profile,
-      rps: payload.rps,
-      burhan: payload.burhan,
-      compliance_framework: payload.compliance_framework,
-      framework: payload.compliance_framework,
-    }),
+    body: JSON.stringify({ url: payload.url }),
   });
 
   if (!res.ok) {

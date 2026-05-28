@@ -6,8 +6,8 @@ Category: scanners
 
 #!/usr/bin/env python3
 
-import subprocess  # nosec B404
-import defusedxml.ElementTree as ET
+import subprocess
+import xml.etree.ElementTree as ET
 
 
 class XMLSchemaValidator:
@@ -28,7 +28,7 @@ class XMLSchemaValidator:
             bool: True if the XML document is valid, False otherwise.
         """
 
-        result = subprocess.run  # nosec B603(
+        result = subprocess.run(
             [
                 "xmllint",
                 "--noout",  # suppress printing of output

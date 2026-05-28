@@ -9,7 +9,7 @@ import pytest
 def mock_no_gpu():
     with (
         patch("cherenkov.ai.model_selector.psutil.virtual_memory") as mock_mem,
-        patch("subprocess.run") as mock_run,
+        patch("subprocess.run") as mock_run, patch("shutil.which") as mock_which,
     ):
         mock_mem.return_value.total = 8e9
         mock_run.side_effect = FileNotFoundError("nvidia-smi not found")
@@ -20,13 +20,15 @@ def mock_no_gpu():
 def mock_high_end_gpu():
     with (
         patch("cherenkov.ai.model_selector.psutil.virtual_memory") as mock_mem,
-        patch("subprocess.run") as mock_run,
+        patch("subprocess.run") as mock_run, patch("shutil.which") as mock_which,
     ):
         mock_mem.return_value.total = 32e9
         mock_proc = MagicMock()
         mock_proc.returncode = 0
         mock_proc.stdout = "NVIDIA RTX 4090, 24576\n"
         mock_run.return_value = mock_proc
+        mock_which.return_value = "nvidia-smi"
+        mock_which.return_value = "nvidia-smi"
         yield
 
 

@@ -38,7 +38,7 @@ jobs:
 
     - name: Run Ruff (lint)
       run: |
-        ruff check packages/ --ignore W,S,B
+        ruff check packages/ --ignore W,B
 
     - name: Run Ruff (format check)
       run: |

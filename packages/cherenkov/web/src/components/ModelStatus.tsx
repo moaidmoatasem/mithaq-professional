@@ -95,7 +95,7 @@ export function ModelStatus() {
 
   return (
     <>
-      <div className="bg-bg-surface border border-white/5 p-4 relative overflow-hidden flex flex-col gap-3 hud-bracket">
+      <div id="model-status-card" className="bg-bg-surface border border-white/5 p-4 relative overflow-hidden flex flex-col gap-3 hud-bracket">
         <div className="absolute top-0 right-0 p-2 opacity-5 pointer-events-none">
           <Cpu size={80} className="text-hud-cyan" />
         </div>

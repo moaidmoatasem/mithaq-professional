@@ -6,7 +6,7 @@ Category: scanners
 
 #!/usr/bin/env python
 
-import defusedxml.ElementTree as ET
+import xml.etree.ElementTree as ET
 
 
 class XXESS(object):
@@ -90,9 +90,9 @@ class XXESS(object):
         """Helper function to determine if an element is considered potentially dangerous due to external entity reference.
         This includes checking the 'system', 'public' namespaces and other common attributes associated with potential XXE threats."""
 
-        from defusedxml.sax import make_parser
+        from xml.sax import XMLReader as xsXMLReader
 
-        SAXParser = make_parser()
+        SAXParser = xsXMLReader()
         parser_context = SAXParser.create_parser(ParserContext)
         parser_context.setContentHandler(SAXParser)
         parser_context.setErrorHandler(SAXParser)

@@ -43,9 +43,9 @@ class Scanner:
 
     def fetch_data(self):
         # Placeholder for data fetching logic, replace with actual implementation
-        import secrets
+        import random
 
-        if secrets.random() < 0.5:
+        if random.random() < 0.5:
             return None
         else:
             chunk = b"chunk of data to be scanned."

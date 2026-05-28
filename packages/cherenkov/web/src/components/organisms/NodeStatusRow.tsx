@@ -24,7 +24,7 @@ function NodeCard({ id, name, status, model, ram, colorClass, icon, onSwap }: No
       
       <div className="flex items-center justify-between mb-3 z-10 relative">
         <div className="flex items-center gap-2">
-          <div className={cn("w-6 h-6 flex items-center justify-center bg-black/40 border border-white/10 text-white/80")}>
+          <div className={cn("w-6 h-6 flex items-center justify-center bg-black/40 border border-white/10", colorClass.replace('bg-', 'text-'))}>
             {icon}
           </div>
           <span className="text-[10px] font-mono uppercase tracking-widest font-bold text-fg1">{name}</span>

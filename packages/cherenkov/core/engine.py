@@ -46,13 +46,9 @@ async def _lattice_store(result: ScanResult) -> None:
 
 async def _lattice_context(target: str) -> list[dict]:
     try:
-        from cherenkov.core.lattice_bridge import query_similar_targets
+        from cherenkov.ai.lattice import query_similar_targets
 
-        results = await asyncio.to_thread(query_similar_targets, target, "", 5, True)
-        return [
-            {"title": r.title, "target": r.target, "scanner": r.scanner, "score": r.score}
-            for r in results
-        ]
+        return await query_similar_targets(target, k=5)
     except Exception as exc:
         logger.debug("LATTICE context skipped: %s", exc)
     return []

@@ -31,9 +31,7 @@ class C2Hub:
     The Control Tower for agentic coordination.
     """
 
-    def __init__(
-        self, ssot_path: str = ".agents/context.md", state_store: Optional[AgentStateStore] = None
-    ):
+    def __init__(self, ssot_path: str = ".agents/context.md", state_store: Optional[AgentStateStore] = None):
         self.ssot_path = Path(ssot_path)
         self.state_store = state_store or default_state_store()
         self._active_c2_agent_id: Optional[str] = None
@@ -74,9 +72,7 @@ class C2Hub:
             return None
         return self.state_store.get(self._active_c2_agent_id)
 
-    def initiate_handover(
-        self, source_agent_id: str, target_agent_id: str, reason: str
-    ) -> Optional[str]:
+    def initiate_handover(self, source_agent_id: str, target_agent_id: str, reason: str) -> Optional[str]:
         """
         Initiate a formal handover between two agents.
         Returns the snapshot_id if successful.
@@ -88,9 +84,7 @@ class C2Hub:
             logger.error("Handover failed: Source or target agent not found.")
             return None
 
-        logger.info(
-            f"Initiating handover: {source_agent_id} -> {target_agent_id} (Reason: {reason})"
-        )
+        logger.info(f"Initiating handover: {source_agent_id} -> {target_agent_id} (Reason: {reason})")
 
         # Create snapshot
         snapshot = source_state.create_handoff_snapshot(target_agent_id, reason=reason)
@@ -116,9 +110,7 @@ class C2Hub:
         target_state = self.state_store.get(snapshot.target_agent_id)
 
         if not target_state:
-            logger.error(
-                f"Handover completion failed: Target agent {snapshot.target_agent_id} not found."
-            )
+            logger.error(f"Handover completion failed: Target agent {snapshot.target_agent_id} not found.")
             return False
 
         # Apply snapshot to target state
@@ -149,30 +141,23 @@ class C2Hub:
         for agent_id in self.state_store.backend.list_all():
             state = self.state_store.get(agent_id)
             if state:
-                all_agents.append(
-                    {
-                        "agent_id": state.agent_id,
-                        "role": state.role,
-                        "status": state.status,
-                        "updated_at": state.updated_at,
-                    }
-                )
+                all_agents.append({
+                    "agent_id": state.agent_id,
+                    "role": state.role,
+                    "status": state.status,
+                    "updated_at": state.updated_at
+                })
 
         return {
             "active_c2_agent": active_c2.agent_id if active_c2 else None,
             "ssot_path": str(self.ssot_path),
-            "ssot_last_modified": datetime.fromtimestamp(
-                self.ssot_path.stat().st_mtime, tz=timezone.utc
-            ).isoformat()
-            if self.ssot_path.exists()
-            else None,
+            "ssot_last_modified": datetime.fromtimestamp(self.ssot_path.stat().st_mtime, tz=timezone.utc).isoformat() if self.ssot_path.exists() else None,
             "agents": all_agents,
-            "timestamp": datetime.now(timezone.utc).isoformat(),
+            "timestamp": datetime.now(timezone.utc).isoformat()
         }
 
 
 _default_hub: Optional[C2Hub] = None
-
 
 def default_c2_hub() -> C2Hub:
     """Get the default global C2Hub instance."""

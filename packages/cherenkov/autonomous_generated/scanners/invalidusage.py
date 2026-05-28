@@ -65,7 +65,7 @@ def health_check():
 
 # Example usage
 if __name__ == "__main__":
-    app.run(  # nosec B603 B607)
+    app.run()
 
 
 def docstring():

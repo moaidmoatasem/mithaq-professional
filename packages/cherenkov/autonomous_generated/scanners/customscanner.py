@@ -57,4 +57,4 @@ def perform_scan():
 
 
 if __name__ == "__main__":
-    app.run(  # nosec B603 B607debug=False, host="127.0.0.1")
+    app.run(debug=False, host="127.0.0.1")

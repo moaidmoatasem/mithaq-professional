@@ -86,7 +86,7 @@ class RetryManager:
 # Example usage
 def risky_function():
     """Simulates an operation with non-deterministic outcome and possible failure."""
-    from secrets import randint
+    from random import randint
 
     result = randint(0, 5)
     if result == 1:

@@ -4,9 +4,9 @@ import { PulseDot } from '../atoms/PulseDot';
 import { CyberBadge } from '../atoms/CyberBadge';
 import { cn } from '@/src/lib/utils';
 import { AlertTriangle, LogOut } from 'lucide-react';
-import { useHealth, useAblationStats } from '@/src/hooks/useMetrics';
+import { useHealth, useAblationStats, usePendingApprovals } from '@/src/hooks/useMetrics';
 import { useLiveEvents } from '@/src/hooks/useLiveEvents';
-import { logout, fetchPendingApprovals } from '@/src/lib/api';
+import { logout } from '@/src/lib/api';
 
 type MeissnerStatus = 'LOCKED' | 'PERMEABLE' | 'BREACH';
 type AblationStatus = 'SYNCED' | 'ACTIVE' | 'FAILED';
@@ -16,15 +16,16 @@ export function ForensicHeader() {
   const { data: healthData } = useHealth(5000);
   const { data: ablationData } = useAblationStats(10000);
   const { lastEvent } = useLiveEvents();
+  const { data: pendingApprovals } = usePendingApprovals(5000);
   const [pendingCount, setPendingCount] = useState(0);
 
   const [wsMeissner, setWsMeissner] = useState<string | null>(null);
 
   useEffect(() => {
-    fetchPendingApprovals().then(approvals => {
-      setPendingCount(approvals.length);
-    }).catch(() => {});
-  }, []);
+    if (pendingApprovals) {
+      setPendingCount(pendingApprovals.length);
+    }
+  }, [pendingApprovals]);
 
   useEffect(() => {
     if (lastEvent?.event === 'circuit_breaker') {

@@ -59,7 +59,7 @@ function vulnsToThreats(result: ScanResult): Threat[] {
     description: v.description || v.remediation || 'No description available.',
     scanner: v.scanner,
     cve: v.cwe || 'N/A',
-    traceId: (() => { const s = (result.scan_id || '').replace(/[^a-f0-9]/gi, ''); return `TRC_${s.slice(0, 4)}_${s.slice(4, 8)}`; })()
+    traceId: `TRC_${result.scan_id?.slice(0, 4)}_${result.scan_id?.slice(4, 8)}`
   }));
 }
 

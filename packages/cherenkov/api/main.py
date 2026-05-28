@@ -761,9 +761,8 @@ async def v1_compliance_pdf(
     if not scan:
         raise HTTPException(status_code=404, detail="Scan not found")
 
-    fw_lower = fw.lower()
-    framework = ComplianceRegistry.get(fw_lower)
-    if not framework:
+    fw_upper = fw.upper()
+    if fw_upper not in ComplianceRegistry.list_framework_ids():
         raise HTTPException(status_code=400, detail=f"Unsupported framework: {fw}")
 
     findings = []
@@ -788,19 +787,20 @@ async def v1_compliance_pdf(
     compliance_data = {}
     for f in findings:
         if f.cwe:
-            refs = framework.cwe_map.get(f.cwe)
+            mappings = ComplianceRegistry.get_cwe_mappings(f.cwe)
+            refs = mappings.get(fw_upper, [])
             if refs:
                 compliance_data[f.cwe] = refs
 
     chk_id = scan.get("meta", {}).get("chk_id", f"CHK-{scan_id[:8]}")
-    renderer = CompliancePDFRenderer(result, framework.framework_id, compliance_data, chk_id=chk_id)
+    renderer = CompliancePDFRenderer(result, fw_upper, compliance_data, chk_id=chk_id)
     pdf_bytes, anchor = renderer.generate()
 
     return Response(
-        content=bytes(pdf_bytes),
+        content=pdf_bytes,
         media_type="application/pdf",
         headers={
-            "Content-Disposition": f"attachment; filename=cherenkov_{framework.framework_id.upper()}_{scan_id}.pdf",
+            "Content-Disposition": f"attachment; filename=cherenkov_{fw_upper}_{scan_id}.pdf",
             "X-SHA256": anchor.get("sha256", ""),
             "X-TSA-Status": anchor.get("tsa_status", "skipped"),
         },
@@ -846,9 +846,9 @@ async def v1_scan_report_pdf(
     compliance_data = {}
     for f in findings:
         if f.cwe:
-            mappings = ComplianceRegistry.get_cwe_mappings(f.cwe)
-            if mappings:
-                compliance_data[f.cwe] = mappings
+            # Flatten the map_all result to list of framework names for simplicity in PDF
+            framework_dict = ComplianceRegistry.get_cwe_mappings(f.cwe)
+            compliance_data[f.cwe] = list(framework_dict.keys())
 
     chk_id = scan.get("meta", {}).get("chk_id", f"CHK-{scan_id[:8]}")
     anchor = scan.get("meta", {}).get("anchor")
@@ -1115,15 +1115,6 @@ async def _run_scan(
 
     try:
         init_db()
-        # Deduplication Issue #435
-        unique_vulns = []
-        seen_cwe_type = set()
-        for vuln in vulnerabilities:
-            key = (vuln.get("cwe"), vuln.get("type"))
-            if key not in seen_cwe_type:
-                seen_cwe_type.add(key)
-                unique_vulns.append(vuln)
-        vulnerabilities = unique_vulns
 
         save_scan(
             scan_id,
@@ -1134,39 +1125,38 @@ async def _run_scan(
             finished_at=finished,
         )
 
-        from cherenkov.core.lattice_bridge import embed_and_store
+        from cherenkov.ai.lattice_bridge import embed_and_store
         from cherenkov.core.storage.database import save_pending_finding
 
         for v in vulnerabilities:
             finding_id = str(uuid.uuid4())
 
-            if background_tasks is not None:
-                background_tasks.add_task(
-                    embed_and_store,
-                    finding_id,
-                    v["title"],
-                    v.get("description", ""),
-                    request.url,
-                    v["scanner"],
-                    v["severity"],
-                    v.get("cwe", ""),
-                )
-            else:
+            # Index every finding in LATTICE for similarity recall and FP learning.
+            # Use BackgroundTasks so the work runs after response delivery and
+            # doesn't leak asyncio tasks into subsequent test event loops.
+            trace_dict = {
+                "findings": f"{v['title']} {v.get('description', '')}",
+                "trace_id": finding_id,
+                "target": request.url,
+                "scanner": v["scanner"],
+                "severity": v["severity"],
+                "cwe": v.get("cwe", ""),
+            }
+
+            async def safe_embed(t: dict):
                 try:
-                    asyncio.get_running_loop().create_task(
-                        asyncio.to_thread(
-                            embed_and_store,
-                            finding_id,
-                            v["title"],
-                            v.get("description", ""),
-                            request.url,
-                            v["scanner"],
-                            v["severity"],
-                            v.get("cwe", ""),
-                        )
-                    )
+                    await embed_and_store(t)
+                except Exception as e:
+                    logger.error("LATTICE embed failed: %s", e)
+
+            if background_tasks is not None:
+                background_tasks.add_task(safe_embed, trace_dict)
+            else:
+                # Fallback for callers that don't supply background_tasks
+                try:
+                    asyncio.get_running_loop().create_task(safe_embed(trace_dict))
                 except RuntimeError:
-                    pass
+                    pass  # No running loop — skip indexing in this context
 
             if v["severity"] in ("CRITICAL", "HIGH"):
                 save_pending_finding(

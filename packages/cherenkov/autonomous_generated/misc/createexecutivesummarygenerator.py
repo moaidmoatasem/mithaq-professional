@@ -52,7 +52,7 @@ class CreateExecutiveSummaryGenerator:
         """
         return f"{self.output_directory}/executive_summary_{datetime.now().strftime('%Y%m%d_%H%M%S')}.txt"
 
-    def run(  # nosec B603 B607self) -> None:
+    def run(self) -> None:
         """
         Runs a generator that will create an executive summary based on provided data.
 
@@ -83,7 +83,7 @@ def main():
     summary_generator = CreateExecutiveSummaryGenerator(output_directory="results/")
     try:
         summary_generator.data = data
-        summary_generator.run(  # nosec B603 B607)
+        summary_generator.run()
     except Exception as e:
         print(f"Error encountered: {e}")
 

@@ -7,7 +7,7 @@ Generates LiteLLM proxy configuration for the recommended models.
 
 import logging
 import platform
-import subprocess
+import subprocess  # nosec B404
 
 import psutil
 
@@ -108,8 +108,11 @@ def detect_hardware() -> dict:
         "gpu_name": "None",
     }
     try:
-        result = subprocess.run(
-            ["nvidia-smi", "--query-gpu=name,memory.total", "--format=csv,noheader,nounits"],
+        import shutil
+        nvidia_smi = shutil.which("nvidia-smi")
+        if nvidia_smi:
+            result = subprocess.run(  # nosec B603
+            [nvidia_smi, "--query-gpu=name,memory.total", "--format=csv,noheader,nounits"],
             capture_output=True,
             text=True,
             timeout=5,
@@ -121,8 +124,9 @@ def detect_hardware() -> dict:
                 hw["gpu_name"] = parts[0].strip()
                 hw["vram_gb"] = round(float(parts[1]) / 1024, 1)
                 hw["has_gpu"] = True
-    except Exception:
-        pass
+    except Exception as e:
+        logger.debug("Failed to detect GPU: %s", e)
+
     effective = hw["vram_gb"] + (hw["ram_gb"] * 0.4) if hw["has_gpu"] else hw["ram_gb"] * 0.4
     if effective >= 10:
         hw["tier"] = "high"

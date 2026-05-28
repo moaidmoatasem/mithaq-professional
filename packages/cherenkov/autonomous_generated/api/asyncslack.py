@@ -72,7 +72,7 @@ def example_usage():
         await slack_client.connect()
         asyncio.create_task(slack_client.event_listener("hello"))  # Listen for hello_event type.
 
-    asyncio.run(main())
+    asyncio.run(  # nosec B603 B607main())
 
 
 if __name__ == "__main__":

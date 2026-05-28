@@ -1,20 +1,18 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { API_BASE, getAuthHeaders } from '@/src/lib/api';
 import type { FindingApproval } from '@/src/lib/api';
 
-export function useHealth(intervalMs = 5000) {
-  const [data, setData] = useState<any>(null);
+function usePolling<T>(fetcher: () => Promise<T>, intervalMs: number, initial: T) {
+  const [data, setData] = useState<T>(initial);
   const [error, setError] = useState<Error | null>(null);
 
   useEffect(() => {
     let mounted = true;
-    const fetchHealth = async () => {
+    const fetchData = async () => {
       try {
-        const res = await fetch(`${API_BASE}/health`, { headers: getAuthHeaders() });
-        if (!res.ok) throw new Error('Backend offline');
-        const json = await res.json();
+        const result = await fetcher();
         if (mounted) {
-          setData(json);
+          setData(result);
           setError(null);
         }
       } catch (err) {
@@ -24,8 +22,8 @@ export function useHealth(intervalMs = 5000) {
       }
     };
 
-    fetchHealth();
-    const int = setInterval(fetchHealth, intervalMs);
+    fetchData();
+    const int = setInterval(fetchData, intervalMs);
     return () => {
       mounted = false;
       clearInterval(int);
@@ -35,37 +33,24 @@ export function useHealth(intervalMs = 5000) {
   return { data, error };
 }
 
+export function useHealth(intervalMs = 5000) {
+  const fetcher = useCallback(async () => {
+    const res = await fetch(`${API_BASE}/health`, { headers: getAuthHeaders() });
+    if (!res.ok) throw new Error('Backend offline');
+    return res.json();
+  }, []);
+
+  return usePolling(fetcher, intervalMs, null);
+}
+
 export function useAblationStats(intervalMs = 10000) {
-  const [data, setData] = useState<any>(null);
-  const [error, setError] = useState<Error | null>(null);
+  const fetcher = useCallback(async () => {
+    const res = await fetch(`${API_BASE}/ablation/stats`, { headers: getAuthHeaders() });
+    if (!res.ok) throw new Error('Backend offline');
+    return res.json();
+  }, []);
 
-  useEffect(() => {
-    let mounted = true;
-    const fetchStats = async () => {
-      try {
-        const res = await fetch(`${API_BASE}/ablation/stats`, { headers: getAuthHeaders() });
-        if (!res.ok) throw new Error('Backend offline');
-        const json = await res.json();
-        if (mounted) {
-          setData(json);
-          setError(null);
-        }
-      } catch (err) {
-        if (mounted) {
-          setError(err instanceof Error ? err : new Error('Unknown error'));
-        }
-      }
-    };
-
-    fetchStats();
-    const int = setInterval(fetchStats, intervalMs);
-    return () => {
-      mounted = false;
-      clearInterval(int);
-    };
-  }, [intervalMs]);
-
-  return { data, error };
+  return usePolling(fetcher, intervalMs, null);
 }
 
 export function useQueueDepth(intervalMs = 5000) {
@@ -105,34 +90,11 @@ export function useQueueDepth(intervalMs = 5000) {
 }
 
 export function usePendingApprovals(intervalMs = 5000) {
-  const [data, setData] = useState<FindingApproval[]>([]);
-  const [error, setError] = useState<Error | null>(null);
+  const fetcher = useCallback(async () => {
+    const res = await fetch(`${API_BASE}/findings/pending`, { headers: getAuthHeaders() });
+    if (!res.ok) throw new Error('Failed to fetch pending approvals');
+    return res.json() as Promise<FindingApproval[]>;
+  }, []);
 
-  useEffect(() => {
-    let mounted = true;
-    const fetchApprovals = async () => {
-      try {
-        const res = await fetch(`${API_BASE}/findings/pending`, { headers: getAuthHeaders() });
-        if (!res.ok) throw new Error('Failed to fetch pending approvals');
-        const json = await res.json();
-        if (mounted) {
-          setData(json);
-          setError(null);
-        }
-      } catch (err) {
-        if (mounted) {
-          setError(err instanceof Error ? err : new Error('Unknown error'));
-        }
-      }
-    };
-
-    fetchApprovals();
-    const int = setInterval(fetchApprovals, intervalMs);
-    return () => {
-      mounted = false;
-      clearInterval(int);
-    };
-  }, [intervalMs]);
-
-  return { data, error };
+  return usePolling(fetcher, intervalMs, [] as FindingApproval[]);
 }

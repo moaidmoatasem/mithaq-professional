@@ -1,6 +1,8 @@
+import { useState, useEffect } from 'react';
 import { motion } from 'motion/react';
 import { Smartphone, ShieldCheck, AlertCircle, FileSearch } from 'lucide-react';
 import { cn } from '@/src/lib/utils';
+import type { ScanResult } from '@/src/lib/api';
 
 interface MobileFinding {
   title: string;
@@ -14,7 +16,52 @@ interface MobileTriagePanelProps {
   className?: string;
 }
 
-export function MobileTriagePanel({ findings, platform, className }: MobileTriagePanelProps) {
+const MOBILE_CWES = new Set([
+  'CWE-276', 'CWE-798', 'CWE-295', 'CWE-312', 'CWE-311',
+  'CWE-326', 'CWE-327', 'CWE-522', 'CWE-89', 'CWE-287',
+  'CWE-200', 'CWE-919', 'CWE-940', 'CWE-921',
+]);
+
+function detectPlatform(target?: string): 'android' | 'ios' | 'unknown' {
+  if (!target) return 'unknown';
+  const lower = target.toLowerCase();
+  if (lower.includes('android') || lower.includes('play.google')) return 'android';
+  if (lower.includes('ios') || lower.includes('apple') || lower.includes('itunes.apple')) return 'ios';
+  return 'unknown';
+}
+
+function filterMobileFindings(scan: ScanResult): MobileFinding[] {
+  return scan.vulnerabilities
+    .filter(v => MOBILE_CWES.has(v.cwe) || v.title.toLowerCase().includes('mobile'))
+    .map(v => ({
+      title: v.title,
+      severity: (v.severity.toUpperCase() === 'CRITICAL' ? 'HIGH' : v.severity.toUpperCase()) as MobileFinding['severity'],
+      cwe: v.cwe,
+    }));
+}
+
+export function MobileTriagePanel({ findings: propFindings, platform: propPlatform, className }: MobileTriagePanelProps) {
+  const [liveFindings, setLiveFindings] = useState<MobileFinding[]>([]);
+  const [livePlatform, setLivePlatform] = useState<'android' | 'ios' | 'unknown'>(propPlatform);
+
+  useEffect(() => {
+    const handler = (e: Event) => {
+      const detail = (e as CustomEvent<ScanResult>).detail;
+      if (detail?.vulnerabilities) {
+        const mobile = filterMobileFindings(detail);
+        if (mobile.length > 0) {
+          setLiveFindings(mobile);
+          setLivePlatform(detectPlatform(detail.target));
+        }
+      }
+    };
+    window.addEventListener('cherenkov:scan_complete', handler);
+    return () => window.removeEventListener('cherenkov:scan_complete', handler);
+  }, []);
+
+  const findings = liveFindings.length > 0 ? liveFindings : propFindings;
+  const platform = livePlatform !== 'unknown' ? livePlatform : propPlatform;
+
   return (
     <div className={cn("bg-bg-surface border border-white/5 p-4 flex flex-col h-full", className)}>
       <div className="flex items-center justify-between mb-4 pb-3 border-b border-white/5">

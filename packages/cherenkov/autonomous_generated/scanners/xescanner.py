@@ -25,7 +25,7 @@ python xxe_scanner.py --file 'path_to_single_xml_file.xml'
 """
 
 import os
-import defusedxml.ElementTree as ET
+import xml.etree.ElementTree as ET
 
 
 class XeScanner:

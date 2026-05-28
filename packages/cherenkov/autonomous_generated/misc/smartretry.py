@@ -70,9 +70,9 @@ class SmartRetry:
 if __name__ == "__main__":
     # Here's how you would use this:
     def failing_function():
-        import secrets
+        import random
 
-        if secrets.randint(0, 1) == 1:
+        if random.randint(0, 1) == 1:
             raise Exception("Simulated failure")
         else:
             return "Success"

@@ -158,10 +158,10 @@ export function TacticalOperationsPanel() {
         window.dispatchEvent(new CustomEvent('cherenkov:scan_complete', { detail: result }));
         
         // Auto-fetch compliance report if selected
-        if (data.framework && data.framework !== 'none') {
-          fetchComplianceReport(result.scan_id, data.framework)
+        if (data.compliance_framework && data.compliance_framework !== 'none') {
+          fetchComplianceReport(result.scan_id, data.compliance_framework)
             .then(report => {
-              addLog(`Compliance Report loaded for ${data.framework}.`, 'verified');
+              addLog(`Compliance Report loaded for ${data.compliance_framework}.`, 'verified');
               window.dispatchEvent(new CustomEvent('cherenkov:compliance_loaded', { detail: report }));
             })
             .catch(err => {

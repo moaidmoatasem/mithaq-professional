@@ -1,7 +1,10 @@
 import base64
 import os
+import logging
 import httpx
 from datetime import datetime, timezone
+
+logger = logging.getLogger(__name__)
 
 
 def _encode_length(n: int) -> bytes:
@@ -49,8 +52,8 @@ async def get_timestamp(trace_hash: str) -> dict:
             if resp.status_code == 200:
                 result["tsr_b64"] = base64.b64encode(resp.content).decode()
                 result["tsa_status"] = "timestamped"
-    except Exception:
+    except Exception as exc:
         # Fall back to unavailable on network failure (air-gap)
-        pass
+        logger.debug("TSA unavailable (air-gap expected): %s", exc)
 
     return result

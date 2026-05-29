@@ -179,7 +179,11 @@ def prune_old_scans(days: int = 90, path: Path = _DB_PATH) -> int:
     cutoff = (datetime.now(timezone.utc) - timedelta(days=days)).isoformat()
     with closing(_connect(path)) as conn:
         with conn:
-            cur = conn.execute("DELETE FROM scans WHERE started_at < ?", (cutoff,))
+            cur = conn.execute(
+                "UPDATE scans SET findings = '[]', meta = '{}', status = 'pruned' "
+                "WHERE started_at < ? AND status != 'pruned'",
+                (cutoff,),
+            )
             return cur.rowcount
 
 

@@ -694,7 +694,7 @@ async def v1_scan(
 
 
 @v1.get("/scans/history")
-async def v1_scan_history() -> list[dict]:
+async def v1_scan_history(current_user: AuthUser = Depends(get_current_user)) -> list[dict]:
     """Return recent scan results for the ThreatIntelPanel sidebar."""
     from cherenkov.core.storage.database import list_scans
 
@@ -702,7 +702,9 @@ async def v1_scan_history() -> list[dict]:
 
 
 @v1.get("/reports/{scan_id}/sarif")
-async def v1_scan_report_sarif(scan_id: str) -> dict:
+async def v1_scan_report_sarif(
+    scan_id: str, current_user: AuthUser = Depends(get_current_user)
+) -> dict:
     """Return a scan report in SARIF 2.1.0 format."""
     from cherenkov.compliance.reports import SARIFExporter
     from cherenkov.core.base_scanner import Finding, ScanResult, Severity

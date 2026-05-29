@@ -98,30 +98,6 @@ test.describe('ComplianceReport', () => {
       });
     });
 
-    await page.route('**/api/v1/compliance/frameworks', async route => {
-      await route.fulfill({
-        status: 200,
-        json: {
-          frameworks: [
-            { id: "egyfincsf", name: "EGY-FIN CSF" },
-            { id: "samacsf", name: "SAMA CSF" },
-          ]
-        }
-      });
-    });
-
-    await page.route('**/api/v1/compliance/frameworks', async route => {
-      await route.fulfill({
-        status: 200,
-        json: {
-          frameworks: [
-            { id: "egyfincsf", name: "EGY-FIN CSF" },
-            { id: "samacsf", name: "SAMA CSF" },
-          ]
-        }
-      });
-    });
-
     await page.route('**/api/v1/scan', async route => {
       await route.fulfill({
         status: 200,
@@ -176,7 +152,7 @@ test.describe('ComplianceReport', () => {
     // Wait for the scan to finish
     await expect(page.locator('text=Scan complete')).toBeVisible({ timeout: 15000 });
 
-    await expect(page.locator('text=EGY-FIN CSF').first()).toBeVisible({ timeout: 10000 });
+    await expect(page.locator('h3', { hasText: 'EGY-FIN CSF' })).toBeVisible({ timeout: 15000 });
     await expect(page.getByText('85%', { exact: true })).toBeVisible();
     await expect(page.locator('text=CSF-1.1').first()).toBeVisible();
     await expect(page.locator('text=Cleartext Storage').first()).toBeVisible();
@@ -196,30 +172,6 @@ test.describe('FindingsTable', () => {
   });
 
   test('should display findings table with scan results', async ({ page }) => {
-    await page.route('**/api/v1/compliance/frameworks', async route => {
-      await route.fulfill({
-        status: 200,
-        json: {
-          frameworks: [
-            { id: "egyfincsf", name: "EGY-FIN CSF" },
-            { id: "samacsf", name: "SAMA CSF" },
-          ]
-        }
-      });
-    });
-
-    await page.route('**/api/v1/compliance/frameworks', async route => {
-      await route.fulfill({
-        status: 200,
-        json: {
-          frameworks: [
-            { id: "egyfincsf", name: "EGY-FIN CSF" },
-            { id: "samacsf", name: "SAMA CSF" },
-          ]
-        }
-      });
-    });
-
     await page.route('**/api/v1/compliance/frameworks', async route => {
       await route.fulfill({
         status: 200,
@@ -299,30 +251,6 @@ test.describe('MobileTriagePanel', () => {
   });
 
   test('should display mobile triage panel with mobile findings', async ({ page }) => {
-    await page.route('**/api/v1/compliance/frameworks', async route => {
-      await route.fulfill({
-        status: 200,
-        json: {
-          frameworks: [
-            { id: "egyfincsf", name: "EGY-FIN CSF" },
-            { id: "samacsf", name: "SAMA CSF" },
-          ]
-        }
-      });
-    });
-
-    await page.route('**/api/v1/compliance/frameworks', async route => {
-      await route.fulfill({
-        status: 200,
-        json: {
-          frameworks: [
-            { id: "egyfincsf", name: "EGY-FIN CSF" },
-            { id: "samacsf", name: "SAMA CSF" },
-          ]
-        }
-      });
-    });
-
     await page.route('**/api/v1/compliance/frameworks', async route => {
       await route.fulfill({
         status: 200,

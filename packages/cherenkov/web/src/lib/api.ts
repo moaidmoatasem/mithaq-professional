@@ -116,7 +116,7 @@ export async function submitScan(payload: ScanRequestPayload): Promise<ScanResul
   const res = await fetch(`${API_BASE}/scan`, {
     method: 'POST',
     headers: getAuthHeaders(),
-    body: JSON.stringify({ url: payload.url }),
+    body: JSON.stringify(payload),
   });
 
   if (!res.ok) {

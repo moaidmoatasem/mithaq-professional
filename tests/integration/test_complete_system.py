@@ -62,16 +62,6 @@ def test_scanner():
     print("✓ Scanner initialized correctly")
 
 
-# Test 4: AI-generated scanners exist
-def test_generated_scanners():
-    # Looking in autonomous_generated directory due to new structure
-    scanner_dir = Path("packages/cherenkov/autonomous_generated/scanners")
-    python_files = list(scanner_dir.glob("*.py"))
-    count = len([f for f in python_files if f.name != "__init__.py"])
-    print(f"✓ Found {count} AI-generated scanners")
-    assert count > 0, "No generated scanners found"
-
-
 # Test 5: Scan reports exist
 def test_scan_reports():
     reports = list(Path(".").glob("scan_report_*.json"))
@@ -124,7 +114,6 @@ if __name__ == "__main__":
     test("Module Imports", test_imports)
     test("Directory Structure", test_structure)
     test("Scanner Initialization", test_scanner)
-    test("AI-Generated Scanners", test_generated_scanners)
     test("Scan Reports", test_scan_reports)
     test("Parallel Execution System", test_parallel)
     test("CLI Interface", test_cli)

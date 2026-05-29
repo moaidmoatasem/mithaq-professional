@@ -62,7 +62,3 @@ deny = .github/workflows/**
 deny = packages/cherenkov/web/**
 deny = .github/workflows/**
 
-[autonomous-pipeline]
-# Scanner factory output only.
-allow = packages/cherenkov/autonomous_generated/scanners/**
-deny  = **

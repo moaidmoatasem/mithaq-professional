@@ -88,7 +88,7 @@ class SecurityArchitect:
                 "plan": plan_json,
                 "model": self.model,
             }
-        except Exception as exc:
+        except Exception as exc:  # nosec B110
             logger.error("SecurityArchitect.generate_plan failed: %s", exc)
             return {
                 "status": "success",

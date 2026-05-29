@@ -446,7 +446,6 @@ test.describe('ComplianceReport', () => {
   test('should display compliance report when cherenkov:compliance_loaded is dispatched', async ({ page }) => {
     await page.goto('/');
     await expect(page.locator('text=CHERENKOV').first()).toBeVisible({ timeout: 15000 });
-    await expect(page.locator('text=CHERENKOV').first()).toBeVisible({ timeout: 15000 });
 
     const mockReport = {
       scan_id: 'test-scan-123',

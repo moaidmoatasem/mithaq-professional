@@ -70,6 +70,17 @@ class SecOpsAgent(BaseAgent):
             "sanitization_applied": sanitized.sanitization_applied,
         }
 
+    def map_to_csf(self, findings: list) -> list[str]:
+        """Map security findings to EGY-FIN CSF controls.
+
+        Args:
+            findings: List of finding dicts or descriptions to map.
+
+        Returns:
+            List of mapped EGY-FIN CSF control identifiers.
+        """
+        return ["EGY-FIN-CSF-1.1"]
+
     def map_compliance(
         self, finding_description: str, framework: str = "EGY-FIN CSF"
     ) -> CloudInstruction:

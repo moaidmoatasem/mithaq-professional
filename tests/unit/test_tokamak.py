@@ -161,7 +161,7 @@ async def test_execute_poc_success():
         mock_docker.errors.APIError = _MockDockerAPIError
         mock_docker.errors.ImageNotFound = _MockDockerImageNotFoundError
         tokamak = ScanTOKAMAK()
-        result = await tokamak.execute_poc(payload="nmap -sV target", timeout=10)
+        result = await tokamak.execute_poc(exploit_command="nmap -sV target", timeout=10)
 
     mock_client.containers.run.assert_called_once()
     args, run_kwargs = mock_client.containers.run.call_args
@@ -200,7 +200,7 @@ async def test_execute_poc_timeout():
         mock_docker.errors.APIError = _MockDockerAPIError
         mock_docker.errors.ImageNotFound = _MockDockerImageNotFoundError
         tokamak = ScanTOKAMAK()
-        result = await tokamak.execute_poc(payload="sleep 30", timeout=1)
+        result = await tokamak.execute_poc(exploit_command="sleep 30", timeout=1)
 
     mock_container.kill.assert_called_once()
     mock_container.remove.assert_called_once_with(force=True)
@@ -221,11 +221,11 @@ async def test_execute_poc_api_error():
         mock_docker.errors.APIError = _MockDockerAPIError
         mock_docker.errors.ImageNotFound = _MockDockerImageNotFoundError
         tokamak = ScanTOKAMAK()
-        result = await tokamak.execute_poc(payload="nmap", timeout=5)
+        result = await tokamak.execute_poc(exploit_command="nmap", timeout=5)
 
     assert result.exit_code == 1
     assert "Docker API error" in result.stderr
-    assert len(result.trace_hash) == 64
+    assert result.trace_hash == ""
 
 
 @pytest.mark.asyncio
@@ -242,11 +242,11 @@ async def test_execute_poc_image_not_found():
         mock_docker.errors.APIError = _MockDockerAPIError
         mock_docker.errors.ImageNotFound = _MockDockerImageNotFoundError
         tokamak = ScanTOKAMAK()
-        result = await tokamak.execute_poc(payload="echo hi", timeout=5)
+        result = await tokamak.execute_poc(exploit_command="echo hi", timeout=5)
 
     assert result.exit_code == 1
     assert "Docker image not found" in result.stderr
-    assert len(result.trace_hash) == 64
+    assert result.trace_hash == ""
 
 
 @pytest.mark.asyncio
@@ -267,7 +267,7 @@ async def test_execute_poc_sha256_signing():
         mock_docker.errors.APIError = _MockDockerAPIError
         mock_docker.errors.ImageNotFound = _MockDockerImageNotFoundError
         tokamak = ScanTOKAMAK()
-        result = await tokamak.execute_poc(payload="echo evidence", timeout=5)
+        result = await tokamak.execute_poc(exploit_command="echo evidence", timeout=5)
 
     assert len(result.trace_hash) == 64
     assert all(c in "0123456789abcdef" for c in result.trace_hash)
@@ -287,7 +287,7 @@ async def test_execute_poc_removes_container_on_exception():
         mock_docker.errors.APIError = _MockDockerAPIError
         mock_docker.errors.ImageNotFound = _MockDockerImageNotFoundError
         tokamak = ScanTOKAMAK()
-        result = await tokamak.execute_poc(payload="echo test", timeout=5)
+        result = await tokamak.execute_poc(exploit_command="echo test", timeout=5)
 
     assert result.exit_code == 1
     assert "Docker API error" in result.stderr

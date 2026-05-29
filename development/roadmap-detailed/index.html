@@ -1,0 +1,4190 @@
+
+<!doctype html>
+<html lang="en" class="no-js">
+  <head>
+    
+      <meta charset="utf-8">
+      <meta name="viewport" content="width=device-width,initial-scale=1">
+      
+        <meta name="description" content="Sovereign AI Security Testing Platform — The Forensic Reveal">
+      
+      
+      
+        <link rel="canonical" href="https://docs.cherenkov-security.com/development/roadmap-detailed/">
+      
+      
+        <link rel="prev" href="../roadmap/">
+      
+      
+        <link rel="next" href="../sovereign-roadmap/">
+      
+      
+        
+      
+      
+      <link rel="icon" href="../../assets/images/favicon.png">
+      <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.7.6">
+    
+    
+      
+        <title>Detailed Roadmap - CHERENKOV</title>
+      
+    
+    
+      <link rel="stylesheet" href="../../assets/stylesheets/main.484c7ddc.min.css">
+      
+        
+        <link rel="stylesheet" href="../../assets/stylesheets/palette.ab4e12ef.min.css">
+      
+      
+
+
+    
+    
+      
+    
+    
+      
+        
+        
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+        <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Inter:300,300i,400,400i,700,700i%7CSpace+Mono:400,400i,700,700i&display=fallback">
+        <style>:root{--md-text-font:"Inter";--md-code-font:"Space Mono"}</style>
+      
+    
+    
+      <link rel="stylesheet" href="../../assets/cherenkov.css">
+    
+    <script>__md_scope=new URL("../..",location),__md_hash=e=>[...e].reduce(((e,_)=>(e<<5)-e+_.charCodeAt(0)),0),__md_get=(e,_=localStorage,t=__md_scope)=>JSON.parse(_.getItem(t.pathname+"."+e)),__md_set=(e,_,t=localStorage,a=__md_scope)=>{try{t.setItem(a.pathname+"."+e,JSON.stringify(_))}catch(e){}}</script>
+    
+      
+
+    
+    
+  </head>
+  
+  
+    
+    
+    
+    
+    
+    <body dir="ltr" data-md-color-scheme="slate" data-md-color-primary="custom" data-md-color-accent="custom">
+  
+    
+    <input class="md-toggle" data-md-toggle="drawer" type="checkbox" id="__drawer" autocomplete="off">
+    <input class="md-toggle" data-md-toggle="search" type="checkbox" id="__search" autocomplete="off">
+    <label class="md-overlay" for="__drawer"></label>
+    <div data-md-component="skip">
+      
+        
+        <a href="#cherenkov-full-task-roadmap" class="md-skip">
+          Skip to content
+        </a>
+      
+    </div>
+    <div data-md-component="announce">
+      
+    </div>
+    
+    
+      
+
+<header class="md-header" data-md-component="header">
+  <nav class="md-header__inner md-grid" aria-label="Header">
+    <a href="../.." title="CHERENKOV" class="md-header__button md-logo" aria-label="CHERENKOV" data-md-component="logo">
+      
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54"/></svg>
+
+    </a>
+    <label class="md-header__button md-icon" for="__drawer">
+      
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M3 6h18v2H3zm0 5h18v2H3zm0 5h18v2H3z"/></svg>
+    </label>
+    <div class="md-header__title" data-md-component="header-title">
+      <div class="md-header__ellipsis">
+        <div class="md-header__topic">
+          <span class="md-ellipsis">
+            CHERENKOV
+          </span>
+        </div>
+        <div class="md-header__topic" data-md-component="header-topic">
+          <span class="md-ellipsis">
+            
+              Detailed Roadmap
+            
+          </span>
+        </div>
+      </div>
+    </div>
+    
+      
+    
+    
+    
+    
+      
+      
+        <label class="md-header__button md-icon" for="__search">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        </label>
+        <div class="md-search" data-md-component="search" role="dialog">
+  <label class="md-search__overlay" for="__search"></label>
+  <div class="md-search__inner" role="search">
+    <form class="md-search__form" name="search">
+      <input type="text" class="md-search__input" name="query" aria-label="Search" placeholder="Search" autocapitalize="off" autocorrect="off" autocomplete="off" spellcheck="false" data-md-component="search-query" required>
+      <label class="md-search__icon md-icon" for="__search">
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11z"/></svg>
+      </label>
+      <nav class="md-search__options" aria-label="Search">
+        
+        <button type="reset" class="md-search__icon md-icon" title="Clear" aria-label="Clear" tabindex="-1">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M19 6.41 17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/></svg>
+        </button>
+      </nav>
+      
+        <div class="md-search__suggest" data-md-component="search-suggest"></div>
+      
+    </form>
+    <div class="md-search__output">
+      <div class="md-search__scrollwrap" tabindex="0" data-md-scrollfix>
+        <div class="md-search-result" data-md-component="search-result">
+          <div class="md-search-result__meta">
+            Initializing search
+          </div>
+          <ol class="md-search-result__list" role="presentation"></ol>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+      
+    
+    
+      <div class="md-header__source">
+        <a href="https://github.com/moaidmoatasem/cherenkov-professional" title="Go to repository" class="md-source" data-md-component="source">
+  <div class="md-source__icon md-icon">
+    
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><!--! Font Awesome Free 7.1.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2025 Fonticons, Inc.--><path d="M173.9 397.4c0 2-2.3 3.6-5.2 3.6-3.3.3-5.6-1.3-5.6-3.6 0-2 2.3-3.6 5.2-3.6 3-.3 5.6 1.3 5.6 3.6m-31.1-4.5c-.7 2 1.3 4.3 4.3 4.9 2.6 1 5.6 0 6.2-2s-1.3-4.3-4.3-5.2c-2.6-.7-5.5.3-6.2 2.3m44.2-1.7c-2.9.7-4.9 2.6-4.6 4.9.3 2 2.9 3.3 5.9 2.6 2.9-.7 4.9-2.6 4.6-4.6-.3-1.9-3-3.2-5.9-2.9M252.8 8C114.1 8 8 113.3 8 252c0 110.9 69.8 205.8 169.5 239.2 12.8 2.3 17.3-5.6 17.3-12.1 0-6.2-.3-40.4-.3-61.4 0 0-70 15-84.7-29.8 0 0-11.4-29.1-27.8-36.6 0 0-22.9-15.7 1.6-15.4 0 0 24.9 2 38.6 25.8 21.9 38.6 58.6 27.5 72.9 20.9 2.3-16 8.8-27.1 16-33.7-55.9-6.2-112.3-14.3-112.3-110.5 0-27.5 7.6-41.3 23.6-58.9-2.6-6.5-11.1-33.3 2.6-67.9 20.9-6.5 69 27 69 27 20-5.6 41.5-8.5 62.8-8.5s42.8 2.9 62.8 8.5c0 0 48.1-33.6 69-27 13.7 34.7 5.2 61.4 2.6 67.9 16 17.7 25.8 31.5 25.8 58.9 0 96.5-58.9 104.2-114.8 110.5 9.2 7.9 17 22.9 17 46.4 0 33.7-.3 75.4-.3 83.6 0 6.5 4.6 14.4 17.3 12.1C436.2 457.8 504 362.9 504 252 504 113.3 391.5 8 252.8 8M105.2 352.9c-1.3 1-1 3.3.7 5.2 1.6 1.6 3.9 2.3 5.2 1 1.3-1 1-3.3-.7-5.2-1.6-1.6-3.9-2.3-5.2-1m-10.8-8.1c-.7 1.3.3 2.9 2.3 3.9 1.6 1 3.6.7 4.3-.7.7-1.3-.3-2.9-2.3-3.9-2-.6-3.6-.3-4.3.7m32.4 35.6c-1.6 1.3-1 4.3 1.3 6.2 2.3 2.3 5.2 2.6 6.5 1 1.3-1.3.7-4.3-1.3-6.2-2.2-2.3-5.2-2.6-6.5-1m-11.4-14.7c-1.6 1-1.6 3.6 0 5.9s4.3 3.3 5.6 2.3c1.6-1.3 1.6-3.9 0-6.2-1.4-2.3-4-3.3-5.6-2"/></svg>
+  </div>
+  <div class="md-source__repository">
+    cherenkov-professional
+  </div>
+</a>
+      </div>
+    
+  </nav>
+  
+</header>
+    
+    <div class="md-container" data-md-component="container">
+      
+      
+        
+          
+            
+<nav class="md-tabs" aria-label="Tabs" data-md-component="tabs">
+  <div class="md-grid">
+    <ul class="md-tabs__list">
+      
+        
+  
+  
+  
+  
+    
+    
+      <li class="md-tabs__item">
+        <a href="../.." class="md-tabs__link">
+          
+  
+  
+    
+  
+  Home
+
+        </a>
+      </li>
+    
+  
+
+      
+        
+  
+  
+  
+  
+    
+    
+      <li class="md-tabs__item">
+        <a href="../../architecture/" class="md-tabs__link">
+          
+  
+  
+    
+  
+  Architecture
+
+        </a>
+      </li>
+    
+  
+
+      
+        
+  
+  
+  
+  
+    
+    
+      <li class="md-tabs__item">
+        <a href="../../scanners/" class="md-tabs__link">
+          
+  
+  
+    
+  
+  Scanners
+
+        </a>
+      </li>
+    
+  
+
+      
+        
+  
+  
+  
+  
+    
+    
+      <li class="md-tabs__item">
+        <a href="../../configuration/" class="md-tabs__link">
+          
+  
+  
+    
+  
+  Configuration
+
+        </a>
+      </li>
+    
+  
+
+      
+        
+  
+  
+  
+  
+    
+    
+      <li class="md-tabs__item">
+        <a href="../../api/" class="md-tabs__link">
+          
+  
+  
+    
+  
+  API Reference
+
+        </a>
+      </li>
+    
+  
+
+      
+        
+  
+  
+  
+  
+    
+    
+      <li class="md-tabs__item">
+        <a href="../../cli/" class="md-tabs__link">
+          
+  
+  
+    
+  
+  CLI
+
+        </a>
+      </li>
+    
+  
+
+      
+        
+  
+  
+  
+  
+    
+    
+      <li class="md-tabs__item">
+        <a href="../../compliance/" class="md-tabs__link">
+          
+  
+  
+    
+  
+  Compliance
+
+        </a>
+      </li>
+    
+  
+
+      
+        
+  
+  
+  
+    
+  
+  
+    
+    
+      <li class="md-tabs__item md-tabs__item--active">
+        <a href="../" class="md-tabs__link">
+          
+  
+  
+    
+  
+  Development
+
+        </a>
+      </li>
+    
+  
+
+      
+        
+  
+  
+  
+  
+    
+    
+      <li class="md-tabs__item">
+        <a href="../../security/" class="md-tabs__link">
+          
+  
+  
+    
+  
+  Security
+
+        </a>
+      </li>
+    
+  
+
+      
+        
+  
+  
+  
+  
+    
+    
+      <li class="md-tabs__item">
+        <a href="../../governance/code-of-conduct/" class="md-tabs__link">
+          
+  
+  
+    
+  
+  Governance
+
+        </a>
+      </li>
+    
+  
+
+      
+        
+  
+  
+  
+  
+    
+    
+      <li class="md-tabs__item">
+        <a href="https://github.com/moaidmoatasem/cherenkov-professional/blob/main/ARCHITECTURE.md" class="md-tabs__link">
+          
+  
+  
+    
+  
+  Architecture Reference
+
+        </a>
+      </li>
+    
+  
+
+      
+    </ul>
+  </div>
+</nav>
+          
+        
+      
+      <main class="md-main" data-md-component="main">
+        <div class="md-main__inner md-grid">
+          
+            
+              
+              <div class="md-sidebar md-sidebar--primary" data-md-component="sidebar" data-md-type="navigation" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+
+  
+
+
+  
+
+<nav class="md-nav md-nav--primary md-nav--lifted md-nav--integrated" aria-label="Navigation" data-md-level="0">
+  <label class="md-nav__title" for="__drawer">
+    <a href="../.." title="CHERENKOV" class="md-nav__button md-logo" aria-label="CHERENKOV" data-md-component="logo">
+      
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54"/></svg>
+
+    </a>
+    CHERENKOV
+  </label>
+  
+    <div class="md-nav__source">
+      <a href="https://github.com/moaidmoatasem/cherenkov-professional" title="Go to repository" class="md-source" data-md-component="source">
+  <div class="md-source__icon md-icon">
+    
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><!--! Font Awesome Free 7.1.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2025 Fonticons, Inc.--><path d="M173.9 397.4c0 2-2.3 3.6-5.2 3.6-3.3.3-5.6-1.3-5.6-3.6 0-2 2.3-3.6 5.2-3.6 3-.3 5.6 1.3 5.6 3.6m-31.1-4.5c-.7 2 1.3 4.3 4.3 4.9 2.6 1 5.6 0 6.2-2s-1.3-4.3-4.3-5.2c-2.6-.7-5.5.3-6.2 2.3m44.2-1.7c-2.9.7-4.9 2.6-4.6 4.9.3 2 2.9 3.3 5.9 2.6 2.9-.7 4.9-2.6 4.6-4.6-.3-1.9-3-3.2-5.9-2.9M252.8 8C114.1 8 8 113.3 8 252c0 110.9 69.8 205.8 169.5 239.2 12.8 2.3 17.3-5.6 17.3-12.1 0-6.2-.3-40.4-.3-61.4 0 0-70 15-84.7-29.8 0 0-11.4-29.1-27.8-36.6 0 0-22.9-15.7 1.6-15.4 0 0 24.9 2 38.6 25.8 21.9 38.6 58.6 27.5 72.9 20.9 2.3-16 8.8-27.1 16-33.7-55.9-6.2-112.3-14.3-112.3-110.5 0-27.5 7.6-41.3 23.6-58.9-2.6-6.5-11.1-33.3 2.6-67.9 20.9-6.5 69 27 69 27 20-5.6 41.5-8.5 62.8-8.5s42.8 2.9 62.8 8.5c0 0 48.1-33.6 69-27 13.7 34.7 5.2 61.4 2.6 67.9 16 17.7 25.8 31.5 25.8 58.9 0 96.5-58.9 104.2-114.8 110.5 9.2 7.9 17 22.9 17 46.4 0 33.7-.3 75.4-.3 83.6 0 6.5 4.6 14.4 17.3 12.1C436.2 457.8 504 362.9 504 252 504 113.3 391.5 8 252.8 8M105.2 352.9c-1.3 1-1 3.3.7 5.2 1.6 1.6 3.9 2.3 5.2 1 1.3-1 1-3.3-.7-5.2-1.6-1.6-3.9-2.3-5.2-1m-10.8-8.1c-.7 1.3.3 2.9 2.3 3.9 1.6 1 3.6.7 4.3-.7.7-1.3-.3-2.9-2.3-3.9-2-.6-3.6-.3-4.3.7m32.4 35.6c-1.6 1.3-1 4.3 1.3 6.2 2.3 2.3 5.2 2.6 6.5 1 1.3-1.3.7-4.3-1.3-6.2-2.2-2.3-5.2-2.6-6.5-1m-11.4-14.7c-1.6 1-1.6 3.6 0 5.9s4.3 3.3 5.6 2.3c1.6-1.3 1.6-3.9 0-6.2-1.4-2.3-4-3.3-5.6-2"/></svg>
+  </div>
+  <div class="md-source__repository">
+    cherenkov-professional
+  </div>
+</a>
+    </div>
+  
+  <ul class="md-nav__list" data-md-scrollfix>
+    
+      
+      
+  
+  
+  
+  
+    
+    
+      
+        
+          
+        
+      
+        
+      
+        
+      
+        
+      
+    
+    
+    
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+          
+        
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_1" >
+        
+          
+          <div class="md-nav__link md-nav__container">
+            <a href="../.." class="md-nav__link ">
+              
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Home
+  
+
+    
+  </span>
+  
+  
+
+            </a>
+            
+              
+              <label class="md-nav__link " for="__nav_1" id="__nav_1_label" tabindex="0">
+                <span class="md-nav__icon md-icon"></span>
+              </label>
+            
+          </div>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_1_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_1">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Home
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../quickstart/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Quick Start
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../what-is-cherenkov/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    What is CHERENKOV?
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../project-briefing/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Project Briefing
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+      
+        
+          
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+    
+    
+    
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+          
+        
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_2" >
+        
+          
+          <div class="md-nav__link md-nav__container">
+            <a href="../../architecture/" class="md-nav__link ">
+              
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Architecture
+  
+
+    
+  </span>
+  
+  
+
+            </a>
+            
+              
+              <label class="md-nav__link " for="__nav_2" id="__nav_2_label" tabindex="0">
+                <span class="md-nav__icon md-icon"></span>
+              </label>
+            
+          </div>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_2_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_2">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Architecture
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../architecture/overview/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Architecture Overview
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../architecture/trident/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    The Trident
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../architecture/meissner/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    MEISSNER (Shield)
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../architecture/ablation/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    ABLATION (Redaction)
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../architecture/tokamak/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    TOKAMAK (Proof)
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../architecture/swarm/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Cognitive Swarm
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../architecture/data-tiers/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Data Tiers
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../architecture/adaptive-learning/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Adaptive Learning
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../architecture/system-architecture/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    System Architecture (Detailed)
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../architecture/hld-diagram/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    High-Level Design
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../architecture/lld-diagram/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Low-Level Design
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../architecture/system-design/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    System Design & State Machine
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../architecture/design-patterns/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Design Patterns
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../architecture/ssot/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    SSOT
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+      
+        
+          
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+    
+    
+    
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+          
+        
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_3" >
+        
+          
+          <div class="md-nav__link md-nav__container">
+            <a href="../../scanners/" class="md-nav__link ">
+              
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Scanners
+  
+
+    
+  </span>
+  
+  
+
+            </a>
+            
+              
+              <label class="md-nav__link " for="__nav_3" id="__nav_3_label" tabindex="0">
+                <span class="md-nav__icon md-icon"></span>
+              </label>
+            
+          </div>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_3_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_3">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Scanners
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../scanners/validated/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Validated Scanners
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../scanners/strategy/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Scanner Strategy
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../scanners/writing/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Writing a Scanner
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../scanners/validation-gate/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Validation Gate
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../scanners/third-party/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Third-Party Wrappers
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+      
+        
+          
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+    
+    
+    
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+          
+        
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_4" >
+        
+          
+          <div class="md-nav__link md-nav__container">
+            <a href="../../configuration/" class="md-nav__link ">
+              
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Configuration
+  
+
+    
+  </span>
+  
+  
+
+            </a>
+            
+              
+              <label class="md-nav__link " for="__nav_4" id="__nav_4_label" tabindex="0">
+                <span class="md-nav__icon md-icon"></span>
+              </label>
+            
+          </div>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_4_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_4">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Configuration
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../configuration/cherenkov-yaml/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    cherenkov.yaml
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../configuration/profiles/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Deployment Profiles
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../configuration/docker/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Docker Compose
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../configuration/env-vars/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Environment Variables
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+      
+        
+          
+        
+      
+        
+      
+        
+      
+        
+      
+    
+    
+    
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+          
+        
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_5" >
+        
+          
+          <div class="md-nav__link md-nav__container">
+            <a href="../../api/" class="md-nav__link ">
+              
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    API Reference
+  
+
+    
+  </span>
+  
+  
+
+            </a>
+            
+              
+              <label class="md-nav__link " for="__nav_5" id="__nav_5_label" tabindex="0">
+                <span class="md-nav__icon md-icon"></span>
+              </label>
+            
+          </div>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_5_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_5">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    API Reference
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../api/rest/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    REST Endpoints
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../api/websocket/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    WebSocket Events
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../api/errors/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Error Codes
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+      
+        
+          
+        
+      
+    
+    
+    
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+          
+        
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_6" >
+        
+          
+          <div class="md-nav__link md-nav__container">
+            <a href="../../cli/" class="md-nav__link ">
+              
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    CLI
+  
+
+    
+  </span>
+  
+  
+
+            </a>
+            
+          </div>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_6_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_6">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    CLI
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+      
+        
+          
+        
+      
+        
+      
+        
+      
+        
+      
+    
+    
+    
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+          
+        
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_7" >
+        
+          
+          <div class="md-nav__link md-nav__container">
+            <a href="../../compliance/" class="md-nav__link ">
+              
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Compliance
+  
+
+    
+  </span>
+  
+  
+
+            </a>
+            
+              
+              <label class="md-nav__link " for="__nav_7" id="__nav_7_label" tabindex="0">
+                <span class="md-nav__icon md-icon"></span>
+              </label>
+            
+          </div>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_7_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_7">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Compliance
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../compliance/egyfincsf/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    EGY-FIN CSF
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../compliance/samacsf/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    SAMA CSF
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../compliance/dora/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    DORA
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+    
+  
+  
+  
+    
+    
+      
+        
+          
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+    
+    
+    
+      
+        
+        
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--active md-nav__item--section md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_8" checked>
+        
+          
+          <div class="md-nav__link md-nav__container">
+            <a href="../" class="md-nav__link ">
+              
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Development
+  
+
+    
+  </span>
+  
+  
+
+            </a>
+            
+              
+              <label class="md-nav__link " for="__nav_8" id="__nav_8_label" tabindex="">
+                <span class="md-nav__icon md-icon"></span>
+              </label>
+            
+          </div>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_8_label" aria-expanded="true">
+          <label class="md-nav__title" for="__nav_8">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Development
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../workflow/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Development Workflow
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../sprint-plan/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Sprint Plan
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../code-standards/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Code Standards
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../brand-guidelines/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Brand Guidelines
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../design/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Design
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../design-system/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Design System
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../technical-specification/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Technical Specification
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../swarm/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Swarm Orchestrator
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../session-protocol/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Session Protocol
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../roadmap/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Roadmap
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+    
+  
+  
+  
+    <li class="md-nav__item md-nav__item--active">
+      
+      <input class="md-nav__toggle md-toggle" type="checkbox" id="__toc">
+      
+      
+        
+      
+      
+        <label class="md-nav__link md-nav__link--active" for="__toc">
+          
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Detailed Roadmap
+  
+
+    
+  </span>
+  
+  
+
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <a href="./" class="md-nav__link md-nav__link--active">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Detailed Roadmap
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+      
+        
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#phase-1-foundation-complete-v100-rc1" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Phase 1 — Foundation ✅ COMPLETE (v1.0.0-rc1)
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#phase-2-swarm-optimization-v110-in-progress-q2-2026" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Phase 2 — Swarm Optimization (v1.1.0) 🔄 IN PROGRESS — Q2 2026
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Phase 2 — Swarm Optimization (v1.1.0) 🔄 IN PROGRESS — Q2 2026">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#2a-tokamak-docker-sandbox-issue-174" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        2A · TOKAMAK Docker Sandbox [Issue #174]
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#2b-backend-hardening-issue-177" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        2B · Backend Hardening [Issue #177]
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#2c-scanner-graduation-issue-178" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        2C · Scanner Graduation [Issue #178]
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#2d-parallel-orchestration-hardening-issue-182" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        2D · Parallel Orchestration Hardening [Issue #182]
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#phase-3-production-hardening-hitl-v150-next-q3-2026" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Phase 3 — Production Hardening &amp; HITL (v1.5.0) ⏳ NEXT — Q3 2026
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Phase 3 — Production Hardening &amp; HITL (v1.5.0) ⏳ NEXT — Q3 2026">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#3a-hitl-approval-gate-issue-183" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        3A · HITL Approval Gate [Issue #183]
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#3b-compliance-mapper-issue-184" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        3B · Compliance Mapper [Issue #184]
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#3c-worm-audit-vault-issue-185" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        3C · WORM Audit Vault [Issue #185]
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#3d-sso-rbac-portal-issue-186" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        3D · SSO / RBAC Portal [Issue #186]
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#phase-4-mobile-triage-v200-q4-2026-q1-2027" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Phase 4 — Mobile Triage (v2.0.0) ⏳ Q4 2026 – Q1 2027
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Phase 4 — Mobile Triage (v2.0.0) ⏳ Q4 2026 – Q1 2027">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#4a-android-scanner-issue-187" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        4A · Android Scanner [Issue #187]
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#4b-ios-scanner-issue-188" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        4B · iOS Scanner [Issue #188]
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#4c-frida-runtime" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        4C · Frida / Runtime
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#4d-mobile-dashboard" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        4D · Mobile Dashboard
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#phase-5-ecosystem-integration-v250-2027" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Phase 5 — Ecosystem Integration (v2.5.0) ⏳ 2027
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Phase 5 — Ecosystem Integration (v2.5.0) ⏳ 2027">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#5a-cicd-integration" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        5A · CI/CD Integration
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#5b-local-siem-integration" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        5B · Local SIEM Integration
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#5c-multi-node-mesh" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        5C · Multi-Node Mesh
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#milestone-summary" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Milestone Summary
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#issue-tracking-convention" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Issue Tracking Convention
+      
+    </span>
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+      
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../sovereign-roadmap/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Sovereign Roadmap
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../integrations-approvals/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Integrations & Approvals
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../ui-requirements/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    UI Requirements
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../master-plan/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Master Plan
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../premortem/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Premortem
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../sovereign-blueprint/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Sovereign Blueprint
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../releases/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Releases
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../newsletter-concept/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Newsletter Concept
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../wiki-index/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Wiki Index
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../writing-style/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Writing Style Guide
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+      
+        
+          
+        
+      
+        
+      
+    
+    
+    
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+          
+        
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_9" >
+        
+          
+          <div class="md-nav__link md-nav__container">
+            <a href="../../security/" class="md-nav__link ">
+              
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Security
+  
+
+    
+  </span>
+  
+  
+
+            </a>
+            
+              
+              <label class="md-nav__link " for="__nav_9" id="__nav_9_label" tabindex="0">
+                <span class="md-nav__icon md-icon"></span>
+              </label>
+            
+          </div>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_9_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_9">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Security
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../security/disclosure/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Vulnerability Disclosure
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+    
+    
+    
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+          
+        
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_10" >
+        
+          
+          <label class="md-nav__link" for="__nav_10" id="__nav_10_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Governance
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_10_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_10">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Governance
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../governance/code-of-conduct/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Code of Conduct
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../governance/security/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Security Policy
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../governance/agent-rules/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Agent Rules
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../governance/hitl-enforcement/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    HITL Enforcement
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../governance/contributing/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Contributing
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+      
+        
+      
+    
+    
+    
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+          
+        
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_11" >
+        
+          
+          <label class="md-nav__link" for="__nav_11" id="__nav_11_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Architecture Reference
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_11_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_11">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Architecture Reference
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="https://github.com/moaidmoatasem/cherenkov-professional/blob/main/ARCHITECTURE.md" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    ARCHITECTURE.md (Root)
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+  </ul>
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+            
+          
+          
+            <div class="md-content" data-md-component="content">
+              
+              <article class="md-content__inner md-typeset">
+                
+                  
+
+
+  
+  
+
+
+<h1 id="cherenkov-full-task-roadmap">CHERENKOV — Full Task Roadmap<a class="headerlink" href="#cherenkov-full-task-roadmap" title="Permanent link">&para;</a></h1>
+<p><strong>Stack:</strong> Python 3.11 · FastAPI · React 19 / Vite / Tailwind v4 · SQLite WAL · Ollama<br />
+<strong>Target market:</strong> EGY-FIN / SAMA sovereign security<br />
+<strong>Budget:</strong> $0 (local inference only)</p>
+<hr />
+<h2 id="phase-1-foundation-complete-v100-rc1">Phase 1 — Foundation ✅ COMPLETE (v1.0.0-rc1)<a class="headerlink" href="#phase-1-foundation-complete-v100-rc1" title="Permanent link">&para;</a></h2>
+<table>
+<thead>
+<tr>
+<th>Task</th>
+<th>File</th>
+<th>Status</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>BaseScanner abstract class</td>
+<td><code>core/base_scanner.py</code></td>
+<td>✅</td>
+</tr>
+<tr>
+<td>Severity / Finding / ScanResult schemas</td>
+<td><code>core/base_scanner.py</code></td>
+<td>✅</td>
+</tr>
+<tr>
+<td>MEISSNER circuit breaker (AIMD)</td>
+<td><code>core/circuit_breaker.py</code></td>
+<td>✅</td>
+</tr>
+<tr>
+<td>ABLATION redactor / sanitizer</td>
+<td><code>core/ablation/</code></td>
+<td>✅</td>
+</tr>
+<tr>
+<td>TOKAMAK execution sandbox stub</td>
+<td><code>core/tokamak.py</code></td>
+<td>✅ stub</td>
+</tr>
+<tr>
+<td>SQLite WAL storage helpers</td>
+<td><code>core/storage/database.py</code></td>
+<td>✅</td>
+</tr>
+<tr>
+<td>FastAPI server skeleton</td>
+<td><code>api/main.py</code></td>
+<td>✅</td>
+</tr>
+<tr>
+<td><code>/api/v1/*</code> REST routes</td>
+<td><code>api/main.py</code></td>
+<td>✅</td>
+</tr>
+<tr>
+<td><code>/ws/live</code> WebSocket hub</td>
+<td><code>api/main.py</code></td>
+<td>✅</td>
+</tr>
+<tr>
+<td>React dashboard (HUD)</td>
+<td><code>web/src/</code></td>
+<td>✅</td>
+</tr>
+<tr>
+<td>Vite proxy + api.ts client</td>
+<td><code>web/src/lib/api.ts</code></td>
+<td>✅</td>
+</tr>
+<tr>
+<td>ForensicHeader + NodeStatusRow</td>
+<td><code>web/src/components/organisms/</code></td>
+<td>✅</td>
+</tr>
+<tr>
+<td>TacticalOperationsPanel + ThreatIntelPanel</td>
+<td><code>web/src/components/organisms/</code></td>
+<td>✅</td>
+</tr>
+<tr>
+<td>CI pipeline (ruff, pytest, bandit, CodeQL)</td>
+<td><code>.github/workflows/</code></td>
+<td>✅</td>
+</tr>
+<tr>
+<td>Agent coordination files</td>
+<td><code>AGENTS.md</code>, <code>GEMINI.md</code>, <code>.agents/</code></td>
+<td>✅</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2 id="phase-2-swarm-optimization-v110-in-progress-q2-2026">Phase 2 — Swarm Optimization (v1.1.0) 🔄 IN PROGRESS — Q2 2026<a class="headerlink" href="#phase-2-swarm-optimization-v110-in-progress-q2-2026" title="Permanent link">&para;</a></h2>
+<h3 id="2a-tokamak-docker-sandbox-issue-174">2A · TOKAMAK Docker Sandbox [Issue #174]<a class="headerlink" href="#2a-tokamak-docker-sandbox-issue-174" title="Permanent link">&para;</a></h3>
+<table>
+<thead>
+<tr>
+<th>#</th>
+<th>Task</th>
+<th>File</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>2A-1</td>
+<td><code>Command</code> + <code>TokamakResult</code> dataclasses</td>
+<td><code>core/tokamak.py</code></td>
+</tr>
+<tr>
+<td>2A-2</td>
+<td><code>Tokamak.execute()</code> — docker run <code>--network none</code>, capture stdout/stderr</td>
+<td><code>core/tokamak.py</code></td>
+</tr>
+<tr>
+<td>2A-3</td>
+<td>SHA-256 trace signing: <code>sha256(stdout+stderr+timestamp).hexdigest()</code></td>
+<td><code>core/tokamak.py</code></td>
+</tr>
+<tr>
+<td>2A-4</td>
+<td>Cryptographic shred receipt on teardown (overwrite + truncate + JSON receipt)</td>
+<td><code>core/tokamak.py</code></td>
+</tr>
+<tr>
+<td>2A-5</td>
+<td><code>POST /api/v1/sandbox/execute</code> + <code>GET /api/v1/sandbox/status</code></td>
+<td><code>api/main.py</code></td>
+</tr>
+<tr>
+<td>2A-6</td>
+<td>Unit tests (mock subprocess, assert 64-char trace_hash, receipt schema)</td>
+<td><code>tests/unit/test_tokamak.py</code></td>
+</tr>
+</tbody>
+</table>
+<h3 id="2b-backend-hardening-issue-177">2B · Backend Hardening [Issue #177]<a class="headerlink" href="#2b-backend-hardening-issue-177" title="Permanent link">&para;</a></h3>
+<table>
+<thead>
+<tr>
+<th>#</th>
+<th>Task</th>
+<th>File</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>2B-1</td>
+<td><code>list_scans(limit)</code> — query SQLite instead of <code>_scan_history</code> list</td>
+<td><code>core/storage/database.py</code></td>
+</tr>
+<tr>
+<td>2B-2</td>
+<td><code>/api/v1/scans/history</code> reads from DB (survives restart)</td>
+<td><code>api/main.py</code></td>
+</tr>
+<tr>
+<td>2B-3</td>
+<td><code>/api/v1/health</code> nodes — ping <code>localhost:11434/api/tags</code> (timeout 1s)</td>
+<td><code>api/main.py</code></td>
+</tr>
+<tr>
+<td>2B-4</td>
+<td><code>/api/v1/health</code> meissner.state from <code>meissner_hub.state.value</code></td>
+<td><code>api/main.py</code></td>
+</tr>
+<tr>
+<td>2B-5</td>
+<td>Register WS callback in <code>Meissner._transition_to_open()</code> → broadcast <code>circuit_breaker</code> event</td>
+<td><code>core/circuit_breaker.py</code> + <code>api/main.py</code></td>
+</tr>
+<tr>
+<td>2B-6</td>
+<td>Unit tests for DB persistence and health endpoint</td>
+<td><code>tests/unit/test_api_health.py</code></td>
+</tr>
+</tbody>
+</table>
+<h3 id="2c-scanner-graduation-issue-178">2C · Scanner Graduation [Issue #178]<a class="headerlink" href="#2c-scanner-graduation-issue-178" title="Permanent link">&para;</a></h3>
+<table>
+<thead>
+<tr>
+<th>#</th>
+<th>Task</th>
+<th>File</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>2C-1</td>
+<td>Graduate <code>xxe_scanner.py</code> → <code>scanners/xxe_scanner.py</code> + unit test</td>
+<td><code>scanners/xxe_scanner.py</code></td>
+</tr>
+<tr>
+<td>2C-2</td>
+<td>Graduate <code>pathtraversalscanner.py</code> + unit test</td>
+<td><code>scanners/path_traversal_scanner.py</code></td>
+</tr>
+<tr>
+<td>2C-3</td>
+<td>Graduate <code>fileuploadscanner.py</code> + unit test</td>
+<td><code>scanners/file_upload_scanner.py</code></td>
+</tr>
+<tr>
+<td>2C-4</td>
+<td>Graduate <code>networkvulnerabilityscanner.py</code> + unit test</td>
+<td><code>scanners/network_scanner.py</code></td>
+</tr>
+<tr>
+<td>2C-5</td>
+<td>Graduate <code>cicdintegrationscanner.py</code> + unit test</td>
+<td><code>scanners/cicd_scanner.py</code></td>
+</tr>
+<tr>
+<td>2C-6</td>
+<td>Register all 5 in <code>ScannerRegistry</code></td>
+<td><code>core/registry.py</code></td>
+</tr>
+<tr>
+<td>2C-7</td>
+<td><code>GET /api/v1/scanners</code> — list registered scanners + metadata</td>
+<td><code>api/main.py</code></td>
+</tr>
+</tbody>
+</table>
+<h3 id="2d-parallel-orchestration-hardening-issue-182">2D · Parallel Orchestration Hardening [Issue #182]<a class="headerlink" href="#2d-parallel-orchestration-hardening-issue-182" title="Permanent link">&para;</a></h3>
+<table>
+<thead>
+<tr>
+<th>#</th>
+<th>Task</th>
+<th>File</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>2D-1</td>
+<td><code>ScanEngine.scan_all()</code> — true asyncio gather across all registered scanners</td>
+<td><code>core/engine.py</code></td>
+</tr>
+<tr>
+<td>2D-2</td>
+<td>Per-scanner timeout isolation (one scanner failure doesn't kill others)</td>
+<td><code>core/engine.py</code></td>
+</tr>
+<tr>
+<td>2D-3</td>
+<td>Broadcast <code>scan_progress</code> WS events per scanner completion</td>
+<td><code>core/engine.py</code> + <code>api/main.py</code></td>
+</tr>
+<tr>
+<td>2D-4</td>
+<td>Integration test: parallel scan finishes faster than sequential</td>
+<td><code>tests/integration/test_parallel_scan.py</code></td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2 id="phase-3-production-hardening-hitl-v150-next-q3-2026">Phase 3 — Production Hardening &amp; HITL (v1.5.0) ⏳ NEXT — Q3 2026<a class="headerlink" href="#phase-3-production-hardening-hitl-v150-next-q3-2026" title="Permanent link">&para;</a></h2>
+<h3 id="3a-hitl-approval-gate-issue-183">3A · HITL Approval Gate [Issue #183]<a class="headerlink" href="#3a-hitl-approval-gate-issue-183" title="Permanent link">&para;</a></h3>
+<table>
+<thead>
+<tr>
+<th>#</th>
+<th>Task</th>
+<th>File</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>3A-1</td>
+<td><code>findings_pending</code> SQLite table (WAL)</td>
+<td><code>core/storage/database.py</code></td>
+</tr>
+<tr>
+<td>3A-2</td>
+<td><code>FindingApproval</code> Pydantic model</td>
+<td><code>api/main.py</code></td>
+</tr>
+<tr>
+<td>3A-3</td>
+<td>Hook <code>_run_scan()</code>: insert CRITICAL/HIGH findings → <code>findings_pending</code> + broadcast</td>
+<td><code>api/main.py</code></td>
+</tr>
+<tr>
+<td>3A-4</td>
+<td><code>POST /api/v1/findings/{id}/approve</code></td>
+<td><code>api/main.py</code></td>
+</tr>
+<tr>
+<td>3A-5</td>
+<td><code>POST /api/v1/findings/{id}/reject</code></td>
+<td><code>api/main.py</code></td>
+</tr>
+<tr>
+<td>3A-6</td>
+<td><code>GET /api/v1/findings/pending</code></td>
+<td><code>api/main.py</code></td>
+</tr>
+<tr>
+<td>3A-7</td>
+<td><code>PendingApprovalsPanel</code> organism (Approve/Reject buttons, severity badge)</td>
+<td><code>web/src/components/organisms/</code></td>
+</tr>
+<tr>
+<td>3A-8</td>
+<td><code>ForensicHeader</code> badge — red pulse when pending count &gt; 0</td>
+<td><code>web/src/components/organisms/ForensicHeader.tsx</code></td>
+</tr>
+<tr>
+<td>3A-9</td>
+<td><code>usePendingApprovals(intervalMs)</code> hook</td>
+<td><code>web/src/hooks/useMetrics.ts</code></td>
+</tr>
+<tr>
+<td>3A-10</td>
+<td>Unit tests for all three endpoints</td>
+<td><code>tests/unit/test_hitl_api.py</code></td>
+</tr>
+</tbody>
+</table>
+<h3 id="3b-compliance-mapper-issue-184">3B · Compliance Mapper [Issue #184]<a class="headerlink" href="#3b-compliance-mapper-issue-184" title="Permanent link">&para;</a></h3>
+<table>
+<thead>
+<tr>
+<th>#</th>
+<th>Task</th>
+<th>File</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>3B-1</td>
+<td><code>packages/cherenkov/compliance/__init__.py</code></td>
+<td><code>compliance/</code></td>
+</tr>
+<tr>
+<td>3B-2</td>
+<td><code>ComplianceMapper</code> — static dict: CWE → OWASP / SAMA_CSF / EGY_FIN_CSF / DORA</td>
+<td><code>compliance/mapper.py</code></td>
+</tr>
+<tr>
+<td>3B-3</td>
+<td>Cover 20+ CWEs: 79, 89, 22, 352, 611, 287, 798, 502, 200, 918, 77, 78, 94, 306, 312, 319, 434, 601, 732, 918</td>
+<td><code>compliance/mapper.py</code></td>
+</tr>
+<tr>
+<td>3B-4</td>
+<td><code>GET /api/v1/reports/{scan_id}/sarif</code> — SARIF 2.1.0 export</td>
+<td><code>api/main.py</code></td>
+</tr>
+<tr>
+<td>3B-5</td>
+<td><code>GET /api/v1/reports/{scan_id}/pdf</code> — local PDF (reportlab, zero cloud)</td>
+<td><code>api/main.py</code></td>
+</tr>
+<tr>
+<td>3B-6</td>
+<td>Unit tests: CWE mapping coverage + SARIF schema validation</td>
+<td><code>tests/unit/test_compliance_mapper.py</code></td>
+</tr>
+</tbody>
+</table>
+<h3 id="3c-worm-audit-vault-issue-185">3C · WORM Audit Vault [Issue #185]<a class="headerlink" href="#3c-worm-audit-vault-issue-185" title="Permanent link">&para;</a></h3>
+<table>
+<thead>
+<tr>
+<th>#</th>
+<th>Task</th>
+<th>File</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>3C-1</td>
+<td>Enforce WAL mode + <code>PRAGMA journal_mode=WAL</code> on all DB connections</td>
+<td><code>core/storage/database.py</code></td>
+</tr>
+<tr>
+<td>3C-2</td>
+<td><code>AuditEntry</code> table: immutable rows (no UPDATE/DELETE permitted)</td>
+<td><code>core/storage/database.py</code></td>
+</tr>
+<tr>
+<td>3C-3</td>
+<td>Auto-append every scan, finding, approval, rejection as audit entry</td>
+<td><code>api/main.py</code></td>
+</tr>
+<tr>
+<td>3C-4</td>
+<td><code>GET /api/v1/audit</code> — chronological audit log endpoint</td>
+<td><code>api/main.py</code></td>
+</tr>
+<tr>
+<td>3C-5</td>
+<td>Unit test: verify no row can be mutated after insert</td>
+<td><code>tests/unit/test_audit_vault.py</code></td>
+</tr>
+</tbody>
+</table>
+<h3 id="3d-sso-rbac-portal-issue-186">3D · SSO / RBAC Portal [Issue #186]<a class="headerlink" href="#3d-sso-rbac-portal-issue-186" title="Permanent link">&para;</a></h3>
+<table>
+<thead>
+<tr>
+<th>#</th>
+<th>Task</th>
+<th>File</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>3D-1</td>
+<td>JWT middleware for <code>/api/v1/*</code> — Bearer token validation</td>
+<td><code>api/middleware/auth.py</code></td>
+</tr>
+<tr>
+<td>3D-2</td>
+<td>Role enum: <code>OPERATOR</code>, <code>ANALYST</code>, <code>ADMIN</code></td>
+<td><code>api/middleware/auth.py</code></td>
+</tr>
+<tr>
+<td>3D-3</td>
+<td><code>POST /api/v1/auth/token</code> — local credential store (bcrypt, no cloud IdP)</td>
+<td><code>api/main.py</code></td>
+</tr>
+<tr>
+<td>3D-4</td>
+<td>Role-gate: only <code>OPERATOR</code>+ can approve/reject findings</td>
+<td><code>api/main.py</code></td>
+</tr>
+<tr>
+<td>3D-5</td>
+<td>Frontend: login page, token storage in <code>sessionStorage</code> (not localStorage)</td>
+<td><code>web/src/</code></td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2 id="phase-4-mobile-triage-v200-q4-2026-q1-2027">Phase 4 — Mobile Triage (v2.0.0) ⏳ Q4 2026 – Q1 2027<a class="headerlink" href="#phase-4-mobile-triage-v200-q4-2026-q1-2027" title="Permanent link">&para;</a></h2>
+<h3 id="4a-android-scanner-issue-187">4A · Android Scanner [Issue #187]<a class="headerlink" href="#4a-android-scanner-issue-187" title="Permanent link">&para;</a></h3>
+<table>
+<thead>
+<tr>
+<th>#</th>
+<th>Task</th>
+<th>File</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>4A-1</td>
+<td><code>MobileScanner</code> abstract class extending <code>BaseScanner</code></td>
+<td><code>core/mobile_scanner.py</code></td>
+</tr>
+<tr>
+<td>4A-2</td>
+<td>APKTool wrapper — decompile APK, extract manifest + smali</td>
+<td><code>scanners/mobile/apktool_scanner.py</code></td>
+</tr>
+<tr>
+<td>4A-3</td>
+<td>Androguard wrapper — static analysis, permission audit</td>
+<td><code>scanners/mobile/androguard_scanner.py</code></td>
+</tr>
+<tr>
+<td>4A-4</td>
+<td>Hardcoded secrets detector (API keys, tokens in smali/java)</td>
+<td><code>scanners/mobile/secrets_scanner.py</code></td>
+</tr>
+<tr>
+<td>4A-5</td>
+<td>TOKAMAK integration — run mobile payloads in <code>--network none</code> container</td>
+<td><code>core/tokamak.py</code></td>
+</tr>
+</tbody>
+</table>
+<h3 id="4b-ios-scanner-issue-188">4B · iOS Scanner [Issue #188]<a class="headerlink" href="#4b-ios-scanner-issue-188" title="Permanent link">&para;</a></h3>
+<table>
+<thead>
+<tr>
+<th>#</th>
+<th>Task</th>
+<th>File</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>4B-1</td>
+<td>IPA unpacker + plist parser</td>
+<td><code>scanners/mobile/ipa_scanner.py</code></td>
+</tr>
+<tr>
+<td>4B-2</td>
+<td>Binary analysis — detect insecure flags (PIE, ARC, stack canary)</td>
+<td><code>scanners/mobile/binary_scanner.py</code></td>
+</tr>
+<tr>
+<td>4B-3</td>
+<td>Transport Security checker (NSAllowsArbitraryLoads audit)</td>
+<td><code>scanners/mobile/ats_scanner.py</code></td>
+</tr>
+</tbody>
+</table>
+<h3 id="4c-frida-runtime">4C · Frida / Runtime<a class="headerlink" href="#4c-frida-runtime" title="Permanent link">&para;</a></h3>
+<table>
+<thead>
+<tr>
+<th>#</th>
+<th>Task</th>
+<th>File</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>4C-1</td>
+<td>Frida hook generator — produce JS hook from CWE/finding</td>
+<td><code>core/frida_generator.py</code></td>
+</tr>
+<tr>
+<td>4C-2</td>
+<td>Drozer PoC executor under TOKAMAK sandbox</td>
+<td><code>core/tokamak.py</code></td>
+</tr>
+<tr>
+<td>4C-3</td>
+<td>Hook output → Finding with <code>trace_hash</code> signature</td>
+<td><code>core/tokamak.py</code></td>
+</tr>
+</tbody>
+</table>
+<h3 id="4d-mobile-dashboard">4D · Mobile Dashboard<a class="headerlink" href="#4d-mobile-dashboard" title="Permanent link">&para;</a></h3>
+<table>
+<thead>
+<tr>
+<th>#</th>
+<th>Task</th>
+<th>File</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>4D-1</td>
+<td><code>MobileTargetForm</code> organism — APK/IPA upload + package name</td>
+<td><code>web/src/components/organisms/</code></td>
+</tr>
+<tr>
+<td>4D-2</td>
+<td><code>MobileResultsPanel</code> — permission tree, binary flags, findings</td>
+<td><code>web/src/components/organisms/</code></td>
+</tr>
+<tr>
+<td>4D-3</td>
+<td><code>POST /api/v1/mobile/scan</code> — accepts file upload</td>
+<td><code>api/main.py</code></td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2 id="phase-5-ecosystem-integration-v250-2027">Phase 5 — Ecosystem Integration (v2.5.0) ⏳ 2027<a class="headerlink" href="#phase-5-ecosystem-integration-v250-2027" title="Permanent link">&para;</a></h2>
+<h3 id="5a-cicd-integration">5A · CI/CD Integration<a class="headerlink" href="#5a-cicd-integration" title="Permanent link">&para;</a></h3>
+<table>
+<thead>
+<tr>
+<th>#</th>
+<th>Task</th>
+<th>File</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>5A-1</td>
+<td><code>cherenkov-action</code> GitHub Action — run scan on PR, post findings as review</td>
+<td><code>.github/actions/cherenkov-scan/</code></td>
+</tr>
+<tr>
+<td>5A-2</td>
+<td>SARIF upload to GitHub Security tab from CI scan</td>
+<td><code>.github/actions/cherenkov-scan/action.yml</code></td>
+</tr>
+<tr>
+<td>5A-3</td>
+<td>CLI: <code>cherenkov scan &lt;url&gt; --format sarif</code></td>
+<td><code>cli/main.py</code></td>
+</tr>
+<tr>
+<td>5A-4</td>
+<td>CLI: <code>cherenkov report &lt;scan_id&gt; --format pdf</code></td>
+<td><code>cli/main.py</code></td>
+</tr>
+</tbody>
+</table>
+<h3 id="5b-local-siem-integration">5B · Local SIEM Integration<a class="headerlink" href="#5b-local-siem-integration" title="Permanent link">&para;</a></h3>
+<table>
+<thead>
+<tr>
+<th>#</th>
+<th>Task</th>
+<th>File</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>5B-1</td>
+<td>Syslog forwarder (RFC 5424, local network only, zero egress)</td>
+<td><code>core/siem/syslog_forwarder.py</code></td>
+</tr>
+<tr>
+<td>5B-2</td>
+<td>CEF (Common Event Format) serializer for findings</td>
+<td><code>core/siem/cef_serializer.py</code></td>
+</tr>
+<tr>
+<td>5B-3</td>
+<td>Splunk HEC connector (local Splunk instance)</td>
+<td><code>core/siem/splunk_connector.py</code></td>
+</tr>
+</tbody>
+</table>
+<h3 id="5c-multi-node-mesh">5C · Multi-Node Mesh<a class="headerlink" href="#5c-multi-node-mesh" title="Permanent link">&para;</a></h3>
+<table>
+<thead>
+<tr>
+<th>#</th>
+<th>Task</th>
+<th>File</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>5C-1</td>
+<td>Node discovery — mDNS broadcast on local subnet</td>
+<td><code>core/mesh/discovery.py</code></td>
+</tr>
+<tr>
+<td>5C-2</td>
+<td>Scan job distribution — partition target list across nodes</td>
+<td><code>core/mesh/distributor.py</code></td>
+</tr>
+<tr>
+<td>5C-3</td>
+<td>Result aggregation — merge findings from all nodes, dedup</td>
+<td><code>core/mesh/aggregator.py</code></td>
+</tr>
+<tr>
+<td>5C-4</td>
+<td>Mesh dashboard panel — node map, job distribution</td>
+<td><code>web/src/components/organisms/MeshPanel.tsx</code></td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2 id="milestone-summary">Milestone Summary<a class="headerlink" href="#milestone-summary" title="Permanent link">&para;</a></h2>
+<table>
+<thead>
+<tr>
+<th>Milestone</th>
+<th>Phases</th>
+<th>Key deliverable</th>
+<th>Target</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>v1.0.0-rc1</td>
+<td>1</td>
+<td>Trident architecture + HUD</td>
+<td>✅ Done</td>
+</tr>
+<tr>
+<td>v1.1.0</td>
+<td>2</td>
+<td>Parallel swarm + TOKAMAK + 5 scanners</td>
+<td>Q2 2026</td>
+</tr>
+<tr>
+<td>v1.5.0</td>
+<td>3</td>
+<td>HITL + compliance + WORM vault + RBAC</td>
+<td>Q3 2026</td>
+</tr>
+<tr>
+<td>v2.0.0</td>
+<td>4</td>
+<td>Mobile Android/iOS + Frida</td>
+<td>Q4 2026</td>
+</tr>
+<tr>
+<td>v2.5.0</td>
+<td>5</td>
+<td>CI/CD action + SIEM + mesh</td>
+<td>Q1 2027</td>
+</tr>
+</tbody>
+</table>
+<h2 id="issue-tracking-convention">Issue Tracking Convention<a class="headerlink" href="#issue-tracking-convention" title="Permanent link">&para;</a></h2>
+<p>Every task row → one GitHub issue.<br />
+Title: <code>[Ph&lt;N&gt;] &lt;task description&gt;</code><br />
+Labels: <code>phase-&lt;N&gt;</code>, <code>area:&lt;domain&gt;</code>, <code>priority:&lt;level&gt;</code><br />
+Branch: <code>feat/&lt;issue&gt;-&lt;slug&gt;</code><br />
+All task files: <code>.agents/tasks/issue-&lt;N&gt;.md</code></p>
+
+
+
+
+
+
+
+
+
+
+
+
+                
+              </article>
+            </div>
+          
+          
+<script>var target=document.getElementById(location.hash.slice(1));target&&target.name&&(target.checked=target.name.startsWith("__tabbed_"))</script>
+        </div>
+        
+          <button type="button" class="md-top md-icon" data-md-component="top" hidden>
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M13 20h-2V8l-5.5 5.5-1.42-1.42L12 4.16l7.92 7.92-1.42 1.42L13 8z"/></svg>
+  Back to top
+</button>
+        
+      </main>
+      
+        <footer class="md-footer">
+  
+  <div class="md-footer-meta md-typeset">
+    <div class="md-footer-meta__inner md-grid">
+      <div class="md-copyright">
+  
+  
+    Made with
+    <a href="https://squidfunk.github.io/mkdocs-material/" target="_blank" rel="noopener">
+      Material for MkDocs
+    </a>
+  
+</div>
+      
+    </div>
+  </div>
+</footer>
+      
+    </div>
+    <div class="md-dialog" data-md-component="dialog">
+      <div class="md-dialog__inner md-typeset"></div>
+    </div>
+    
+    
+    
+      
+      
+      <script id="__config" type="application/json">{"annotate": null, "base": "../..", "features": ["navigation.tabs", "navigation.sections", "navigation.expand", "navigation.top", "navigation.indexes", "toc.integrate", "search.suggest", "search.highlight", "content.code.copy"], "search": "../../assets/javascripts/workers/search.2c215733.min.js", "tags": null, "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}, "version": null}</script>
+    
+    
+      <script src="../../assets/javascripts/bundle.79ae519e.min.js"></script>
+      
+    
+  </body>
+</html>

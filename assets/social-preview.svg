@@ -1,0 +1,80 @@
+<svg width="1280" height="640" viewBox="0 0 1280 640" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <radialGradient id="bg-glow" cx="50%" cy="50%" r="70%">
+      <stop offset="0%" stop-color="#0A0E1A"/>
+      <stop offset="100%" stop-color="#02040A"/>
+    </radialGradient>
+    <linearGradient id="accent-line" x1="0" y1="0" x2="1280" y2="0">
+      <stop offset="0%" stop-color="transparent"/>
+      <stop offset="15%" stop-color="#00E0FF" stop-opacity="0.3"/>
+      <stop offset="50%" stop-color="#00E0FF" stop-opacity="0.8"/>
+      <stop offset="85%" stop-color="#9D00FF" stop-opacity="0.3"/>
+      <stop offset="100%" stop-color="transparent"/>
+    </linearGradient>
+    <linearGradient id="hex-grad" x1="180" y1="140" x2="380" y2="420">
+      <stop stop-color="#00E0FF"/>
+      <stop offset="1" stop-color="#9D00FF"/>
+    </linearGradient>
+    <linearGradient id="grid-grad" x1="0" y1="0" x2="1280" y2="640">
+      <stop offset="0%" stop-color="#00E0FF" stop-opacity="0.03"/>
+      <stop offset="100%" stop-color="#9D00FF" stop-opacity="0.03"/>
+    </linearGradient>
+  </defs>
+
+  <!-- Background -->
+  <rect width="1280" height="640" fill="url(#bg-glow)"/>
+
+  <!-- Grid lines -->
+  <g stroke="url(#grid-grad)" stroke-width="1">
+    <line x1="0" y1="160" x2="1280" y2="160"/>
+    <line x1="0" y1="320" x2="1280" y2="320"/>
+    <line x1="0" y1="480" x2="1280" y2="480"/>
+    <line x1="320" y1="0" x2="320" y2="640"/>
+    <line x1="640" y1="0" x2="640" y2="640"/>
+    <line x1="960" y1="0" x2="960" y2="640"/>
+  </g>
+
+  <!-- Accent line top -->
+  <rect x="0" y="0" width="1280" height="4" fill="url(#accent-line)"/>
+
+  <!-- Large Hexagonal Shield -->
+  <g transform="translate(140, 120)">
+    <path d="M160 20 L284 70 V170 L160 220 L36 170 V70 L160 20Z" stroke="url(#hex-grad)" stroke-width="8" stroke-linejoin="round" opacity="0.8"/>
+    <path d="M160 50 L253 87 V157 L160 194 L67 157 V87 L160 50Z" stroke="url(#hex-grad)" stroke-width="3" stroke-linejoin="round" opacity="0.4"/>
+    <!-- Core reveal cone -->
+    <path d="M160 90 L220 140 Q160 180 100 140Z" fill="#00E0FF" opacity="0.7"/>
+    <circle cx="160" cy="130" r="8" fill="white" opacity="0.9"/>
+  </g>
+
+  <!-- Title -->
+  <text x="440" y="200" fill="#F0F1F5" style="font-family: 'Inter', 'Segoe UI', sans-serif; font-weight: 800; font-size: 80px; letter-spacing: -0.03em;">CHERENKOV</text>
+  <text x="440" y="250" fill="#00E0FF" opacity="0.7" style="font-family: 'Inter', 'Segoe UI', sans-serif; font-weight: 500; font-size: 22px; letter-spacing: 0.35em; text-transform: uppercase;">THE FORENSIC REVEAL</text>
+
+  <!-- Tagline -->
+  <text x="440" y="320" fill="#B0B8C8" style="font-family: 'Inter', 'Segoe UI', sans-serif; font-size: 18px; letter-spacing: 0.02em;">AI-Native Security Scanner Engine — Autonomous · Sovereign · Self-Healing</text>
+
+  <!-- Feature tags -->
+  <g transform="translate(440, 370)">
+    <rect x="0" y="0" width="160" height="34" rx="4" fill="#00E0FF" fill-opacity="0.1" stroke="#00E0FF" stroke-opacity="0.3" stroke-width="1"/>
+    <text x="80" y="22" fill="#00E0FF" text-anchor="middle" style="font-family: 'IBM Plex Mono', 'Consolas', monospace; font-size: 13px;">AI Scanner Gen</text>
+
+    <rect x="175" y="0" width="160" height="34" rx="4" fill="#9D00FF" fill-opacity="0.1" stroke="#9D00FF" stroke-opacity="0.3" stroke-width="1"/>
+    <text x="255" y="22" fill="#9D00FF" text-anchor="middle" style="font-family: 'IBM Plex Mono', 'Consolas', monospace; font-size: 13px;">5-Gate Validation</text>
+
+    <rect x="350" y="0" width="160" height="34" rx="4" fill="#00E0FF" fill-opacity="0.1" stroke="#00E0FF" stroke-opacity="0.3" stroke-width="1"/>
+    <text x="430" y="22" fill="#00E0FF" text-anchor="middle" style="font-family: 'IBM Plex Mono', 'Consolas', monospace; font-size: 13px;">Zero-Egress</text>
+
+    <rect x="0" y="46" width="160" height="34" rx="4" fill="#9D00FF" fill-opacity="0.1" stroke="#9D00FF" stroke-opacity="0.3" stroke-width="1"/>
+    <text x="80" y="68" fill="#9D00FF" text-anchor="middle" style="font-family: 'IBM Plex Mono', 'Consolas', monospace; font-size: 13px;">Agentic Red-Team</text>
+
+    <rect x="175" y="46" width="160" height="34" rx="4" fill="#00E0FF" fill-opacity="0.1" stroke="#00E0FF" stroke-opacity="0.3" stroke-width="1"/>
+    <text x="255" y="68" fill="#00E0FF" text-anchor="middle" style="font-family: 'IBM Plex Mono', 'Consolas', monospace; font-size: 13px;">CVE-Driven</text>
+
+    <rect x="350" y="46" width="160" height="34" rx="4" fill="#9D00FF" fill-opacity="0.1" stroke="#9D00FF" stroke-opacity="0.3" stroke-width="1"/>
+    <text x="430" y="68" fill="#9D00FF" text-anchor="middle" style="font-family: 'IBM Plex Mono', 'Consolas', monospace; font-size: 13px;">MIT/Apache</text>
+  </g>
+
+  <!-- Bottom bar -->
+  <rect x="0" y="600" width="1280" height="40" fill="#00E0FF" fill-opacity="0.04"/>
+  <text x="640" y="625" fill="#5A6A8A" text-anchor="middle" style="font-family: 'IBM Plex Mono', 'Consolas', monospace; font-size: 14px; letter-spacing: 0.15em;">cherenkov-security.com  ·  support@cherenkov-security.com</text>
+</svg>

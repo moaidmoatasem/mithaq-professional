@@ -257,7 +257,9 @@ def save_pending_finding(
 def get_pending_findings(path: Path = None) -> list[dict]:
     path = path or _DB_PATH
     with closing(_connect(path)) as conn:
-        rows = conn.execute("SELECT * FROM findings_pending WHERE status IN ('pending', 'awaiting_approval')").fetchall()
+        rows = conn.execute(
+            "SELECT * FROM findings_pending WHERE status IN ('pending', 'awaiting_approval')"
+        ).fetchall()
     return [dict(r) for r in rows]
 
 

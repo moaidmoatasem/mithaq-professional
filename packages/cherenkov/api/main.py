@@ -117,6 +117,10 @@ async def lifespan(app: FastAPI):
     if not get_user("admin"):
         save_user("admin", hash_password(admin_password), Role.ADMIN)
 
+    from cherenkov.credentials import DefaultCredentialsManager
+
+    DefaultCredentialsManager.clear_rotation_flag()
+
     meissner_hub.on_open(
         lambda: asyncio.create_task(
             _broadcast(

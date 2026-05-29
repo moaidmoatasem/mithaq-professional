@@ -85,10 +85,51 @@ def test_owasptop10_2021_cwe_mappings_match_standard():
     assert "A01" in info.controls
     assert mapped_has_no_control(fw, "CWE-200", "A09")
 
+    xss = fw.map_finding({"title": "XSS", "severity": "HIGH", "cwe": "CWE-79"})
+    assert "A03" in xss.controls
+    assert mapped_has_no_control(fw, "CWE-79", "A07")
+
 
 def mapped_has_no_control(fw, cwe: str, control_id: str) -> bool:
     """True when the control with id==control_id does not claim the given cwe."""
     return all(cwe not in c.cwe_list for c in fw.controls if c.id == control_id)
+
+
+def test_owasptop10_all_known_cwe_pairs():
+    """Every simplified CWE→OWASP 2021 pair must resolve correctly."""
+    fw = ComplianceRegistry.get("owasp2021")
+    known = {
+        "CWE-284": "A01",
+        "CWE-285": "A01",
+        "CWE-639": "A01",
+        "CWE-22": "A01",
+        "CWE-200": "A01",
+        "CWE-319": "A02",
+        "CWE-311": "A02",
+        "CWE-312": "A02",
+        "CWE-327": "A02",
+        "CWE-523": "A02",
+        "CWE-89": "A03",
+        "CWE-79": "A03",
+        "CWE-78": "A03",
+        "CWE-77": "A03",
+        "CWE-693": "A04",
+        "CWE-16": "A05",
+        "CWE-749": "A05",
+        "CWE-1021": "A05",
+        "CWE-611": "A05",
+        "CWE-306": "A07",
+        "CWE-307": "A07",
+        "CWE-308": "A07",
+        "CWE-384": "A07",
+        "CWE-778": "A09",
+        "CWE-918": "A10",
+    }
+    for cwe, expected_control in known.items():
+        result = fw.map_finding({"title": "test", "severity": "MEDIUM", "cwe": cwe})
+        assert expected_control in result.controls, (
+            f"{cwe} should map to {expected_control}, got {result.controls}"
+        )
 
 
 def test_registry_list_frameworks():

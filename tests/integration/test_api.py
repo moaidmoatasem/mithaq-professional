@@ -1,18 +1,22 @@
 import sys
 from unittest.mock import MagicMock
 
+
 class MockPsutil:
     def __init__(self):
         self.__spec__ = MagicMock()
+
     def cpu_count(self, logical=False):
         return 8
+
     def virtual_memory(self):
         class Mem:
             total = 16e9
+
         return Mem()
-sys.modules['psutil'] = MockPsutil()
 
 
+sys.modules["psutil"] = MockPsutil()
 
 
 import asyncio
@@ -29,6 +33,7 @@ import os
 
 pytestmark = pytest.mark.integration
 
+
 @pytest.fixture(autouse=True)
 def bypass_rate_limit():
     app.state.limiter.enabled = False
@@ -42,6 +47,7 @@ def mock_jwt_secret(monkeypatch, tmp_path):
     env_file.write_text("CHERENKOV_JWT_SECRET=super_secret_test_key_1234567890\n")
     monkeypatch.setenv("ROTATION_ENV_PATH", str(env_file))
     yield
+
 
 @pytest.fixture(autouse=True)
 def isolate_db(tmp_path: Path):
@@ -177,6 +183,15 @@ def test_websocket_live(client, monkeypatch):
         assert data2["event"] == "health_pulse"
 
 
+def test_unprotected_endpoints_return_401_without_token(client):
+    """/scans/history and /reports/{scan_id}/sarif must require auth."""
+    response_history = client.get("/api/v1/scans/history")
+    assert response_history.status_code == 401
+
+    response_sarif = client.get("/api/v1/reports/00000000-0000-0000-0000-000000000000/sarif")
+    assert response_sarif.status_code == 401
+
+
 def test_error_cases(client):
     # Get a token to bypass 401 for the 422 test
     auth_data = {"username": "admin", "password": "admin"}
@@ -196,16 +211,14 @@ def test_error_cases(client):
     response_404 = client.get("/api/v1/non_existent_route")
     assert response_404.status_code == 404
 
+
 def test_architect_plan_post(client, monkeypatch):
     # Mock SecurityArchitect.generate_plan to return a dummy result
     async def mock_generate_plan(self, context):
-        return {
-            "status": "success",
-            "plan": "Generated secure plan",
-            "model": "architect"
-        }
+        return {"status": "success", "plan": "Generated secure plan", "model": "architect"}
 
     from cherenkov.agents.architect import SecurityArchitect
+
     monkeypatch.setattr(SecurityArchitect, "generate_plan", mock_generate_plan)
 
     # Need authentication for v1_architect_plan
@@ -218,7 +231,7 @@ def test_architect_plan_post(client, monkeypatch):
         "target": "mobile app",
         "requirements": ["encryption"],
         "constraints": ["low latency"],
-        "threat_context": "DDoS attacks"
+        "threat_context": "DDoS attacks",
     }
     response = client.post("/api/v1/architect/plan", json=payload, headers=headers)
 

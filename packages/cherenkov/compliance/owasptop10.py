@@ -22,7 +22,7 @@ class OWASPTop10(ComplianceFramework):
                 "Broken Access Control",
                 "Access",
                 "Access control failures",
-                ["CWE-284", "CWE-285", "CWE-639", "CWE-22"],
+                ["CWE-284", "CWE-285", "CWE-639", "CWE-22", "CWE-200"],
                 5,
             ),
             ComplianceControl(
@@ -38,7 +38,7 @@ class OWASPTop10(ComplianceFramework):
                 "Injection",
                 "Injection",
                 "Injection flaws",
-                ["CWE-89", "CWE-79", "CWE-78", "CWE-77", "CWE-611"],
+                ["CWE-89", "CWE-79", "CWE-78", "CWE-77"],
                 5,
             ),
             ComplianceControl("A04", "Insecure Design", "Design", "Design flaws", ["CWE-693"], 4),
@@ -47,7 +47,7 @@ class OWASPTop10(ComplianceFramework):
                 "Security Misconfiguration",
                 "Config",
                 "Misconfiguration",
-                ["CWE-16", "CWE-749", "CWE-1021"],
+                ["CWE-16", "CWE-749", "CWE-1021", "CWE-611"],
                 4,
             ),
             ComplianceControl(
@@ -69,7 +69,7 @@ class OWASPTop10(ComplianceFramework):
                 "Logging Failures",
                 "Logging",
                 "Insufficient logging",
-                ["CWE-778", "CWE-200"],
+                ["CWE-778"],
                 3,
             ),
             ComplianceControl(

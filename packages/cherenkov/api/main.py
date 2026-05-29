@@ -621,7 +621,7 @@ async def v1_sandbox_execute(
 
     tokamak = ScanTOKAMAK()
     result = await tokamak.execute_poc(
-        payload=command.payload,
+        exploit_command=command.payload,
         timeout=command.timeout,
     )
 

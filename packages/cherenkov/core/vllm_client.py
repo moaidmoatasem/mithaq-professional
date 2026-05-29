@@ -177,26 +177,28 @@ class UnifiedLLMClient:
 
     def _fallback_triage(self, prompt: str) -> str:
         """Sovereign fallback logic performing simple rule-based triage when the LLM is down."""
+        import re
+
         logger.info("Executing rule-based static analyzer fallback...")
 
         lower_prompt = prompt.lower()
         findings = []
 
-        if "sql" in lower_prompt or "select" in lower_prompt:
+        if re.search(r"\b(sql|select)\b", lower_prompt):
             findings.append(
                 "- Finding: Potential SQL Injection Vulnerability\n"
                 "  Severity: High\n"
                 "  Description: Unsanitized database input detected in string pattern."
             )
 
-        if "system" in lower_prompt or "eval" in lower_prompt or "os.system" in lower_prompt:
+        if re.search(r"\b(system|eval|os\.system)\b", lower_prompt):
             findings.append(
                 "- Finding: Potential Remote Code Execution / Shell Injection\n"
                 "  Severity: Critical\n"
                 "  Description: Direct system shell execution detected with user-supplied arguments."
             )
 
-        if "password" in lower_prompt or "secret" in lower_prompt or "key" in lower_prompt:
+        if re.search(r"\b(password|secret|key)\b", lower_prompt):
             findings.append(
                 "- Finding: Hardcoded Secret Assignment\n"
                 "  Severity: Critical\n"

@@ -38,6 +38,8 @@ class DefaultCredentialsManager:
 
     @classmethod
     def is_rotation_required(cls) -> bool:
+        if os.getenv("CHERENKOV_SKIP_ROTATION") == "true":
+            return False
         if os.environ.get("CHERENKOV_FORCE_ROTATION") == "true":
             return True
         path = cls.get_env_path()

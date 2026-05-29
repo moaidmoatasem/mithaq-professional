@@ -928,6 +928,12 @@ async def v1_approve_finding(
             details={"finding_id": finding_id},
         )
 
+        # Operator approved — kick off TOKAMAK PoC validation in the background.
+        try:
+            asyncio.get_running_loop().create_task(ScanTOKAMAK().execute_poc(payload="auto"))
+        except RuntimeError:
+            pass  # No running loop — skip TOKAMAK trigger in this context
+
         return {"status": "success", "finding_id": finding_id, "new_status": "approved"}
     except Exception as exc:
         raise HTTPException(status_code=500, detail=f"Failed to approve finding: {exc}") from exc
@@ -1152,13 +1158,37 @@ async def _run_scan(
                     pass  # No running loop — skip indexing in this context
 
             if v["severity"] in ("CRITICAL", "HIGH"):
-                save_pending_finding(
-                    finding_id=finding_id,
-                    severity=v["severity"],
-                    scanner=v["scanner"],
-                    title=v["title"],
-                    scan_id=scan_id,
-                )
+                hitl_mode = os.getenv("CHERENKOV_HITL_MODE", "true").lower() == "true"
+                if hitl_mode:
+                    save_pending_finding(
+                        finding_id=finding_id,
+                        severity=v["severity"],
+                        scanner=v["scanner"],
+                        title=v["title"],
+                        scan_id=scan_id,
+                        status="awaiting_approval",
+                    )
+                    v["tokamak_status"] = "awaiting_approval"
+                else:
+                    save_pending_finding(
+                        finding_id=finding_id,
+                        severity=v["severity"],
+                        scanner=v["scanner"],
+                        title=v["title"],
+                        scan_id=scan_id,
+                        status="pending",
+                    )
+                    v["tokamak_status"] = "running"
+                    try:
+                        asyncio.get_running_loop().create_task(
+                            ScanTOKAMAK().run_poc(
+                                target=request.url,
+                                technique=v["scanner"],
+                                payload="auto",
+                            )
+                        )
+                    except RuntimeError:
+                        pass  # No running loop — skip TOKAMAK trigger in this context
                 try:
                     asyncio.get_running_loop().create_task(
                         _broadcast(

@@ -235,6 +235,7 @@ def save_pending_finding(
     scanner: str,
     title: str,
     scan_id: str | None = None,
+    status: str = "pending",
     path: Path = None,
 ) -> None:
     path = path or _DB_PATH
@@ -242,10 +243,10 @@ def save_pending_finding(
         with conn:
             conn.execute(
                 """
-                INSERT OR IGNORE INTO findings_pending (finding_id, severity, scanner, title, scan_id)
-                VALUES (?, ?, ?, ?, ?)
+                INSERT OR IGNORE INTO findings_pending (finding_id, severity, scanner, title, status, scan_id)
+                VALUES (?, ?, ?, ?, ?, ?)
                 """,
-                (finding_id, severity, scanner, title, scan_id),
+                (finding_id, severity, scanner, title, status, scan_id),
             )
 
 

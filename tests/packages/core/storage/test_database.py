@@ -47,13 +47,29 @@ def test_prune_old_scans_removes_stale_rows(db):
     from datetime import datetime, timedelta, timezone
 
     old_ts = (datetime.now(timezone.utc) - timedelta(days=100)).isoformat()
-    save_scan("old-scan", "http://old.com", [], started_at=old_ts, finished_at=old_ts, path=db)
-    save_scan("new-scan", "http://new.com", [], path=db)
+    save_scan(
+        "old-scan",
+        "http://old.com",
+        [{"id": "vuln1"}],
+        started_at=old_ts,
+        finished_at=old_ts,
+        meta={"foo": "bar"},
+        path=db,
+    )
+    save_scan("new-scan", "http://new.com", [{"id": "vuln2"}], path=db)
 
-    deleted = prune_old_scans(days=90, path=db)
-    assert deleted == 1
-    assert get_scan("old-scan", path=db) is None
-    assert get_scan("new-scan", path=db) is not None
+    pruned = prune_old_scans(days=90, path=db)
+    assert pruned == 1
+
+    old_scan = get_scan("old-scan", path=db)
+    assert old_scan is not None
+    assert old_scan["status"] == "pruned"
+    assert old_scan["findings"] == []
+    assert old_scan["meta"] == {}
+
+    new_scan = get_scan("new-scan", path=db)
+    assert new_scan is not None
+    assert new_scan["status"] != "pruned"
 
 
 def test_get_scan_missing_record(db):
@@ -78,6 +94,7 @@ def test_save_scan_trace(db):
 
 def test_save_and_get_tokamak_trace(db):
     from datetime import datetime, timezone
+
     finding_id = "fid-999"
     exploit_command = "curl http://internal"
     stdout = "root:x:0:0"
@@ -88,8 +105,7 @@ def test_save_and_get_tokamak_trace(db):
     receipt = {"shredded": True}
 
     save_tokamak_trace(
-        finding_id, exploit_command, stdout, stderr, exit_code,
-        trace_hash, ts, receipt, path=db
+        finding_id, exploit_command, stdout, stderr, exit_code, trace_hash, ts, receipt, path=db
     )
 
     trace = get_tokamak_trace(finding_id, path=db)
@@ -101,10 +117,32 @@ def test_save_and_get_tokamak_trace(db):
 
 
 def test_save_tokamak_trace_worm_violation(db):
-    from cherenkov.core.exceptions import StorageError
     from datetime import datetime, timezone
+
+    from cherenkov.core.exceptions import StorageError
+
     finding_id = "fid-worm"
-    save_tokamak_trace(finding_id, "cmd", "out", "err", 0, "hash1", datetime.now(timezone.utc).isoformat(), {}, path=db)
+    save_tokamak_trace(
+        finding_id,
+        "cmd",
+        "out",
+        "err",
+        0,
+        "hash1",
+        datetime.now(timezone.utc).isoformat(),
+        {},
+        path=db,
+    )
 
     with pytest.raises(StorageError, match="WORM violation"):
-        save_tokamak_trace(finding_id, "cmd", "out", "err", 0, "hash2", datetime.now(timezone.utc).isoformat(), {}, path=db)
+        save_tokamak_trace(
+            finding_id,
+            "cmd",
+            "out",
+            "err",
+            0,
+            "hash2",
+            datetime.now(timezone.utc).isoformat(),
+            {},
+            path=db,
+        )

@@ -37,7 +37,7 @@ cherenkov-professional/
 |---|---|---|
 | **MEISSNER** | AIMD circuit breaker — fail-closed network perimeter | ✅ `core/circuit_breaker.py` |
 | **ABLATION** | PII redactor — scrubs payloads before any LLM call | ✅ `ai/ablation/` |
-| **TOKAMAK** | Docker sandbox — executes PoC, SHA-256 trace signing | ⚠️ stub — P0 issue #222 |
+| **TOKAMAK** | Docker sandbox — executes PoC, SHA-256 trace signing | ✅ `core/tokamak.py` |
 
 ## AI Stack
 
@@ -45,7 +45,7 @@ cherenkov-professional/
 |---|---|---|
 | TENSOR | Qwen2.5-Coder 7B (Ollama) | Primary reasoning / scanner generation |
 | KINETIC | Qwen2.5-Coder 1.5B (Ollama) | Autocomplete / fast triage |
-| LATTICE | nomic-embed-text + Qdrant (local) | Adaptive memory — P0 issue #224 |
+| LATTICE | nomic-embed-text + Qdrant (local) | ✅ `ai/lattice.py` |
 
 ## Import Convention
 
@@ -67,6 +67,6 @@ from src.cherenkov.core.base_scanner import BaseScanner
 
 ## Current Phase
 
-**Phase 2 in progress** — see [roadmap](docs/development/roadmap-detailed.md) and open issues.
+**Phase 3 in progress** — see [roadmap](docs/development/roadmap-detailed.md) and open issues.
 
-P0 blockers: [#221](https://github.com/moaidmoatasem/cherenkov-professional/issues/221) (health), [#222](https://github.com/moaidmoatasem/cherenkov-professional/issues/222) (TOKAMAK), [#223](https://github.com/moaidmoatasem/cherenkov-professional/issues/223) (root cleanup), [#224](https://github.com/moaidmoatasem/cherenkov-professional/issues/224) (LATTICE).
+P0 blockers: [#246](https://github.com/moaidmoatasem/cherenkov-professional/issues/246) (TOKAMAK SQLite WAL logger), [#247](https://github.com/moaidmoatasem/cherenkov-professional/issues/247) (Wire Cherenkov Trace signing).

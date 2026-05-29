@@ -1215,7 +1215,7 @@ async def _run_scan(
         await embed_and_store(
             {
                 "scan_id": scan_id,
-                "target": request.url,
+                "target": str(request.url),
                 "findings": unique_for_lattice,
                 "count": len(unique_for_lattice),
             }

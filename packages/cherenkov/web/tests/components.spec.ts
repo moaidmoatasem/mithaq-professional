@@ -139,7 +139,7 @@ test.describe('ComplianceReport', () => {
     await expect(page.locator('text=EGY-FIN CSF').first()).toBeVisible({ timeout: 10000 });
     await expect(page.getByText('85%', { exact: true })).toBeVisible();
     await expect(page.locator('text=CSF-1.1').first()).toBeVisible();
-    await expect(page.locator('text=Cleartext Storage')).toBeVisible();
+    await expect(page.locator('text=Cleartext Storage').first()).toBeVisible();
   });
 });
 
@@ -255,7 +255,7 @@ test.describe('MobileTriagePanel', () => {
     await page.locator('select').first().selectOption('mobile');
     await page.locator('button', { hasText: 'LAUNCH SCAN' }).click();
 
-    await expect(page.locator('text=Mobile_Triage_Analysis').first()).toBeVisible({ timeout: 10000 });
+    await expect(page.locator('text=Mobile Triage').first()).toBeVisible({ timeout: 10000 });
     await expect(page.locator('text=Insecure Permissions Detected')).toBeVisible();
     await expect(page.locator('text=ANDROID')).toBeVisible();
   });

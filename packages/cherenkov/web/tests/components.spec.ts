@@ -162,3 +162,71 @@ test.describe('PendingApprovalsPanel', () => {
     expect(approvedId).toBe('f1');
   });
 });
+
+test.describe('ComplianceReport', () => {
+  test.beforeEach(async ({ page }) => {
+    await page.addInitScript(() => {
+      window.sessionStorage.setItem('cherenkov_token', 'dummy-token');
+    });
+    for (const [url, json] of Object.entries(DASHBOARD_MOCKS)) {
+      await page.route(url, async route => {
+        await route.fulfill({ status: 200, json });
+      });
+    }
+  });
+
+  test('should display compliance report when cherenkov:compliance_loaded is dispatched', async ({ page }) => {
+    await page.goto('/');
+    await expect(page.locator('text=CHERENKOV').first()).toBeVisible({ timeout: 15000 });
+
+    const mockReport = {
+      scan_id: 'test-scan-123',
+      framework_id: 'samacsf',
+      framework_name: 'SamaCSF',
+      framework_version: '1.0',
+      regulator: 'SAMA',
+      controls_total: 15,
+      controls_tested: 12,
+      coverage_pct: 80,
+      findings_mapped: 1,
+      findings_unmapped: 0,
+      compliance_score: 85.5,
+      mapped_findings: [
+        {
+          finding_title: 'Cross-Site Scripting',
+          cwe: 'CWE-79',
+          severity: 'HIGH',
+          controls: ['SAMA-SEC-3.1', 'SAMA-SEC-3.2'],
+          domain: 'Application Security',
+          remediation: 'Sanitize inputs.',
+          compliant: false
+        }
+      ],
+      summary: 'SAMA Assessment completed.'
+    };
+
+    // Simulate completed scan by dispatching custom event first so setScanFindings is populated
+    await page.evaluate(() => {
+      window.dispatchEvent(new CustomEvent('cherenkov:scan_complete', {
+        detail: {
+          scan_id: 'test-scan-123',
+          count: 1,
+          vulnerabilities: [
+            { id: 'f1', title: 'Cross-Site Scripting', severity: 'high', cwe: 'CWE-79' }
+          ]
+        }
+      }));
+    });
+
+    await page.evaluate((report) => {
+      window.dispatchEvent(new CustomEvent('cherenkov:compliance_loaded', {
+        detail: report
+      }));
+    }, mockReport);
+
+    await expect(page.locator('text=SamaCSF')).toBeVisible({ timeout: 10000 });
+    await expect(page.locator('text=Cross-Site Scripting').first()).toBeVisible();
+    await expect(page.locator('text=SAMA-SEC-3.1')).toBeVisible();
+  });
+});
+

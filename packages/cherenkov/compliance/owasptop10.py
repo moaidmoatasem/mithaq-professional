@@ -55,9 +55,9 @@ class OWASPTop10(ComplianceFramework):
             ),
             ComplianceControl(
                 "A07",
-                "Auth Failures",
+                "Identification and Authentication Failures",
                 "Auth",
-                "Authentication failures",
+                "Identification and authentication failures",
                 ["CWE-306", "CWE-307", "CWE-308", "CWE-384"],
                 5,
             ),

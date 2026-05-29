@@ -110,7 +110,7 @@ async def lifespan(app: FastAPI):
             "CHERENKOV_ADMIN_PASSWORD environment variable is required at startup. "
             "Set it to a strong password and never use the default."
         )
-    if admin_password == "admin":
+    if admin_password == "admin":  # nosec B105
         raise RuntimeError(
             "CHERENKOV_ADMIN_PASSWORD must not be 'admin'. Choose a strong, unique password."
         )

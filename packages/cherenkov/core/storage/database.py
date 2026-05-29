@@ -236,23 +236,24 @@ def save_pending_finding(
     title: str,
     scan_id: str | None = None,
     path: Path = None,
+    status: str = "pending",
 ) -> None:
     path = path or _DB_PATH
     with closing(_connect(path)) as conn:
         with conn:
             conn.execute(
                 """
-                INSERT OR IGNORE INTO findings_pending (finding_id, severity, scanner, title, scan_id)
-                VALUES (?, ?, ?, ?, ?)
+                INSERT OR IGNORE INTO findings_pending (finding_id, severity, scanner, title, scan_id, status)
+                VALUES (?, ?, ?, ?, ?, ?)
                 """,
-                (finding_id, severity, scanner, title, scan_id),
+                (finding_id, severity, scanner, title, scan_id, status),
             )
 
 
 def get_pending_findings(path: Path = None) -> list[dict]:
     path = path or _DB_PATH
     with closing(_connect(path)) as conn:
-        rows = conn.execute("SELECT * FROM findings_pending WHERE status = 'pending'").fetchall()
+        rows = conn.execute("SELECT * FROM findings_pending WHERE status IN ('pending', 'awaiting_approval')").fetchall()
     return [dict(r) for r in rows]
 
 

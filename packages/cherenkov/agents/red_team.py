@@ -23,7 +23,7 @@ class RedTeamAgentConfig(BaseAgentConfig):
                 "bypassing security controls, and simulating advanced persistent threat (APT) tactics. "
                 "Specializes in automated red teaming, evasion techniques, and payload synthesis.",
             ),
-            llm_model=data.get("llm_model", "red-team"),
+            llm_model=data.get("llm_model", "whiterabbitneo"),
             verbose=data.get("verbose", True),
             allow_delegation=data.get("allow_delegation", False),
             max_iterations=data.get("max_iterations", 5),

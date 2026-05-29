@@ -38,7 +38,10 @@ def _use_temp_db(tmp_path: Path) -> None:
 
 
 @pytest.fixture(autouse=True)
-def _override_auth():
+def _override_auth(monkeypatch):
+    from cherenkov.credentials import DefaultCredentialsManager
+    monkeypatch.setattr(DefaultCredentialsManager, "is_rotation_required", lambda: False)
+
     async def mock_user() -> User:
         return User(username="test_operator", role=Role.OPERATOR)
 

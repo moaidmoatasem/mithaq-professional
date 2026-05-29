@@ -920,10 +920,22 @@ async def v1_approve_finding(
             detail={"code": "rotation_required", "message": "Password rotation required"},
         )
     from cherenkov.core.storage.database import init_db, update_finding_status
+    from cherenkov.core.tokamak import ScanTOKAMAK
 
     try:
         init_db()
         update_finding_status(finding_id, "approved", current_user.username)
+
+        try:
+            asyncio.get_running_loop().create_task(
+                ScanTOKAMAK().run_poc(
+                    target="auto",
+                    technique="auto",
+                    payload="auto",
+                )
+            )
+        except RuntimeError:
+            pass
 
         # Audit log
         save_audit_entry(
@@ -1046,6 +1058,7 @@ async def _run_scan(
     from cherenkov.core.engine import ScanEngine
     from cherenkov.core.registry import ScannerRegistry
     from cherenkov.core.storage.database import init_db, save_scan, save_scan_trace
+    from cherenkov.core.tokamak import ScanTOKAMAK
 
     try:
         parsed = urlparse(request.url)
@@ -1156,13 +1169,37 @@ async def _run_scan(
                     pass  # No running loop — skip indexing in this context
 
             if v["severity"] in ("CRITICAL", "HIGH"):
-                save_pending_finding(
-                    finding_id=finding_id,
-                    severity=v["severity"],
-                    scanner=v["scanner"],
-                    title=v["title"],
-                    scan_id=scan_id,
-                )
+                hitl_mode = os.getenv("CHERENKOV_HITL_MODE", "true").lower() == "true"
+                if hitl_mode:
+                    save_pending_finding(
+                        finding_id=finding_id,
+                        severity=v["severity"],
+                        scanner=v["scanner"],
+                        title=v["title"],
+                        scan_id=scan_id,
+                        status="awaiting_approval",
+                    )
+                    v["tokamak_status"] = "awaiting_approval"
+                else:
+                    save_pending_finding(
+                        finding_id=finding_id,
+                        severity=v["severity"],
+                        scanner=v["scanner"],
+                        title=v["title"],
+                        scan_id=scan_id,
+                        status="pending",
+                    )
+                    v["tokamak_status"] = "running"
+                    try:
+                        asyncio.get_running_loop().create_task(
+                            ScanTOKAMAK().run_poc(
+                                target=request.url,
+                                technique=v["scanner"],
+                                payload="auto",
+                            )
+                        )
+                    except RuntimeError:
+                        pass
                 try:
                     asyncio.get_running_loop().create_task(
                         _broadcast(

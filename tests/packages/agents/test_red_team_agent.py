@@ -11,7 +11,7 @@ def test_red_team_agent_config_defaults():
     assert config.role == "Red Team Specialist"
     assert "offensive security audits" in config.goal
     assert "offensive security expert" in config.backstory
-    assert config.llm_model == "red-team"
+    assert config.llm_model == "whiterabbitneo"
     assert config.verbose is True
     assert config.allow_delegation is False
     assert config.max_iterations == 5
@@ -42,7 +42,7 @@ def test_red_team_agent_instantiation():
     agent = RedTeamAgent()
     capabilities = agent.get_capabilities()
     assert capabilities["role"] == "Red Team Specialist"
-    assert capabilities["llm_model"] == "red-team"
+    assert capabilities["llm_model"] == "whiterabbitneo"
     assert capabilities["max_iterations"] == 5
     assert capabilities["sanitization_enabled"] is True
 

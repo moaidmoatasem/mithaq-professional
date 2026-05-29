@@ -17,12 +17,14 @@ test.describe('Auth Flow', () => {
 
   test('should show login page when not authenticated', async ({ page }) => {
     await page.goto('/');
+    await expect(page.locator('text=CHERENKOV').first()).toBeVisible({ timeout: 15000 });
     await expect(page.locator('text=CHERENKOV')).toBeVisible({ timeout: 10000 });
     await expect(page.locator('input[type="text"]')).toBeVisible();
   });
 
   test('should show error on invalid credentials', async ({ page }) => {
     await page.goto('/');
+    await expect(page.locator('text=CHERENKOV').first()).toBeVisible({ timeout: 15000 });
     await page.fill('input[type="text"]', 'admin');
     await page.fill('input[type="password"]', 'wrong');
     await page.click('button[type="submit"]');
@@ -49,6 +51,7 @@ test.describe('Auth Flow', () => {
     }
 
     await page.goto('/');
+    await expect(page.locator('text=CHERENKOV').first()).toBeVisible({ timeout: 15000 });
     await expect(page.locator('text=C2 Hub Dashboard').first()).toBeVisible({ timeout: 15000 });
 
     await Promise.all([
@@ -83,6 +86,42 @@ test.describe('ComplianceReport', () => {
   });
 
   test('should fetch and display compliance report', async ({ page }) => {
+    await page.route('**/api/v1/compliance/frameworks', async route => {
+      await route.fulfill({
+        status: 200,
+        json: {
+          frameworks: [
+            { id: "egyfincsf", name: "EGY-FIN CSF" },
+            { id: "samacsf", name: "SAMA CSF" },
+          ]
+        }
+      });
+    });
+
+    await page.route('**/api/v1/compliance/frameworks', async route => {
+      await route.fulfill({
+        status: 200,
+        json: {
+          frameworks: [
+            { id: "egyfincsf", name: "EGY-FIN CSF" },
+            { id: "samacsf", name: "SAMA CSF" },
+          ]
+        }
+      });
+    });
+
+    await page.route('**/api/v1/compliance/frameworks', async route => {
+      await route.fulfill({
+        status: 200,
+        json: {
+          frameworks: [
+            { id: "egyfincsf", name: "EGY-FIN CSF" },
+            { id: "samacsf", name: "SAMA CSF" },
+          ]
+        }
+      });
+    });
+
     await page.route('**/api/v1/scan', async route => {
       await route.fulfill({
         status: 200,
@@ -127,6 +166,7 @@ test.describe('ComplianceReport', () => {
     });
 
     await page.goto('/');
+    await expect(page.locator('text=CHERENKOV').first()).toBeVisible({ timeout: 15000 });
 
     await page.locator('button', { hasText: 'INITIATE NEW SCAN' }).click();
     await expect(page.locator('h3', { hasText: 'Configure New Scan' })).toBeVisible();
@@ -156,6 +196,42 @@ test.describe('FindingsTable', () => {
   });
 
   test('should display findings table with scan results', async ({ page }) => {
+    await page.route('**/api/v1/compliance/frameworks', async route => {
+      await route.fulfill({
+        status: 200,
+        json: {
+          frameworks: [
+            { id: "egyfincsf", name: "EGY-FIN CSF" },
+            { id: "samacsf", name: "SAMA CSF" },
+          ]
+        }
+      });
+    });
+
+    await page.route('**/api/v1/compliance/frameworks', async route => {
+      await route.fulfill({
+        status: 200,
+        json: {
+          frameworks: [
+            { id: "egyfincsf", name: "EGY-FIN CSF" },
+            { id: "samacsf", name: "SAMA CSF" },
+          ]
+        }
+      });
+    });
+
+    await page.route('**/api/v1/compliance/frameworks', async route => {
+      await route.fulfill({
+        status: 200,
+        json: {
+          frameworks: [
+            { id: "egyfincsf", name: "EGY-FIN CSF" },
+            { id: "samacsf", name: "SAMA CSF" },
+          ]
+        }
+      });
+    });
+
     await page.route('**/api/v1/scan', async route => {
       await route.fulfill({
         status: 200,
@@ -189,6 +265,7 @@ test.describe('FindingsTable', () => {
     });
 
     await page.goto('/');
+    await expect(page.locator('text=CHERENKOV').first()).toBeVisible({ timeout: 15000 });
 
     await page.locator('button', { hasText: 'INITIATE NEW SCAN' }).click();
     await expect(page.locator('h3', { hasText: 'Configure New Scan' })).toBeVisible();
@@ -222,6 +299,42 @@ test.describe('MobileTriagePanel', () => {
   });
 
   test('should display mobile triage panel with mobile findings', async ({ page }) => {
+    await page.route('**/api/v1/compliance/frameworks', async route => {
+      await route.fulfill({
+        status: 200,
+        json: {
+          frameworks: [
+            { id: "egyfincsf", name: "EGY-FIN CSF" },
+            { id: "samacsf", name: "SAMA CSF" },
+          ]
+        }
+      });
+    });
+
+    await page.route('**/api/v1/compliance/frameworks', async route => {
+      await route.fulfill({
+        status: 200,
+        json: {
+          frameworks: [
+            { id: "egyfincsf", name: "EGY-FIN CSF" },
+            { id: "samacsf", name: "SAMA CSF" },
+          ]
+        }
+      });
+    });
+
+    await page.route('**/api/v1/compliance/frameworks', async route => {
+      await route.fulfill({
+        status: 200,
+        json: {
+          frameworks: [
+            { id: "egyfincsf", name: "EGY-FIN CSF" },
+            { id: "samacsf", name: "SAMA CSF" },
+          ]
+        }
+      });
+    });
+
     await page.route('**/api/v1/scan', async route => {
       await route.fulfill({
         status: 200,
@@ -246,6 +359,7 @@ test.describe('MobileTriagePanel', () => {
     });
 
     await page.goto('/');
+    await expect(page.locator('text=CHERENKOV').first()).toBeVisible({ timeout: 15000 });
 
     await page.locator('button', { hasText: 'INITIATE NEW SCAN' }).click();
     await expect(page.locator('h3', { hasText: 'Configure New Scan' })).toBeVisible();
@@ -272,6 +386,7 @@ test.describe('AssistantWidget', () => {
       });
     }
     await page.goto('/');
+    await expect(page.locator('text=CHERENKOV').first()).toBeVisible({ timeout: 15000 });
     // Wait for dashboard to render (token should skip login)
     await expect(page.locator('text=CHERENKOV').first()).toBeVisible({ timeout: 15000 });
   });
@@ -355,6 +470,7 @@ test.describe('PendingApprovalsPanel', () => {
     });
 
     await page.goto('/');
+    await expect(page.locator('text=CHERENKOV').first()).toBeVisible({ timeout: 15000 });
     await expect(page.locator('text=XSS Vulnerability')).toBeVisible({ timeout: 15000 });
     await expect(page.locator('text=CSRF Token Missing')).toBeVisible();
   });
@@ -377,6 +493,7 @@ test.describe('PendingApprovalsPanel', () => {
     });
 
     await page.goto('/');
+    await expect(page.locator('text=CHERENKOV').first()).toBeVisible({ timeout: 15000 });
     await expect(page.locator('text=XSS Vulnerability')).toBeVisible({ timeout: 15000 });
     const approveBtn = page.locator('button:has(svg.lucide-check)').first();
     await expect(approveBtn).toBeVisible({ timeout: 5000 });
@@ -400,6 +517,7 @@ test.describe('ComplianceReport', () => {
 
   test('should display compliance report when cherenkov:compliance_loaded is dispatched', async ({ page }) => {
     await page.goto('/');
+    await expect(page.locator('text=CHERENKOV').first()).toBeVisible({ timeout: 15000 });
     await expect(page.locator('text=CHERENKOV').first()).toBeVisible({ timeout: 15000 });
 
     const mockReport = {

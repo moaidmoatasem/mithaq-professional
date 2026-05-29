@@ -8,7 +8,8 @@ import pytest
 @pytest.fixture
 def mock_no_gpu():
     with (
-        patch("cherenkov.ai.model_selector.psutil.virtual_memory") as mock_mem,
+        patch("psutil.virtual_memory") as mock_mem,
+        patch("psutil.cpu_count", return_value=8),
         patch("subprocess.run") as mock_run,
     ):
         mock_mem.return_value.total = 8e9
@@ -19,7 +20,8 @@ def mock_no_gpu():
 @pytest.fixture
 def mock_high_end_gpu():
     with (
-        patch("cherenkov.ai.model_selector.psutil.virtual_memory") as mock_mem,
+        patch("psutil.virtual_memory") as mock_mem,
+        patch("psutil.cpu_count", return_value=8),
         patch("subprocess.run") as mock_run,
     ):
         mock_mem.return_value.total = 32e9
@@ -48,7 +50,7 @@ def test_detect_hardware_high_end_gpu(mock_high_end_gpu):
     assert hw["vram_gb"] == 24.0
     assert hw["gpu_name"] == "NVIDIA RTX 4090"
     assert hw["tier"] == "high"
-
+    assert hw["effective_memory_gb"] == 36.8
 
 def test_recommend_models_low_tier(mock_no_gpu):
     from cherenkov.ai.model_selector import recommend_models
@@ -80,7 +82,6 @@ def test_recommend_models_medium_tier():
         "tier": "medium",
         "gpu_name": "RTX 3060",
         "cpu_cores": 8,
-        "platform": "Linux",
     }
     recs = recommend_models(hw)
     assert recs["tier"] == "medium"

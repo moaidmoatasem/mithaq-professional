@@ -5,6 +5,8 @@ let wsInstance: WebSocket | null = null;
 let eventListeners = new Set<(event: any) => void>();
 let statusListeners = new Set<(connected: boolean) => void>();
 let reconnectTimeout: any;
+let reconnectAttempts = 0;
+const MAX_RECONNECT_DELAY = 30000;
 let isConnected = false;
 
 function connectWs() {
@@ -13,6 +15,7 @@ function connectWs() {
   
   wsInstance.onopen = () => {
     isConnected = true;
+    reconnectAttempts = 0;
     statusListeners.forEach(listener => listener(true));
   };
   wsInstance.onmessage = (event) => {
@@ -28,7 +31,9 @@ function connectWs() {
     wsInstance = null;
     statusListeners.forEach(listener => listener(false));
     clearTimeout(reconnectTimeout);
-    reconnectTimeout = setTimeout(connectWs, 3000);
+    reconnectAttempts++;
+    const delay = Math.min(1000 * Math.pow(2, reconnectAttempts), MAX_RECONNECT_DELAY);
+    reconnectTimeout = setTimeout(connectWs, delay);
   };
   wsInstance.onerror = () => {
     if (wsInstance) wsInstance.close();

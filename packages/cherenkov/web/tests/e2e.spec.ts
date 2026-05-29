@@ -98,4 +98,23 @@ test.describe('Dashboard E2E Tests', () => {
     }
   });
 
+  test('should display newly integrated premium widgets (Model Status, Compliance, and Findings Table)', async ({ page }) => {
+    // 1. Verify Model Status card and specifications details are visible
+    await expect(page.locator('text=Sovereign_Brain_Status')).toBeVisible();
+    await expect(page.locator('text=detected_ram')).toBeVisible();
+    await expect(page.locator('text=Active_Model_Topology')).toBeVisible();
+    await expect(page.locator('button', { hasText: 'OPTIMISE SOVEREIGN MODELS' })).toBeVisible();
+
+    // 2. Click the optimize button and verify the Ryzen terminal simulator modal mounts
+    await page.locator('button', { hasText: 'OPTIMISE SOVEREIGN MODELS' }).click();
+    await expect(page.locator('span', { hasText: 'OPTIMISE_MODELS.SH' })).toBeVisible();
+
+    // 3. Wait for the simulation sequence to successfully complete (takes ~12 seconds)
+    await expect(page.locator('button', { hasText: 'DISMISS TERMINAL' })).toBeVisible({ timeout: 15000 });
+
+    // 4. Dismiss the terminal simulation modal and verify it unmounts
+    await page.locator('button', { hasText: 'DISMISS TERMINAL' }).click();
+    await expect(page.locator('span', { hasText: 'OPTIMISE_MODELS.SH' })).not.toBeVisible();
+  });
+
 });

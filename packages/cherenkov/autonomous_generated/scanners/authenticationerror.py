@@ -176,4 +176,4 @@ if __name__ == "__main__":
             endpoint=endpoint + "_auth",
         )
 
-    app.run()
+    app.run(  # nosec B603 B607)

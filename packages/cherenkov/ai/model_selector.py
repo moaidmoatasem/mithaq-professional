@@ -109,14 +109,15 @@ def detect_hardware() -> dict:
     }
     try:
         import shutil
+
         nvidia_smi = shutil.which("nvidia-smi")
         if nvidia_smi:
             result = subprocess.run(  # nosec B603
-            [nvidia_smi, "--query-gpu=name,memory.total", "--format=csv,noheader,nounits"],
-            capture_output=True,
-            text=True,
-            timeout=5,
-        )
+                [nvidia_smi, "--query-gpu=name,memory.total", "--format=csv,noheader,nounits"],
+                capture_output=True,
+                text=True,
+                timeout=5,
+            )
         if result.returncode == 0:
             line = result.stdout.strip().split("\n")[0]
             parts = line.split(", ")

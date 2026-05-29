@@ -15,6 +15,18 @@ test.describe('Dashboard E2E Tests', () => {
       });
     });
 
+    await page.route('**/api/v1/compliance/frameworks', async route => {
+      await route.fulfill({
+        status: 200,
+        json: {
+          frameworks: [
+            { id: "egyfincsf", name: "EGY-FIN CSF" },
+            { id: "samacsf", name: "SAMA CSF" },
+          ]
+        }
+      });
+    });
+
     await page.route('**/api/v1/scan', async route => {
       await route.fulfill({
         status: 500,

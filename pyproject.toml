@@ -58,7 +58,7 @@ dev = [
 [tool.ruff]
 line-length = 100
 target-version = "py310"
-exclude = ["packages/cherenkov/autonomous_generated", "packages/cherenkov/scanners/generated"]
+exclude = ["packages/cherenkov/scanners/generated"]
 
 [tool.ruff.lint]
 select = ["E", "F", "I", "N", "W", "B", "S"]
@@ -90,7 +90,7 @@ ignore = ["E501", "S101"]
 "system_dashboard.py" = ["S110"]
 
 [tool.bandit]
-exclude_dirs = ["tests", "venv", ".venv", "candidates", "packages/cherenkov/autonomous_generated", "packages/cherenkov/autonomous_generated/**"]
+exclude_dirs = ["tests", "venv", ".venv", "candidates"]
 skips = ["B101"]
 
 [tool.pytest.ini_options]
@@ -105,7 +105,7 @@ markers = [
 
 [tool.coverage.run]
 source = ["cherenkov"]
-omit = ["tests/*", "venv/*", "candidates/*", "packages/cherenkov/autonomous_generated/*"]
+omit = ["tests/*", "venv/*", "candidates/*"]
 
 [tool.coverage.report]
 fail_under = 24

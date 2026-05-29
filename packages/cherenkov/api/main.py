@@ -1206,6 +1206,12 @@ async def _run_scan(
     trace_data = json.dumps(trace_dict, sort_keys=True).encode()
     trace_hash = hashlib.sha256(trace_data).hexdigest()
     result["trace_hash"] = trace_hash
+
+    from cherenkov.core.tsa_client import get_timestamp
+
+    tsa_data = await get_timestamp(trace_hash)
+    result.update(tsa_data)
+
     save_scan_trace(scan_id, trace_hash, result)
 
     from cherenkov.ai.lattice_bridge import embed_and_store

@@ -39,7 +39,7 @@ jobs:
             });
 
             // Ignore lockfiles and generated artifacts — they aren't agent intent.
-            const IGNORE = /^(.*\.lock|.*\.lockb|package-lock\.json|pnpm-lock\.yaml|poetry\.lock|cherno-docs\/.*\.svg|.*\.min\.(js|css))$/;
+            const IGNORE = /(^|\/)(.*\.lock|.*\.lockb|package-lock\.json|pnpm-lock\.yaml|poetry\.lock|.*\.min\.(js|css))$|^cherno-docs\/.*\.svg$/;
             const real = files.filter(f => !IGNORE.test(f.filename));
 
             const fileCount = real.length;

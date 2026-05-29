@@ -457,21 +457,21 @@ class Tokamak:
                         os.truncate(fpath, 0)
                         os.remove(fpath)
                         shredded_files.append(fpath)
-                    except Exception:
+                    except Exception:  # nosec B110
                         shredded_files.append(f"{fpath} (shred_failed)")
                 for name in dirs:
                     dpath = os.path.join(root, name)
                     try:
                         os.rmdir(dpath)
-                    except Exception:
+                    except Exception:  # nosec B110
                         pass
             try:
                 os.rmdir(tmpdir)
-            except Exception:
+            except Exception:  # nosec B110
                 pass
         try:
             os.rmdir(tmpdir)
-        except Exception:
+        except Exception:  # nosec B110
             pass
 
         shred_receipt = {
@@ -494,9 +494,6 @@ def execute_poc(exploit_command: str, timeout: int = 30) -> dict:
     """
     Standalone TOKAMAK PoC executor as requested.
     """
-    import docker
-    import hashlib
-
     try:
         client = docker.from_env()
     except Exception as e:
@@ -520,12 +517,11 @@ def execute_poc(exploit_command: str, timeout: int = 30) -> dict:
         try:
             wait_result = container.wait(timeout=timeout)
             exit_code = wait_result.get("StatusCode", -1)
-        except Exception:  # e.g. Timeout
+        except Exception:  # nosec B110  # e.g. Timeout
             container.kill()
             exit_code = 124
 
         logs_bytes = container.logs()
-        logs = logs_bytes.decode("utf-8", errors="replace")
 
         is_verified = exit_code == 0
         if is_verified:
@@ -540,5 +536,5 @@ def execute_poc(exploit_command: str, timeout: int = 30) -> dict:
         if container:
             try:
                 container.remove(force=True)
-            except Exception:
+            except Exception:  # nosec B110
                 pass

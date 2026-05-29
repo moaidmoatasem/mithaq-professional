@@ -12,6 +12,8 @@ dependencies = [
     "httpx>=0.27.0",
     "python-dotenv>=1.0.0",
     "fastapi>=0.100.0",
+    "distro",
+    "packaging",
     "uvicorn[standard]>=0.24.0",
     "typer>=0.9.0",
     "rich>=13.0.0",

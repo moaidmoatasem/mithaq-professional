@@ -36,7 +36,7 @@ _XXE_PAYLOADS: list[str] = [
 _FILE_SIGNATURES: tuple[str, ...] = (
     "root:x:0:0:",  # /etc/passwd
     "[extensions]",  # win.ini
-    "[fonts]",       # win.ini
+    "[fonts]",  # win.ini
 )
 
 
@@ -71,9 +71,7 @@ class XXEScanner(BaseScanner):
                         continue
 
                     body = response.text
-                    matched_sig = next(
-                        (sig for sig in _FILE_SIGNATURES if sig in body), None
-                    )
+                    matched_sig = next((sig for sig in _FILE_SIGNATURES if sig in body), None)
 
                     if response.status_code == 200 and matched_sig:
                         findings.append(

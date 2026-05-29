@@ -1193,7 +1193,13 @@ async def _run_scan(
     async with _active_scan_lock:
         _active_scan_targets.discard(normalised_target)
 
-    trace_data = json.dumps(result, sort_keys=True).encode()
+    trace_dict = {
+        "scan_id": scan_id,
+        "target": request.url,
+        "timestamp": finished,
+        "count": len(vulnerabilities),
+    }
+    trace_data = json.dumps(trace_dict, sort_keys=True).encode()
     trace_hash = hashlib.sha256(trace_data).hexdigest()
     result["trace_hash"] = trace_hash
     save_scan_trace(scan_id, trace_hash, result)

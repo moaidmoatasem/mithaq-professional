@@ -39,6 +39,17 @@ class ScannerRegistry:
         self.register(IOSScanner)
         self.register(CVEDatabaseScanner)
         self.register(NetworkVulnerabilityScanner)
+        from cherenkov.scanners.component_cve_scanner import ComponentCVEScanner
+        from cherenkov.scanners.local_path_traversal_scanner import LocalPathTraversalScanner
+        from cherenkov.scanners.severity_classifier_scanner import SeverityClassifierScanner
+        from cherenkov.scanners.static_file_upload_scanner import StaticFileUploadScanner
+        from cherenkov.scanners.static_xxe_scanner import StaticXXEScanner
+
+        self.register(LocalPathTraversalScanner)
+        self.register(StaticXXEScanner)
+        self.register(ComponentCVEScanner)
+        self.register(StaticFileUploadScanner)
+        self.register(SeverityClassifierScanner)
         self.register(AttackChainDetectorScanner)
         self.register(CICDIntegrationScanner)
 

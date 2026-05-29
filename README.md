@@ -26,7 +26,7 @@ CHERENKOV operates on a mathematically provable "Trident of Truth": it finds vul
 
 ---
 
-> **Alpha Software** — 5 validated scanners. Core architecture complete. TOKAMAK PoC execution and LATTICE adaptive learning are planned for Phase 4–5. See the [honest roadmap](https://docs.cherenkov-security.com/development/roadmap/).
+> **Alpha Software** — 10 validated scanners. Core architecture complete. TOKAMAK PoC execution and LATTICE adaptive learning are planned for Phase 4–5. See the [honest roadmap](https://docs.cherenkov-security.com/development/roadmap/).
 
 ## 🎯 At a Glance
 

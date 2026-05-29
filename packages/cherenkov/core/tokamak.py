@@ -488,3 +488,57 @@ class Tokamak:
             exit_code=exit_code,
             duration_ms=duration_ms,
         )
+
+
+def execute_poc(exploit_command: str, timeout: int = 30) -> dict:
+    """
+    Standalone TOKAMAK PoC executor as requested.
+    """
+    import docker
+    import hashlib
+
+    try:
+        client = docker.from_env()
+    except Exception as e:
+        return {"is_verified": False, "cryptographic_proof": None, "error": str(e)}
+
+    container = None
+    try:
+        container = client.containers.run(
+            "alpine:latest",
+            command=["sh", "-c", exploit_command],
+            detach=True,
+            network_mode="none",
+            mem_limit="128m",
+            cpu_quota=50000,
+            security_opt=["no-new-privileges:true"],
+            cap_drop=["ALL"],
+            pids_limit=50,
+            labels={"cherenkov.execute_poc": "true"},
+        )
+
+        try:
+            wait_result = container.wait(timeout=timeout)
+            exit_code = wait_result.get("StatusCode", -1)
+        except Exception:  # e.g. Timeout
+            container.kill()
+            exit_code = 124
+
+        logs_bytes = container.logs()
+        logs = logs_bytes.decode("utf-8", errors="replace")
+
+        is_verified = exit_code == 0
+        if is_verified:
+            cryptographic_proof = hashlib.sha256(logs_bytes).hexdigest()
+        else:
+            cryptographic_proof = None
+
+        return {"is_verified": is_verified, "cryptographic_proof": cryptographic_proof}
+    except Exception as e:
+        return {"is_verified": False, "cryptographic_proof": None, "error": str(e)}
+    finally:
+        if container:
+            try:
+                container.remove(force=True)
+            except Exception:
+                pass

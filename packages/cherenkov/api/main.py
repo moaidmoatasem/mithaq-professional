@@ -1317,6 +1317,7 @@ class ArchitectPlanRequest(BaseModel):
     requirements: list[str] = []
     constraints: list[str] = []
     threat_context: str = ""
+    framework: str = ""
 
 
 class LatticeQueryRequest(BaseModel):

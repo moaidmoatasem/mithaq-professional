@@ -213,15 +213,23 @@ def test_error_cases(client):
 
 
 def test_architect_plan_post(client, monkeypatch):
-    # Mock SecurityArchitect.generate_plan to return a dummy result
     async def mock_generate_plan(self, context):
-        return {"status": "success", "plan": "Generated secure plan", "model": "architect"}
+        return {
+            "status": "success",
+            "plan": {
+                "threat_surface": ["app"],
+                "red_team_tasks": ["test"],
+                "secops_tasks": ["monitor"],
+                "risk_score": 50,
+                "reasoning": "mock",
+            },
+            "model": "architect",
+        }
 
     from cherenkov.agents.architect import SecurityArchitect
 
     monkeypatch.setattr(SecurityArchitect, "generate_plan", mock_generate_plan)
 
-    # Need authentication for v1_architect_plan
     auth_data = {"username": "admin", "password": "admin"}
     token_response = client.post("/api/v1/auth/token", json=auth_data)
     token = token_response.json()["access_token"]
@@ -229,6 +237,7 @@ def test_architect_plan_post(client, monkeypatch):
 
     payload = {
         "target": "mobile app",
+        "framework": "DORA",
         "requirements": ["encryption"],
         "constraints": ["low latency"],
         "threat_context": "DDoS attacks",
@@ -238,4 +247,5 @@ def test_architect_plan_post(client, monkeypatch):
     assert response.status_code == 200
     data = response.json()
     assert data["status"] == "success"
-    assert data["plan"] == "Generated secure plan"
+    assert "threat_surface" in data["plan"]
+    assert data["plan"]["risk_score"] == 50

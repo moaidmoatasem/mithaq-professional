@@ -15,3 +15,12 @@ Generates a security architecture plan using Foundation-Sec-8B via the LiteLLM p
 
 ### `/api/v1/auth/token`
 Generates a short-lived JWT token for authentication.
+
+### `/api/v1/findings/pending`
+Returns a list of all pending findings.
+
+### `/api/v1/findings/{finding_id}/approve`
+Approves a finding and triggers a TOKAMAK execution in the background. Requires OPERATOR role or higher.
+
+### `/api/v1/findings/{finding_id}/reject`
+Rejects a finding (marks it as a false positive) and labels it in LATTICE. Requires OPERATOR role or higher.

@@ -51,10 +51,10 @@
 | Issue | Description | Priority | Status |
 |-------|-------------|----------|--------|
 | #230 | Remove cloud configs (MEISSNER) | 🔴 critical | ✅ Merged |
+| #232 | Root cleanup | 🟡 medium | ✅ Merged |
 | #234 | Harden .gitignore | 🟠 high | ✅ Merged |
 | #236 | Scanner registry auto-discovery | 🟠 high | ✅ Merged |
 | #237 | Scan result aggregation pipeline | 🟠 high | ✅ Merged |
-| #243 | Graduate CI/CD Integration Scanner | 🟠 high | ✅ Merged |
 | #238 | Wire POST /api/v1/scan | 🟠 high | ✅ Merged |
 | #239 | CI matrix 222+ tests pass | 🟠 high | ✅ COMPLETE |
 
@@ -63,20 +63,27 @@
 | Issue | Description | Priority | Status |
 |-------|-------------|----------|--------|
 | #231 | GitHub repo metadata | 🟡 medium | ✅ COMPLETE |
-| #232 | Root cleanup | 🟡 medium | ✅ Merged |
 | #233 | Align GEMINI.md | 🟡 medium | ✅ COMPLETE |
 | #235 | Canonicalize CHANGELOG | 🔵 low | ✅ COMPLETE |
 
 **Phase 3 (v1.5.0) — 🔄 IN PROGRESS:**
 
+**P0 — Critical infrastructure:**
+
 | Issue | Description | Priority | Status |
 |-------|-------------|----------|--------|
 | #246 | TOKAMAK SQLite WAL logger | 🔴 critical | ✅ Merged |
 | #247 | Wire Cherenkov Trace signing | 🔴 critical | ✅ Merged |
+
+**P1 & P2 — Scanner graduation:**
+
+| Issue | Description | Priority | Status |
+|-------|-------------|----------|--------|
 | #240 | Graduate NetworkVulnerabilityScanner | 🟠 high | ✅ Merged |
 | #241 | Verify XXE scanner contract | 🟠 high | ✅ Merged |
 | #245 | Verify SSRF scanner contract | 🟠 high | ✅ Merged |
 | #242 | Graduate CVE Database Scanner | 🟡 medium | ✅ Merged |
+| #243 | Graduate CI/CD Integration Scanner | 🟠 high | ✅ Merged |
 | #244 | Graduate AttackChainDetector | 🟡 medium | ✅ Merged |
 
 ---

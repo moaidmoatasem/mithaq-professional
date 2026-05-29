@@ -63,6 +63,7 @@ def test_scanner():
 
 
 # Test 4: AI-generated scanners exist
+@pytest.mark.skip(reason="autonomous_generated directory removed per issue #544")
 def test_generated_scanners():
     # Looking in autonomous_generated directory due to new structure
     scanner_dir = Path("packages/cherenkov/autonomous_generated/scanners")

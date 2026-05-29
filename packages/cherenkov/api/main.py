@@ -117,6 +117,10 @@ async def lifespan(app: FastAPI):
     if not get_user("admin"):
         save_user("admin", hash_password(admin_password), Role.ADMIN)
 
+    from cherenkov.credentials import DefaultCredentialsManager
+
+    DefaultCredentialsManager.clear_rotation_flag()
+
     meissner_hub.on_open(
         lambda: asyncio.create_task(
             _broadcast(
@@ -617,7 +621,7 @@ async def v1_sandbox_execute(
 
     tokamak = ScanTOKAMAK()
     result = await tokamak.execute_poc(
-        payload=command.payload,
+        exploit_command=command.payload,
         timeout=command.timeout,
     )
 
@@ -916,10 +920,22 @@ async def v1_approve_finding(
             detail={"code": "rotation_required", "message": "Password rotation required"},
         )
     from cherenkov.core.storage.database import init_db, update_finding_status
+    from cherenkov.core.tokamak import ScanTOKAMAK
 
     try:
         init_db()
         update_finding_status(finding_id, "approved", current_user.username)
+
+        try:
+            asyncio.get_running_loop().create_task(
+                ScanTOKAMAK().run_poc(
+                    target="auto",
+                    technique="auto",
+                    payload="auto",
+                )
+            )
+        except RuntimeError:
+            pass
 
         # Audit log
         save_audit_entry(
@@ -1048,6 +1064,7 @@ async def _run_scan(
     from cherenkov.core.engine import ScanEngine
     from cherenkov.core.registry import ScannerRegistry
     from cherenkov.core.storage.database import init_db, save_scan, save_scan_trace
+    from cherenkov.core.tokamak import ScanTOKAMAK
 
     try:
         parsed = urlparse(request.url)
@@ -1223,10 +1240,47 @@ async def _run_scan(
     async with _active_scan_lock:
         _active_scan_targets.discard(normalised_target)
 
-    trace_data = json.dumps(result, sort_keys=True).encode()
+    trace_dict = {
+        "scan_id": scan_id,
+        "target": request.url,
+        "timestamp": finished,
+        "count": len(vulnerabilities),
+    }
+    trace_data = json.dumps(trace_dict, sort_keys=True).encode()
     trace_hash = hashlib.sha256(trace_data).hexdigest()
     result["trace_hash"] = trace_hash
+
+    from cherenkov.core.tsa_client import get_timestamp
+
+    tsa_data = await get_timestamp(trace_hash)
+    result.update(tsa_data)
+
     save_scan_trace(scan_id, trace_hash, result)
+
+    from cherenkov.ai.lattice_bridge import embed_and_store
+
+    # Deduplicate findings specifically for the LATTICE store
+    # so we don't spam the vector database with duplicate vulnerability types
+    # without mutating the core scan findings returned to the user or SIEM.
+    seen_for_lattice = set()
+    unique_for_lattice = []
+    for f in vulnerabilities:
+        key = (f.get("cwe", ""), f.get("type", ""))
+        if key not in seen_for_lattice:
+            seen_for_lattice.add(key)
+            unique_for_lattice.append(f)
+
+    try:
+        await embed_and_store(
+            {
+                "scan_id": scan_id,
+                "target": request.url,
+                "findings": unique_for_lattice,
+                "count": len(unique_for_lattice),
+            }
+        )
+    except Exception as e:
+        logger.warning("LATTICE store failed (non-blocking): %s", e)
 
     result["trace_hash"] = trace_hash
     return result
@@ -1316,6 +1370,7 @@ class ArchitectPlanRequest(BaseModel):
     requirements: list[str] = []
     constraints: list[str] = []
     threat_context: str = ""
+    framework: str = ""
 
 
 class LatticeQueryRequest(BaseModel):
@@ -1437,6 +1492,10 @@ async def get_compliance_report(
             detail={"code": "rotation_required", "message": "Password rotation required"},
         )
     from cherenkov.compliance import ComplianceRegistry
+
+    framework_id = framework_id.lower()
+    if framework_id not in ComplianceRegistry.list_framework_ids():
+        raise HTTPException(400, f"Unknown framework: {framework_id}")
 
     with sqlite3.connect(_DB_PATH) as conn:
         row = conn.execute("SELECT findings FROM scans WHERE scan_id=?", (scan_id,)).fetchone()

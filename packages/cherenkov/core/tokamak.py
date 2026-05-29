@@ -148,6 +148,16 @@ class TokamakResult:
     exit_code: int
     duration_ms: float = 0.0
 
+    @property
+    def is_verified(self) -> bool:
+        """A PoC is verified only when it executed cleanly (exit code 0)."""
+        return self.exit_code == 0
+
+    @property
+    def cryptographic_proof(self) -> str:
+        """SHA-256 trace signature; empty unless the PoC is verified."""
+        return self.trace_hash
+
 
 class ScanTOKAMAK:
     """
@@ -275,7 +285,7 @@ class ScanTOKAMAK:
 
     async def execute_poc(
         self,
-        payload: str,
+        exploit_command: str,
         profile: TOKAMAKProfile = TOKAMAKProfile.STANDARD,
         timeout: int = 30,
     ) -> TokamakResult:
@@ -293,11 +303,19 @@ class ScanTOKAMAK:
         container = None
 
         try:
-            run_kwargs = {k: v for k, v in cfg.items() if k not in ("audit_note", "image")}
+            # Hardened one-shot PoC sandbox: air-gapped, tightly capped, no privilege escalation.
+            run_kwargs = {
+                "network_mode": "none",
+                "mem_limit": "128m",
+                "cpu_quota": 50000,
+                "security_opt": ["no-new-privileges:true"],
+                "cap_drop": ["ALL"],
+                "pids_limit": 50,
+            }
             container = await asyncio.to_thread(
                 self.client.containers.run,
                 cfg["image"],
-                command=["sh", "-c", payload],
+                command=["sh", "-c", exploit_command],
                 detach=True,
                 labels={
                     "cherenkov.role": "tokamak",
@@ -343,8 +361,12 @@ class ScanTOKAMAK:
                 except Exception as exc:
                     logger.warning("Failed to remove tokamak container: %s", exc)
 
-        trace_data = stdout + stderr + iso_timestamp
-        trace_hash = hashlib.sha256(trace_data.encode()).hexdigest()
+        # Only sign verified executions (exit 0). A failed/errored run yields no proof.
+        if exit_code == 0:
+            trace_data = stdout + stderr + iso_timestamp
+            trace_hash = hashlib.sha256(trace_data.encode()).hexdigest()
+        else:
+            trace_hash = ""
         duration_ms = (time_module.monotonic() - start) * 1000
 
         return TokamakResult(
@@ -457,21 +479,21 @@ class Tokamak:
                         os.truncate(fpath, 0)
                         os.remove(fpath)
                         shredded_files.append(fpath)
-                    except Exception:
+                    except Exception:  # nosec B110
                         shredded_files.append(f"{fpath} (shred_failed)")
                 for name in dirs:
                     dpath = os.path.join(root, name)
                     try:
                         os.rmdir(dpath)
-                    except Exception:
+                    except Exception:  # nosec B110
                         pass
             try:
                 os.rmdir(tmpdir)
-            except Exception:
+            except Exception:  # nosec B110
                 pass
         try:
             os.rmdir(tmpdir)
-        except Exception:
+        except Exception:  # nosec B110
             pass
 
         shred_receipt = {
@@ -488,3 +510,53 @@ class Tokamak:
             exit_code=exit_code,
             duration_ms=duration_ms,
         )
+
+
+def execute_poc(exploit_command: str, timeout: int = 30) -> dict:
+    """
+    Standalone TOKAMAK PoC executor as requested.
+    """
+    try:
+        client = docker.from_env()
+    except Exception as e:
+        return {"is_verified": False, "cryptographic_proof": None, "error": str(e)}
+
+    container = None
+    try:
+        container = client.containers.run(
+            "alpine:latest",
+            command=["sh", "-c", exploit_command],
+            detach=True,
+            network_mode="none",
+            mem_limit="128m",
+            cpu_quota=50000,
+            security_opt=["no-new-privileges:true"],
+            cap_drop=["ALL"],
+            pids_limit=50,
+            labels={"cherenkov.execute_poc": "true"},
+        )
+
+        try:
+            wait_result = container.wait(timeout=timeout)
+            exit_code = wait_result.get("StatusCode", -1)
+        except Exception:  # nosec B110  # e.g. Timeout
+            container.kill()
+            exit_code = 124
+
+        logs_bytes = container.logs()
+
+        is_verified = exit_code == 0
+        if is_verified:
+            cryptographic_proof = hashlib.sha256(logs_bytes).hexdigest()
+        else:
+            cryptographic_proof = None
+
+        return {"is_verified": is_verified, "cryptographic_proof": cryptographic_proof}
+    except Exception as e:
+        return {"is_verified": False, "cryptographic_proof": None, "error": str(e)}
+    finally:
+        if container:
+            try:
+                container.remove(force=True)
+            except Exception:  # nosec B110
+                pass

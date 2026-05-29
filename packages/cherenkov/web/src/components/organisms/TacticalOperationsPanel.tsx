@@ -125,7 +125,13 @@ export function TacticalOperationsPanel() {
 
   const initiateScan = async (data: any) => {
     window.dispatchEvent(new CustomEvent('cherenkov:scan_initiated'));
-    const result = await submitScan({ url: data.url });
+    const result = await submitScan({ 
+      url: data.url,
+      profile: data.profile,
+      rps: data.rps,
+      burhan: data.burhan,
+      compliance_framework: data.compliance_framework
+    });
     
     setTraceId(result.scan_id?.slice(0, 8).toUpperCase() || generateTrace().slice(0, 8).toUpperCase());
     setIsExecuting(true);
@@ -158,10 +164,10 @@ export function TacticalOperationsPanel() {
         window.dispatchEvent(new CustomEvent('cherenkov:scan_complete', { detail: result }));
         
         // Auto-fetch compliance report if selected
-        if (data.framework && data.framework !== 'none') {
-          fetchComplianceReport(result.scan_id, data.framework)
+        if (data.compliance_framework && data.compliance_framework !== 'none') {
+          fetchComplianceReport(result.scan_id, data.compliance_framework)
             .then(report => {
-              addLog(`Compliance Report loaded for ${data.framework}.`, 'verified');
+              addLog(`Compliance Report loaded for ${data.compliance_framework}.`, 'verified');
               window.dispatchEvent(new CustomEvent('cherenkov:compliance_loaded', { detail: report }));
             })
             .catch(err => {

@@ -1,4 +1,3 @@
-
 #!/usr/bin/env python3
 """
 CHERENKOV — Sovereign Security API & WebSocket Server
@@ -185,7 +184,7 @@ async def post_run_scan(payload: Dict[str, str]):
 
         # 2. Inference Reasoning
         system_prompt = "You are an air-gapped vulnerability scanner. Output a strict security report detailing flaws."
-        response = client.generate(prompt=sanitized_code, system_prompt=system_prompt)
+        response = await client.generate(prompt=sanitized_code, system_prompt=system_prompt)
 
         active_scan_logs.append(
             "[TENSOR-REASON] SWARM SCAN COMPLETE. Vulnerability report generated."

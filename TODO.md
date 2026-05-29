@@ -68,17 +68,14 @@
 
 - [x] #438 Security Architect agent via LiteLLM proxy
 
-### P1 — Scanner graduation (high)
+### P1 & P2 — Scanner graduation
 
 - [x] #240 Graduate NetworkVulnerabilityScanner
 - [x] #241 Verify XXE scanner contract
 - [x] #245 Verify SSRF scanner contract
-
-### P2 — Scanner graduation (medium)
-
 - [x] #242 Graduate CVE Database Scanner
-- [x] #244 Graduate AttackChainDetector
 - [x] #243 Graduate CI/CD Integration Scanner
+- [x] #244 Graduate AttackChainDetector
 
 ---
 

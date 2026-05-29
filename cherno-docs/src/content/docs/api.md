@@ -15,3 +15,6 @@ Generates a security architecture plan using Foundation-Sec-8B via the LiteLLM p
 
 ### `/api/v1/auth/token`
 Generates a short-lived JWT token for authentication.
+
+### `/api/auth/status`
+Returns the status of the authentication system, including whether a first-boot credential rotation is required.

@@ -5,13 +5,15 @@ Provides a highly reliable, production-grade integration layer for agent inferen
 Includes structured logging, retry mechanisms, and analytical metrics tracking.
 """
 
+import asyncio
 import logging
 import time
 from typing import Any, Dict, Optional
 
-from openai import OpenAI
+from openai import AsyncOpenAI
 
 from cherenkov.core.circuit_breaker import Meissner
+from cherenkov.core.config.llm_config import DEFAULT_LLM_MODEL
 
 # Setup logging with modern formatting
 logging.basicConfig(
@@ -55,7 +57,7 @@ class UnifiedLLMClient:
         self,
         backend: str = "vllm",  # 'vllm' or 'ollama'
         base_url: Optional[str] = None,
-        model_name: str = "Qwen/Qwen2.5-Coder-7B-Instruct",
+        model_name: str = DEFAULT_LLM_MODEL,
         timeout: float = 60.0,
         max_retries: int = 3,
         failure_threshold: int = 3,
@@ -91,19 +93,19 @@ class UnifiedLLMClient:
             f"Initializing client | Backend: {self.backend.upper()} | Model: {self.model_name} | Endpoint: {self.base_url}"
         )
 
-        # Instantiate OpenAI-compatible client wrapper
-        self.client = OpenAI(
+        # Instantiate async OpenAI-compatible client wrapper
+        self.client = AsyncOpenAI(
             base_url=self.base_url, api_key="EMPTY" if self.backend == "vllm" else "ollama"
         )
 
-    def generate(
+    async def generate(
         self,
         prompt: str,
         system_prompt: str = "You are Cherenkov TENSOR, a sovereign security analysis model. Be precise, strict, and perform comprehensive source-code vulnerability scanning.",
         temperature: float = 0.2,
         max_tokens: int = 1024,
     ) -> str:
-        """Sends a completion request to the served local model with retry and circuit-breaker support."""
+        """Sends an async completion request to the served local model with retry and circuit-breaker support."""
         # Enforce dynamic first-run credentials blocker
         from cherenkov.credentials import DefaultCredentialsManager
 
@@ -165,7 +167,7 @@ class UnifiedLLMClient:
                 if attempt < self.max_retries:
                     # Exponential backoff: 1s, 2s, 4s...
                     sleep_time = 2 ** (attempt - 1)
-                    time.sleep(sleep_time)
+                    await asyncio.sleep(sleep_time)
 
         # If we reach here, all retries failed. Record failure on circuit breaker.
         self.breaker._record_failure(Exception("All attempts failed"), 0.0)
@@ -177,26 +179,28 @@ class UnifiedLLMClient:
 
     def _fallback_triage(self, prompt: str) -> str:
         """Sovereign fallback logic performing simple rule-based triage when the LLM is down."""
+        import re
+
         logger.info("Executing rule-based static analyzer fallback...")
 
         lower_prompt = prompt.lower()
         findings = []
 
-        if "sql" in lower_prompt or "select" in lower_prompt:
+        if re.search(r"\b(sql|select)\b", lower_prompt):
             findings.append(
                 "- Finding: Potential SQL Injection Vulnerability\n"
                 "  Severity: High\n"
                 "  Description: Unsanitized database input detected in string pattern."
             )
 
-        if "system" in lower_prompt or "eval" in lower_prompt or "os.system" in lower_prompt:
+        if re.search(r"\b(system|eval|os\.system)\b", lower_prompt):
             findings.append(
                 "- Finding: Potential Remote Code Execution / Shell Injection\n"
                 "  Severity: Critical\n"
                 "  Description: Direct system shell execution detected with user-supplied arguments."
             )
 
-        if "password" in lower_prompt or "secret" in lower_prompt or "key" in lower_prompt:
+        if re.search(r"\b(password|secret|key)\b", lower_prompt):
             findings.append(
                 "- Finding: Hardcoded Secret Assignment\n"
                 "  Severity: Critical\n"

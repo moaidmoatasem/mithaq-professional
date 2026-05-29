@@ -37,6 +37,21 @@ test.describe('Dashboard UI Visual Regression Tests', () => {
     });
 
     // Mock static model topology list
+
+    // Mock additional endpoints that cause ECONNREFUSED
+    await page.route('**/api/v1/health', async route => {
+      await route.fulfill({ status: 200, json: { status: 'healthy', nodes: {}, queue: { scan_jobs_pending: 0 } } });
+    });
+    await page.route('**/api/v1/ablation/stats', async route => {
+      await route.fulfill({ status: 200, json: { session_stats: { attempts: 0, drops: 0, drop_rate: 0, alert_active: false } } });
+    });
+    await page.route('**/api/v1/scans/history', async route => {
+      await route.fulfill({ status: 200, json: [] });
+    });
+    await page.route('**/api/v1/models/recommend', async route => {
+      await route.fulfill({ status: 200, json: { models: [] } });
+    });
+
     await page.route('**/api/v1/models/specs', async route => {
       await route.fulfill({
         status: 200,

@@ -179,7 +179,11 @@ def prune_old_scans(days: int = 90, path: Path = _DB_PATH) -> int:
     cutoff = (datetime.now(timezone.utc) - timedelta(days=days)).isoformat()
     with closing(_connect(path)) as conn:
         with conn:
-            cur = conn.execute("DELETE FROM scans WHERE started_at < ?", (cutoff,))
+            cur = conn.execute(
+                "UPDATE scans SET findings = '[]', meta = '{}', status = 'pruned' "
+                "WHERE started_at < ? AND status != 'pruned'",
+                (cutoff,),
+            )
             return cur.rowcount
 
 
@@ -236,24 +240,24 @@ def save_pending_finding(
     title: str,
     scan_id: str | None = None,
     status: str = "pending",
-    path: Path = None,
+    path: Path | None = None,
 ) -> None:
     path = path or _DB_PATH
     with closing(_connect(path)) as conn:
         with conn:
             conn.execute(
                 """
-                INSERT OR IGNORE INTO findings_pending (finding_id, severity, scanner, title, status, scan_id)
+                INSERT OR IGNORE INTO findings_pending (finding_id, severity, scanner, title, scan_id, status)
                 VALUES (?, ?, ?, ?, ?, ?)
                 """,
-                (finding_id, severity, scanner, title, status, scan_id),
+                (finding_id, severity, scanner, title, scan_id, status),
             )
 
 
 def get_pending_findings(path: Path = None) -> list[dict]:
     path = path or _DB_PATH
     with closing(_connect(path)) as conn:
-        rows = conn.execute("SELECT * FROM findings_pending WHERE status = 'pending'").fetchall()
+        rows = conn.execute("SELECT * FROM findings_pending WHERE status IN ('pending', 'awaiting_approval')").fetchall()
     return [dict(r) for r in rows]
 
 

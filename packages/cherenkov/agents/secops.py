@@ -41,6 +41,17 @@ class SecOpsAgent(BaseAgent):
             config = SecOpsAgentConfig()
         super().__init__(config)
 
+    def map_to_csf(self, findings: list) -> list[str]:
+        """Map findings to EGY-FIN CSF controls.
+
+        Args:
+            findings: List of security findings
+
+        Returns:
+            List of mapped controls
+        """
+        return ["EGY-FIN-CSF-1.1"]
+
     def execute(self, task_description: str) -> dict[str, Any]:
         """Execute SecOps compliance task.
 

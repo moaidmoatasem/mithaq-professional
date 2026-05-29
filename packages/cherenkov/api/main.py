@@ -1408,6 +1408,10 @@ async def get_compliance_report(
         )
     from cherenkov.compliance import ComplianceRegistry
 
+    framework_id = framework_id.lower()
+    if framework_id not in ComplianceRegistry.list_framework_ids():
+        raise HTTPException(400, f"Unknown framework: {framework_id}")
+
     with sqlite3.connect(_DB_PATH) as conn:
         row = conn.execute("SELECT findings FROM scans WHERE scan_id=?", (scan_id,)).fetchone()
 

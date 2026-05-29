@@ -239,8 +239,8 @@ def save_pending_finding(
     scanner: str,
     title: str,
     scan_id: str | None = None,
-    path: Path = None,
     status: str = "pending",
+    path: Path | None = None,
 ) -> None:
     path = path or _DB_PATH
     with closing(_connect(path)) as conn:

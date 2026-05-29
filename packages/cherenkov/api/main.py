@@ -944,6 +944,12 @@ async def v1_approve_finding(
             details={"finding_id": finding_id},
         )
 
+        # Operator approved — kick off TOKAMAK PoC validation in the background.
+        try:
+            asyncio.get_running_loop().create_task(ScanTOKAMAK().execute_poc(payload="auto"))
+        except RuntimeError:
+            pass  # No running loop — skip TOKAMAK trigger in this context
+
         return {"status": "success", "finding_id": finding_id, "new_status": "approved"}
     except Exception as exc:
         raise HTTPException(status_code=500, detail=f"Failed to approve finding: {exc}") from exc
@@ -1199,7 +1205,7 @@ async def _run_scan(
                             )
                         )
                     except RuntimeError:
-                        pass
+                        pass  # No running loop — skip TOKAMAK trigger in this context
                 try:
                     asyncio.get_running_loop().create_task(
                         _broadcast(

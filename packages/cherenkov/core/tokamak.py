@@ -457,21 +457,21 @@ class Tokamak:
                         os.truncate(fpath, 0)
                         os.remove(fpath)
                         shredded_files.append(fpath)
-                    except Exception:
+                    except OSError:  # noqa: S110
                         shredded_files.append(f"{fpath} (shred_failed)")
                 for name in dirs:
                     dpath = os.path.join(root, name)
                     try:
                         os.rmdir(dpath)
-                    except Exception:
+                    except OSError:  # noqa: S110
                         pass
             try:
                 os.rmdir(tmpdir)
-            except Exception:
+            except OSError:  # noqa: S110
                 pass
         try:
             os.rmdir(tmpdir)
-        except Exception:
+        except OSError:  # noqa: S110
             pass
 
         shred_receipt = {

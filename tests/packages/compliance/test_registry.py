@@ -68,6 +68,29 @@ def test_owasptop10_loads_and_maps_correctly():
     assert mapped.domain == "Injection"
 
 
+def test_owasptop10_2021_cwe_mappings_match_standard():
+    """CWE→category mappings must follow the OWASP Top 10 2021 standard.
+
+    XSS (CWE-79) is part of A03:2021-Injection (it left A07 after 2017).
+    XXE (CWE-611) merged into A05:2021-Security Misconfiguration.
+    Sensitive-info exposure (CWE-200) belongs to A01:2021-Broken Access Control.
+    """
+    fw = ComplianceRegistry.get("owasp2021")
+
+    xxe = fw.map_finding({"title": "XXE", "severity": "HIGH", "cwe": "CWE-611"})
+    assert "A05" in xxe.controls
+    assert mapped_has_no_control(fw, "CWE-611", "A03")
+
+    info = fw.map_finding({"title": "Info Exposure", "severity": "MEDIUM", "cwe": "CWE-200"})
+    assert "A01" in info.controls
+    assert mapped_has_no_control(fw, "CWE-200", "A09")
+
+
+def mapped_has_no_control(fw, cwe: str, control_id: str) -> bool:
+    """True when the control with id==control_id does not claim the given cwe."""
+    return all(cwe not in c.cwe_list for c in fw.controls if c.id == control_id)
+
+
 def test_registry_list_frameworks():
     """Verify registry.list_frameworks() returns all 3 expected frameworks."""
     frameworks = ComplianceRegistry.list_frameworks()

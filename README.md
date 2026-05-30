@@ -8,17 +8,17 @@
 </p>
 
 <p align="center">
-  <img src="https://img.shields.io/badge/license-MIT_/_Apache_2.0-00E0FF?style=for-the-badge&labelColor=0A0E1A" alt="License">
-  <img src="https://img.shields.io/badge/python-3.11%2B-00E0FF?style=for-the-badge&labelColor=0A0E1A" alt="Python">
+  <img src="https://img.shields.io/badge/license-MIT_/_Apache_2.0-00A3FF?style=for-the-badge&labelColor=0A0E1A" alt="License">
+  <img src="https://img.shields.io/badge/python-3.11%2B-00A3FF?style=for-the-badge&labelColor=0A0E1A" alt="Python">
   <img src="https://img.shields.io/badge/status-alpha-9D00FF?style=for-the-badge&labelColor=0A0E1A" alt="Status">
-  <img src="https://img.shields.io/badge/architecture-air--gapped-00E0FF?style=for-the-badge&labelColor=0A0E1A" alt="Air-Gapped">
+  <img src="https://img.shields.io/badge/architecture-air--gapped-00A3FF?style=for-the-badge&labelColor=0A0E1A" alt="Air-Gapped">
   <img src="https://img.shields.io/badge/security-sovereign-9D00FF?style=for-the-badge&labelColor=0A0E1A" alt="Sovereign">
 </p>
 
 ---
 
 # CHERENKOV · The Sovereign Security Standard
-**Precision in Sovereignty**
+**Air-gapped security scanner platform — local Ollama inference, zero cloud dependencies**
 
 CHERENKOV is an air-gapped, sovereign AI security and quality intelligence platform. Designed explicitly for highly regulated infrastructures (EGY-FIN CSF, SAMA CSF, DORA), it tests traditional software, mobile applications, and embedded AI systems entirely on local hardware.
 
@@ -26,7 +26,7 @@ CHERENKOV operates on a mathematically provable "Trident of Truth": it finds vul
 
 ---
 
-> **Alpha Software** — 5 validated scanners. Core architecture complete. TOKAMAK PoC execution and LATTICE adaptive learning are planned for Phase 4–5. See the [honest roadmap](https://docs.cherenkov-security.com/development/roadmap/).
+> **Alpha Software** — 10 validated scanners. Core architecture complete. TOKAMAK PoC execution and LATTICE adaptive learning are planned for Phase 4–5. See the [honest roadmap](https://docs.cherenkov-security.com/development/roadmap/).
 
 ## 🎯 At a Glance
 
@@ -37,7 +37,7 @@ CHERENKOV operates on a mathematically provable "Trident of Truth": it finds vul
 | **Governance** | SHA-256 signed WAL/WORM · Shred Receipts · Zero-Egress |
 | **AI Stack** | Ollama-powered multi-agent swarm · LLM-driven scanner generation |
 | **Compliance** | EGY-FIN CSF · SAMA CSF · DORA · ISO 27001-aligned |
-| **Design System** | See [`DESIGN_SYSTEM.md`](DESIGN_SYSTEM.md) for brand guidelines |
+| **Design System** | See [`Design System docs`](docs/development/design-system.md) for brand guidelines |
 
 ---
 
@@ -88,13 +88,17 @@ cd cherenkov-professional
 # 2. Configure environment
 cp .env.example .env
 
-# 3. Start all services
-docker-compose -f deploy/docker-compose.yml up -d
-ollama pull qwen2.5-coder:3b
+# 3. One-command boot (Qdrant, Ollama, LiteLLM, API, DVWA)
+./scripts/start_cherenkov.sh
 
-# 4. Run your first scan (against DVWA included in compose)
-cherenkov scan http://localhost/dvwa --output table
+# 4. Run your first scan (against DVWA)
+c2 scan http://localhost/dvwa --output table
 ```
+
+> The orchestrator automatically generates a JWT secret, health-checks every
+> service (✓/✗), performs a JWT smoke test with `admin/admin`, and registers
+> the `c2` alias idempotently. Optional services that are down (e.g. DVWA)
+> do not cause a non-zero exit.
 
 ## ⚖️ Licensing & The Ethical Open-Core
 We refuse to utilize the "SSO Wall of Shame." Core security features (SSO, RBAC, audit logging, local scanning) are provided under **MIT/Apache**. The proprietary multi-agent orchestrator and advanced Arabic RTL/OCR modules are dual-licensed (**AGPLv3/BSL**) to protect localized intelligence from hyperscaler cannibalization.
@@ -108,7 +112,7 @@ We refuse to utilize the "SSO Wall of Shame." Core security features (SSO, RBAC,
 </p>
 
 <p align="center">
-  <a href="DESIGN_SYSTEM.md">🎨 Design System</a> ·
+  <a href="docs/development/design-system.md">🎨 Design System</a> ·
   <a href="docs/">📚 Documentation</a> ·
   <a href="https://docs.cherenkov-security.com/">🌐 docs.cherenkov-security.com</a> ·
   <a href="docs/PROJECT_BRIEFING.md">📋 Project briefing</a> ·

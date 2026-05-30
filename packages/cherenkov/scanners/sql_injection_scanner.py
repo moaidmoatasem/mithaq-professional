@@ -1,73 +1,27 @@
-"""
-SQLInjectionScanner — detects error-based and boolean-based SQL injection.
-
-Probes URL query parameters with classic SQL injection payloads and looks
-for database error strings in responses.  Only inert, read-only payloads
-are used; no destructive SQL (DROP / DELETE / UPDATE) is ever sent.
-
-CWE-89: Improper Neutralization of Special Elements used in an SQL Command
-OWASP A03:2021 — Injection
-"""
-
-from __future__ import annotations
+"""SQL Injection Scanner (CWE-89)"""
 
 import logging
 import time
-from typing import List
 from urllib.parse import parse_qs, urlencode, urlparse, urlunparse
-
-import httpx
 
 from cherenkov.core.base_scanner import BaseScanner, Finding, ScanResult, Severity
 
-logger = logging.getLogger("cherenkov.scanners.sqli")
+logger = logging.getLogger(__name__)
 
-# Inert payloads — single-quote terminators and Boolean tautologies only.
-# Ordered from most likely to trigger verbose DB errors to least.
-_SQLI_PAYLOADS: list[str] = [
-    "'",
-    '"',
-    "' OR '1'='1",
-    "' OR 1=1--",
-    '" OR "1"="1',
-    "1 AND 1=1",
-    "1 AND 1=2",
-    "'; SELECT 1--",
+# Basic error-based SQLi signatures (MySQL, PostgreSQL, MSSQL, Oracle)
+_ERROR_SIGNATURES = [
+    "you have an error in your sql syntax",
+    "unclosed quotation mark before the character string",
+    "postgresql query failed: error:",
+    "ora-00933: sql command not properly ended",
+    "mysql_fetch_array() expects parameter 1 to be resource",
+    "sqlite3.operationalerror:",
+    "warning: mysql_connect():",
+    "driver][odbc sql server driver",
 ]
 
-# Database error substrings that indicate unhandled SQL exceptions.
-_ERROR_SIGNATURES: tuple[str, ...] = (
-    # MySQL / MariaDB
-    "you have an error in your sql syntax",
-    "warning: mysql",
-    "mysql_fetch",
-    "mysql_num_rows",
-    # PostgreSQL
-    "pg_query",
-    "pg::syntaxerror",
-    "unterminated quoted string",
-    "syntax error at or near",
-    # MSSQL
-    "unclosed quotation mark",
-    "incorrect syntax near",
-    "microsoft ole db provider for sql server",
-    "odbc sql server driver",
-    # Oracle
-    "ora-00907",
-    "ora-00933",
-    "ora-01756",
-    "quoted string not properly terminated",
-    # SQLite
-    "sqlite3::query",
-    "sqlite3.operationalerror",
-    "unrecognized token",
-    # Generic
-    "sql syntax",
-    "sqlexception",
-    "syntax error",
-    "invalid query",
-    "sql error",
-)
+# Simple probes to trigger syntax errors
+_PROBES = ["'", "''", "'; --", '") OR 1=1 --', "')) OR 1=1 --"]
 
 
 def _inject_into_params(url: str, payload: str) -> list[str]:
@@ -101,57 +55,74 @@ class SQLInjectionScanner(BaseScanner):
         )
 
     async def scan(self, target: str, timeout: float = 10.0) -> ScanResult:
-        start = time.monotonic()
-        findings: List[Finding] = []
+        start_time = time.monotonic()
+        findings: list[Finding] = []
 
         try:
-            async with httpx.AsyncClient(timeout=timeout, verify=True) as client:
-                for payload in _SQLI_PAYLOADS:
-                    probe_urls = _inject_into_params(target, payload)
-                    for probe_url in probe_urls:
-                        try:
-                            response = await client.get(probe_url, follow_redirects=True)
-                        except (httpx.RequestError, httpx.TimeoutException):
-                            continue
+            # Only probe if target looks like a URL
+            if not target.startswith(("http://", "https://")):
+                return ScanResult(target=target, scanner_name=self.name, status="skipped")
 
-                        body_lower = response.text.lower()
-                        matched_sig = next(
-                            (sig for sig in _ERROR_SIGNATURES if sig in body_lower), None
-                        )
+            # For each probe, inject it into each query parameter and check response
+            for payload in _PROBES:
+                test_urls = _inject_into_params(target, payload)
 
-                        if response.status_code == 200 and matched_sig:
-                            findings.append(
-                                Finding(
-                                    title="SQL Injection",
-                                    severity=Severity.CRITICAL,
-                                    description=(
-                                        f"The endpoint returned a database error signature "
-                                        f'("{matched_sig}") when the query parameter was set to '
-                                        f'"{payload}". This indicates unparameterised SQL and '
-                                        f"possible full database compromise."
-                                    ),
-                                    cwe="CWE-89",
-                                    remediation=(
-                                        "Use parameterised queries or prepared statements exclusively. "
-                                        "Never concatenate user input into SQL strings. "
-                                        "Apply an ORM or query builder and disable verbose DB error "
-                                        "messages in production."
-                                    ),
-                                )
+                for test_url in test_urls:
+                    try:
+                        async with self._http_request_with_timeout(test_url, timeout) as response:
+                            if response is None:
+                                continue
+
+                            body_lower = response.text.lower()
+                            matched_sig = next(
+                                (sig for sig in _ERROR_SIGNATURES if sig in body_lower), None
                             )
-                            break  # One confirmed finding per target is sufficient
-                    if findings:
-                        break
+
+                            if response.status_code == 200 and matched_sig:
+                                findings.append(
+                                    Finding(
+                                        title="SQL Injection",
+                                        severity=Severity.CRITICAL,
+                                        description=(
+                                            f"The endpoint returned a database error signature "
+                                            f'("{matched_sig}") when the query parameter was set to '
+                                            f'"{payload}". This indicates unparameterised SQL and '
+                                            f"possible full database compromise."
+                                        ),
+                                        cwe="CWE-89",
+                                        remediation=(
+                                            "Use parameterised queries or prepared statements exclusively. "
+                                            "Never concatenate user input directly into SQL strings. "
+                                            "Apply an ORM or query builder and disable verbose DB error "
+                                            "messages in production."
+                                        ),
+                                        scanner="sql_injection",
+                                    )
+                                )
+                                break  # One confirmed finding per target is sufficient
+                    except Exception:
+                        continue  # nosec B112
+                if findings:
+                    break
 
         except Exception as exc:
             logger.debug("SQLi scan network/parse error for %s: %s", target, exc)
 
-        duration_ms = (time.monotonic() - start) * 1000
-
+        duration_ms = (time.monotonic() - start_time) * 1000
         return ScanResult(
             target=target,
             scanner_name=self.name,
             findings=findings,
             duration_ms=duration_ms,
-            status="completed",
         )
+
+    import contextlib
+
+    @contextlib.asynccontextmanager
+    async def _http_request_with_timeout(self, url: str, timeout: float):
+        """Helper to handle http requests with timeout and return None on error."""
+        try:
+            resp = await self._http_request(url, timeout)
+            yield resp
+        except Exception:
+            yield None

@@ -1,8 +1,6 @@
 import asyncio
-import sys
 import time
 from typing import Dict
-from unittest.mock import MagicMock
 
 import pytest
 from cherenkov.core.base_scanner import BaseScanner, ScanResult
@@ -41,6 +39,15 @@ def engine(registry):
     return ScanEngine(registry)
 
 
+@pytest.fixture(autouse=True)
+def mock_lattice(monkeypatch):
+    monkeypatch.setattr("cherenkov.core.engine._lattice_context", lambda x: asyncio.Future())
+    # Wait, _lattice_context is async, so it should return an awaitable.
+    async def mock_context(target): return []
+    async def mock_store(result): pass
+    monkeypatch.setattr("cherenkov.core.engine._lattice_context", mock_context)
+    monkeypatch.setattr("cherenkov.core.engine._lattice_store", mock_store)
+
 @pytest.mark.asyncio
 async def test_scan_all_concurrency(engine, registry):
     # Register 3 different slow scanners to avoid dict key collision
@@ -57,14 +64,14 @@ async def test_scan_all_concurrency(engine, registry):
     registry.register(SlowScanner2)
     registry.register(SlowScanner3)
 
-    scanners = ["slowscanner1", "slowscanner2", "slowscanner3"]
+    scanners = ["slow1", "slow2", "slow3"]
 
     start_time = time.time()
     results = await engine.scan_all("http://test.local", scanners=scanners, max_concurrent=3)
     duration = time.time() - start_time
 
     assert len(results) == 3
-    assert duration < 3.5
+    assert duration < 2.0
 
 
 @pytest.mark.asyncio

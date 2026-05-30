@@ -141,13 +141,15 @@ class SSRFScanner(BaseScanner):
             try:
                 baseline = await self._http_request(target, timeout)
                 baseline_lower = baseline.text.lower()
-            except Exception:
+            except Exception as exc:
+                logger.debug("SSRF baseline request failed for %s: %s", target, exc)
                 baseline_lower = ""
 
             for probe_url, param in probe_list:
                 try:
                     response = await self._http_request(probe_url, timeout)
-                except Exception:
+                except Exception as exc:
+                    logger.debug("SSRF probe request failed for %s: %s", probe_url, exc)
                     continue
 
                 body_lower = response.text.lower()
@@ -180,6 +182,7 @@ class SSRFScanner(BaseScanner):
                                 "Use an egress proxy that enforces this allowlist. "
                                 "Never forward raw user-supplied URLs to internal HTTP clients."
                             ),
+                            scanner="ssrf_basic",
                         )
                     )
                     break  # One confirmed SSRF finding per target is sufficient

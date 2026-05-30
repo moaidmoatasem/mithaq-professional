@@ -17,7 +17,7 @@ States:
 import asyncio
 import logging
 import platform
-import subprocess
+import subprocess  # nosec B404
 import time
 from dataclasses import dataclass
 from enum import Enum
@@ -173,6 +173,26 @@ class CircuitBreaker:
                         return True
                 return False
             return True
+
+    def check_state(self) -> None:
+        """Check if circuit is available for requests. Raises CircuitOpenError if not."""
+        if not self.is_available():
+            with self._lock:
+                elapsed = time.time() - (self._last_failure_time or 0)
+                raise CircuitOpenError(
+                    f"Circuit '{self.config.name}' is OPEN. "
+                    f"Try again in {max(0.0, self.config.recovery_timeout - elapsed):.1f}s"
+                )
+
+    def record_success(self) -> None:
+        """Public alias for recording success (used by manual instrumentation)."""
+        with self._lock:
+            self._record_success(0.0)
+
+    def record_failure(self, exc: Optional[Exception] = None) -> None:
+        """Public alias for recording failure (used by manual instrumentation)."""
+        with self._lock:
+            self._record_failure(exc or Exception("Manual failure"), 0.0)
 
     def _is_failure_exception(self, exc: Exception) -> bool:
         """Check if an exception should count as a failure."""
@@ -566,21 +586,58 @@ class Meissner(CircuitBreaker):
         system = platform.system().lower()
         logger.critical(f"MEISSNER FAIL-CLOSED TRIGGERED: Dropping all egress on {system}")
 
+        import shutil
+
         try:
             if system == "linux":
-                # Use iptables to drop all output traffic
-                # -I OUTPUT 1 inserts at the top of the chain
-                subprocess.run(["iptables", "-I", "OUTPUT", "1", "-j", "DROP"], check=True)
-                logger.info("Linux iptables: Egress dropped successfully.")
+                iptables_path = shutil.which("iptables")
+                if not iptables_path:
+                    logger.error("iptables not found. Cannot enforce Meissner isolation.")
+                    return
+
+                # Drop outbound traffic to external networks only.
+                # Preserve internal Docker bridge (docker0) and loopback so
+                # the API, dashboard, Ollama, and Qdrant continue to function.
+                # Rules are inserted at the top of the OUTPUT chain and removed
+                # on recovery (fail_open) by matching the comment string.
+                meissner_rule = "cherenkov-meissner-egress-block"
+                # Allow loopback and Docker internal bridge
+                subprocess.run(
+                    [iptables_path, "-A", "OUTPUT", "-o", "lo", "-j", "ACCEPT"], check=True
+                )  # nosec: B603
+                subprocess.run(
+                    [iptables_path, "-A", "OUTPUT", "-o", "docker0", "-j", "ACCEPT"], check=True
+                )  # nosec: B603
+                # Block all remaining outbound traffic with a comment marker
+                subprocess.run(
+                    [
+                        iptables_path,
+                        "-A",
+                        "OUTPUT",
+                        "-m",
+                        "comment",
+                        "--comment",
+                        meissner_rule,
+                        "-j",
+                        "DROP",
+                    ],
+                    check=True,
+                )  # nosec: B603
+                logger.info("Linux iptables: External egress blocked (lo/docker0 preserved).")
             elif system == "windows":
+                netsh_path = shutil.which("netsh")
+                if not netsh_path:
+                    logger.error("netsh not found. Cannot enforce Meissner isolation.")
+                    return
+
                 # Use netsh to block all outgoing traffic
                 # First ensure firewall is on, then set default to block outbound
                 subprocess.run(
-                    ["netsh", "advfirewall", "set", "allprofiles", "state", "on"], check=True
-                )
+                    [netsh_path, "advfirewall", "set", "allprofiles", "state", "on"], check=True
+                )  # nosec: B603
                 subprocess.run(
                     [
-                        "netsh",
+                        netsh_path,
                         "advfirewall",
                         "set",
                         "allprofiles",
@@ -588,7 +645,7 @@ class Meissner(CircuitBreaker):
                         "blockinbound,blockoutbound",
                     ],
                     check=True,
-                )
+                )  # nosec: B603
                 logger.info("Windows Firewall: Outbound traffic blocked successfully.")
             else:
                 logger.error(f"Unsupported OS for Meissner isolation: {system}")
@@ -609,16 +666,48 @@ class Meissner(CircuitBreaker):
         system = platform.system().lower()
         logger.info(f"MEISSNER RECOVERY: Restoring egress on {system}")
 
+        import shutil
+
         try:
             if system == "linux":
-                # Remove the drop rule
-                subprocess.run(["iptables", "-D", "OUTPUT", "-j", "DROP"], check=True)
-                logger.info("Linux iptables: Egress restored.")
+                iptables_path = shutil.which("iptables")
+                if not iptables_path:
+                    logger.error("iptables not found. Cannot restore connectivity.")
+                    return
+
+                # Remove rules matching the comment marker
+                meissner_rule = "cherenkov-meissner-egress-block"
+                subprocess.run(
+                    [
+                        iptables_path,
+                        "-D",
+                        "OUTPUT",
+                        "-m",
+                        "comment",
+                        "--comment",
+                        meissner_rule,
+                        "-j",
+                        "DROP",
+                    ],
+                    check=True,
+                )  # nosec: B603
+                subprocess.run(
+                    [iptables_path, "-D", "OUTPUT", "-o", "lo", "-j", "ACCEPT"], check=True
+                )  # nosec: B603
+                subprocess.run(
+                    [iptables_path, "-D", "OUTPUT", "-o", "docker0", "-j", "ACCEPT"], check=True
+                )  # nosec: B603
+                logger.info("Linux iptables: External egress restored.")
             elif system == "windows":
+                netsh_path = shutil.which("netsh")
+                if not netsh_path:
+                    logger.error("netsh not found. Cannot restore connectivity.")
+                    return
+
                 # Restore default outbound behavior (allow)
                 subprocess.run(
                     [
-                        "netsh",
+                        netsh_path,
                         "advfirewall",
                         "set",
                         "allprofiles",
@@ -626,7 +715,7 @@ class Meissner(CircuitBreaker):
                         "blockinbound,allowoutbound",
                     ],
                     check=True,
-                )
+                )  # nosec: B603
                 logger.info("Windows Firewall: Outbound traffic allowed.")
 
             self._isolation_active = False
@@ -744,3 +833,7 @@ def fail_closed() -> None:
 def fail_open() -> None:
     """Restore global network connectivity."""
     meissner_hub.fail_open()
+
+
+# Compatibility alias to fix an ImportError
+MeissnerCircuitBreaker = Meissner

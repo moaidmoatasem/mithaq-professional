@@ -1,0 +1,105 @@
+/* CHERENKOV Unified Brand Palette — derived from assets/cherenkov-logo.svg
+ *
+ * PRIMARY ACCENT:  #00E0FF (Cherenkov blue glow — from the conical reveal cone)
+ * SECONDARY:       #9D00FF (deep purple — from the hexagonal shield gradient end)
+ * BACKGROUND:      #0B0D0F (near-black)
+ * SURFACE:         #0A0E1A (deep navy — badge labelColor)
+ * TEXT:            #F0F1F5 (off-white wordmark)
+ * SHIELD GRADIENT: #00E0FF -> #9D00FF
+ * TAGLINE:         "The Forensic Reveal"
+ *
+ * All brand tokens live here as CSS custom properties.
+ * Do not hard-code hex values in markdown — reference these tokens.
+ */
+
+:root {
+  /* Accent ramp (light theme fallback) */
+  --sl-color-accent-low: #003d5c;
+  --sl-color-accent: #00b8d4;
+  --sl-color-accent-high: #b8f0ff;
+
+  /* CHERENKOV brand tokens (theme-stable) — from logo SVG */
+  --cv-accent: #00E0FF;
+  --cv-accent-glow: #b8f5ff;
+  --cv-accent-deep: #00b8d4;
+  --cv-accent-shadow: #003d5c;
+  --cv-secondary: #9D00FF;
+  --cv-ink: #0B0D0F;
+  --cv-plate: #0A0E1A;
+  --cv-text: #F0F1F5;
+
+  /* Semantic */
+  --cv-success: #00E0FF;
+  --cv-info: #5ec8ff;
+  --cv-warning: #ffb84d;
+  --cv-danger: #ff5c6c;
+  --cv-neutral: #8a9990;
+}
+
+:root[data-theme='dark'] {
+  /* Accent ramp — matched to logo #00E0FF */
+  --sl-color-accent-low: #002838;
+  --sl-color-accent: #00E0FF;
+  --sl-color-accent-high: #b8f0ff;
+
+  /* Surfaces — matched to logo plate #0A0E1A */
+  --sl-color-bg: #0B0D0F;
+  --sl-color-bg-nav: #0A0E1A;
+  --sl-color-bg-sidebar: #080A0E;
+  --sl-color-bg-inline-code: #0A0E1A;
+
+  /* Text — matched to logo wordmark #F0F1F5 */
+  --sl-color-white: #F0F1F5;
+  --sl-color-gray-1: #e0e4f0;
+  --sl-color-gray-2: #b0b8c8;
+  --sl-color-gray-3: #808a96;
+  --sl-color-gray-4: #505a66;
+  --sl-color-gray-5: #2a3038;
+  --sl-color-gray-6: #181c22;
+
+  /* Borders — Cherenkov glow tint */
+  --sl-color-hairline: rgba(0, 224, 255, 0.12);
+  --sl-color-hairline-light: rgba(0, 224, 255, 0.18);
+}
+
+/* Cherenkov glow on the logo */
+.site-title img {
+  filter: drop-shadow(0 0 8px rgba(0, 224, 255, 0.25));
+}
+
+/* Accent links in dark mode */
+:root[data-theme='dark'] .sl-markdown-content a:not(.not-content a) {
+  text-shadow: 0 0 12px rgba(0, 224, 255, 0.15);
+}
+
+/* Mermaid: Cherenkov-themed container */
+.mermaid,
+.expressive-code + .mermaid,
+pre.mermaid {
+  background: var(--sl-color-bg-inline-code);
+  border: 1px solid var(--sl-color-hairline);
+  border-radius: 8px;
+  padding: 1rem;
+  margin: 1.25rem 0;
+  overflow-x: auto;
+}
+
+/* Design-system color-swatch utility */
+.cv-swatch {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.35rem 0.7rem;
+  border-radius: 6px;
+  border: 1px solid var(--sl-color-hairline);
+  font-family: var(--sl-font-mono, ui-monospace, SFMono-Regular, Menlo, monospace);
+  font-size: 0.85rem;
+  margin: 0.25rem 0.25rem 0.25rem 0;
+}
+.cv-swatch-chip {
+  display: inline-block;
+  width: 1.1rem;
+  height: 1.1rem;
+  border-radius: 4px;
+  border: 1px solid var(--sl-color-hairline-light);
+}

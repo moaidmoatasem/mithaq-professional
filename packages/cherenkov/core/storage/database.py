@@ -40,10 +40,11 @@ CREATE TABLE IF NOT EXISTS findings_pending (
 CREATE INDEX IF NOT EXISTS idx_findings_pending_status ON findings_pending(status);
 
 CREATE TABLE IF NOT EXISTS users (
-    id          INTEGER PRIMARY KEY AUTOINCREMENT,
-    username    TEXT    NOT NULL UNIQUE,
-    password    TEXT    NOT NULL,
-    role        INTEGER NOT NULL DEFAULT 1
+    id              INTEGER PRIMARY KEY AUTOINCREMENT,
+    username        TEXT    NOT NULL UNIQUE,
+    password        TEXT    NOT NULL,
+    role            INTEGER NOT NULL DEFAULT 1,
+    token_version   INTEGER NOT NULL DEFAULT 0
 );
 CREATE INDEX IF NOT EXISTS idx_users_username ON users(username);
 
@@ -146,7 +147,15 @@ def save_scan(
 
 def get_scan(scan_id: str, path: Path = _DB_PATH) -> dict | None:
     with closing(_connect(path)) as conn:
-        row = conn.execute("SELECT * FROM scans WHERE scan_id = ?", (scan_id,)).fetchone()
+        row = conn.execute(
+            """
+            SELECT s.*, a.trace_hash
+            FROM scans s
+            LEFT JOIN audit_log a ON a.user_id = s.scan_id AND a.event_type = 'scan_trace'
+            WHERE s.scan_id = ?
+            """,
+            (scan_id,),
+        ).fetchone()
     if row is None:
         return None
     return _row_to_dict(row)
@@ -155,7 +164,13 @@ def get_scan(scan_id: str, path: Path = _DB_PATH) -> dict | None:
 def list_scans(limit: int = 20, path: Path = _DB_PATH) -> list[dict]:
     with _connect(path) as conn:
         rows = conn.execute(
-            "SELECT * FROM scans ORDER BY started_at DESC LIMIT ?", (limit,)
+            """
+            SELECT s.*, a.trace_hash
+            FROM scans s
+            LEFT JOIN audit_log a ON a.user_id = s.scan_id AND a.event_type = 'scan_trace'
+            ORDER BY s.started_at DESC LIMIT ?
+            """,
+            (limit,),
         ).fetchall()
     return [_row_to_dict(r) for r in rows]
 
@@ -164,7 +179,11 @@ def prune_old_scans(days: int = 90, path: Path = _DB_PATH) -> int:
     cutoff = (datetime.now(timezone.utc) - timedelta(days=days)).isoformat()
     with closing(_connect(path)) as conn:
         with conn:
-            cur = conn.execute("DELETE FROM scans WHERE started_at < ?", (cutoff,))
+            cur = conn.execute(
+                "UPDATE scans SET findings = '[]', meta = '{}', status = 'pruned' "
+                "WHERE started_at < ? AND status != 'pruned'",
+                (cutoff,),
+            )
             return cur.rowcount
 
 
@@ -220,24 +239,27 @@ def save_pending_finding(
     scanner: str,
     title: str,
     scan_id: str | None = None,
-    path: Path = None,
+    status: str = "pending",
+    path: Path | None = None,
 ) -> None:
     path = path or _DB_PATH
     with closing(_connect(path)) as conn:
         with conn:
             conn.execute(
                 """
-                INSERT OR IGNORE INTO findings_pending (finding_id, severity, scanner, title, scan_id)
-                VALUES (?, ?, ?, ?, ?)
+                INSERT OR IGNORE INTO findings_pending (finding_id, severity, scanner, title, scan_id, status)
+                VALUES (?, ?, ?, ?, ?, ?)
                 """,
-                (finding_id, severity, scanner, title, scan_id),
+                (finding_id, severity, scanner, title, scan_id, status),
             )
 
 
 def get_pending_findings(path: Path = None) -> list[dict]:
     path = path or _DB_PATH
     with closing(_connect(path)) as conn:
-        rows = conn.execute("SELECT * FROM findings_pending WHERE status = 'pending'").fetchall()
+        rows = conn.execute(
+            "SELECT * FROM findings_pending WHERE status IN ('pending', 'awaiting_approval')"
+        ).fetchall()
     return [dict(r) for r in rows]
 
 
@@ -350,7 +372,39 @@ def load_cb_state(key: str, path: Path = _DB_PATH) -> dict | None:
         return None
 
 
-def save_trace(
+def _row_to_dict(row: sqlite3.Row) -> dict:
+    d = dict(row)
+    d["findings"] = json.loads(d["findings"])
+    d["meta"] = json.loads(d["meta"])
+    return d
+
+
+def save_scan_trace(
+    scan_id: str, trace_hash: str, scan_result: dict, path: Path = _DB_PATH
+) -> None:
+    now = datetime.now(timezone.utc).isoformat()
+    details_json = json.dumps(scan_result)
+
+    with closing(_connect(path)) as conn:
+        with conn:
+            conn.execute(
+                """
+                INSERT INTO audit_log (timestamp, event_type, user_id, details, trace_hash)
+                VALUES (?, ?, ?, ?, ?)
+                """,
+                (now, "scan_trace", scan_id, details_json, trace_hash),
+            )
+            conn.execute(
+                """
+                INSERT INTO cherenkov_traces (
+                    finding_id, exploit_command, stdout, stderr, exit_code, trace_hash, timestamp, shred_receipt
+                ) VALUES (?, ?, ?, ?, ?, ?, ?, ?)
+                """,
+                (scan_id, "SCAN_COMPLETION", details_json, "", 0, trace_hash, now, "{}"),
+            )
+
+
+def save_tokamak_trace(
     finding_id: str,
     exploit_command: str,
     stdout: str,
@@ -399,7 +453,7 @@ def save_trace(
             )
 
 
-def get_trace(finding_id: str, path: Path | None = None) -> dict | None:
+def get_tokamak_trace(finding_id: str, path: Path | None = None) -> dict | None:
     """Retrieve a persisted forensic execution trace."""
     path = path or _DB_PATH
     with closing(_connect(path)) as conn:
@@ -410,13 +464,4 @@ def get_trace(finding_id: str, path: Path | None = None) -> dict | None:
         return None
     d = dict(row)
     d["shred_receipt"] = json.loads(d["shred_receipt"])
-    return d
-
-
-
-
-def _row_to_dict(row: sqlite3.Row) -> dict:
-    d = dict(row)
-    d["findings"] = json.loads(d["findings"])
-    d["meta"] = json.loads(d["meta"])
     return d

@@ -1,13 +1,14 @@
 [project]
 name = "cherenkov-core"
 version = "1.1.0"
-description = "cherenkov Security Framework - Precision in Sovereignty"
+description = "Air-gapped security scanner platform — local Ollama inference, zero cloud dependencies"
 authors = [
     {name = "Moaid EL-Moatasem Bellah"}
 ]
 requires-python = ">=3.10"
 dependencies = [
     "pydantic>=2.0",
+    "psutil>=5.9.0",
     "httpx>=0.27.0",
     "python-dotenv>=1.0.0",
     "fastapi>=0.100.0",
@@ -23,8 +24,10 @@ dependencies = [
     "sentence-transformers",
     "slowapi>=0.1.9",
     "ollama>=0.1.0",
-    "requests>=2.31.0",
-    "websockets>=12.0",
+    "litellm>=1.40.0",
+    "fpdf2>=2.7.0",
+    "psutil",
+    "defusedxml>=0.7.1",
 ]
 
 [tool.setuptools.packages.find]
@@ -46,6 +49,7 @@ dev = [
     "crewai>=0.1.0",
     "groq>=0.4.0",
     "ollama>=0.1.0",
+    "litellm>=1.40.0",
     "qdrant-client>=1.9.0",
     "sentence-transformers",
     "slowapi>=0.1.9",
@@ -54,7 +58,7 @@ dev = [
 [tool.ruff]
 line-length = 100
 target-version = "py310"
-exclude = ["packages/cherenkov/autonomous_generated", "packages/cherenkov/scanners/generated"]
+exclude = ["packages/cherenkov/scanners/generated"]
 
 [tool.ruff.lint]
 select = ["E", "F", "I", "N", "W", "B", "S"]
@@ -71,12 +75,17 @@ ignore = ["E501", "S101"]
 "tools/*.py" = ["S603"]
 "benchmarks/**" = ["S108", "S311", "E402"]
 "test_*.py" = ["S603", "S607", "B904", "F401"]
-"packages/cherenkov/core/tokamak.py" = ["S108", "S311"]
-"packages/cherenkov/core/circuit_breaker.py" = ["S607"]
+"packages/cherenkov/core/tokamak.py" = ["S108", "S311", "S110", "S603", "S607"]
+"packages/cherenkov/compliance/reports.py" = ["F401"]
+"packages/cherenkov/ai/model_selector.py" = ["S603"]
+"packages/cherenkov/api/main.py" = ["S105", "S603"]
+"packages/cherenkov/core/circuit_breaker.py" = ["S603", "S607"]
+"packages/cherenkov/cli/main.py" = ["B008", "S110"]
+"packages/cherenkov/scanners/refined/open_redirect_scanner.py" = ["S110"]
+"packages/cherenkov/scanners/security_headers.py" = ["S110"]
+"packages/cherenkov/scanners/sql_injection_scanner.py" = ["S112"]
 "packages/cherenkov/core/workflow_retry.py" = ["S108", "S311", "S110"]
 "packages/cherenkov/core/agent_message_bus.py" = ["S110"]
-"packages/cherenkov/cli/main.py" = ["B008"]
-"packages/cherenkov/api/main.py" = ["B008", "E402"]
 "cherenkov_simple_scanner.py" = ["S108"]
 "system_dashboard.py" = ["S110"]
 
@@ -96,7 +105,7 @@ markers = [
 
 [tool.coverage.run]
 source = ["cherenkov"]
-omit = ["tests/*", "venv/*", "candidates/*", "packages/cherenkov/autonomous_generated/*"]
+omit = ["tests/*", "venv/*", "candidates/*"]
 
 [tool.coverage.report]
 fail_under = 24

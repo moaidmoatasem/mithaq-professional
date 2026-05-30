@@ -3,7 +3,7 @@ import { motion, AnimatePresence } from 'motion/react';
 import { CyberButton } from '../atoms';
 import { MessageSquare, X, Send, Bot, User, Loader2 } from 'lucide-react';
 import { cn } from '@/src/lib/utils';
-import { API_BASE, fetchWithAuth } from '@/src/lib/api';
+import { API_BASE, getAuthHeaders, type ScanResult } from '@/src/lib/api';
 
 const SYSTEM_PROMPT = `You are the CHERENKOV AI Security Assistant — a sovereign, zero-egress AI agent integrated into the Cherenkov security operations dashboard.`;
 
@@ -25,6 +25,26 @@ export function AssistantWidget() {
   const [error, setError] = useState<string | null>(null);
   const bottomRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
+  const scanContextRef = useRef<{ findings: any[]; target: string } | null>(null);
+
+  useEffect(() => {
+    const handler = (e: Event) => {
+      const detail = (e as CustomEvent<ScanResult>).detail;
+      if (detail?.vulnerabilities) {
+        scanContextRef.current = {
+          findings: detail.vulnerabilities.map(v => ({
+            title: v.title,
+            severity: v.severity,
+            cwe: v.cwe,
+            description: v.description,
+          })),
+          target: detail.target,
+        };
+      }
+    };
+    window.addEventListener('cherenkov:scan_complete', handler);
+    return () => window.removeEventListener('cherenkov:scan_complete', handler);
+  }, []);
 
   useEffect(() => {
     bottomRef.current?.scrollIntoView({ behavior: 'smooth' });
@@ -44,14 +64,12 @@ export function AssistantWidget() {
     setError(null);
 
     try {
-      const res = await fetchWithAuth(`${API_BASE}/assistant/advice`, {
+      const res = await fetch(`${API_BASE}/assistant/advice`, {
         method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
+        headers: getAuthHeaders(),
         body: JSON.stringify({
-          findings: [], // In a real scenario, we'd pass current findings
-          context: { query: text },
+          findings: scanContextRef.current?.findings || [],
+          context: { query: text, target: scanContextRef.current?.target },
         }),
       });
 

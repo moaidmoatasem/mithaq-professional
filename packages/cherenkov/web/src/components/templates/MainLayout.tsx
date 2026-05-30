@@ -31,6 +31,13 @@ export function MainLayout({ header, content, sidebar, className }: MainLayoutPr
         </div>
       </main>
 
+      {/* Footer */}
+      <footer className="w-full border-t border-white/5 py-4 px-6 bg-[#030303]/60 backdrop-blur-md text-center z-50 shrink-0">
+        <p className="text-[10px] font-mono text-fg3 tracking-[0.25em] uppercase opacity-70">
+          MEISSNER AIR-GAP PROTOCOL ENFORCED // ZERO EGRESS
+        </p>
+      </footer>
+
       {/* Decorative Border */}
       <div className="fixed top-0 left-0 w-full h-1 bg-gradient-to-r from-cherenkov-accent via-hud-cyan to-hud-mint opacity-30 z-[150]" />
     </div>

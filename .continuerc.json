@@ -1,0 +1,9 @@
+{
+  "systemMessage": "You are an AI assistant for CHERENKOV sovereign security platform. Primary package: packages/cherenkov/. Import convention: from cherenkov.X import Y. Architecture principles: Zero egress (no outbound calls outside scan targets). Air-gapped Docker networks. Use local Ollama or gated Groq. ABLATION: sanitize all LLM payloads. TOKAMAK: sign all PoC outputs with SHA-256. Shred temp files with cryptographic erasure. Never assume AWS/GCP/cloud providers.",
+  "allowAnonymousTelemetry": false,
+  "tabAutocompleteOptions": {
+    "useCache": true,
+    "maxPromptTokens": 2048,
+    "disable": false
+  }
+}

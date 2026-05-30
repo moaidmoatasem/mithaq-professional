@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import asyncio
+import hashlib
 import logging
 import time
 from typing import Callable, Dict, List, Optional
@@ -15,10 +16,30 @@ logger = logging.getLogger(__name__)
 
 
 async def _lattice_store(result: ScanResult) -> None:
-    try:
-        from cherenkov.ai.lattice import embed_and_store
+    """Fire-and-forget: index each finding in the LATTICE vector store.
 
-        await embed_and_store(result)
+    Uses the production-grade synchronous bridge (sentence-transformers +
+    qdrant_client).  Failure is logged at DEBUG and never propagated.
+    """
+    if not result.findings:
+        return
+    try:
+        from cherenkov.core.lattice_bridge import embed_and_store
+
+        for finding in result.findings:
+            fid = hashlib.sha256(
+                f"{result.target}:{finding.title}:{finding.cwe}".encode()
+            ).hexdigest()[:16]
+            await asyncio.to_thread(
+                embed_and_store,
+                fid,
+                finding.title,
+                finding.description or "",
+                result.target,
+                result.scanner_name,
+                finding.severity.value,
+                finding.cwe or "",
+            )
     except Exception as exc:
         logger.debug("LATTICE store skipped: %s", exc)
 
@@ -50,23 +71,6 @@ class ScanEngine:
         start_time = time.time()
         try:
             result = await asyncio.wait_for(scanner.scan(target, timeout), timeout=timeout)
-            if result and result.findings:
-                from .tokamak import Tokamak, ValidationRequest
-                for finding in result.findings:
-                    if finding.severity in ["HIGH", "CRITICAL"] and finding.poc_command:
-                        try:
-                            sandbox = Tokamak()
-                            tokamak_result = await sandbox.execute_poc(
-                                ValidationRequest(
-                                    finding_id=finding.id,
-                                    exploit_command=finding.poc_command,
-                                    timeout_seconds=30
-                                )
-                            )
-                            finding.confirmed = tokamak_result.is_verified
-                            finding.proof = tokamak_result.cryptographic_proof
-                        except Exception as e:
-                            logger.error("Failed to execute PoC validation via TOKAMAK: %s", e)
         except asyncio.TimeoutError:
             logger.warning("Scanner %s timed out on %s", scanner_name, target)
             if raise_on_failure:

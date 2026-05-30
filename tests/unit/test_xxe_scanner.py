@@ -1,4 +1,3 @@
-import sys
 from unittest.mock import MagicMock, patch
 
 import httpx
@@ -8,11 +7,11 @@ from cherenkov.scanners.xxe_scanner import XXEScanner
 
 
 @pytest.mark.asyncio
-async def test_xxe_scanner_positive():
+async def test_xxe_scanner_positive_linux():
     scanner = XXEScanner()
     target = "http://example.com/api"
 
-    mock_response = MagicMock()
+    mock_response = MagicMock(spec=httpx.Response)
     mock_response.status_code = 200
     mock_response.text = "root:x:0:0:root:/root:/bin/bash"
 
@@ -32,7 +31,33 @@ async def test_xxe_scanner_positive():
     assert result.target == target
     assert len(result.findings) == 1
     assert result.findings[0].severity == Severity.HIGH
-    assert "XXE" in result.findings[0].title
+    assert "matched 'root:x:0:0:'" in result.findings[0].description
+
+
+@pytest.mark.asyncio
+async def test_xxe_scanner_positive_windows():
+    scanner = XXEScanner()
+    target = "http://example-win.com/api"
+
+    mock_response = MagicMock(spec=httpx.Response)
+    mock_response.status_code = 200
+    mock_response.text = "[extensions]\nbitmapped=off"
+
+    class MockClient:
+        async def __aenter__(self):
+            return self
+
+        async def __aexit__(self, *args):
+            pass
+
+        async def post(self, *args, **kwargs):
+            return mock_response
+
+    with patch("httpx.AsyncClient", return_value=MockClient()):
+        result = await scanner.scan(target)
+
+    assert len(result.findings) == 1
+    assert "matched '[extensions]'" in result.findings[0].description
 
 
 @pytest.mark.asyncio
@@ -40,7 +65,7 @@ async def test_xxe_scanner_negative():
     scanner = XXEScanner()
     target = "http://example.com/api"
 
-    mock_response = MagicMock()
+    mock_response = MagicMock(spec=httpx.Response)
     mock_response.status_code = 200
     mock_response.text = "OK"
 
@@ -65,7 +90,13 @@ async def test_xxe_scanner_timeout():
     scanner = XXEScanner()
     target = "http://example.com/api"
 
-    with patch("httpx.AsyncClient", side_effect=httpx.TimeoutException("Timeout")):
+    class MockClient:
+        async def __aenter__(self): return self
+        async def __aexit__(self, *args): pass
+        async def post(self, *args, **kwargs):
+            raise httpx.TimeoutException("Timeout")
+
+    with patch("httpx.AsyncClient", return_value=MockClient()):
         result = await scanner.scan(target)
 
     assert len(result.findings) == 0

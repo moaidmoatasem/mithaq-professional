@@ -64,11 +64,11 @@ export function ForensicHeader() {
         <div className="flex flex-col">
           <h1 
             className="text-lg font-bold tracking-tighter text-hud-cyan fx-glitch transition-all group-hover:neon" 
-            data-text="CHERENKOV"
+            data-text="CHERENKOV // SECURITY OPERATIONS CENTER"
           >
-            CHERENKOV
+            CHERENKOV // SECURITY OPERATIONS CENTER
           </h1>
-          <span className="text-[8px] font-mono text-fg2 tracking-[0.4em] uppercase opacity-50">The Forensic Reveal</span>
+          <span className="text-[8px] font-mono text-fg2 tracking-[0.4em] uppercase opacity-50">The Forensic Reveal // v0.2.0-beta</span>
         </div>
       </div>
 

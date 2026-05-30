@@ -1,3 +1,24 @@
+import sys
+from unittest.mock import MagicMock
+
+
+class MockPsutil:
+    def __init__(self):
+        self.__spec__ = MagicMock()
+
+    def cpu_count(self, logical=False):
+        return 8
+
+    def virtual_memory(self):
+        class Mem:
+            total = 16e9
+
+        return Mem()
+
+
+sys.modules["psutil"] = MockPsutil()
+
+
 import asyncio
 from pathlib import Path
 
@@ -8,6 +29,11 @@ from cherenkov.core.storage.database import init_db
 from fastapi.testclient import TestClient
 
 
+import os
+
+pytestmark = pytest.mark.integration
+
+
 @pytest.fixture(autouse=True)
 def bypass_rate_limit():
     app.state.limiter.enabled = False
@@ -16,11 +42,22 @@ def bypass_rate_limit():
 
 
 @pytest.fixture(autouse=True)
+def mock_jwt_secret(monkeypatch, tmp_path):
+    env_file = tmp_path / ".env"
+    env_file.write_text("CHERENKOV_JWT_SECRET=super_secret_test_key_1234567890\n")
+    monkeypatch.setenv("ROTATION_ENV_PATH", str(env_file))
+    yield
+
+
+@pytest.fixture(autouse=True)
 def isolate_db(tmp_path: Path):
     test_db = tmp_path / "test_api.db"
     original_db = db._DB_PATH
     db._DB_PATH = test_db
     init_db(test_db)
+    from cherenkov.api.middleware.auth import hash_password
+
+    db.save_user("admin", hash_password("admin"), 3, path=test_db)
     yield
     db._DB_PATH = original_db
 
@@ -101,7 +138,7 @@ def test_scan_post(client, monkeypatch):
         return {
             "status": "accepted",
             "scan_id": "test_scan_123",
-            "target": request.target_url,
+            "target": request.url,
             "count": 0,
             "timestamp": datetime.now(timezone.utc).isoformat(),
         }
@@ -114,7 +151,7 @@ def test_scan_post(client, monkeypatch):
     token = token_response.json()["access_token"]
     headers = {"Authorization": f"Bearer {token}"}
 
-    scan_payload = {"target_url": "http://example.com"}
+    scan_payload = {"url": "http://example.com"}
     response = client.post("/api/v1/scan", json=scan_payload, headers=headers)
 
     assert response.status_code == 200
@@ -146,6 +183,15 @@ def test_websocket_live(client, monkeypatch):
         assert data2["event"] == "health_pulse"
 
 
+def test_unprotected_endpoints_return_401_without_token(client):
+    """/scans/history and /reports/{scan_id}/sarif must require auth."""
+    response_history = client.get("/api/v1/scans/history")
+    assert response_history.status_code == 401
+
+    response_sarif = client.get("/api/v1/reports/00000000-0000-0000-0000-000000000000/sarif")
+    assert response_sarif.status_code == 401
+
+
 def test_error_cases(client):
     # Get a token to bypass 401 for the 422 test
     auth_data = {"username": "admin", "password": "admin"}
@@ -164,3 +210,42 @@ def test_error_cases(client):
     # 404: Not found
     response_404 = client.get("/api/v1/non_existent_route")
     assert response_404.status_code == 404
+
+
+def test_architect_plan_post(client, monkeypatch):
+    async def mock_generate_plan(self, context):
+        return {
+            "status": "success",
+            "plan": {
+                "threat_surface": ["app"],
+                "red_team_tasks": ["test"],
+                "secops_tasks": ["monitor"],
+                "risk_score": 50,
+                "reasoning": "mock",
+            },
+            "model": "architect",
+        }
+
+    from cherenkov.agents.architect import SecurityArchitect
+
+    monkeypatch.setattr(SecurityArchitect, "generate_plan", mock_generate_plan)
+
+    auth_data = {"username": "admin", "password": "admin"}
+    token_response = client.post("/api/v1/auth/token", json=auth_data)
+    token = token_response.json()["access_token"]
+    headers = {"Authorization": f"Bearer {token}"}
+
+    payload = {
+        "target": "mobile app",
+        "framework": "DORA",
+        "requirements": ["encryption"],
+        "constraints": ["low latency"],
+        "threat_context": "DDoS attacks",
+    }
+    response = client.post("/api/v1/architect/plan", json=payload, headers=headers)
+
+    assert response.status_code == 200
+    data = response.json()
+    assert data["status"] == "success"
+    assert "threat_surface" in data["plan"]
+    assert data["plan"]["risk_score"] == 50

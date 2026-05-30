@@ -13,3 +13,9 @@ MEISSNER is the fail-closed network perimeter. It enforces the zero-egress polic
 - Drops all outbound TCP/UDP except explicitly whitelisted routes
 - Logs all denied connection attempts for audit
 - Operates at the kernel level via iptables/nftables on Linux
+
+```mermaid
+graph TD
+    A[Component] --> B[Subcomponent]
+    B --> C[Implementation Detail]
+```

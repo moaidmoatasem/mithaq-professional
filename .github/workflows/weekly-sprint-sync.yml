@@ -16,7 +16,7 @@ jobs:
           fetch-depth: 0
 
       - name: Create issues from TODO.md unchecked items
-        uses: actions/github-script@v7
+        uses: actions/github-script@v6
         with:
           script: |
             const fs = require('fs');
@@ -42,7 +42,7 @@ jobs:
             }
 
       - name: Generate weekly summary
-        uses: actions/github-script@v7
+        uses: actions/github-script@v6
         with:
           script: |
             const since = new Date(Date.now() - 7*24*60*60*1000).toISOString();

@@ -1,0 +1,54 @@
+# PR auto-labeling by changed paths.
+# Areas mirror the agent domain matrix in AGENTS.md / CLAUDE.md.
+# Consumed by .github/workflows/labeler.yml (actions/labeler@v5).
+
+area:web:
+  - changed-files:
+      - any-glob-to-any-file: 'packages/cherenkov/web/**'
+
+area:api:
+  - changed-files:
+      - any-glob-to-any-file: 'packages/cherenkov/api/**'
+
+area:core:
+  - changed-files:
+      - any-glob-to-any-file: 'packages/cherenkov/core/**'
+
+area:agents:
+  - changed-files:
+      - any-glob-to-any-file: 'packages/cherenkov/agents/**'
+
+area:ai:
+  - changed-files:
+      - any-glob-to-any-file: 'packages/cherenkov/ai/**'
+
+area:autonomous:
+  - changed-files:
+      - any-glob-to-any-file: 'packages/cherenkov/autonomous_generated/scanners/**'
+
+area:ci:
+  - changed-files:
+      - any-glob-to-any-file: '.github/workflows/**'
+
+docs:
+  - changed-files:
+      - any-glob-to-any-file:
+          - 'docs/**'
+          - '**/*.md'
+
+dependencies:
+  - changed-files:
+      - any-glob-to-any-file:
+          - '**/requirements*.txt'
+          - '**/pyproject.toml'
+          - '**/poetry.lock'
+          - '**/package.json'
+          - '**/package-lock.json'
+          - '**/pnpm-lock.yaml'
+
+tests:
+  - changed-files:
+      - any-glob-to-any-file:
+          - '**/test_*.py'
+          - '**/*_test.py'
+          - 'tests/**'

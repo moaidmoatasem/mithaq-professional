@@ -7,7 +7,9 @@
 
 // In development, Vite proxies /api and /ws to http://127.0.0.1:8000.
 // In production, same-origin requests work directly.
-export const API_BASE = '/api/v1';
+export const API_BASE =
+  import.meta.env.VITE_API_BASE ||
+  (window.location.origin.endsWith('/api/v1') ? window.location.origin : `${window.location.origin}/api/v1`);
 
 /**
  * Derive the correct WebSocket base URL from the current origin.
@@ -20,7 +22,20 @@ export function getWsUrl(path: string = '/ws/live'): string {
 }
 
 /**
+ * Get unified authorization headers for API requests.
+ */
+export function getAuthHeaders(): Record<string, string> {
+  const token = sessionStorage.getItem("cherenkov_token");
+  if (!token) return { "Content-Type": "application/json" };
+  return {
+    "Content-Type": "application/json",
+    "Authorization": `Bearer ${token}`
+  };
+}
+
+/**
  * Get the current auth token from sessionStorage and return as a Header object.
+ * Provided for backward compatibility.
  */
 export function getAuthHeader(): Record<string, string> {
   const token = sessionStorage.getItem('cherenkov_token');
@@ -33,53 +48,6 @@ export function getAuthHeader(): Record<string, string> {
 export function logout(): void {
   sessionStorage.removeItem('cherenkov_token');
   window.location.reload();
-}
-
-/**
- * Custom fetch wrapper that automatically attaches authorization headers,
- * and handles 401 Unauthorized status by clearing session storage and redirecting.
- */
-export async function fetchWithAuth(url: string, init?: RequestInit): Promise<Response> {
-  const headers = {
-    ...getAuthHeader(),
-    ...(init?.headers || {}),
-  };
-
-  const res = await fetch(url, {
-    ...init,
-    headers,
-  });
-
-  if (res.status === 401) {
-    sessionStorage.removeItem('cherenkov_token');
-    window.location.reload();
-  }
-
-  return res;
-}
-
-/**
- * Validate current session by calling `/auth/me`.
- * Returns true if the session is valid.
- */
-export async function validateSession(): Promise<boolean> {
-  const token = sessionStorage.getItem('cherenkov_token');
-  if (!token) return false;
-
-  try {
-    const res = await fetch(`${API_BASE}/auth/me`, {
-      headers: {
-        'Authorization': `Bearer ${token}`
-      }
-    });
-    if (res.status === 401) {
-      sessionStorage.removeItem('cherenkov_token');
-      return false;
-    }
-    return res.ok;
-  } catch (err) {
-    return false;
-  }
 }
 
 export interface ScanRequestPayload {
@@ -96,6 +64,7 @@ export interface ScanResult {
   timestamp: string;
   vulnerabilities: Vulnerability[];
   count: number;
+  trace_hash?: string;
 }
 
 export interface Vulnerability {
@@ -107,6 +76,7 @@ export interface Vulnerability {
   cwe: string;
   description: string;
   remediation: string;
+  confirmed?: boolean;
 }
 
 export interface HealthResponse {
@@ -143,12 +113,10 @@ export interface NodeInfo {
  * POST a new scan request to the backend.
  */
 export async function submitScan(payload: ScanRequestPayload): Promise<ScanResult> {
-  const res = await fetchWithAuth(`${API_BASE}/scan`, {
+  const res = await fetch(`${API_BASE}/scan`, {
     method: 'POST',
-    headers: { 
-      'Content-Type': 'application/json',
-    },
-    body: JSON.stringify({ target_url: payload.url, scanners: ["header_scanner"] }),
+    headers: getAuthHeaders(),
+    body: JSON.stringify(payload),
   });
 
   if (!res.ok) {
@@ -163,7 +131,9 @@ export async function submitScan(payload: ScanRequestPayload): Promise<ScanResul
  * Fetch scan history from the backend.
  */
 export async function fetchScanHistory(): Promise<ScanResult[]> {
-  const res = await fetchWithAuth(`${API_BASE}/scans/history`);
+  const res = await fetch(`${API_BASE}/scans/history`, {
+    headers: getAuthHeaders()
+  });
   if (!res.ok) return [];
   return res.json();
 }
@@ -172,7 +142,9 @@ export async function fetchScanHistory(): Promise<ScanResult[]> {
  * Fetch pending approvals (HITL gate)
  */
 export async function fetchPendingApprovals(): Promise<FindingApproval[]> {
-  const res = await fetchWithAuth(`${API_BASE}/findings/pending`);
+  const res = await fetch(`${API_BASE}/findings/pending`, {
+    headers: getAuthHeaders()
+  });
   if (!res.ok) return [];
   return res.json();
 }
@@ -181,8 +153,9 @@ export async function fetchPendingApprovals(): Promise<FindingApproval[]> {
  * Approve a finding
  */
 export async function approveFinding(id: string): Promise<void> {
-  const res = await fetchWithAuth(`${API_BASE}/findings/${id}/approve`, {
+  const res = await fetch(`${API_BASE}/findings/${id}/approve`, {
     method: 'POST',
+    headers: getAuthHeaders()
   });
   if (!res.ok) {
     throw new Error(`Failed to approve finding ${id}`);
@@ -193,8 +166,9 @@ export async function approveFinding(id: string): Promise<void> {
  * Reject a finding
  */
 export async function rejectFinding(id: string): Promise<void> {
-  const res = await fetchWithAuth(`${API_BASE}/findings/${id}/reject`, {
+  const res = await fetch(`${API_BASE}/findings/${id}/reject`, {
     method: 'POST',
+    headers: getAuthHeaders()
   });
   if (!res.ok) {
     throw new Error(`Failed to reject finding ${id}`);
@@ -205,7 +179,35 @@ export async function rejectFinding(id: string): Promise<void> {
  * Fetch the CHERENKOV audit log (Admin only)
  */
 export async function fetchAuditLog(): Promise<any[]> {
-  const res = await fetchWithAuth(`${API_BASE}/audit`);
+  const res = await fetch(`${API_BASE}/audit`, {
+    headers: getAuthHeaders()
+  });
   if (!res.ok) return [];
+  return res.json();
+}
+
+/**
+ * Fetch compliance report for a specific scan and framework.
+ */
+export async function fetchComplianceReport(scanId: string, framework: string): Promise<any> {
+  const res = await fetch(`${API_BASE}/scan/${scanId}/compliance/${framework}`, {
+    headers: getAuthHeaders()
+  });
+  if (!res.ok) {
+    throw new Error(`Failed to fetch compliance report for scan ${scanId} and framework ${framework}`);
+  }
+  return res.json();
+}
+
+/**
+ * Fetch active model recommendation and system status configurations.
+ */
+export async function fetchModelRecommendations(): Promise<any> {
+  const res = await fetch(`${API_BASE}/models/recommend`, {
+    headers: getAuthHeaders()
+  });
+  if (!res.ok) {
+    throw new Error('Failed to fetch model recommendations');
+  }
   return res.json();
 }

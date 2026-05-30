@@ -1,4 +1,13 @@
-from .mapper import ComplianceMapper
-from .process_mapper import ProcessMapper
+"""Compliance package definition for CHERENKOV compliance module."""
 
-__all__ = ["ComplianceMapper", "ProcessMapper"]
+from __future__ import annotations
+
+from .base import ComplianceFramework, ComplianceReport, MappedFinding
+from .registry import ComplianceRegistry
+
+__all__ = [
+    "ComplianceRegistry",
+    "ComplianceFramework",
+    "ComplianceReport",
+    "MappedFinding",
+]

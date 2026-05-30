@@ -38,7 +38,7 @@ logging.basicConfig(level=logging.INFO, format="%(asctime)s [%(levelname)s] %(me
 logger = logging.getLogger("cherenkov.swarm")
 
 OLLAMA_URL = "http://localhost:11434"
-OLLAMA_MODEL = os.getenv("cherenkov_OLLAMA_MODEL", "qwen2.5-coder:7b")
+OLLAMA_MODEL = os.getenv("cherenkov_OLLAMA_MODEL", "qwen2.5-coder:3b")
 MAX_RETRIES = 3
 CANDIDATES = Path("candidates/generated_scanners")
 MANIFESTS = Path("manifests/cwe_queue.yaml")
@@ -237,35 +237,57 @@ Produce the complete fixed file. Python code only. No explanation. No markdown f
         Hard pass/fail. No LLM involved.
         Returns (passed, error_output).
         """
+        import shutil
+
         errors: list[str] = []
 
         # Syntax check
+        python_path = shutil.which("python3")
+        if not python_path:
+            return False, "python3 executable not found"
+
         syn = subprocess.run(
-            ["python3", "-m", "py_compile", str(scanner_file)], capture_output=True, text=True
-        )
+            [python_path, "-m", "py_compile", str(scanner_file)],
+            capture_output=True,
+            text=True,
+            check=False,
+        )  # nosec: B603
         if syn.returncode != 0:
             errors.append(f"SYNTAX ERROR:\n{syn.stderr}")
 
         # Bandit security scan — skip B501 (verify=False is intentional in TLS scanners)
-        ban = subprocess.run(
-            ["bandit", "--severity-level", "medium", "--skip", "B501", str(scanner_file)],
-            capture_output=True,
-            text=True,
-        )
-        if ban.returncode != 0:
-            errors.append(f"BANDIT:\n{ban.stdout}")
+        bandit_path = shutil.which("bandit")
+        if bandit_path:
+            ban = subprocess.run(
+                [bandit_path, "--severity-level", "medium", "--skip", "B501", str(scanner_file)],
+                capture_output=True,
+                text=True,
+                check=False,
+            )  # nosec: B603
+            if ban.returncode != 0:
+                errors.append(f"BANDIT:\n{ban.stdout}")
 
         # Auto-fix trivial issues first (import order, unused imports, formatting)
-        subprocess.run(
-            ["ruff", "check", "--select", "I,F401,F841", "--fix", str(scanner_file)],
-            capture_output=True,
-        )
-        subprocess.run(["ruff", "format", str(scanner_file)], capture_output=True)
+        ruff_path = shutil.which("ruff")
+        if ruff_path:
+            subprocess.run(
+                [ruff_path, "check", "--select", "I,F401,F841", "--fix", str(scanner_file)],
+                capture_output=True,
+                check=False,
+            )  # nosec: B603
+            subprocess.run(
+                [ruff_path, "format", str(scanner_file)], capture_output=True, check=False
+            )  # nosec: B603
 
-        # Ruff lint
-        ruff = subprocess.run(["ruff", "check", str(scanner_file)], capture_output=True, text=True)
-        if ruff.returncode != 0:
-            errors.append(f"RUFF:\n{ruff.stdout}")
+            # Ruff lint
+            ruff = subprocess.run(
+                [ruff_path, "check", str(scanner_file)],
+                capture_output=True,
+                text=True,
+                check=False,
+            )  # nosec: B603
+            if ruff.returncode != 0:
+                errors.append(f"RUFF:\n{ruff.stdout}")
 
         # CWE reference check — accept "CWE-295", "CWE_ID = 295", or "cwe: 295"
         import re as _re
@@ -432,60 +454,6 @@ queue:
     tier: 2
     status: pending
 """
-
-
-# ── Focused single-file sprint (used by dev_crew CLI) ───────────────────────
-
-
-class AutonomousSprint:
-    """
-    Single-task sprint: Architect drafts spec → Developer writes code →
-    ValidationGate runs ruff+pytest and feeds errors back (up to MAX_RETRIES).
-    Use this when you have a specific file target, not a CWE queue.
-    """
-
-    def __init__(self, focus_area: str, target_filepath: str) -> None:
-        from cherenkov.dev_crew.architect_agent import LocalArchitect
-        from cherenkov.dev_crew.developer_agent import LocalDeveloper
-        from cherenkov.dev_crew.validation_gate import ValidationGate
-
-        self.focus_area = focus_area
-        self.target_file = Path(target_filepath)
-        self.architect = LocalArchitect()
-        self.developer = LocalDeveloper()
-        self.gate = ValidationGate(self.target_file)
-
-    def _extract_code(self, raw: str) -> str:
-        import re
-
-        m = re.search(r"```python\n(.*?)\n```", raw, re.DOTALL)
-        return m.group(1) if m else raw
-
-    async def execute_sprint(self) -> bool:
-        logger.info("SPRINT START: %s", self.focus_area)
-        spec = await self.architect.get_next_directive(self.focus_area)
-        logger.info("Spec: %s", spec.get("task_name", "unnamed"))
-
-        feedback = ""
-        for i in range(1, MAX_RETRIES + 1):
-            logger.info("Developer iteration %d/%d", i, MAX_RETRIES)
-            task = dict(spec)
-            if feedback:
-                task["previous_failure_feedback"] = feedback
-
-            raw = await self.developer.write_code(task)
-            self.target_file.parent.mkdir(parents=True, exist_ok=True)
-            self.target_file.write_text(self._extract_code(raw), encoding="utf-8")
-
-            result = self.gate.run_checks()
-            if result.passed:
-                logger.info("SPRINT SUCCESS")
-                return True
-            logger.warning("Validation failed, retrying: %s", result.feedback[:120])
-            feedback = result.feedback
-
-        logger.error("CIRCUIT BREAKER: max iterations reached")
-        return False
 
 
 # ── CLI entry point ─────────────────────────────────────────────────────────

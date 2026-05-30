@@ -29,11 +29,11 @@ export function SIEMConfigPanel() {
             <Server size={14} />
             <span className="text-[10px] font-mono uppercase">Syslog_UDP_CEF</span>
           </div>
-          
+
           <div className="flex flex-col gap-1">
             <label className="text-[9px] font-mono text-fg3 uppercase">Target_Host</label>
-            <input 
-              type="text" 
+            <input
+              type="text"
               value={syslogHost}
               onChange={(e) => setSyslogHost(e.target.value)}
               className="bg-black/50 border border-white/10 p-2 text-[12px] font-mono text-white focus:border-hud-cyan outline-none"
@@ -42,8 +42,8 @@ export function SIEMConfigPanel() {
 
           <div className="flex flex-col gap-1">
             <label className="text-[9px] font-mono text-fg3 uppercase">Port</label>
-            <input 
-              type="text" 
+            <input
+              type="text"
               value={syslogPort}
               onChange={(e) => setSyslogPort(e.target.value)}
               className="bg-black/50 border border-white/10 p-2 text-[12px] font-mono text-white focus:border-hud-cyan outline-none"
@@ -60,8 +60,8 @@ export function SIEMConfigPanel() {
 
           <div className="flex flex-col gap-1">
             <label className="text-[9px] font-mono text-fg3 uppercase">HEC_URL</label>
-            <input 
-              type="text" 
+            <input
+              type="text"
               value={splunkUrl}
               onChange={(e) => setSplunkUrl(e.target.value)}
               placeholder="https://splunk:8088/services/collector"
@@ -71,8 +71,8 @@ export function SIEMConfigPanel() {
 
           <div className="flex flex-col gap-1">
             <label className="text-[9px] font-mono text-fg3 uppercase">HEC_Token</label>
-            <input 
-              type="password" 
+            <input
+              type="password"
               value={splunkToken}
               onChange={(e) => setSplunkToken(e.target.value)}
               placeholder="GUID"
@@ -87,8 +87,8 @@ export function SIEMConfigPanel() {
           <span className="text-[10px] font-mono text-fg3 uppercase">Bridge_State</span>
           <span className="text-[11px] font-bold text-hud-cyan uppercase">Authenticated_Handshake</span>
         </div>
-        
-        <CyberButton 
+
+        <CyberButton
           onClick={handleSave}
           className="px-8"
           variant="primary"

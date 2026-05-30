@@ -1,0 +1,63 @@
+# Paths and branches that agents must never modify.
+# Read by every agent before any edit. Not enforced by git — enforced by
+# prompt and by reviewer. See AGENTS.md for the full coordination protocol.
+
+# Protected branches — never commit, push, or merge directly
+main
+master
+
+# Wrong source path — CHERENKOV code lives in packages/cherenkov/, never src/
+src/
+
+# Secrets and local config — never stage, never read into prompts
+.env
+.env.*
+*.pem
+*.key
+mcp_config.json
+.claude/settings.local.json
+
+# Build artifacts and dependency trees — let tooling regenerate these
+venv/
+.venv/
+node_modules/
+site/
+dist/
+build/
+__pycache__/
+*.egg-info/
+
+# Other agents' working state — do not cross-contaminate
+.kilo/
+.worktrees/
+.aider*
+
+# Forensic / runtime state — only the system writes here
+*.sqlite
+*.sqlite-wal
+*.sqlite-shm
+forensic_traces/
+
+# ---------------------------------------------------------------------------
+# Per-agent domain boundaries (advisory; agents MUST self-honor)
+# ---------------------------------------------------------------------------
+# See AGENTS.md §1f for routing hints and §1e for the claim-ticket protocol
+# that resolves ownership when these denies would otherwise block legitimate
+# cross-domain work.
+
+[antigravity]
+# Frontend-only. No Python edits from the web IDE.
+allow = packages/cherenkov/web/**
+deny  = **
+
+[jules]
+# API, scanners, tests, CI. Architecture and frontend are off-limits.
+deny = packages/cherenkov/web/**
+deny = docs/architecture/**
+deny = .github/workflows/**
+
+[claude-code]
+# Architecture, agent layer, multi-file refactors. Frontend off-limits.
+# Workflow changes require an explicit task and Moaid review.
+deny = packages/cherenkov/web/**
+deny = .github/workflows/**

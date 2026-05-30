@@ -1,9 +1,10 @@
+import asyncio
 import os
 import subprocess
 from unittest.mock import MagicMock, patch
 
 import pytest
-from cherenkov.core.tokamak import Command, Tokamak, TOKAMAKProfile, TokamakResult, ValidationRequest, ValidationResult
+from cherenkov.core.tokamak import Command, ScanTOKAMAK, Tokamak, TOKAMAKProfile, TokamakResult
 
 
 def test_tokamak_execute_success():
@@ -131,91 +132,164 @@ def test_tokamak_profile_enum_values():
     assert TOKAMAKProfile.KALI.value == "kali"
 
 
-@pytest.mark.asyncio
-async def test_tokamak_execute_poc_success():
-    req = ValidationRequest(
-        finding_id="test_id",
-        exploit_command="echo 'poc_verified'",
-        timeout_seconds=5
-    )
+# ── ScanTOKAMAK.execute_poc() tests ──────────────────────────────────
 
-    with patch("docker.from_env") as mock_from_env:
-        mock_client = MagicMock()
-        mock_container = MagicMock()
-        mock_container.wait = MagicMock(return_value={"StatusCode": 0})
-        mock_container.logs = MagicMock(return_value=b"poc_verified")
-        mock_client.containers.run = MagicMock(return_value=mock_container)
-        mock_from_env.return_value = mock_client
 
-        sandbox = Tokamak()
-        result = await sandbox.execute_poc(req)
+class _MockDockerAPIError(Exception):
+    """Stand-in for docker.errors.APIError."""
 
-        assert isinstance(result, ValidationResult)
-        assert result.is_verified is True
-        assert result.cryptographic_proof is not None
-        assert len(result.cryptographic_proof) == 64
 
-        mock_client.containers.run.assert_called_once_with(
-            image="alpine:latest",
-            command=["sh", "-c", "echo 'poc_verified'"],
-            detach=True,
-            network_mode="none",
-            mem_limit="128m",
-            cpu_quota=50000,
-            remove=False
-        )
-        mock_container.remove.assert_called_once_with(force=True)
+class _MockDockerImageNotFoundError(Exception):
+    """Stand-in for docker.errors.ImageNotFound."""
 
 
 @pytest.mark.asyncio
-async def test_tokamak_execute_poc_failure():
-    req = ValidationRequest(
-        finding_id="test_id",
-        exploit_command="exit 1",
-        timeout_seconds=5
-    )
+async def test_execute_poc_success():
+    """execute_poc() spawns container, captures logs, signs, and removes."""
+    mock_container = MagicMock()
+    mock_container.wait.return_value = {"StatusCode": 0}
+    mock_container.logs.side_effect = [b"nmap output", b""]
 
-    with patch("docker.from_env") as mock_from_env:
-        mock_client = MagicMock()
-        mock_container = MagicMock()
-        mock_container.wait = MagicMock(return_value={"StatusCode": 1})
-        mock_client.containers.run = MagicMock(return_value=mock_container)
-        mock_from_env.return_value = mock_client
+    mock_client = MagicMock()
+    mock_client.containers.run.return_value = mock_container
 
-        sandbox = Tokamak()
-        result = await sandbox.execute_poc(req)
+    with (
+        patch("cherenkov.core.tokamak.DOCKER_AVAILABLE", True),
+        patch("cherenkov.core.tokamak.docker", create=True) as mock_docker,
+    ):
+        mock_docker.from_env.return_value = mock_client
+        mock_docker.errors.APIError = _MockDockerAPIError
+        mock_docker.errors.ImageNotFound = _MockDockerImageNotFoundError
+        tokamak = ScanTOKAMAK()
+        result = await tokamak.execute_poc(exploit_command="nmap -sV target", timeout=10)
 
-        assert isinstance(result, ValidationResult)
-        assert result.is_verified is False
-        assert result.cryptographic_proof is None
-        mock_container.remove.assert_called_once_with(force=True)
+    mock_client.containers.run.assert_called_once()
+    args, run_kwargs = mock_client.containers.run.call_args
+    assert args[0] == "python:3.11-slim"
+    assert run_kwargs["command"] == ["sh", "-c", "nmap -sV target"]
+    assert run_kwargs["detach"] is True
+    assert run_kwargs["labels"]["cherenkov.role"] == "tokamak"
+
+    mock_container.wait.assert_called_once()
+    mock_container.remove.assert_called_once_with(force=True)
+
+    assert result.stdout == "nmap output"
+    assert result.stderr == ""
+    assert result.exit_code == 0
+    assert len(result.trace_hash) == 64
+    assert result.shred_receipt["method"] == "container_removed"
+    assert isinstance(result.duration_ms, float)
+    assert result.duration_ms >= 0
 
 
 @pytest.mark.asyncio
-async def test_tokamak_execute_poc_timeout():
-    req = ValidationRequest(
-        finding_id="test_id",
-        exploit_command="sleep 10",
-        timeout_seconds=1
-    )
+async def test_execute_poc_timeout():
+    """execute_poc() kills container and returns exit code 124 on timeout."""
+    mock_container = MagicMock()
+    mock_container.wait.side_effect = asyncio.TimeoutError()
+    mock_container.logs.side_effect = [b"", b""]
 
-    with patch("docker.from_env") as mock_from_env:
-        mock_client = MagicMock()
-        mock_container = MagicMock()
+    mock_client = MagicMock()
+    mock_client.containers.run.return_value = mock_container
 
-        def mock_wait(*args, **kwargs):
-            import time
-            time.sleep(2)
-            return {"StatusCode": 0}
+    with (
+        patch("cherenkov.core.tokamak.DOCKER_AVAILABLE", True),
+        patch("cherenkov.core.tokamak.docker", create=True) as mock_docker,
+    ):
+        mock_docker.from_env.return_value = mock_client
+        mock_docker.errors.APIError = _MockDockerAPIError
+        mock_docker.errors.ImageNotFound = _MockDockerImageNotFoundError
+        tokamak = ScanTOKAMAK()
+        result = await tokamak.execute_poc(exploit_command="sleep 30", timeout=1)
 
-        mock_container.wait = mock_wait
-        mock_client.containers.run = MagicMock(return_value=mock_container)
-        mock_from_env.return_value = mock_client
+    mock_container.kill.assert_called_once()
+    mock_container.remove.assert_called_once_with(force=True)
+    assert result.exit_code == 124
 
-        sandbox = Tokamak()
-        result = await sandbox.execute_poc(req)
 
-        assert isinstance(result, ValidationResult)
-        assert result.is_verified is False
-        assert result.cryptographic_proof is None
-        mock_container.remove.assert_called_once_with(force=True)
+@pytest.mark.asyncio
+async def test_execute_poc_api_error():
+    """execute_poc() handles Docker API errors gracefully."""
+    mock_client = MagicMock()
+    mock_client.containers.run.side_effect = _MockDockerAPIError("connection refused")
+
+    with (
+        patch("cherenkov.core.tokamak.DOCKER_AVAILABLE", True),
+        patch("cherenkov.core.tokamak.docker", create=True) as mock_docker,
+    ):
+        mock_docker.from_env.return_value = mock_client
+        mock_docker.errors.APIError = _MockDockerAPIError
+        mock_docker.errors.ImageNotFound = _MockDockerImageNotFoundError
+        tokamak = ScanTOKAMAK()
+        result = await tokamak.execute_poc(exploit_command="nmap", timeout=5)
+
+    assert result.exit_code == 1
+    assert "Docker API error" in result.stderr
+    assert result.trace_hash == ""
+
+
+@pytest.mark.asyncio
+async def test_execute_poc_image_not_found():
+    """execute_poc() handles missing Docker images."""
+    mock_client = MagicMock()
+    mock_client.containers.run.side_effect = _MockDockerImageNotFoundError("python:3.11-slim")
+
+    with (
+        patch("cherenkov.core.tokamak.DOCKER_AVAILABLE", True),
+        patch("cherenkov.core.tokamak.docker", create=True) as mock_docker,
+    ):
+        mock_docker.from_env.return_value = mock_client
+        mock_docker.errors.APIError = _MockDockerAPIError
+        mock_docker.errors.ImageNotFound = _MockDockerImageNotFoundError
+        tokamak = ScanTOKAMAK()
+        result = await tokamak.execute_poc(exploit_command="echo hi", timeout=5)
+
+    assert result.exit_code == 1
+    assert "Docker image not found" in result.stderr
+    assert result.trace_hash == ""
+
+
+@pytest.mark.asyncio
+async def test_execute_poc_sha256_signing():
+    """execute_poc() SHA-256 signs the trace with stdout+stderr+timestamp."""
+    mock_container = MagicMock()
+    mock_container.wait.return_value = {"StatusCode": 0}
+    mock_container.logs.side_effect = [b"evidence data", b""]
+
+    mock_client = MagicMock()
+    mock_client.containers.run.return_value = mock_container
+
+    with (
+        patch("cherenkov.core.tokamak.DOCKER_AVAILABLE", True),
+        patch("cherenkov.core.tokamak.docker", create=True) as mock_docker,
+    ):
+        mock_docker.from_env.return_value = mock_client
+        mock_docker.errors.APIError = _MockDockerAPIError
+        mock_docker.errors.ImageNotFound = _MockDockerImageNotFoundError
+        tokamak = ScanTOKAMAK()
+        result = await tokamak.execute_poc(exploit_command="echo evidence", timeout=5)
+
+    assert len(result.trace_hash) == 64
+    assert all(c in "0123456789abcdef" for c in result.trace_hash)
+
+
+@pytest.mark.asyncio
+async def test_execute_poc_removes_container_on_exception():
+    """Container is removed even when docker-py raises before execution."""
+    mock_client = MagicMock()
+    mock_client.containers.run.side_effect = _MockDockerAPIError("daemon down")
+
+    with (
+        patch("cherenkov.core.tokamak.DOCKER_AVAILABLE", True),
+        patch("cherenkov.core.tokamak.docker", create=True) as mock_docker,
+    ):
+        mock_docker.from_env.return_value = mock_client
+        mock_docker.errors.APIError = _MockDockerAPIError
+        mock_docker.errors.ImageNotFound = _MockDockerImageNotFoundError
+        tokamak = ScanTOKAMAK()
+        result = await tokamak.execute_poc(exploit_command="echo test", timeout=5)
+
+    assert result.exit_code == 1
+    assert "Docker API error" in result.stderr
+    assert result.shred_receipt["method"] == "container_removed"
+    assert result.shred_receipt["profile"] == "standard"

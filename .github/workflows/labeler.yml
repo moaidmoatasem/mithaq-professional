@@ -1,0 +1,21 @@
+name: labeler
+
+# Auto-labels PRs by changed paths so reviewers can see which agent
+# domain a PR touches at a glance. Config: .github/labeler.yml
+
+on:
+  pull_request_target:
+    types: [opened, synchronize, reopened]
+
+permissions:
+  contents: read
+  pull-requests: write
+
+jobs:
+  label:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/labeler@v5
+        with:
+          repo-token: ${{ secrets.GITHUB_TOKEN }}
+          sync-labels: false

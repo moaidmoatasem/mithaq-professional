@@ -26,7 +26,6 @@ manifests/cwe_queue.yaml
 agent_state/
 workflow_checkpoints/
 workflow_results/
-data/reasoning/
 
 # Qdrant runtime data (local vector DB state — not config)
 qdrant/
@@ -35,12 +34,24 @@ qdrant/
 site/
 
 
-# Secrets
+# Secrets & credentials (never commit — see AGENTS.md §1d, CHERENKOV ABLATION)
 .env
+.env.*
+mcp_config.json
+*.key
+*.pem
+credentials.json
+
+# Runtime artifacts — produced by scans/inference, never committed
+data/
+models/
+cherno-docs/
 
 # Node / wrangler
 node_modules/
 package-lock.json
+# Frontend lockfile must be tracked so CI `npm ci` is reproducible
+!packages/cherenkov/web/package-lock.json
 .wrangler
 .dev.vars*
 !.dev.vars.example
@@ -73,43 +84,10 @@ validation_results.json
 build/
 .aider*
 
-# === Added by #234 — harden gitignore ===
-
-# Database files
-*.sqlite
-*.sqlite3
+# Local HLD preview (not source)
+.preview-hld/
 *.db
-
-# Node
-node_modules/
-dist/
-
-# Aider
-.aider*
-.aider.tags.cache.v3/
-
-# Agent runtime state
-agent_state/
-workflow_checkpoints/
-
-# Vector DB
-qdrant/
-
-# MkDocs
-site/
-
-# Python build
-*.egg-info/
-build/
-
-# IDE
-.idea/
-.vscode/settings.json
-
-# OS
-Thumbs.db
-.DS_Store
-
-# Scratch scripts
-scripts/gh-*.sh
-scripts/do-*.sh
+*.sqlite
+*.wal
+*_receipt*.json
+*_trace*.json

@@ -44,12 +44,13 @@ def _next_chk_id() -> str:
 
 def _write_pdf(chk_id: str, target: str, findings: list[dict], anchor: dict) -> Path:
     """Generate a signed PDF report and return its path."""
-    from cherenkov.compliance.mapper import ComplianceMapper
+    from cherenkov.compliance.registry import ComplianceRegistry
     from cherenkov.compliance.reports import PDFReportGenerator
     from cherenkov.core.base_scanner import Finding, ScanResult, Severity
 
-    mapper = ComplianceMapper()
-    compliance_data = {f["cwe"]: mapper.map_all(f["cwe"]) for f in findings if f.get("cwe")}
+    compliance_data = {
+        f["cwe"]: ComplianceRegistry.get_cwe_mappings(f["cwe"]) for f in findings if f.get("cwe")
+    }
 
     scan_findings = []
     for f in findings:
@@ -156,39 +157,34 @@ def scan(
             )
         )
     elif output == OutputFormat.sarif:
-        sarif_results = [
-            {
-                "ruleId": f.get("cwe", ""),
-                "message": {"text": f.get("title", "")},
-                "level": f.get("severity", "none").lower(),
-            }
+        from cherenkov.compliance.reports import SARIFExporter
+        from cherenkov.core.base_scanner import Finding, ScanResult, Severity
+
+        scan_findings = [
+            Finding(
+                title=f.get("title", "Unknown"),
+                severity=Severity(str(f.get("severity", "INFO")).upper()),
+                description=f.get("description", ""),
+                cwe=f.get("cwe", ""),
+                remediation=f.get("remediation", ""),
+            )
             for f in findings
         ]
-        sarif = {
-            "version": "2.1.0",
-            "$schema": "https://json.schemastore.org/sarif-2.1.0.json",
-            "runs": [
-                {
-                    "tool": {"driver": {"name": "cherenkov", "rules": []}},
-                    "results": sarif_results,
-                }
-            ],
-        }
-        console.print_json(json.dumps(sarif))
+        result = ScanResult(
+            target=target,
+            scanner_name="Cherenkov CLI",
+            findings=scan_findings,
+            status="completed",
+        )
+        exporter = SARIFExporter(result, chk_id=chk_id)
+        console.print_json(json.dumps(exporter.generate()))
     else:
         t = Table(
-            "Finding",
-            "Severity",
-            "CWE",
-            "Scanner",
-            title=f"Cherenkov Trace {chk_id} — {target}",
+            "Finding", "Severity", "CWE", "Scanner", title=f"Cherenkov Trace {chk_id} — {target}"
         )
         for f in findings:
             t.add_row(
-                f.get("title", ""),
-                f.get("severity", ""),
-                f.get("cwe", ""),
-                f.get("scanner", ""),
+                f.get("title", ""), f.get("severity", ""), f.get("cwe", ""), f.get("scanner", "")
             )
         console.print(t if findings else "[green]No anomalies isolated.[/green]")
 
@@ -235,111 +231,36 @@ def list_scanners() -> None:
     for name in names:
         scanner_cls = registry.get_scanner(name)
         t.add_row(
-            name,
-            getattr(scanner_cls, "cwe", "—"),
-            getattr(scanner_cls, "__doc__", "—") or "—",
+            name, getattr(scanner_cls, "cwe", "—"), getattr(scanner_cls, "__doc__", "—") or "—"
         )
     console.print(t)
 
 
-reasoning_app = typer.Typer(name="reasoning", help="Manage and inspect reasoning logs")
-app.add_typer(reasoning_app)
+@app.command()
+def verify(
+    pdf_path: str = typer.Argument(..., help="Path to the signed PDF report to verify"),
+) -> None:
+    """Verify the forensic anchor embedded in a signed PDF."""
+    import os
 
+    from cherenkov.compliance.pdf_renderer import verify_pdf_signature
 
-@reasoning_app.command("show")
-def reasoning_show(session_id: str = typer.Argument(..., help="Session ID of the reasoning trace")):
-    """Display a human-readable reasoning log for the specified session."""
-    from pathlib import Path
+    if not os.path.exists(pdf_path):
+        console.print(f"[red]Error:[/red] File not found: {pdf_path}")
+        raise typer.Exit(code=1)
 
-    from cherenkov.core.reasoning_store import ReasoningStore
-
-    # Based on the path from the prompt guidelines
-    db_path = Path("data") / "reasoning" / f"{session_id}.db"
-    store = ReasoningStore(db_path)
-    traces = store.query(session_id=session_id)
-
-    if not traces:
-        console.print(f"[yellow]No reasoning traces found for session: {session_id}[/yellow]")
-        return
-
-    for trace in traces:
-        step = trace.step_index
-        tool = trace.tool_name or "unknown"
-        model = trace.model_backend or "unknown"
-        duration = trace.latency_ms or 0
-        agent = trace.agent_id
-        reasoning = trace.reasoning
-        confidence = trace.confidence or 0.0
-        sha256 = trace.sha256_anchor
-        short_sha = sha256[:8] if sha256 else ""
-
-        console.print(f"[Step {step:02d} | {tool} | {model} | {duration}ms]")
-        console.print(f"Agent : {agent}")
-        console.print(f'Reasoning: "{reasoning}"')
-        console.print(f"Confidence: {confidence}")
-        console.print(f"SHA256: {short_sha}...")
-        console.print()
-
-
-@reasoning_app.command("export")
-def reasoning_export(
-    session_id: str = typer.Argument(..., help="Session ID of the reasoning trace"),
-    out: str = typer.Argument(..., help="Output JSONL file path"),
-):
-    """Export reasoning log to a JSONL file."""
-    from pathlib import Path
-
-    from cherenkov.core.reasoning_store import ReasoningStore
-
-    db_path = Path("data") / "reasoning" / f"{session_id}.db"
-    store = ReasoningStore(db_path)
-    store.export_jsonl(session_id, Path(out))
-    console.print(f"[green]Exported traces for session {session_id} to {out}[/green]")
-
-
-@reasoning_app.command("verify")
-def reasoning_verify(
-    session_id: str = typer.Argument(..., help="Session ID of the reasoning trace"),
-):
-    """Re-compute SHA-256 anchors for all rows to detect tampering."""
-    from pathlib import Path
-
-    from cherenkov.core.reasoning_store import ReasoningStore
-
-    db_path = Path("data") / "reasoning" / f"{session_id}.db"
-    store = ReasoningStore(db_path)
-    traces = store.query(session_id=session_id)
-
-    if not traces:
-        console.print(f"[yellow]No reasoning traces found for session: {session_id}[/yellow]")
-        return
-
-    failures = 0
-    for trace in traces:
-        step = trace.step_index
-        expected_hash = trace.compute_hash()
-        stored_hash = trace.sha256_anchor
-        status = "PASS" if expected_hash == stored_hash else "FAIL"
-
-        if status == "PASS":
-            short_sha = stored_hash[:8] if stored_hash else ""
-            console.print(
-                f"[{status}] Step {step:02d} | trace_id={session_id} | anchor={short_sha}..."
-            )
-        else:
-            failures += 1
-            short_stored = stored_hash[:8] if stored_hash else "..."
-            short_expected = expected_hash[:8] if expected_hash else "..."
-            console.print(
-                f"[{status}] Step {step:02d} | trace_id={session_id} | stored={short_stored} recomputed={short_expected}"
-            )
-
-    if failures > 0:
-        console.print(
-            f"\n[red]Tamper detected: {failures} of {len(traces)} steps failed anchor verification.[/red]"
-        )
+    result = verify_pdf_signature(pdf_path)
+    if result.get("valid"):
+        console.print("[green]Signature status: VALID[/green]")
+        console.print(f"  SHA-256 (findings):  {result['sha256']}")
+        console.print(f"  RFC 3161 Status:     {result['tsa_status']}")
+        if "tsa_token_prefix" in result:
+            console.print(f"  RFC 3161 Token Pref: {result['tsa_token_prefix'][:32]}...")
+        console.print(f"  PDF File SHA-256:    {result['pdf_sha256']}")
     else:
-        console.print(f"\n[green]All {len(traces)} steps passed anchor verification.[/green]")
+        console.print("[red]Signature status: INVALID[/red]")
+        console.print(f"  Reason: {result.get('error')}")
+        raise typer.Exit(code=1)
 
 
 if __name__ == "__main__":

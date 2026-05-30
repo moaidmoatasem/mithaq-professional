@@ -1,3 +1,20 @@
+import sys
+from unittest.mock import MagicMock
+
+class MockPsutil:
+    def __init__(self):
+        self.__spec__ = MagicMock()
+    def cpu_count(self, logical=False):
+        return 8
+    def virtual_memory(self):
+        class Mem:
+            total = 16e9
+        return Mem()
+sys.modules['psutil'] = MockPsutil()
+
+
+
+
 from pathlib import Path
 
 import pytest
@@ -21,7 +38,10 @@ def _use_temp_db(tmp_path: Path) -> None:
 
 
 @pytest.fixture(autouse=True)
-def _override_auth():
+def _override_auth(monkeypatch):
+    from cherenkov.credentials import DefaultCredentialsManager
+    monkeypatch.setattr(DefaultCredentialsManager, "is_rotation_required", lambda: False)
+
     async def mock_user() -> User:
         return User(username="test_operator", role=Role.OPERATOR)
 

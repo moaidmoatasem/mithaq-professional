@@ -1,5 +1,12 @@
 # Changelog
 
+## v1.1.0 — Swarm Optimization (May 2026)
+
+### Added
+- **Phase 2 Scanner Graduations**: Graduated XSS, CSRF, SQLi, OpenRedirect, FileUpload, PathTraversal, SSRF, XXE, AttackChainDetector, CICDIntegrationScanner, CVEDatabaseScanner, and NetworkVulnerabilityScanner to the `BaseScanner` contract.
+- **Scan Aggregation**: Added scan result aggregation pipeline.
+- **Trace Signing**: Wired scan output to CherenkovTrace signing.
+
 ## v1.0.0-rc2 — Documentation Finalization (May 2026)
 
 ### Added
@@ -46,7 +53,7 @@
 ### Added
 - Cloudflare Workers configuration (`wrangler.jsonc`) for deployment.
 
-## [0.1.1] - 2026-05-08
+## v0.1.1-cherenkov - 2026-05-08
 Security Patch (May 2026)
 
 ### Fixed

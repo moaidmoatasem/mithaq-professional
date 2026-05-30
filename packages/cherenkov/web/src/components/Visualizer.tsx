@@ -14,14 +14,14 @@ export function TridentVisualizer({ state, traceId }: VisualizerProps) {
     <div className="relative w-full h-full flex items-center justify-center bg-obsidian overflow-hidden">
       {/* HUD GRID */}
       <div className="absolute inset-0 bg-[length:32px_32px] bg-[linear-gradient(to_right,#2F5F8A1A_1px,transparent_1px),linear-gradient(to_bottom,#2F5F8A1A_1px,transparent_1px)]" />
-      
+
       {/* CONCENTRIC RINGS */}
       <div className="relative flex items-center justify-center">
         {/* MEISSNER OUTER RING */}
-        <motion.div 
-          animate={{ 
-            borderColor: state === 'MEISSNER_LOCKED' || state === 'ABLATION_ACTIVE' || state === 'TOKAMAK_EXECUTING' || state === 'TRACE_SIGNED' 
-              ? '#00A3FF' 
+        <motion.div
+          animate={{
+            borderColor: state === 'MEISSNER_LOCKED' || state === 'ABLATION_ACTIVE' || state === 'TOKAMAK_EXECUTING' || state === 'TRACE_SIGNED'
+              ? '#00A3FF'
               : '#2F5F8A',
             scale: state === 'MEISSNER_LOCKED' ? [1, 1.02, 1] : 1,
             borderWidth: state === 'MEISSNER_LOCKED' ? '2px' : '1px'
@@ -30,17 +30,17 @@ export function TridentVisualizer({ state, traceId }: VisualizerProps) {
           className="w-64 h-64 rounded-full border border-cobalt/30 flex items-center justify-center relative"
         >
           {/* ABLATION MIDDLE RING */}
-          <motion.div 
-            animate={{ 
-              borderColor: state === 'ABLATION_ACTIVE' || state === 'TOKAMAK_EXECUTING' || state === 'TRACE_SIGNED' 
-                ? '#7B4BFF' 
+          <motion.div
+            animate={{
+              borderColor: state === 'ABLATION_ACTIVE' || state === 'TOKAMAK_EXECUTING' || state === 'TRACE_SIGNED'
+                ? '#7B4BFF'
                 : '#2F5F8A33',
             }}
             className="w-48 h-48 rounded-full border border-cobalt/20 flex items-center justify-center"
           >
             {/* TOKAMAK CORE */}
-            <motion.div 
-              animate={{ 
+            <motion.div
+              animate={{
                 scale: state === 'TOKAMAK_EXECUTING' ? [1, 1.1, 1] : 1,
                 backgroundColor: state === 'TOKAMAK_EXECUTING' ? 'rgba(123, 75, 255, 0.1)' : 'rgba(0, 0, 0, 0.4)',
               }}
@@ -58,8 +58,8 @@ export function TridentVisualizer({ state, traceId }: VisualizerProps) {
         {(state !== 'MONITORING') && (
           <motion.div
             initial={{ x: 200, opacity: 0 }}
-            animate={{ 
-              x: state === 'THREAT_DETECTED' ? 140 : 0, 
+            animate={{
+              x: state === 'THREAT_DETECTED' ? 140 : 0,
               opacity: 1,
               backgroundColor: state === 'ABLATION_ACTIVE' ? '#9AA6B2' : (state === 'THREAT_DETECTED' ? '#FF4444' : '#7B4BFF')
             }}
@@ -69,7 +69,7 @@ export function TridentVisualizer({ state, traceId }: VisualizerProps) {
             )}
           >
             {state === 'TOKAMAK_EXECUTING' && (
-              <motion.div 
+              <motion.div
                 animate={{ scale: [1, 1.5, 1], opacity: [0.5, 1, 0.5] }}
                 transition={{ repeat: Infinity, duration: 0.5 }}
                 className="absolute -inset-2 border-2 border-bismuth rounded-sm"
@@ -80,7 +80,7 @@ export function TridentVisualizer({ state, traceId }: VisualizerProps) {
 
         {/* ABLATION SCAN LINE */}
         {state === 'ABLATION_ACTIVE' && (
-          <motion.div 
+          <motion.div
             initial={{ x: -150 }}
             animate={{ x: 150 }}
             transition={{ duration: 1.5, ease: "linear", repeat: Infinity }}
@@ -91,7 +91,7 @@ export function TridentVisualizer({ state, traceId }: VisualizerProps) {
 
       {/* FINAL TRACE BADGE */}
       {state === 'TRACE_SIGNED' && (
-        <motion.div 
+        <motion.div
           initial={{ opacity: 0, scale: 0.9, y: 20 }}
           animate={{ opacity: 1, scale: 1, y: 0 }}
           className="absolute inset-0 flex items-center justify-center z-50 bg-obsidian/60 backdrop-blur-sm"

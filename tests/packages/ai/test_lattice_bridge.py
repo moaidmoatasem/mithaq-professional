@@ -1,7 +1,3 @@
-import sys
-from unittest.mock import MagicMock
-
-sys.modules["sentence_transformers"] = MagicMock()
 from unittest.mock import MagicMock, patch
 
 import pytest

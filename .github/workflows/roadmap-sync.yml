@@ -15,7 +15,7 @@ jobs:
           fetch-depth: 0
 
       - name: Update ROADMAP_PROGRESS.md from milestones
-        uses: actions/github-script@v7
+        uses: actions/github-script@v6
         with:
           script: |
             const fs = require('fs');

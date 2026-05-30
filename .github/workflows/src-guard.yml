@@ -1,0 +1,47 @@
+name: src-guard
+
+# Conflict-avoidance guardrail: enforce the "no src/ at repo root" rule
+# from .agentsignore and CLAUDE.md ("never src/, use packages/cherenkov/").
+# Allows the legacy starlight stub at src/content/docs/ but blocks any
+# new file under src/ outside that path.
+
+on:
+  pull_request:
+    types: [opened, synchronize, reopened]
+
+permissions:
+  contents: read
+  pull-requests: read
+
+jobs:
+  guard:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Reject new files under src/ (except legacy starlight stub)
+        uses: actions/github-script@v6
+        with:
+          script: |
+            const ALLOW = /^src\/content\/docs\//;
+            const files = await github.paginate(github.rest.pulls.listFiles, {
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              pull_number: context.payload.pull_request.number,
+              per_page: 100,
+            });
+
+            const violations = files.filter(f =>
+              (f.status === 'added' || f.status === 'renamed') &&
+              f.filename.startsWith('src/') &&
+              !ALLOW.test(f.filename)
+            );
+
+            if (violations.length > 0) {
+              const list = violations.map(f => `  - ${f.filename}`).join('\n');
+              core.setFailed(
+                `Forbidden path: files added under src/ at repo root.\n` +
+                `CHERENKOV code lives in packages/cherenkov/, never src/.\n` +
+                `See .agentsignore and CLAUDE.md.\n\n` +
+                `Offending files:\n${list}\n\n` +
+                `Fix: move these files under packages/cherenkov/<area>/ and update imports.`
+              );
+            }

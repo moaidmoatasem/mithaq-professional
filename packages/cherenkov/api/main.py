@@ -144,6 +144,22 @@ app = FastAPI(
 app.state.limiter = limiter
 app.add_exception_handler(RateLimitExceeded, _rate_limit_exceeded_handler)
 
+
+@app.get("/v1/models")
+async def openai_models_compat():
+    return {
+        "object": "list",
+        "data": [
+            {
+                "id": "cherenkov-v1",
+                "object": "model",
+                "created": 1714000000,
+                "owned_by": "cherenkov",
+            }
+        ],
+    }
+
+
 # Include localhost:3000 (React dev server) alongside the API host origins
 _ALLOWED_ORIGINS = os.getenv(
     "cherenkov_CORS_ORIGINS",

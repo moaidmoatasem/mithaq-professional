@@ -27,15 +27,15 @@ sleep 1
 ok "Stale processes cleaned"
 
 # ── 2. Start Docker-backed services ──────────────────────────────────
-COMPOSE_FILES="-f deploy/docker-compose.yml"
+COMPOSE_FILES=("-f" "deploy/docker-compose.yml")
 if [ -f "deploy/dvwa-compose.yml" ]; then
-  COMPOSE_FILES="$COMPOSE_FILES -f deploy/dvwa-compose.yml"
+  COMPOSE_FILES+=("-f" "deploy/dvwa-compose.yml")
 fi
 
 info "Starting Docker services (Qdrant, Ollama)..."
-docker compose $COMPOSE_FILES up -d qdrant ollama 2>/dev/null || warn "Docker not available — run services manually"
-if echo "$COMPOSE_FILES" | grep -q dvwa; then
-  docker compose $COMPOSE_FILES up -d dvwa 2>/dev/null || warn "DVWA start skipped (optional)"
+docker compose "${COMPOSE_FILES[@]}" up -d qdrant ollama 2>/dev/null || warn "Docker not available — run services manually"
+if echo "${COMPOSE_FILES[*]}" | grep -q dvwa; then
+  docker compose "${COMPOSE_FILES[@]}" up -d dvwa 2>/dev/null || warn "DVWA start skipped (optional)"
 fi
 
 # ── 3. Start LiteLLM (if config exists) ──────────────────────────────
@@ -51,6 +51,9 @@ else
 fi
 
 # ── 4. Start API server ──────────────────────────────────────────────
+info "Clearing rotation flag..."
+PYTHONPATH="${REPO_DIR}/packages:${PYTHONPATH:-}" python3 -c "from cherenkov.credentials import DefaultCredentialsManager; DefaultCredentialsManager.clear_rotation_flag()"
+
 info "Starting CHERENKOV API server..."
 PYTHONPATH="${REPO_DIR}/packages:${PYTHONPATH:-}" nohup uvicorn cherenkov.api.main:app \
   --host 0.0.0.0 --port 8000 > /tmp/cherenkov-api.log 2>&1 &
@@ -65,7 +68,7 @@ sleep 3
 
 check_service() {
   local name="$1" url="$2" max="$3" optional="${4:-}"
-  for i in $(seq 1 "$max"); do
+  for _ in $(seq 1 "$max"); do
     if curl -sf "$url" >/dev/null 2>&1; then
       ok "$name is healthy"
       return 0

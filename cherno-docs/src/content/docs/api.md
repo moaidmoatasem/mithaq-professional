@@ -18,3 +18,6 @@ Generates a short-lived JWT token for authentication.
 
 ### `/api/auth/status`
 Returns the status of the authentication system, including whether a first-boot credential rotation is required.
+
+### `/v1/models`
+Returns a stubbed list of available models to satisfy standard OpenAI client library compatibility checks and prevent log spam from IDE plugins (e.g. Cline, Continue).

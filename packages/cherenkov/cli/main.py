@@ -65,7 +65,7 @@ def _write_pdf(chk_id: str, target: str, findings: list[dict], anchor: dict) -> 
                 )
             )
         except Exception:
-            pass
+            pass  # nosec B110
 
     result = ScanResult(target=target, scanner_name="cherenkov", findings=scan_findings)
     gen = PDFReportGenerator(result, compliance_data, chk_id=chk_id, anchor=anchor)

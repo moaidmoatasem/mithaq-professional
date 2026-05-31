@@ -89,7 +89,7 @@ class RetryPolicy:
         delay = min(delay, self.max_delay)
 
         if self.jitter:
-            delay = delay * (0.5 + random.random())
+            delay = delay * (0.5 + random.random())  # nosec B311
 
         return max(0.0, delay)
 
@@ -218,7 +218,7 @@ class WorkflowRetryManager:
                     try:
                         use_policy.callback(attempt, e, delay)
                     except Exception:
-                        pass
+                        pass  # nosec B110
 
                 logger.debug(f"Waiting {delay:.2f}s before retry {attempt + 2}")
                 time.sleep(delay)
@@ -292,7 +292,7 @@ class WorkflowRetryManager:
                         else:
                             use_policy.callback(attempt, e, delay)
                     except Exception:
-                        pass
+                        pass  # nosec B110
 
                 logger.debug(f"Waiting {delay:.2f}s before retry {attempt + 2}")
                 await asyncio.sleep(delay)

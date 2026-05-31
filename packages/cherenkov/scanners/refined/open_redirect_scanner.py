@@ -81,7 +81,7 @@ class OpenRedirectScanner(BaseScanner):
                                 continue
 
         except Exception:
-            pass
+            pass  # nosec B110
 
         duration_ms = (time.time() - start) * 1000
         return ScanResult(

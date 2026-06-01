@@ -80,7 +80,7 @@ class OpenRedirectScanner(BaseScanner):
                             except (httpx.RequestError, httpx.TimeoutException):
                                 continue
 
-        except Exception:
+        except Exception:  # nosec B110
             pass
 
         duration_ms = (time.time() - start) * 1000

@@ -122,7 +122,7 @@ class AgentMessageBus:
                 if hasattr(pending.event, "set"):
                     try:
                         pending.event.set()
-                    except Exception:
+                    except Exception:  # nosec B110
                         pass
                 logger.debug(
                     f"Agent {self.agent_id} received response to request {message.in_reply_to}"

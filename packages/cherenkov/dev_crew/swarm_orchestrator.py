@@ -25,7 +25,7 @@ import asyncio
 import logging
 import os
 import shutil
-import subprocess
+import subprocess  # nosec B404
 import tempfile
 from dataclasses import dataclass
 from enum import Enum

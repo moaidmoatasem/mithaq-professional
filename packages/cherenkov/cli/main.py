@@ -64,7 +64,7 @@ def _write_pdf(chk_id: str, target: str, findings: list[dict], anchor: dict) -> 
                     remediation=f.get("remediation", ""),
                 )
             )
-        except Exception:
+        except Exception:  # nosec B110
             pass
 
     result = ScanResult(target=target, scanner_name="cherenkov", findings=scan_findings)

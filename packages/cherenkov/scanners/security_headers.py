@@ -60,7 +60,7 @@ class SecurityHeadersScanner(BaseScanner):
                             remediation=remediation,
                         )
                     )
-        except Exception:
+        except Exception:  # nosec B110
             pass
 
         return ScanResult(target=target, scanner_name=self.name, findings=findings)

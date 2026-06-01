@@ -123,13 +123,11 @@ async def lifespan(app: FastAPI):
 
     meissner_hub.on_open(
         lambda: asyncio.create_task(
-            _broadcast(
-                {
-                    "type": "circuit_breaker",
-                    "state": "OPEN",
-                    "reason": "threshold_exceeded",
-                }
-            )
+            _broadcast({
+                "type": "circuit_breaker",
+                "state": "OPEN",
+                "reason": "threshold_exceeded",
+            })
         )
     )
     yield
@@ -181,14 +179,12 @@ async def ws_live(websocket: WebSocket) -> None:
     _ws_clients.add(websocket)
     try:
         while True:
-            await websocket.send_json(
-                {
-                    "event": "health_pulse",
-                    "timestamp": datetime.now(timezone.utc).isoformat(),
-                    "queue_depth": 0,
-                    "active_scans": 0,
-                }
-            )
+            await websocket.send_json({
+                "event": "health_pulse",
+                "timestamp": datetime.now(timezone.utc).isoformat(),
+                "queue_depth": 0,
+                "active_scans": 0,
+            })
             await asyncio.sleep(5)
     except WebSocketDisconnect:
         pass
@@ -685,15 +681,13 @@ async def v1_scan(
         details={"target": scan_request.url, "scan_id": result["scan_id"]},
     )
 
-    await _broadcast(
-        {
-            "type": "scan_complete",
-            "scan_id": result["scan_id"],
-            "target": result["target"],
-            "count": result["count"],
-            "timestamp": result["timestamp"],
-        }
-    )
+    await _broadcast({
+        "type": "scan_complete",
+        "scan_id": result["scan_id"],
+        "target": result["target"],
+        "count": result["count"],
+        "timestamp": result["timestamp"],
+    })
     return result
 
 
@@ -758,8 +752,8 @@ async def v1_compliance_pdf(
     if not scan:
         raise HTTPException(status_code=404, detail="Scan not found")
 
-    fw_upper = fw.upper()
-    if fw_upper not in ComplianceRegistry.list_framework_ids():
+    fw_id = fw.lower()
+    if fw_id not in ComplianceRegistry.list_framework_ids():
         raise HTTPException(status_code=400, detail=f"Unsupported framework: {fw}")
 
     findings = []
@@ -785,19 +779,19 @@ async def v1_compliance_pdf(
     for f in findings:
         if f.cwe:
             mappings = ComplianceRegistry.get_cwe_mappings(f.cwe)
-            refs = mappings.get(fw_upper, [])
+            refs = mappings.get(fw_id, [])
             if refs:
                 compliance_data[f.cwe] = refs
 
     chk_id = scan.get("meta", {}).get("chk_id", f"CHK-{scan_id[:8]}")
-    renderer = CompliancePDFRenderer(result, fw_upper, compliance_data, chk_id=chk_id)
+    renderer = CompliancePDFRenderer(result, fw_id, compliance_data, chk_id=chk_id)
     pdf_bytes, anchor = renderer.generate()
 
     return Response(
-        content=pdf_bytes,
+        content=bytes(pdf_bytes),
         media_type="application/pdf",
         headers={
-            "Content-Disposition": f"attachment; filename=cherenkov_{fw_upper}_{scan_id}.pdf",
+            "Content-Disposition": f"attachment; filename=cherenkov_{fw_id}_{scan_id}.pdf",
             "X-SHA256": anchor.get("sha256", ""),
             "X-TSA-Status": anchor.get("tsa_status", "skipped"),
         },
@@ -859,7 +853,7 @@ async def v1_scan_report_pdf(
     filename += ".pdf"
 
     return Response(
-        content=pdf_bytes,
+        content=bytes(pdf_bytes),
         media_type="application/pdf",
         headers={"Content-Disposition": f"attachment; filename={filename}"},
     )
@@ -1115,17 +1109,15 @@ async def _run_scan(
             if key in seen:
                 continue
             seen.add(key)
-            vulnerabilities.append(
-                {
-                    "scanner": scanner_name,
-                    "title": f.title,
-                    "type": f.title,
-                    "severity": f.severity.value,
-                    "cwe": f.cwe,
-                    "description": f.description,
-                    "remediation": f.remediation,
-                }
-            )
+            vulnerabilities.append({
+                "scanner": scanner_name,
+                "title": f.title,
+                "type": f.title,
+                "severity": f.severity.value,
+                "cwe": f.cwe,
+                "description": f.description,
+                "remediation": f.remediation,
+            })
 
     finished = datetime.now(timezone.utc).isoformat()
 
@@ -1208,13 +1200,11 @@ async def _run_scan(
                         pass  # No running loop — skip TOKAMAK trigger in this context
                 try:
                     asyncio.get_running_loop().create_task(
-                        _broadcast(
-                            {
-                                "type": "finding_discovered",
-                                "finding_id": finding_id,
-                                "severity": v["severity"],
-                            }
-                        )
+                        _broadcast({
+                            "type": "finding_discovered",
+                            "finding_id": finding_id,
+                            "severity": v["severity"],
+                        })
                     )
                 except RuntimeError:
                     pass  # No running loop — skip WebSocket broadcast in this context
@@ -1271,14 +1261,12 @@ async def _run_scan(
             unique_for_lattice.append(f)
 
     try:
-        await embed_and_store(
-            {
-                "scan_id": scan_id,
-                "target": request.url,
-                "findings": unique_for_lattice,
-                "count": len(unique_for_lattice),
-            }
-        )
+        await embed_and_store({
+            "scan_id": scan_id,
+            "target": request.url,
+            "findings": unique_for_lattice,
+            "count": len(unique_for_lattice),
+        })
     except Exception as e:
         logger.warning("LATTICE store failed (non-blocking): %s", e)
 

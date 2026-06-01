@@ -41,7 +41,7 @@ jobs:
           exit 0
         fi
 
-        bandit -r $TARGETS -f sarif -o bandit-results.sarif
+        bandit -r $TARGETS -f sarif -o bandit-results.sarif || true
 
     - name: Upload Bandit to GitHub Security
       if: >

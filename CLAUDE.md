@@ -2,6 +2,13 @@
 
 > Read this first, every session. Then read [`AGENTS.md`](./AGENTS.md) for multi-agent coordination rules.
 
+## Token discipline
+
+- **Grep before Read.** Never open a file without knowing the target line. Know the path → `Grep pattern file` or `Read offset+limit`. Don't know → `Glob` or one `Explore` agent.
+- **Never read speculatively:** `node_modules/`, `venv/`, `__pycache__/`, `data/`, `logs/`, `workflow_results/`, `assets/`, `cherno-docs/` — large or generated, read only if the task names a specific file inside.
+- **Subagent discipline.** Only spawn for genuinely parallel work. Pass file:line refs in the prompt.
+- **End of turn:** one sentence — what changed, what's next.
+
 ## Product (one paragraph)
 
 CHERENKOV is a sovereign AI security platform for MENA financial institutions. It produces **cryptographically proven, sovereignty-preserving, regulator-ready** security evidence: scanners surface findings, TOKAMAK confirms them via isolated PoC execution, every result is SHA-256 signed (CherenkovTrace) and mappable to EGY-FIN CSF controls. No data leaves the customer perimeter unless ABLATION sanitizes it first.
